@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
 namespace Blockchain
 {
@@ -8,7 +7,7 @@ namespace Blockchain
         /// <summary>
         /// List of authorization decisions made
         /// </summary>
-        List<IAuditEntry> AuditEntries { get; }
+        IList<IAuditEntry> AuditEntries { get; }
 
         // Block header data
         /// <summary>
@@ -19,7 +18,7 @@ namespace Blockchain
         /// <summary>
         /// Date the block was created
         /// </summary>
-        DateTime CreatedDate { get; set; }
+        long Timestamp { get; set; }
 
         /// <summary>
         /// Current block hash
@@ -30,6 +29,16 @@ namespace Blockchain
         /// Hash of previous block in chain
         /// </summary>
         string PreviousBlockHash { get; set; }
+
+        /// <summary>
+        /// Block structure version to account for future changes
+        /// </summary>
+        int Version { get; set; }
+
+        /// <summary>
+        /// HMAC signature of block
+        /// </summary>
+        string BlockSignature { get; }
 
 
         /// <summary>

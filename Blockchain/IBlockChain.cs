@@ -1,5 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Threading.Tasks;
 
 namespace Blockchain
 {
@@ -9,7 +8,7 @@ namespace Blockchain
         /// Accept a block
         /// </summary>
         /// <param name="block"></param>
-        void AcceptBlock(IBlock block);
+        Task AcceptBlock(IBlock block);
 
         /// <summary>
         /// Next block sequence number
@@ -19,6 +18,6 @@ namespace Blockchain
         /// <summary>
         /// Verify the full chain
         /// </summary>
-        void VerifyChain();
+        Task VerifyChain();
     }
 }
