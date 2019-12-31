@@ -29,7 +29,7 @@
     "Docker": {
       "commandName": "Docker",
       "launchBrowser": true,
-      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/weatherforecast",
+      "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/policies",
       "environmentVariables": {
         "ASPNETCORE_URLS": "https://+:443;http://+:80",
         "ASPNETCORE_HTTPS_PORT": "44375"
