@@ -10,11 +10,11 @@ namespace PolicyServer.Controllers
 {
     [ApiController]
     [Route("[controller]")]
-    public class PolicyController : ControllerBase
+    public class PoliciesController : ControllerBase
     {
-        private readonly ILogger<PolicyController> _logger;
+        private readonly ILogger<PoliciesController> _logger;
 
-        public PolicyController(ILogger<PolicyController> logger)
+        public PoliciesController(ILogger<PoliciesController> logger)
         {
             _logger = logger;
         }
