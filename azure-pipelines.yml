@@ -28,15 +28,6 @@ steps:
     updateAssemblyInfoFilename: 'AssemblyInfo.cs'
     additionalArguments: '/output buildserver'
 
-- task: dependency-check-build-task@5
-  inputs:
-    projectName: '$(Build.DefinitionName)'
-    scanPath: '$(build.artifactstagingdirectory)'
-    format: 'ALL'
-    suppressionPath: '$(Build.SourcesDirectory)\cve-suppression.xml'
-    additionalArguments: '--disableBundleAudit --disableRubygems --disableNodeJS --disablePyPkg --disablePyDist --out "$(Agent.BuildDirectory)"'
-  continueOnError: true
-
 - task: SonarCloudPrepare@1
   inputs:
     SonarCloud: 'SonarCloud'
@@ -45,6 +36,20 @@ steps:
     projectKey: 'ops-ai_authorization'
     projectName: 'ops.ai Authorization'
     projectVersion: '0.1'
+    extraProperties: |
+      sonar.dependencyCheck.reportPath=$(Agent.BuildDirectory)\dependency-check-report.xml
+      sonar.dependencyCheck.htmlReportPath=$(Agent.BuildDirectory)\dependency-check-report.html
+      sonar.cs.opencover.reportsPaths="$(Agent.TempDirectory)\opencover.xml"
+      sonar.coverage.exclusions="**Tests*.cs"
+      
+- task: dependency-check-build-task@5
+  inputs:
+    projectName: '$(Build.DefinitionName)'
+    scanPath: '$(build.artifactstagingdirectory)'
+    format: 'ALL'
+    suppressionPath: '$(Build.SourcesDirectory)\cve-suppression.xml'
+    additionalArguments: '--disableBundleAudit --disableRubygems --disableNodeJS --disablePyPkg --disablePyDist --out "$(Agent.BuildDirectory)"'
+  continueOnError: true
 
 - task: VSBuild@1
   inputs:
