@@ -21,6 +21,22 @@ steps:
   inputs:
     restoreSolution: '$(solution)'
 
+- task: gittools.gitversion.gitversion-task.GitVersion@4
+  displayName: GitVersion
+  inputs:
+    updateAssemblyInfo: true
+    updateAssemblyInfoFilename: '**\Properties\AssemblyInfo.cs'
+    additionalArguments: '/output buildserver'
+    preferBundledVersion: false
+
+- task: dependency-check.dependencycheck.dependency-check-build-task.dependency-check-build-task@5
+  displayName: 'Dependency Check'
+  inputs:
+    projectName: '$(Build.DefinitionName)'
+    scanPath: '$(build.artifactstagingdirectory)'
+    format: ALL
+    additionalArguments: '--disableBundleAudit --disableRubygems --disableNodeJS --disablePyPkg --disablePyDist --suppression "$(Build.SourcesDirectory)\cve-suppression.xml" --out "$(Agent.BuildDirectory)"'
+
 - task: SonarCloudPrepare@1
   inputs:
     SonarCloud: 'SonarCloud'
@@ -37,10 +53,12 @@ steps:
     platform: '$(buildPlatform)'
     configuration: '$(buildConfiguration)'
 
-- task: VSTest@2
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet test'
   inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    command: test
+    projects: '**\*test*.csproj'
+    arguments: '--no-restore /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput="$(Agent.TempDirectory)\opencover.xml"'
 
 - task: SonarCloudAnalyze@1
 
