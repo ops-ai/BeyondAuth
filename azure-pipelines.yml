@@ -35,7 +35,7 @@ steps:
     format: 'ALL'
     suppressionPath: '$(Build.SourcesDirectory)\cve-suppression.xml'
     additionalArguments: '--disableBundleAudit --disableRubygems --disableNodeJS --disablePyPkg --disablePyDist --out "$(Agent.BuildDirectory)"'
-    continueOnError: true
+  continueOnError: true
 
 - task: SonarCloudPrepare@1
   inputs:
