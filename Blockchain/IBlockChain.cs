@@ -18,6 +18,6 @@ namespace Blockchain
         /// <summary>
         /// Verify the full chain
         /// </summary>
-        Task VerifyChain();
+        Task<bool> VerifyChain();
     }
 }
