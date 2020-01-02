@@ -66,29 +66,26 @@ namespace Blockchain
         }
 
         /// <inheritdoc />
-        public void AddAuditEntry(IAuditEntry auditEntry)
-        {
-            AuditEntries.Add(auditEntry);
-        }
+        public void AddAuditEntry(IAuditEntry auditEntry) => AuditEntries.Add(auditEntry);
 
         /// <inheritdoc />
         public string CalculateBlockHash(string previousBlockHash)
         {
-            string blockheader = $"{BlockNumber}{Timestamp}{previousBlockHash}";
-            string combined = $"{merkleTree.RootNode}{blockheader}";
+            var blockheader = $"{BlockNumber}{Timestamp}{previousBlockHash}";
+            var combined = $"{merkleTree.RootNode}{blockheader}";
 
-            string completeBlockHash = Convert.ToBase64String(Hashing.ComputeHmacSha256(Encoding.UTF8.GetBytes(combined), KeyStore.AuthenticatedHashKey));
+            var completeBlockHash = Convert.ToBase64String(Hashing.ComputeHmacSha256(Encoding.UTF8.GetBytes(combined), KeyStore.AuthenticatedHashKey));
 
             return completeBlockHash;
         }
 
         public string CalculateProofOfWork(string blockHash)
         {
-            string difficulty = string.Join("", Enumerable.Range(0, Difficulty).Select(t => '0'));
+            var difficulty = string.Join("", Enumerable.Range(0, Difficulty).Select(t => '0'));
 
             while (true)
             {
-                string hashedData = Convert.ToBase64String(Hashing.ComputeHashSha256(Encoding.UTF8.GetBytes(Nonce + blockHash)));
+                var hashedData = Convert.ToBase64String(Hashing.ComputeHashSha256(Encoding.UTF8.GetBytes(Nonce + blockHash)));
 
                 if (hashedData.StartsWith(difficulty, StringComparison.Ordinal))
                     return hashedData;
@@ -134,7 +131,7 @@ namespace Blockchain
         /// <inheritdoc />
         public bool IsValidChain(string prevBlockHash)
         {
-            bool isValid = true;
+            var isValid = true;
 
             BuildMerkleTree();
 
@@ -142,7 +139,7 @@ namespace Blockchain
                 isValid = false;
 
             // Is this a valid block and transaction
-            string newBlockHash = Convert.ToBase64String(Hashing.ComputeHashSha256(Encoding.UTF8.GetBytes(Nonce + CalculateBlockHash(prevBlockHash))));
+            var newBlockHash = Convert.ToBase64String(Hashing.ComputeHashSha256(Encoding.UTF8.GetBytes(Nonce + CalculateBlockHash(prevBlockHash))));
 
             if (!KeyStore.VerifyBlock(BlockHash, BlockSignature))
                 isValid = false;
@@ -156,7 +153,7 @@ namespace Blockchain
                 // Does the previous block hash match the latest previous block hash
                 isValid |= PreviousBlockHash == prevBlockHash;
             }
-            
+
             // Check the next block by passing in our newly calculated blockhash. This will be compared to the previous
             // hash in the next block. They should match for the chain to be valid.
             // Shortcut validation if current block is not valid

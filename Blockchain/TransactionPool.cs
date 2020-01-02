@@ -9,19 +9,10 @@ namespace Blockchain
     {
         private readonly Queue<IAuditEntry> _queue;
 
-        public TransactionPool()
-        {
-            _queue = new Queue<IAuditEntry>();
-        }
+        public TransactionPool() => _queue = new Queue<IAuditEntry>();
 
-        public void AddAuditEntry(IAuditEntry auditEntry)
-        {
-            _queue.Enqueue(auditEntry);
-        }
+        public void AddAuditEntry(IAuditEntry auditEntry) => _queue.Enqueue(auditEntry);
 
-        public IAuditEntry GetAuditEntry()
-        {
-            return _queue.Dequeue();
-        }
+        public IAuditEntry GetAuditEntry() => _queue.Dequeue();
     }
 }

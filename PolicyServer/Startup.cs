@@ -1,7 +1,3 @@
-using System;
-using System.Linq;
-using System.Net;
-using System.Security.Cryptography.X509Certificates;
 using Autofac;
 using Autofac.Configuration;
 using CorrelationId.DependencyInjection;
@@ -15,15 +11,16 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Raven.Client.Documents;
+using System;
+using System.Linq;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
 
 namespace PolicyServer
 {
     public class Startup
     {
-        public Startup(IConfiguration configuration)
-        {
-            Configuration = configuration;
-        }
+        public Startup(IConfiguration configuration) => Configuration = configuration;
 
         public IConfiguration Configuration { get; }
 

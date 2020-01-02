@@ -1,10 +1,8 @@
 ﻿using Autofac;
 using Microsoft.AspNetCore.TestHost;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Moq;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -37,7 +35,7 @@ namespace PolicyServer.Tests.Integration_Tests
 
                 builder.ConfigureTestContainer<ContainerBuilder>(services =>
                 {
-                    
+
                 });
             }).CreateClient();
         }

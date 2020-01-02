@@ -4,11 +4,10 @@
 * http://www.codeproject.com/info/cpol10.aspx
 */
 
+using Clifton.Core.ExtensionMethods;
 using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
-
-using Clifton.Core.ExtensionMethods;
 
 namespace Clifton.Blockchain
 {
@@ -19,7 +18,7 @@ namespace Clifton.Blockchain
         public MerkleNode RightNode { get; protected set; }
         public MerkleNode Parent { get; protected set; }
 
-        public bool IsLeaf { get { return LeftNode == null && RightNode == null; } }
+        public bool IsLeaf => LeftNode == null && RightNode == null;
 
         public MerkleNode()
         {
@@ -28,10 +27,7 @@ namespace Clifton.Blockchain
         /// <summary>
         /// Constructor for a base node (leaf), representing the lowest level of the tree.
         /// </summary>
-        public MerkleNode(MerkleHash hash)
-        {
-            Hash = hash;
-        }
+        public MerkleNode(MerkleHash hash) => Hash = hash;
 
         /// <summary>                
         /// Constructor for a parent node.
@@ -45,15 +41,9 @@ namespace Clifton.Blockchain
             ComputeHash();
         }
 
-        public override string ToString()
-        {
-            return Hash.ToString();
-        }
+        public override string ToString() => Hash.ToString();
 
-        IEnumerator IEnumerable.GetEnumerator()
-        {
-            return GetEnumerator();
-        }
+        IEnumerator IEnumerable.GetEnumerator() => GetEnumerator();
 
         public IEnumerator<MerkleNode> GetEnumerator()
         {
@@ -90,10 +80,7 @@ namespace Clifton.Blockchain
         /// <summary>
         /// Return the leaves (not all children, just leaves) under this node
         /// </summary>
-        public IEnumerable<MerkleNode> Leaves()
-        {
-            return this.Where(n => n.LeftNode == null && n.RightNode == null);
-        }
+        public IEnumerable<MerkleNode> Leaves() => this.Where(n => n.LeftNode == null && n.RightNode == null);
 
         public void SetLeftNode(MerkleNode node)
         {
@@ -120,10 +107,7 @@ namespace Clifton.Blockchain
         /// True if we have enough data to verify our hash, particularly if we have child nodes.
         /// </summary>
         /// <returns>True if this node is a leaf or a branch with at least a left node.</returns>
-        public bool CanVerifyHash()
-        {
-            return (LeftNode != null && RightNode != null) || (LeftNode != null);
-        }
+        public bool CanVerifyHash() => (LeftNode != null && RightNode != null) || (LeftNode != null);
 
         /// <summary>
         /// Verifies the hash for this node against the computed hash for our child nodes.
@@ -131,7 +115,7 @@ namespace Clifton.Blockchain
         /// </summary>
         public bool VerifyHash()
         {
-            if (LeftNode == null  && RightNode == null)
+            if (LeftNode == null && RightNode == null)
             {
                 return true;
             }
@@ -142,7 +126,7 @@ namespace Clifton.Blockchain
             }
 
             MerkleTree.Contract(() => LeftNode != null, "Left branch must be a node if right branch is a node.");
-            MerkleHash leftRightHash = MerkleHash.Create(LeftNode.Hash, RightNode.Hash);
+            var leftRightHash = MerkleHash.Create(LeftNode.Hash, RightNode.Hash);
 
             return Hash.Equals(leftRightHash);
         }
@@ -150,10 +134,7 @@ namespace Clifton.Blockchain
         /// <summary>
         /// If the hashes are equal, we know the entire node tree is equal.
         /// </summary>
-        public bool Equals(MerkleNode node)
-        {
-            return Hash.Equals(node.Hash);
-        }
+        public bool Equals(MerkleNode node) => Hash.Equals(node.Hash);
 
         protected void ComputeHash()
         {
