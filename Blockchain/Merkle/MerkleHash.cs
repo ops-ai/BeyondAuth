@@ -47,11 +47,6 @@ namespace Clifton.Blockchain
             return !h1.Equals(h2);
         }
 
-        public override int GetHashCode()
-        {
-            return base.GetHashCode();
-        }
-
         public override bool Equals(object obj)
         {
             MerkleTree.Contract(() => obj is MerkleHash, "rvalue is not a MerkleHash");

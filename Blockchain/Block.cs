@@ -3,6 +3,7 @@ using Cryptography;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text;
 
 namespace Blockchain
@@ -37,6 +38,14 @@ namespace Blockchain
         [JsonProperty("sig")]
         public string BlockSignature { get; private set; }
 
+        /// <inheritdoc />
+        [JsonProperty("difficulty")]
+        public int Difficulty { get; private set; }
+
+        /// <inheritdoc />
+        [JsonProperty("nonce")]
+        public int Nonce { get; private set; }
+
         /// <summary>
         /// Merkle tree to aid in validation of audit entries included in block
         /// </summary>
@@ -47,12 +56,13 @@ namespace Blockchain
         /// </summary>
         /// <param name="blockNumber">Index to assign block</param>
         /// <param name="keystore">Key store</param>
-        public Block(int blockNumber, IKeyStore keystore)
+        public Block(int blockNumber, int miningDifficulty, IKeyStore keystore)
         {
             BlockNumber = blockNumber;
 
             Timestamp = DateTimeOffset.UtcNow.ToUnixTimeSeconds();
             KeyStore = keystore;
+            Difficulty = miningDifficulty;
         }
 
         /// <inheritdoc />
@@ -72,6 +82,21 @@ namespace Blockchain
             return completeBlockHash;
         }
 
+        public string CalculateProofOfWork(string blockHash)
+        {
+            string difficulty = string.Join("", Enumerable.Range(0, Difficulty).Select(t => '0'));
+
+            while (true)
+            {
+                string hashedData = Convert.ToBase64String(Hashing.ComputeHashSha256(Encoding.UTF8.GetBytes(Nonce + blockHash)));
+
+                if (hashedData.StartsWith(difficulty, StringComparison.Ordinal))
+                    return hashedData;
+
+                Nonce++;
+            }
+        }
+
         /// <inheritdoc />
         public void SetBlockHash(IBlock previousBlock)
         {
@@ -88,7 +113,7 @@ namespace Blockchain
 
             BuildMerkleTree();
 
-            BlockHash = CalculateBlockHash(PreviousBlockHash);
+            BlockHash = CalculateProofOfWork(CalculateBlockHash(PreviousBlockHash));
 
             BlockSignature = KeyStore.SignBlock(BlockHash);
         }
@@ -117,7 +142,7 @@ namespace Blockchain
                 isValid = false;
 
             // Is this a valid block and transaction
-            string newBlockHash = CalculateBlockHash(prevBlockHash);
+            string newBlockHash = Convert.ToBase64String(Hashing.ComputeHashSha256(Encoding.UTF8.GetBytes(Nonce + CalculateBlockHash(prevBlockHash))));
 
             if (!KeyStore.VerifyBlock(BlockHash, BlockSignature))
                 isValid = false;
