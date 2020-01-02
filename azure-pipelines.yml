@@ -47,7 +47,6 @@ steps:
     projectName: '$(Build.DefinitionName)'
     scanPath: '$(build.artifactstagingdirectory)'
     format: 'ALL'
-    suppressionPath: '$(Build.SourcesDirectory)\cve-suppression.xml'
     additionalArguments: '--disableBundleAudit --disableRubygems --disableNodeJS --disablePyPkg --disablePyDist --out "$(Agent.BuildDirectory)"'
   continueOnError: true
 
