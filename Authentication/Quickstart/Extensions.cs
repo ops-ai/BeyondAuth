@@ -1,6 +1,6 @@
-using System.Threading.Tasks;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Mvc;
+using System.Threading.Tasks;
 
 namespace IdentityServer4.Quickstart.UI
 {
@@ -27,7 +27,7 @@ namespace IdentityServer4.Quickstart.UI
         {
             controller.HttpContext.Response.StatusCode = 200;
             controller.HttpContext.Response.Headers["Location"] = "";
-            
+
             return controller.View(viewName, new RedirectViewModel { RedirectUrl = redirectUri });
         }
     }

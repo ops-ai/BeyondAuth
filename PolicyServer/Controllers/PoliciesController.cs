@@ -1,10 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using PolicyServer.Models;
+using System;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace PolicyServer.Controllers
 {
@@ -14,10 +13,7 @@ namespace PolicyServer.Controllers
     {
         private readonly ILogger<PoliciesController> _logger;
 
-        public PoliciesController(ILogger<PoliciesController> logger)
-        {
-            _logger = logger;
-        }
+        public PoliciesController(ILogger<PoliciesController> logger) => _logger = logger;
 
         [HttpGet]
         public IEnumerable<PolicyModel> Get()

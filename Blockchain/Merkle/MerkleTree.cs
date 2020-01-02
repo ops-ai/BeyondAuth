@@ -4,11 +4,10 @@
 * http://www.codeproject.com/info/cpol10.aspx
 */
 
+using Clifton.Core.ExtensionMethods;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-
-using Clifton.Core.ExtensionMethods;
 
 namespace Clifton.Blockchain
 {
@@ -41,10 +40,7 @@ namespace Clifton.Blockchain
             return node;
         }
 
-        public void AppendLeaves(MerkleNode[] nodes)
-        {
-            nodes.ForEach(n => AppendLeaf(n));
-        }
+        public void AppendLeaves(MerkleNode[] nodes) => nodes.ForEach(n => AppendLeaf(n));
 
         public MerkleNode AppendLeaf(MerkleHash hash)
         {
@@ -57,7 +53,7 @@ namespace Clifton.Blockchain
 
         public List<MerkleNode> AppendLeaves(MerkleHash[] hashes)
         {
-            List<MerkleNode> nodes = new List<MerkleNode>();
+            var nodes = new List<MerkleNode>();
             hashes.ForEach(h => nodes.Add(AppendLeaf(h)));
 
             return nodes;
@@ -116,7 +112,7 @@ namespace Clifton.Blockchain
         /// <returns>The audit trail of hashes needed to create the root, or an empty list if the leaf hash doesn't exist.</returns>
         public List<MerkleProofHash> AuditProof(MerkleHash leafHash)
         {
-            List<MerkleProofHash> auditTrail = new List<MerkleProofHash>();
+            var auditTrail = new List<MerkleProofHash>();
 
             var leafNode = FindLeaf(leafHash);
 
@@ -140,11 +136,11 @@ namespace Clifton.Blockchain
             // Rule 1:
             // Find the leftmost node of the tree from which we can start our consistency proof.
             // Set k, the number of leaves for this node.
-            List<MerkleProofHash> hashNodes = new List<MerkleProofHash>();
-            int idx = (int)Math.Log(m, 2);
+            var hashNodes = new List<MerkleProofHash>();
+            var idx = (int)Math.Log(m, 2);
 
             // Get the leftmost node.
-            MerkleNode node = leaves[0];
+            var node = leaves[0];
 
             // Traverse up the tree until we get to the node specified by idx.
             while (idx > 0)
@@ -153,7 +149,7 @@ namespace Clifton.Blockchain
                 --idx;
             }
 
-            int k = node.Leaves().Count();
+            var k = node.Leaves().Count();
             hashNodes.Add(new MerkleProofHash(node.Hash, MerkleProofHash.Branch.OldRoot));
 
             if (m == k)
@@ -168,13 +164,13 @@ namespace Clifton.Blockchain
                 // if m - k < # of SN's leaves, set SN to SN's left child node and repeat Rule 2.
 
                 // sibling node:
-                MerkleNode sn = node.Parent.RightNode;
-                bool traverseTree = true;
+                var sn = node.Parent.RightNode;
+                var traverseTree = true;
 
                 while (traverseTree)
                 {
                     Contract(() => sn != null, "Sibling node must exist because m != k");
-                    int sncount = sn.Leaves().Count();
+                    var sncount = sn.Leaves().Count();
 
                     if (m - k == sncount)
                     {
@@ -205,7 +201,7 @@ namespace Clifton.Blockchain
         /// </summary>
         public List<MerkleProofHash> ConsistencyAuditProof(MerkleHash nodeHash)
         {
-            List<MerkleProofHash> auditTrail = new List<MerkleProofHash>();
+            var auditTrail = new List<MerkleProofHash>();
 
             var node = RootNode.Single(n => n.Hash == nodeHash);
             var parent = node.Parent;
@@ -220,10 +216,10 @@ namespace Clifton.Blockchain
         public static bool VerifyAudit(MerkleHash rootHash, MerkleHash leafHash, List<MerkleProofHash> auditTrail)
         {
             Contract(() => auditTrail.Count > 0, "Audit trail cannot be empty.");
-            MerkleHash testHash = leafHash;
+            var testHash = leafHash;
 
             // TODO: Inefficient - compute hashes directly.
-            foreach (MerkleProofHash auditHash in auditTrail)
+            foreach (var auditHash in auditTrail)
             {
                 testHash = auditHash.Direction == MerkleProofHash.Branch.Left ?
                     MerkleHash.Create(testHash.Value.Concat(auditHash.Hash.Value).ToArray()) :
@@ -240,10 +236,10 @@ namespace Clifton.Blockchain
         {
             Contract(() => auditTrail.Count > 0, "Audit trail cannot be empty.");
             var auditPairs = new List<Tuple<MerkleHash, MerkleHash>>();
-            MerkleHash testHash = leafHash;
+            var testHash = leafHash;
 
             // TODO: Inefficient - compute hashes directly.
-            foreach (MerkleProofHash auditHash in auditTrail)
+            foreach (var auditHash in auditTrail)
             {
                 switch (auditHash.Direction)
                 {
@@ -269,7 +265,7 @@ namespace Clifton.Blockchain
             if (proof.Count > 1)
             {
                 lhash = proof[proof.Count - 2].Hash;
-                int hidx = proof.Count - 1;
+                var hidx = proof.Count - 1;
                 hash = rhash = MerkleTree.ComputeHash(lhash, proof[hidx].Hash);
                 hidx -= 2;
 
@@ -290,10 +286,7 @@ namespace Clifton.Blockchain
             return hash == oldRootHash;
         }
 
-        public static MerkleHash ComputeHash(MerkleHash left, MerkleHash right)
-        {
-            return MerkleHash.Create(left.Value.Concat(right.Value).ToArray());
-        }
+        public static MerkleHash ComputeHash(MerkleHash left, MerkleHash right) => MerkleHash.Create(left.Value.Concat(right.Value).ToArray());
 
         protected void BuildAuditTrail(List<MerkleProofHash> auditTrail, MerkleNode parent, MerkleNode child)
         {
@@ -336,13 +329,13 @@ namespace Clifton.Blockchain
             }
             else
             {
-                List<MerkleNode> parents = new List<MerkleNode>();
+                var parents = new List<MerkleNode>();
 
-                for (int i = 0; i < nodes.Count; i += 2)
+                for (var i = 0; i < nodes.Count; i += 2)
                 {
-                    MerkleNode right = (i + 1 < nodes.Count) ? nodes[i + 1] : null;
+                    var right = (i + 1 < nodes.Count) ? nodes[i + 1] : null;
                     // Constructing the MerkleNode resolves the right node being null.
-                    MerkleNode parent = CreateNode(nodes[i], right);
+                    var parent = CreateNode(nodes[i], right);
                     parents.Add(parent);
                 }
 
@@ -353,14 +346,8 @@ namespace Clifton.Blockchain
         // Override in derived class to extend the behavior.
         // Alternatively, we could implement a factory pattern.
 
-        protected virtual MerkleNode CreateNode(MerkleHash hash)
-        {
-            return new MerkleNode(hash);
-        }
+        protected virtual MerkleNode CreateNode(MerkleHash hash) => new MerkleNode(hash);
 
-        protected virtual MerkleNode CreateNode(MerkleNode left, MerkleNode right)
-        {
-            return new MerkleNode(left, right);
-        }
+        protected virtual MerkleNode CreateNode(MerkleNode left, MerkleNode right) => new MerkleNode(left, right);
     }
 }

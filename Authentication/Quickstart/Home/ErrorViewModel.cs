@@ -12,10 +12,7 @@ namespace IdentityServer4.Quickstart.UI
         {
         }
 
-        public ErrorViewModel(string error)
-        {
-            Error = new ErrorMessage { Error = error };
-        }
+        public ErrorViewModel(string error) => Error = new ErrorMessage { Error = error };
 
         public ErrorMessage Error { get; set; }
     }

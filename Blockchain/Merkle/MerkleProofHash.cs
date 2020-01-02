@@ -24,9 +24,6 @@ namespace Clifton.Blockchain
             Direction = direction;
         }
 
-        public override string ToString()
-        {
-            return Hash.ToString();
-        }
+        public override string ToString() => Hash.ToString();
     }
 }

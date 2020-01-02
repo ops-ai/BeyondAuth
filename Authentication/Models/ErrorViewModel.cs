@@ -1,5 +1,3 @@
-using System;
-
 namespace Authentication.Models
 {
     public class ErrorViewModel

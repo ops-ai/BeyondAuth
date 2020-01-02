@@ -52,7 +52,7 @@ namespace Blockchain
         /// <inheritdoc />
         public string CalculateAuditEntryHash()
         {
-            string auditHash = $"{Subject}{CorrelationId}{Timestamp}{AuthorizationDecision}{Resolver}{Policy}{Action}{ResourceId}{Originator}{string.Join("", Data.Keys)}{string.Join("", Data.Values)}";
+            var auditHash = $"{Subject}{CorrelationId}{Timestamp}{AuthorizationDecision}{Resolver}{Policy}{Action}{ResourceId}{Originator}{string.Join("", Data.Keys)}{string.Join("", Data.Values)}";
             return Convert.ToBase64String(Hashing.ComputeHashSha256(Encoding.UTF8.GetBytes(auditHash)));
         }
     }

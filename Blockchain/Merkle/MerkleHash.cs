@@ -21,21 +21,15 @@ namespace Clifton.Blockchain
 
         public static MerkleHash Create(byte[] buffer)
         {
-            MerkleHash hash = new MerkleHash();
+            var hash = new MerkleHash();
             hash.ComputeHash(buffer);
 
             return hash;
         }
 
-        public static MerkleHash Create(string buffer)
-        {
-            return Create(Encoding.UTF8.GetBytes(buffer));
-        }
+        public static MerkleHash Create(string buffer) => Create(Encoding.UTF8.GetBytes(buffer));
 
-        public static MerkleHash Create(MerkleHash left, MerkleHash right)
-        {
-            return Create(left.Value.Concat(right.Value).ToArray());
-        }
+        public static MerkleHash Create(MerkleHash left, MerkleHash right) => Create(left.Value.Concat(right.Value).ToArray());
 
         public static bool operator ==(MerkleHash h1, MerkleHash h2)
         {
@@ -53,14 +47,11 @@ namespace Clifton.Blockchain
             return Equals((MerkleHash)obj);
         }
 
-        public override string ToString()
-        {
-            return BitConverter.ToString(Value).Replace("-", "");
-        }
+        public override string ToString() => BitConverter.ToString(Value).Replace("-", "");
 
         public void ComputeHash(byte[] buffer)
         {
-            SHA256 sha256 = SHA256.Create();
+            var sha256 = SHA256.Create();
             SetHash(sha256.ComputeHash(buffer));
         }
 
@@ -70,14 +61,11 @@ namespace Clifton.Blockchain
             Value = hash;
         }
 
-        public bool Equals(byte[] hash)
-        {
-            return Value.SequenceEqual(hash);
-        }
+        public bool Equals(byte[] hash) => Value.SequenceEqual(hash);
 
         public bool Equals(MerkleHash hash)
         {
-            bool ret = false;
+            var ret = false;
 
             if (((object)hash) != null)
             {
