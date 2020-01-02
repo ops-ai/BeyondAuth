@@ -40,6 +40,15 @@ namespace Blockchain
         /// </summary>
         string BlockSignature { get; }
 
+        /// <summary>
+        /// Difficulty used for proof of work to calculate block
+        /// </summary>
+        int Difficulty { get; }
+
+        /// <summary>
+        /// Proof of work nonce
+        /// </summary>
+        int Nonce { get; }
 
         /// <summary>
         /// Record a new authorization decision
