@@ -65,12 +65,18 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.5" />
+    <PackageReference Include="RavenDB.Client" Version="4.2.6" />
     <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
   </ItemGroup>
 
 
   <ItemGroup>
     <Folder Include="Controllers\" />
+  </ItemGroup>
+
+
+  <ItemGroup>
+    <ProjectReference Include="..\IdentityServer4.Contrib.RavenDB\IdentityServer4.Contrib.RavenDB.csproj" />
   </ItemGroup>
 
 </Project>
