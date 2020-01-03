@@ -7,6 +7,8 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Raven.Client.Documents;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Authentication
 {
@@ -28,6 +30,13 @@ namespace Authentication
 
             services.AddControllersWithViews();
             services.AddRazorPages();
+
+            services.AddSingleton((ctx) => new DocumentStore
+            {
+                Urls = new[] { Configuration["Raven:Url"] },
+                Database = Configuration["Raven:Database"],
+                Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null
+            }.Initialize());
 
             var builder = services.AddIdentityServer(options =>
             {
