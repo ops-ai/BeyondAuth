@@ -55,7 +55,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
             using (var session = _store.OpenAsyncSession())
             {
-                _logger.LogDebug($"Storing consent for clientId {consent.ClientId} and subjectId {consent.SubjectId} into document store");
+                _logger.LogDebug($"Storing consent for clientId {consent.ClientId} and subjectId {consent.SubjectId}");
                 await session.StoreAsync(consent, $"Consents/{Convert.ToBase64String(Encoding.UTF8.GetBytes(consent.ClientId))}-{Convert.ToBase64String(Encoding.UTF8.GetBytes(consent.SubjectId))}");
                 await session.SaveChangesAsync();
             }

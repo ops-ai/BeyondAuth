@@ -5,7 +5,6 @@ using Microsoft.Extensions.Logging;
 using Raven.Client.Documents;
 using System;
 using System.Collections.Generic;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Contrib.RavenDB.Stores
@@ -28,6 +27,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
             using (var session = _store.OpenAsyncSession())
             {
+                _logger.LogDebug($"Finding device code {deviceCode}");
                 return await session.Query<DeviceCodeEntity>().FirstOrDefaultAsync(t => t.DeviceCode.Equals(deviceCode));
             }
         }
@@ -39,6 +39,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
             using (var session = _store.OpenAsyncSession())
             {
+                _logger.LogDebug($"Loading device code with user code {userCode}");
                 return await session.LoadAsync<DeviceCodeEntity>($"DeviceCodes/{userCode}");
             }
         }
@@ -51,6 +52,10 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 var code = await session.Query<DeviceCodeEntity>().FirstOrDefaultAsync(t => t.DeviceCode.Equals(deviceCode));
+                if (code == null)
+                    throw new KeyNotFoundException($"Device code {deviceCode} was not found");
+
+                _logger.LogDebug($"Deleting device code {deviceCode}");
                 session.Delete(code);
                 await session.SaveChangesAsync();
             }
@@ -67,6 +72,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             if (data == null)
                 throw new ArgumentException("data is required", nameof(data));
 
+            _logger.LogDebug($"Storing device code with user code {userCode}");
             using (var session = _store.OpenAsyncSession())
             {
                 var code = new DeviceCodeEntity
@@ -100,6 +106,8 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
                 var code = await session.LoadAsync<DeviceCodeEntity>($"DeviceCodes/{userCode}");
                 if (code == null)
                     throw new KeyNotFoundException($"Device code with UserCode {userCode} was not found");
+
+                _logger.LogDebug($"Updating device flow {userCode}");
 
                 code.AuthorizedScopes = data.AuthorizedScopes;
                 code.ClientId = data.ClientId;

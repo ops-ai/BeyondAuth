@@ -27,6 +27,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
             using (var session = _store.OpenAsyncSession())
             {
+                _logger.LogDebug($"Loading refresh token {refreshTokenHandle}");
                 return await session.LoadAsync<RefreshToken>($"RefreshTokens/{refreshTokenHandle}");
             }
         }
@@ -38,6 +39,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
             using (var session = _store.OpenAsyncSession())
             {
+                _logger.LogDebug($"Deleting refresh token {refreshTokenHandle}");
                 session.Delete($"RefreshTokens/{refreshTokenHandle}");
                 await session.SaveChangesAsync();
             }
@@ -57,6 +59,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
                 if (token == null)
                     throw new KeyNotFoundException($"Refresh token with subjectId {subjectId} and clientId {clientId} was not found");
 
+                _logger.LogDebug($"Deleting refresh token with subjectId {subjectId} and clientId {clientId}");
                 session.Delete(token);
                 await session.SaveChangesAsync();
             }
@@ -71,7 +74,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             {
                 var newToken = ShortId.Generate(true, false, 14);
 
-                _logger.LogDebug($"Storing refresh token {newToken} into document store");
+                _logger.LogDebug($"Storing refresh token {newToken}");
                 await session.StoreAsync(refreshToken, $"RefreshTokens/{newToken}");
                 await session.SaveChangesAsync();
 
@@ -93,6 +96,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
                 if (token == null)
                     throw new KeyNotFoundException($"Refresh token with handle {handle} was not found");
 
+                _logger.LogDebug($"Updating refresh token {handle}");
                 token.AccessToken = refreshToken.AccessToken;
                 token.CreationTime = refreshToken.CreationTime;
                 token.Lifetime = refreshToken.Lifetime;

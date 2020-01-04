@@ -29,7 +29,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
             using (var session = _store.OpenAsyncSession())
             {
-                _logger.LogDebug($"Loading api resource {name} from document store");
+                _logger.LogDebug($"Loading api resource {name}");
                 return await session.LoadAsync<ApiResource>(name);
             }
         }
@@ -41,7 +41,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
             using (var session = _store.OpenAsyncSession())
             {
-                _logger.LogDebug($"Loading api resources with scopes {string.Join(",", scopeNames)} from document store");
+                _logger.LogDebug($"Loading api resources with scopes {string.Join(",", scopeNames)}");
                 return await session.Query<ApiResource>().Where(t => t.Scopes.Any(s => scopeNames.Contains(s.Name))).Take(1024).ToListAsync();
             }
         }
@@ -53,7 +53,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
             using (var session = _store.OpenAsyncSession())
             {
-                _logger.LogDebug($"Loading identity resources with scopes {string.Join(",", scopeNames)} from document store");
+                _logger.LogDebug($"Loading identity resources with scopes {string.Join(",", scopeNames)}");
                 return await session.Query<IdentityResource>().Where(t => t.Name.In(scopeNames)).Take(1024).ToListAsync();
             }
         }
@@ -62,7 +62,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
         {
             using (var session = _store.OpenAsyncSession())
             {
-                _logger.LogDebug($"Loading all resources from document store");
+                _logger.LogDebug($"Loading all resources");
                 var apiResources = session.Query<ApiResource>().Take(1024).ToListAsync();
                 var identityResources = session.Query<IdentityResource>().Take(1024).ToListAsync();
 
