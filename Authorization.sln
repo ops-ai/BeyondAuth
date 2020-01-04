@@ -3,9 +3,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.29519.87
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blockchain", "Blockchain\Blockchain.csproj", "{7A3768A8-DDC8-4DD6-873E-D87DF0D2821A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blockchain", "Blockchain\Blockchain.csproj", "{7A3768A8-DDC8-4DD6-873E-D87DF0D2821A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Cryptography", "Cryptography\Cryptography.csproj", "{1F16C805-7C24-4500-BB56-BFF1B13EE346}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cryptography", "Cryptography\Cryptography.csproj", "{1F16C805-7C24-4500-BB56-BFF1B13EE346}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".Solution Items", ".Solution Items", "{EBA8BEB2-ECFB-49AF-B2A2-7C8E06039BEF}"
 	ProjectSection(SolutionItems) = preProject
@@ -20,19 +20,19 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "docs", "docs", "{9878F2DF-8
 		README.md = README.md
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Authentication", "Authentication\Authentication.csproj", "{F136CC10-4CD8-4424-9277-4D7863748D9D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Authentication", "Authentication\Authentication.csproj", "{F136CC10-4CD8-4424-9277-4D7863748D9D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolicyServer", "PolicyServer\PolicyServer.csproj", "{8270183E-DA51-45E8-BDC2-B2858656D167}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PolicyServer", "PolicyServer\PolicyServer.csproj", "{8270183E-DA51-45E8-BDC2-B2858656D167}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F697BF7F-ED3E-4571-A176-AA937EE763FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolicyServer.Tests", "Tests\PolicyServer.Tests\PolicyServer.Tests.csproj", "{863F7A90-11DA-4360-9E2D-ABEA7CE4B9D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PolicyServer.Tests", "Tests\PolicyServer.Tests\PolicyServer.Tests.csproj", "{863F7A90-11DA-4360-9E2D-ABEA7CE4B9D7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blockchain.Tests", "Tests\Blockchain.Tests\Blockchain.Tests.csproj", "{B54B76D4-4BE3-4616-AE59-63A98724F6AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blockchain.Tests", "Tests\Blockchain.Tests\Blockchain.Tests.csproj", "{B54B76D4-4BE3-4616-AE59-63A98724F6AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Authentication.Tests", "Tests\Authentication.Tests\Authentication.Tests.csproj", "{02539C80-259A-43D0-B1E4-C5FBE896FC87}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Authentication.Tests", "Tests\Authentication.Tests\Authentication.Tests.csproj", "{02539C80-259A-43D0-B1E4-C5FBE896FC87}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServer4.Contrib.RavenDB", "IdentityServer4.Contrib.RavenDB\IdentityServer4.Contrib.RavenDB.csproj", "{83D6CCDC-B98A-4E6B-9426-FA05CBE4BF7B}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer4.Contrib.RavenDB", "IdentityServer4.Contrib.RavenDB\IdentityServer4.Contrib.RavenDB.csproj", "{83D6CCDC-B98A-4E6B-9426-FA05CBE4BF7B}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -83,6 +83,7 @@ Global
 		{02539C80-259A-43D0-B1E4-C5FBE896FC87} = {F697BF7F-ED3E-4571-A176-AA937EE763FF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
+		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
 		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
 	EndGlobalSection
 EndGlobal
