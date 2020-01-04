@@ -3,6 +3,7 @@ using IdentityServer4.Stores;
 using Microsoft.Extensions.Logging;
 using Raven.Client.Documents;
 using System;
+using System.Text;
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Contrib.RavenDB.Stores
@@ -18,19 +19,46 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             _store = store;
         }
 
-        public Task<Consent> GetUserConsentAsync(string subjectId, string clientId)
+        public async Task<Consent> GetUserConsentAsync(string subjectId, string clientId)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(subjectId))
+                throw new ArgumentException("subjectId is required", nameof(subjectId));
+
+            if (string.IsNullOrEmpty(clientId))
+                throw new ArgumentException("clientId is required", nameof(clientId));
+
+            using (var session = _store.OpenAsyncSession())
+            {
+                return await session.LoadAsync<Consent>($"Consents/{Convert.ToBase64String(Encoding.UTF8.GetBytes(clientId))}-{Convert.ToBase64String(Encoding.UTF8.GetBytes(subjectId))}");
+            }
         }
 
-        public Task RemoveUserConsentAsync(string subjectId, string clientId)
+        public async Task RemoveUserConsentAsync(string subjectId, string clientId)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(subjectId))
+                throw new ArgumentException("subjectId is required", nameof(subjectId));
+
+            if (string.IsNullOrEmpty(clientId))
+                throw new ArgumentException("clientId is required", nameof(clientId));
+
+            using (var session = _store.OpenAsyncSession())
+            {
+                session.Delete($"Consents/{Convert.ToBase64String(Encoding.UTF8.GetBytes(clientId))}-{Convert.ToBase64String(Encoding.UTF8.GetBytes(subjectId))}");
+                await session.SaveChangesAsync();
+            }
         }
 
-        public Task StoreUserConsentAsync(Consent consent)
+        public async Task StoreUserConsentAsync(Consent consent)
         {
-            throw new NotImplementedException();
+            if (consent == null)
+                throw new ArgumentException("consent is required", nameof(consent));
+
+            using (var session = _store.OpenAsyncSession())
+            {
+                _logger.LogDebug($"Storing consent for clientId {consent.ClientId} and subjectId {consent.SubjectId} into document store");
+                await session.StoreAsync(consent, $"Consents/{Convert.ToBase64String(Encoding.UTF8.GetBytes(consent.ClientId))}-{Convert.ToBase64String(Encoding.UTF8.GetBytes(consent.SubjectId))}");
+                await session.SaveChangesAsync();
+            }
         }
     }
 }

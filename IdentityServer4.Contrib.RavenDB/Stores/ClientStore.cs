@@ -2,6 +2,7 @@
 using IdentityServer4.Stores;
 using Microsoft.Extensions.Logging;
 using Raven.Client.Documents;
+using System;
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Contrib.RavenDB.Stores
@@ -19,6 +20,9 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
         public async Task<Client> FindClientByIdAsync(string clientId)
         {
+            if (string.IsNullOrEmpty(clientId))
+                throw new ArgumentException("clientId is required", nameof(clientId));
+
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Loading client {clientId} from document store");

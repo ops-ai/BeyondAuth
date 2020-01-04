@@ -24,6 +24,9 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
         public async Task<ApiResource> FindApiResourceAsync(string name)
         {
+            if (string.IsNullOrEmpty(name))
+                throw new ArgumentException("name is required", nameof(name));
+
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Loading api resource {name} from document store");
@@ -33,6 +36,9 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
         public async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeAsync(IEnumerable<string> scopeNames)
         {
+            if (scopeNames == null)
+                throw new ArgumentException("scopeNames is required", nameof(scopeNames));
+
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Loading api resources with scopes {string.Join(",", scopeNames)} from document store");
@@ -42,6 +48,9 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
         public async Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeAsync(IEnumerable<string> scopeNames)
         {
+            if (scopeNames == null)
+                throw new ArgumentException("scopeNames is required", nameof(scopeNames));
+
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Loading identity resources with scopes {string.Join(",", scopeNames)} from document store");

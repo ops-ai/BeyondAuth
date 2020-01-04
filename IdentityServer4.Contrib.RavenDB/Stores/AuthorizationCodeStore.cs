@@ -2,6 +2,7 @@
 using IdentityServer4.Stores;
 using Microsoft.Extensions.Logging;
 using Raven.Client.Documents;
+using shortid;
 using System;
 using System.Threading.Tasks;
 
@@ -18,19 +19,44 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             _store = store;
         }
 
-        public Task<AuthorizationCode> GetAuthorizationCodeAsync(string code)
+        public async Task<AuthorizationCode> GetAuthorizationCodeAsync(string code)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(code))
+                throw new ArgumentException("code is required", nameof(code));
+
+            using (var session = _store.OpenAsyncSession())
+            {
+                _logger.LogDebug($"Loading authorization code {code} from document store");
+                return await session.LoadAsync<AuthorizationCode>($"AuthorizationCodes/{code}");
+            }
         }
 
-        public Task RemoveAuthorizationCodeAsync(string code)
+        public async Task RemoveAuthorizationCodeAsync(string code)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(code))
+                throw new ArgumentException("code is required", nameof(code));
+
+            using (var session = _store.OpenAsyncSession())
+            {
+                _logger.LogDebug($"Deleting authorization code {code} from document store");
+                session.Delete($"AuthorizationCodes/{code}");
+                await session.SaveChangesAsync();
+            }
         }
 
-        public Task<string> StoreAuthorizationCodeAsync(AuthorizationCode code)
+        public async Task<string> StoreAuthorizationCodeAsync(AuthorizationCode code)
         {
-            throw new NotImplementedException();
+            if (code == null)
+                throw new ArgumentException("code is required", nameof(code));
+
+            using (var session = _store.OpenAsyncSession())
+            {
+                var newCode = ShortId.Generate(true, false, 14);
+                _logger.LogDebug($"Storing authorization code {code} into document store");
+                await session.StoreAsync(code, $"AuthorizationCodes/{newCode}");
+                await session.SaveChangesAsync();
+                return newCode;
+            }
         }
     }
 }
