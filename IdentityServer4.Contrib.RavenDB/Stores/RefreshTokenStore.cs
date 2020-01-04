@@ -2,7 +2,9 @@
 using IdentityServer4.Stores;
 using Microsoft.Extensions.Logging;
 using Raven.Client.Documents;
+using shortid;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Contrib.RavenDB.Stores
@@ -18,29 +20,86 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             _store = store;
         }
 
-        public Task<RefreshToken> GetRefreshTokenAsync(string refreshTokenHandle)
+        public async Task<RefreshToken> GetRefreshTokenAsync(string refreshTokenHandle)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(refreshTokenHandle))
+                throw new ArgumentException("refreshTokenHandle is required", nameof(refreshTokenHandle));
+
+            using (var session = _store.OpenAsyncSession())
+            {
+                return await session.LoadAsync<RefreshToken>($"RefreshTokens/{refreshTokenHandle}");
+            }
         }
 
-        public Task RemoveRefreshTokenAsync(string refreshTokenHandle)
+        public async Task RemoveRefreshTokenAsync(string refreshTokenHandle)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(refreshTokenHandle))
+                throw new ArgumentException("refreshTokenHandle is required", nameof(refreshTokenHandle));
+
+            using (var session = _store.OpenAsyncSession())
+            {
+                session.Delete($"RefreshTokens/{refreshTokenHandle}");
+                await session.SaveChangesAsync();
+            }
         }
 
-        public Task RemoveRefreshTokensAsync(string subjectId, string clientId)
+        public async Task RemoveRefreshTokensAsync(string subjectId, string clientId)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(subjectId))
+                throw new ArgumentException("subjectId is required", nameof(subjectId));
+
+            if (string.IsNullOrEmpty(clientId))
+                throw new ArgumentException("clientId is required", nameof(clientId));
+
+            using (var session = _store.OpenAsyncSession())
+            {
+                var token = await session.Query<RefreshToken>().FirstOrDefaultAsync(t => t.SubjectId.Equals(subjectId) && t.ClientId.Equals(clientId));
+                if (token == null)
+                    throw new KeyNotFoundException($"Refresh token with subjectId {subjectId} and clientId {clientId} was not found");
+
+                session.Delete(token);
+                await session.SaveChangesAsync();
+            }
         }
 
-        public Task<string> StoreRefreshTokenAsync(RefreshToken refreshToken)
+        public async Task<string> StoreRefreshTokenAsync(RefreshToken refreshToken)
         {
-            throw new NotImplementedException();
+            if (refreshToken == null)
+                throw new ArgumentException("refreshToken is required", nameof(refreshToken));
+
+            using (var session = _store.OpenAsyncSession())
+            {
+                var newToken = ShortId.Generate(true, false, 14);
+
+                _logger.LogDebug($"Storing refresh token {newToken} into document store");
+                await session.StoreAsync(refreshToken, $"RefreshTokens/{newToken}");
+                await session.SaveChangesAsync();
+
+                return newToken;
+            }
         }
 
-        public Task UpdateRefreshTokenAsync(string handle, RefreshToken refreshToken)
+        public async Task UpdateRefreshTokenAsync(string handle, RefreshToken refreshToken)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(handle))
+                throw new ArgumentException("handle is required", nameof(handle));
+
+            if (refreshToken == null)
+                throw new ArgumentException("refreshToken is required", nameof(refreshToken));
+
+            using (var session = _store.OpenAsyncSession())
+            {
+                var token = await session.LoadAsync<RefreshToken>($"RefreshTokens/{handle}");
+                if (token == null)
+                    throw new KeyNotFoundException($"Refresh token with handle {handle} was not found");
+
+                token.AccessToken = refreshToken.AccessToken;
+                token.CreationTime = refreshToken.CreationTime;
+                token.Lifetime = refreshToken.Lifetime;
+                token.Version++;
+
+                await session.SaveChangesAsync();
+            }
         }
     }
 }

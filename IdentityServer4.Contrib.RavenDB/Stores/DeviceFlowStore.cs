@@ -1,4 +1,5 @@
-﻿using IdentityServer4.Models;
+﻿using IdentityServer4.Contrib.RavenDB.Entities;
+using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using Microsoft.Extensions.Logging;
 using Raven.Client.Documents;
@@ -20,29 +21,97 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             _store = store;
         }
 
-        public Task<DeviceCode> FindByDeviceCodeAsync(string deviceCode)
+        public async Task<DeviceCode> FindByDeviceCodeAsync(string deviceCode)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(deviceCode))
+                throw new ArgumentException("deviceCode is required", nameof(deviceCode));
+
+            using (var session = _store.OpenAsyncSession())
+            {
+                return await session.Query<DeviceCodeEntity>().FirstOrDefaultAsync(t => t.DeviceCode.Equals(deviceCode));
+            }
         }
 
-        public Task<DeviceCode> FindByUserCodeAsync(string userCode)
+        public async Task<DeviceCode> FindByUserCodeAsync(string userCode)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(userCode))
+                throw new ArgumentException("userCode is required", nameof(userCode));
+
+            using (var session = _store.OpenAsyncSession())
+            {
+                return await session.LoadAsync<DeviceCodeEntity>($"DeviceCodes/{userCode}");
+            }
         }
 
-        public Task RemoveByDeviceCodeAsync(string deviceCode)
+        public async Task RemoveByDeviceCodeAsync(string deviceCode)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(deviceCode))
+                throw new ArgumentException("Device code is required", nameof(deviceCode));
+
+            using (var session = _store.OpenAsyncSession())
+            {
+                var code = await session.Query<DeviceCodeEntity>().FirstOrDefaultAsync(t => t.DeviceCode.Equals(deviceCode));
+                session.Delete(code);
+                await session.SaveChangesAsync();
+            }
         }
 
-        public Task StoreDeviceAuthorizationAsync(string deviceCode, string userCode, DeviceCode data)
+        public async Task StoreDeviceAuthorizationAsync(string deviceCode, string userCode, DeviceCode data)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(deviceCode))
+                throw new ArgumentException("deviceCode is required", nameof(deviceCode));
+
+            if (string.IsNullOrEmpty(userCode))
+                throw new ArgumentException("userCode is required", nameof(userCode));
+
+            if (data == null)
+                throw new ArgumentException("data is required", nameof(data));
+
+            using (var session = _store.OpenAsyncSession())
+            {
+                var code = new DeviceCodeEntity
+                {
+                    AuthorizedScopes = data.AuthorizedScopes,
+                    ClientId = data.ClientId,
+                    CreationTime = data.CreationTime,
+                    DeviceCode = deviceCode,
+                    Id = $"DeviceCodes/{userCode}",
+                    IsAuthorized = data.IsAuthorized,
+                    IsOpenId = data.IsOpenId,
+                    Lifetime = data.Lifetime,
+                    RequestedScopes = data.RequestedScopes,
+                    Subject = data.Subject
+                };
+                await session.StoreAsync(code);
+                await session.SaveChangesAsync();
+            }
         }
 
-        public Task UpdateByUserCodeAsync(string userCode, DeviceCode data)
+        public async Task UpdateByUserCodeAsync(string userCode, DeviceCode data)
         {
-            throw new NotImplementedException();
+            if (string.IsNullOrEmpty(userCode))
+                throw new ArgumentException("userCode is required", nameof(userCode));
+
+            if (data == null)
+                throw new ArgumentException("data is required", nameof(data));
+
+            using (var session = _store.OpenAsyncSession())
+            {
+                var code = await session.LoadAsync<DeviceCodeEntity>($"DeviceCodes/{userCode}");
+                if (code == null)
+                    throw new KeyNotFoundException($"Device code with UserCode {userCode} was not found");
+
+                code.AuthorizedScopes = data.AuthorizedScopes;
+                code.ClientId = data.ClientId;
+                code.CreationTime = data.CreationTime;
+                code.IsAuthorized = data.IsAuthorized;
+                code.IsOpenId = data.IsOpenId;
+                code.Lifetime = data.Lifetime;
+                code.RequestedScopes = data.RequestedScopes;
+                code.Subject = data.Subject;
+
+                await session.SaveChangesAsync();
+            }
         }
     }
 }
