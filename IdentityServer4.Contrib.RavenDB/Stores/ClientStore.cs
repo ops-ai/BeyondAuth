@@ -25,7 +25,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
             using (var session = _store.OpenAsyncSession())
             {
-                _logger.LogDebug($"Loading client {clientId} from document store");
+                _logger.LogDebug($"Loading client {clientId}");
                 return await session.LoadAsync<Client>(clientId);
             }
         }
