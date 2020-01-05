@@ -47,6 +47,12 @@ namespace Clifton.Blockchain
             return Equals((MerkleHash)obj);
         }
 
+        public override int GetHashCode()
+        {
+            // implement to respect convention
+            return base.GetHashCode();
+        }
+
         public override string ToString() => BitConverter.ToString(Value).Replace("-", "");
 
         public void ComputeHash(byte[] buffer)
