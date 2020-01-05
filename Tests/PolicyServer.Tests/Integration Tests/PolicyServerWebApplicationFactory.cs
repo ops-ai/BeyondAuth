@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using NLog.Web;
 
@@ -13,10 +12,7 @@ namespace PolicyServer.Tests.Integration_Tests
             builder.UseEnvironment("Test")
                 .ConfigureServices(services =>
                 {
-                    services.AddMvc(options =>
-                    {
 
-                    });
                 })
                 .ConfigureLogging(logging =>
                 {
