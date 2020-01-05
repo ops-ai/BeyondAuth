@@ -1,17 +1,18 @@
-﻿using PolicyServer.Entities;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 
-namespace PolicyServer.Models
+namespace PolicyServer.Entities
 {
-    /// <summary>
-    /// Policy details
-    /// </summary>
-    public class PolicyModel
+    public class Policy
     {
         /// <summary>
         /// Policy unique id
         /// </summary>
         public string Id { get; set; }
+
+        /// <summary>
+        /// Client Id the policy is created for
+        /// </summary>
+        public string ClientId { get; set; }
 
         /// <summary>
         /// Policy name
@@ -26,11 +27,11 @@ namespace PolicyServer.Models
         /// <summary>
         /// Authentication schemes it applies to
         /// </summary>
-        public List<string> AuthenticationSchemes { get; set; }
+        public List<string> AuthenticationSchemes { get; } = new List<string>();
 
         /// <summary>
         /// List of requirements the policy demands
         /// </summary>
-        public List<AuthorizationRequirement> Requirements { get; set; }
+        public List<AuthorizationRequirement> Requirements { get; set; } = new List<AuthorizationRequirement>();
     }
 }
