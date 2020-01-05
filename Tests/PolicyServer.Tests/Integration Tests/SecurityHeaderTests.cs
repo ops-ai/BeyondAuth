@@ -1,8 +1,11 @@
 ﻿using Autofac;
+using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.TestHost;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Moq;
+using PolicyServer.Tests.Fakes;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -32,6 +35,14 @@ namespace PolicyServer.Tests.Integration_Tests
                         services.Remove(descriptor);
                     }
                 });
+                builder.ConfigureTestServices(services =>
+                 {
+                     services.AddControllers(opt =>
+                     {
+                         opt.Filters.Add(new AllowAnonymousFilter());
+                         opt.Filters.Add(new FakeUserFilter());
+                     });
+                 });
 
                 builder.ConfigureTestContainer<ContainerBuilder>(services =>
                 {
@@ -44,8 +55,6 @@ namespace PolicyServer.Tests.Integration_Tests
         public async Task ServerHeadersPresent()
         {
             var response = await _client.GetAsync("policies");
-
-            response.EnsureSuccessStatusCode();
 
             Assert.Contains(response.Headers, t => t.Key == "X-Content-Type-Options");
             Assert.Contains(response.Headers, t => t.Key == "X-Download-Options");
