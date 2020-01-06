@@ -350,3 +350,4 @@ MigrationBackup/
 .ionide/
 Authentication/appsettings.Development.json
 PolicyServer/appsettings.Development.json
+AuthorizationServer/appsettings.Development.json
