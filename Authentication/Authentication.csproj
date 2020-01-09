@@ -56,6 +56,10 @@
 
 
   <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.RavenDB" Version="3.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.UI" Version="3.0.9" />
+    <PackageReference Include="Autofac" Version="4.9.4" />
+    <PackageReference Include="Autofac.Configuration" Version="4.1.0" />
     <PackageReference Include="CorrelationId" Version="3.0.0-preview.1" />
     <PackageReference Include="IdentityServer.LdapExtension" Version="2.1.13" />
     <PackageReference Include="IdentityServer4" Version="3.1.0" />
@@ -70,6 +74,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.5" />
+    <PackageReference Include="NWebsec.AspNetCore.Middleware" Version="2.0.0" />
     <PackageReference Include="RavenDB.Client" Version="4.2.6" />
     <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
   </ItemGroup>

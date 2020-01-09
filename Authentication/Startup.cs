@@ -1,6 +1,9 @@
 using Authentication.Data;
 using Authentication.Models;
+using Autofac;
+using CorrelationId.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -8,7 +11,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Raven.Client.Documents;
+using System.Linq;
 using System.Security.Cryptography.X509Certificates;
+using HealthChecks.UI.Client;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
+using System.Net;
 
 namespace Authentication
 {
@@ -18,9 +25,23 @@ namespace Authentication
 
         public IConfiguration Configuration { get; }
 
+        public ILifetimeScope AutofacContainer { get; private set; }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            services.Configure<ForwardedHeadersOptions>(options =>
+            {
+                options.ForwardLimit = 2;
+                Configuration["ProxyNodes"]?.Split(';').ToList().ForEach(t =>
+                {
+                    if (!string.IsNullOrEmpty(t))
+                        options.KnownProxies.Add(IPAddress.Parse(t));
+                });
+            });
+
+            services.AddCorrelationId();
+
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
                     Configuration.GetConnectionString("DefaultConnection")));
@@ -37,6 +58,13 @@ namespace Authentication
                 Database = Configuration["Raven:Database"],
                 Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null
             }.Initialize());
+
+            try
+            {
+                services.AddHealthChecks()
+                    .AddRavenDB(setup => { setup.Urls = new[] { Configuration["Raven:Url"] }; setup.Database = Configuration["Raven:Database"]; setup.Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null; }, "ravendb");
+            }
+            catch { }
 
             var builder = services.AddIdentityServer(options =>
             {
@@ -80,11 +108,32 @@ namespace Authentication
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
+            app.UseForwardedHeaders();
+
+            app.UseCors(x => x.AllowAnyOrigin().WithHeaders("accept", "authorization", "content-type", "origin").AllowAnyMethod());
+
+            app.UseXContentTypeOptions();
+            app.UseXDownloadOptions();
+            app.UseXfo(options => options.SameOrigin());
+            app.UseXXssProtection(options => options.EnabledWithBlockMode());
+            app.UseHsts(options => options.MaxAge(30).AllResponses());
+
             app.UseRouting();
             app.UseAuthentication();
             app.UseIdentityServer();
 
             app.UseAuthorization();
+
+            app.UseHealthChecks(Configuration["HealthChecks:FullEndpoint"], new HealthCheckOptions()
+            {
+                Predicate = _ => true,
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
+
+            app.UseHealthChecks(Configuration["HealthChecks:SummaryEndpoint"], new HealthCheckOptions()
+            {
+                Predicate = _ => _.FailureStatus == HealthStatus.Unhealthy
+            });
 
             app.UseEndpoints(endpoints =>
             {
