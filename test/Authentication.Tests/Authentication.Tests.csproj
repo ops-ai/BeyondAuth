@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\Blockchain\Blockchain.csproj" />
+    <ProjectReference Include="..\..\src\Authentication\Authentication.csproj" />
   </ItemGroup>
 
 </Project>
