@@ -7,7 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\..\src\PolicyServer\appsettings.json" Link="appsettings.json" />
+    <Content Include="..\..\PolicyServer\appsettings.json" Link="appsettings.json" />
   </ItemGroup>
 
   <ItemGroup>
@@ -37,7 +37,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\src\PolicyServer\PolicyServer.csproj" />
+    <ProjectReference Include="..\..\PolicyServer\PolicyServer.csproj" />
   </ItemGroup>
 
 </Project>

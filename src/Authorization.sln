@@ -27,17 +27,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PolicyServer", "PolicyServe
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Tests", "Tests", "{F697BF7F-ED3E-4571-A176-AA937EE763FF}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PolicyServer.Tests", "..\test\PolicyServer.Tests\PolicyServer.Tests.csproj", "{863F7A90-11DA-4360-9E2D-ABEA7CE4B9D7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PolicyServer.Tests", "Tests\PolicyServer.Tests\PolicyServer.Tests.csproj", "{863F7A90-11DA-4360-9E2D-ABEA7CE4B9D7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blockchain.Tests", "..\test\Blockchain.Tests\Blockchain.Tests.csproj", "{B54B76D4-4BE3-4616-AE59-63A98724F6AE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blockchain.Tests", "Tests\Blockchain.Tests\Blockchain.Tests.csproj", "{B54B76D4-4BE3-4616-AE59-63A98724F6AE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Authentication.Tests", "..\test\Authentication.Tests\Authentication.Tests.csproj", "{02539C80-259A-43D0-B1E4-C5FBE896FC87}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Authentication.Tests", "Tests\Authentication.Tests\Authentication.Tests.csproj", "{02539C80-259A-43D0-B1E4-C5FBE896FC87}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer4.Contrib.RavenDB", "IdentityServer4.Contrib.RavenDB\IdentityServer4.Contrib.RavenDB.csproj", "{83D6CCDC-B98A-4E6B-9426-FA05CBE4BF7B}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizationServer", "AuthorizationServer\AuthorizationServer.csproj", "{E5F8E4FA-FD0E-4E01-8561-15DDE0A1B25C}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizationServer.Tests", "..\test\AuthorizationServer.Tests\AuthorizationServer.Tests.csproj", "{A0F1E41E-AEC9-4263-AFD6-FFA2CFB5D44A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizationServer.Tests", "Tests\AuthorizationServer.Tests\AuthorizationServer.Tests.csproj", "{A0F1E41E-AEC9-4263-AFD6-FFA2CFB5D44A}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authorization Handlers", "Authorization Handlers", "{84BCB7A7-6678-441F-B075-15D4A7E04ACB}"
 EndProject
