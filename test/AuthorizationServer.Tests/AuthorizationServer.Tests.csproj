@@ -33,7 +33,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\AuthorizationServer\AuthorizationServer.csproj" />
+    <ProjectReference Include="..\..\src\AuthorizationServer\AuthorizationServer.csproj" />
   </ItemGroup>
   
 </Project>
