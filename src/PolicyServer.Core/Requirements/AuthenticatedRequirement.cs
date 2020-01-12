@@ -1,4 +1,4 @@
-﻿namespace PolicyServer.Entities.Requirements
+﻿namespace PolicyServer.Core.Entities.Requirements
 {
     /// <summary>
     /// Authenticated user requirement

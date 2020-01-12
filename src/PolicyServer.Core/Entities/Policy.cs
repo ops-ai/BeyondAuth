@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PolicyServer.Entities
+namespace PolicyServer.Core.Entities
 {
     public class Policy
     {
