@@ -29,6 +29,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\PolicyServer.Core\PolicyServer.Core.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
     <None Update="AuthorizationServer.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

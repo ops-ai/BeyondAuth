@@ -1,16 +1,17 @@
 ﻿using JsonSubTypes;
+using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
 using NJsonSchema.Converters;
-using PolicyServer.Entities.Requirements;
+using PolicyServer.Core.Entities.Requirements;
 
-namespace PolicyServer.Entities
+namespace PolicyServer.Core.Entities
 {
     /// <summary>
     /// Authorization requirements base class
     /// </summary>
     [JsonConverter(typeof(JsonInheritanceConverter), "name")]
     [JsonSubtypes.KnownSubType(typeof(AuthenticatedRequirement), "authenticated")]
-    public abstract class AuthorizationRequirement
+    public abstract class AuthorizationRequirement : IAuthorizationRequirement
     {
         /// <summary>
         /// Unique name of requirement

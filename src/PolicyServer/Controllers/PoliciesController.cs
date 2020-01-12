@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using PolicyServer.Entities;
+using PolicyServer.Core.Entities;
 using PolicyServer.Models;
 using Raven.Client.Documents;
 using System;
@@ -31,6 +31,7 @@ namespace PolicyServer.Controllers
         /// </summary>
         /// <returns></returns>
         /// <response code="200">List of policies available to the application</response>
+        /// <response code="500">Unexpected error occurred</response>
         [ProducesResponseType(typeof(List<PolicyModel>), 200)]
         [ProducesResponseType(500)]
         [HttpGet]
@@ -59,6 +60,52 @@ namespace PolicyServer.Controllers
                     }
                     return Ok(model);
                 }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError(e, "Failed to get policies");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Get a policy by id
+        /// </summary>
+        /// <returns></returns>
+        /// <response code="200">Returns the requested policy</response>
+        /// <response code="404">Policy not found</response>
+        /// <response code="500">Unexpected error occurred</response>
+        [ProducesResponseType(typeof(PolicyModel), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(500)]
+        [HttpGet("{name}")]
+        public async Task<IActionResult> GetPolicy(string name)
+        {
+            try
+            {
+                using (var session = _documentStore.OpenAsyncSession())
+                {
+                    var clientId = User.FindFirstValue("client_id");
+                    var policy = await session.Query<Policy>().FirstOrDefaultAsync(t => t.ClientId.Equals(clientId) && t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+
+                    if (policy == null)
+                        throw new KeyNotFoundException($"Policy {name} was not found");
+
+                    var model = new PolicyModel
+                    {
+                        AuthenticationSchemes = policy.AuthenticationSchemes,
+                        Description = policy.Description,
+                        Id = policy.Id,
+                        Name = policy.Name,
+                        Requirements = policy.Requirements
+                    };
+                    return Ok(model);
+                }
+            }
+            catch (KeyNotFoundException ex)
+            {
+                _logger.LogWarning(ex, "Policy not found");
+                return NotFound();
             }
             catch (Exception e)
             {

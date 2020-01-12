@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PolicyServer.Entities.Requirements
+namespace PolicyServer.Core.Entities.Requirements
 {
     /// <summary>
     /// Claim requirement
