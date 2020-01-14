@@ -45,6 +45,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizationPolicyProvider
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolicyServer.Core", "PolicyServer.Core\PolicyServer.Core.csproj", "{1CC84BD3-5297-471C-BEE7-41432E61817A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuditServer", "AuditServer\AuditServer.csproj", "{64408365-EC62-4AF4-BF01-758BBD22093C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuditServer.Tests", "Tests\AuditServer.Tests\AuditServer.Tests.csproj", "{EF82BD7D-7E61-4CAD-9ECB-AD9AB428DE8C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -99,6 +103,14 @@ Global
 		{1CC84BD3-5297-471C-BEE7-41432E61817A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1CC84BD3-5297-471C-BEE7-41432E61817A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1CC84BD3-5297-471C-BEE7-41432E61817A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{64408365-EC62-4AF4-BF01-758BBD22093C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{64408365-EC62-4AF4-BF01-758BBD22093C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{64408365-EC62-4AF4-BF01-758BBD22093C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{64408365-EC62-4AF4-BF01-758BBD22093C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF82BD7D-7E61-4CAD-9ECB-AD9AB428DE8C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF82BD7D-7E61-4CAD-9ECB-AD9AB428DE8C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF82BD7D-7E61-4CAD-9ECB-AD9AB428DE8C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF82BD7D-7E61-4CAD-9ECB-AD9AB428DE8C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -110,6 +122,7 @@ Global
 		{02539C80-259A-43D0-B1E4-C5FBE896FC87} = {F697BF7F-ED3E-4571-A176-AA937EE763FF}
 		{A0F1E41E-AEC9-4263-AFD6-FFA2CFB5D44A} = {F697BF7F-ED3E-4571-A176-AA937EE763FF}
 		{321484F9-D797-4334-8079-92145751C83A} = {84BCB7A7-6678-441F-B075-15D4A7E04ACB}
+		{EF82BD7D-7E61-4CAD-9ECB-AD9AB428DE8C} = {F697BF7F-ED3E-4571-A176-AA937EE763FF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d

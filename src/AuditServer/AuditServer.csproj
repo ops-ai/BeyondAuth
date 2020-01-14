@@ -2,7 +2,7 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-    <UserSecretsId>3b9331f8-ba04-4bdb-9c42-707d155ced83</UserSecretsId>
+    <UserSecretsId>5054c24a-99a3-4ba7-b428-8164a41c704a</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
@@ -11,7 +11,7 @@
   <ItemGroup>
     <Compile Include="..\AssemblyInfo.cs" Link="Properties\AssemblyInfo.cs" />
   </ItemGroup>
-
+  
   <ItemGroup>
     <PackageReference Include="AspNetCore.HealthChecks.RavenDB" Version="3.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.UI" Version="3.0.9" />
@@ -19,23 +19,32 @@
     <PackageReference Include="Autofac.Configuration" Version="4.1.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="5.0.1" />
     <PackageReference Include="CorrelationId" Version="3.0.0-preview.1" />
+    <PackageReference Include="FluentValidation" Version="8.6.1" />
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
-    <PackageReference Include="JsonSubTypes" Version="1.6.0" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.0-preview1.19506.2" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="3.1.0-preview1.19506.2">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.5" />
-    <PackageReference Include="NJsonSchema" Version="10.1.2" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="3.1.0-preview1-19509-03" />
     <PackageReference Include="NWebsec.AspNetCore.Middleware" Version="2.0.0" />
     <PackageReference Include="RavenDB.Client" Version="4.2.6" />
     <PackageReference Include="scientist" Version="2.0.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\PolicyServer.Core\PolicyServer.Core.csproj" />
+    <ProjectReference Include="..\Blockchain\Blockchain.csproj" />
   </ItemGroup>
 
   <ItemGroup>
     <None Update="AuthorizationServer.pfx">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Models\" />
   </ItemGroup>
 
 </Project>
