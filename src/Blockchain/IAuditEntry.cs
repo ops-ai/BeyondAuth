@@ -15,6 +15,11 @@ namespace Blockchain
         string CorrelationId { get; set; }
 
         /// <summary>
+        /// Identifier of system that made the decision
+        /// </summary>
+        string ClientId { get; set; }
+
+        /// <summary>
         /// Date the authorization decision was made. Represented as an integer timestamp, measured in the number of seconds since January 1 1970 UTC
         /// </summary>
         long Timestamp { get; set; }

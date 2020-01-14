@@ -8,43 +8,68 @@ namespace Blockchain
 {
     public class AuditEntry : IAuditEntry
     {
-        /// <inheritdoc />
+        /// <summary>
+        /// Identifier of subject/principal accessing the resource
+        /// </summary>
         [JsonProperty("sub")]
         public string Subject { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Cross-system correlation id which can be used to cross-reference logs in other systems or trace request
+        /// </summary>
         [JsonProperty("correlation_id")]
         public string CorrelationId { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Identifier of system that made the decision
+        /// </summary>
+        public string ClientId { get; set; }
+
+        /// <summary>
+        /// Date the authorization decision was made. Represented as an integer timestamp, measured in the number of seconds since January 1 1970 UTC
+        /// </summary>
         [JsonProperty("timestamp")]
         public long Timestamp { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Authorization decision made / event
+        /// </summary>
         [JsonProperty("decision")]
         public AuthorizationDecisions AuthorizationDecision { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Identifier of resolver which made the authorization decision
+        /// </summary>
         [JsonProperty("resolver")]
         public string Resolver { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Id/name of policy that dictated this requirement
+        /// </summary>
         [JsonProperty("policy")]
         public string Policy { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Action trying to be performed on the resource. Read/Access in coarse policy cases, or driven by ACL/ACE for fine-grained authorization
+        /// </summary>
         [JsonProperty("action")]
         public string Action { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Unique Id of resource accessed (Ex: file path, document id, record number, url)
+        /// </summary>
         [JsonProperty("resource_id")]
         public string ResourceId { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Originating system trying to access the resource
+        /// </summary>
         [JsonProperty("originator")]
         public string Originator { get; set; }
 
-        /// <inheritdoc />
+        /// <summary>
+        /// Extra information included by the authorization resolver
+        /// </summary>
         [JsonProperty("data")]
         public IDictionary<string, string> Data { get; set; } = new Dictionary<string, string>();
 
@@ -52,7 +77,7 @@ namespace Blockchain
         /// <inheritdoc />
         public string CalculateAuditEntryHash()
         {
-            var auditHash = $"{Subject}{CorrelationId}{Timestamp}{AuthorizationDecision}{Resolver}{Policy}{Action}{ResourceId}{Originator}{string.Join("", Data.Keys)}{string.Join("", Data.Values)}";
+            var auditHash = $"{Subject}{CorrelationId}{Timestamp}{AuthorizationDecision}{ClientId}{Resolver}{Policy}{Action}{ResourceId}{Originator}{string.Join("", Data.Keys)}{string.Join("", Data.Values)}";
             return Convert.ToBase64String(Hashing.ComputeHashSha256(Encoding.UTF8.GetBytes(auditHash)));
         }
     }
