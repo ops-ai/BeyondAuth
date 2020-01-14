@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Threading;
 
 namespace Blockchain
 {
@@ -7,12 +9,40 @@ namespace Blockchain
     /// </summary>
     public class TransactionPool : ITransactionPool
     {
-        private readonly Queue<IAuditEntry> _queue;
+        private ConcurrentQueue<IAuditEntry> _queue;
 
-        public TransactionPool() => _queue = new Queue<IAuditEntry>();
+        public TransactionPool() => _queue = new ConcurrentQueue<IAuditEntry>();
 
         public void AddAuditEntry(IAuditEntry auditEntry) => _queue.Enqueue(auditEntry);
 
-        public IAuditEntry GetAuditEntry() => _queue.Dequeue();
+        public IAuditEntry GetAuditEntry()
+        {
+            if (_queue.TryDequeue(out var entry))
+                return entry;
+
+            return null;
+        }
+
+        /// <summary>
+        /// Close this queue connection. Does not destroy flushed data.
+        /// </summary>
+        public void Dispose()
+        {
+            var local = Interlocked.Exchange(ref _queue, null);
+            if (local == null) return;
+            
+            GC.SuppressFinalize(this);
+        }
+
+        /// <summary>
+        /// Dispose of the queue connection on destruction.
+        /// This is a safety valve. You should ensure you dispose
+        /// of connections properly.
+        /// </summary>
+        ~TransactionPool()
+        {
+            if (_queue == null) return;
+            Dispose();
+        }
     }
 }

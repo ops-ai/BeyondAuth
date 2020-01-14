@@ -6,6 +6,7 @@ using System.Text;
 
 namespace Blockchain
 {
+    [Serializable]
     public class AuditEntry : IAuditEntry
     {
         /// <summary>
