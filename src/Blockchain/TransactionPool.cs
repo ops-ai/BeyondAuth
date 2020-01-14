@@ -5,7 +5,7 @@ namespace Blockchain
     /// <summary>
     /// Audit entry transaction pool placeholder - to be replaced by distributed queue
     /// </summary>
-    public class TransactionPool
+    public class TransactionPool : ITransactionPool
     {
         private readonly Queue<IAuditEntry> _queue;
 
