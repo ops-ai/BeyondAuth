@@ -5,7 +5,7 @@ using NLog.Web;
 
 namespace AuditServer.Tests.Integration_Tests
 {
-    public class PolicyServerWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup : class
+    public class AuditServerWebApplicationFactory<TStartup> : WebApplicationFactory<TStartup> where TStartup : class
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
