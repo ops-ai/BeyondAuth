@@ -9,14 +9,14 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Contrib.RavenDB.Stores
 {
-    public class ReferenceTokenStore : IReferenceTokenStore
+    public class RavenDBReferenceTokenStore : IReferenceTokenStore
     {
         private readonly ILogger _logger;
         private readonly IDocumentStore _store;
 
-        public ReferenceTokenStore(ILoggerFactory loggerFactory, IDocumentStore store)
+        public RavenDBReferenceTokenStore(ILoggerFactory loggerFactory, IDocumentStore store)
         {
-            _logger = loggerFactory.CreateLogger<ReferenceTokenStore>();
+            _logger = loggerFactory.CreateLogger<RavenDBReferenceTokenStore>();
             _store = store;
         }
 

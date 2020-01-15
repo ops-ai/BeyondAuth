@@ -1,22 +1,26 @@
-﻿using IdentityServer4.Contrib.RavenDB.Entities;
+﻿using IdentityModel;
+using IdentityServer4.Contrib.RavenDB.Entities;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
+using IdentityServer4.Stores.Serialization;
 using Microsoft.Extensions.Logging;
 using Raven.Client.Documents;
 using System;
 using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace IdentityServer4.Contrib.RavenDB.Stores
 {
-    public class DeviceFlowStore : IDeviceFlowStore
+    public class RavenDBDeviceFlowStore : IDeviceFlowStore
     {
         private readonly ILogger _logger;
         private readonly IDocumentStore _store;
 
-        public DeviceFlowStore(ILoggerFactory loggerFactory, IDocumentStore store)
+        public RavenDBDeviceFlowStore(ILoggerFactory loggerFactory, IDocumentStore store)
         {
-            _logger = loggerFactory.CreateLogger<DeviceFlowStore>();
+            _logger = loggerFactory.CreateLogger<RavenDBDeviceFlowStore>();
             _store = store;
         }
 
@@ -28,7 +32,23 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Finding device code {deviceCode}");
-                return await session.Query<DeviceCodeEntity>().FirstOrDefaultAsync(t => t.DeviceCode.Equals(deviceCode));
+                var entity = await session.Query<DeviceCodeEntity>().FirstOrDefaultAsync(t => t.DeviceCode.Equals(deviceCode));
+
+                ClaimsPrincipal principal = null;
+                if (entity.Principal != null)
+                    principal = new ClaimsPrincipal(new ClaimsIdentity(entity.Principal.Claims.Select(x => new Claim(x.Type, x.Value, x.ValueType)), entity.Principal.AuthenticationType));
+
+                return new DeviceCode
+                {
+                    AuthorizedScopes = entity.AuthorizedScopes,
+                    ClientId = entity.ClientId,
+                    CreationTime = entity.CreationTime,
+                    IsAuthorized = entity.IsAuthorized,
+                    IsOpenId = entity.IsOpenId,
+                    Lifetime = entity.Lifetime,
+                    RequestedScopes = entity.RequestedScopes,
+                    Subject = principal
+                };
             }
         }
 
@@ -40,7 +60,26 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Loading device code with user code {userCode}");
-                return await session.LoadAsync<DeviceCodeEntity>($"DeviceCodes/{userCode}");
+                var entity = await session.LoadAsync<DeviceCodeEntity>($"DeviceCodes/{userCode}");
+                if (entity != null)
+                {
+                    ClaimsPrincipal principal = null;
+                    if (entity.Principal != null)
+                        principal = new ClaimsPrincipal(new ClaimsIdentity(entity.Principal.Claims.Select(x => new Claim(x.Type, x.Value, x.ValueType)), entity.Principal.AuthenticationType));
+
+                    return new DeviceCode
+                    {
+                        AuthorizedScopes = entity.AuthorizedScopes,
+                        ClientId = entity.ClientId,
+                        CreationTime = entity.CreationTime,
+                        IsAuthorized = entity.IsAuthorized,
+                        IsOpenId = entity.IsOpenId,
+                        Lifetime = entity.Lifetime,
+                        RequestedScopes = entity.RequestedScopes,
+                        Subject = principal
+                    };
+                }
+                return null;
             }
         }
 
@@ -85,9 +124,14 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
                     IsAuthorized = data.IsAuthorized,
                     IsOpenId = data.IsOpenId,
                     Lifetime = data.Lifetime,
-                    RequestedScopes = data.RequestedScopes,
-                    Subject = data.Subject
+                    RequestedScopes = data.RequestedScopes
                 };
+                if (data.Subject?.Identity != null)
+                    code.Principal = new ClaimsPrincipalLite
+                    {
+                        AuthenticationType = data.Subject.Identity.AuthenticationType,
+                        Claims = data.Subject?.Claims.Select(x => new ClaimLite { Type = x.Type, Value = x.Value, ValueType = x.ValueType }).ToArray()
+                    };
                 await session.StoreAsync(code);
                 await session.SaveChangesAsync();
             }
@@ -116,7 +160,12 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
                 code.IsOpenId = data.IsOpenId;
                 code.Lifetime = data.Lifetime;
                 code.RequestedScopes = data.RequestedScopes;
-                code.Subject = data.Subject;
+                if (data.Subject?.Identity != null)
+                    code.Principal = new ClaimsPrincipalLite
+                    {
+                        AuthenticationType = data.Subject.Identity.AuthenticationType,
+                        Claims = data.Subject?.Claims.Select(x => new ClaimLite { Type = x.Type, Value = x.Value, ValueType = x.ValueType }).ToArray()
+                    };
 
                 await session.SaveChangesAsync();
             }

@@ -10,16 +10,16 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Contrib.RavenDB.Stores
 {
-    public class PersistedGrantStore : IPersistedGrantStore
+    public class RavenDBPersistedGrantStore : IPersistedGrantStore
     {
         private readonly ILogger _logger;
         private readonly IPersistentGrantSerializer _serializer;
         private readonly IDocumentStore _store;
 
-        public PersistedGrantStore(IPersistentGrantSerializer serializer, ILoggerFactory loggerFactory, IDocumentStore store)
+        public RavenDBPersistedGrantStore(IPersistentGrantSerializer serializer, ILoggerFactory loggerFactory, IDocumentStore store)
         {
             _serializer = serializer;
-            _logger = loggerFactory.CreateLogger<PersistedGrantStore>();
+            _logger = loggerFactory.CreateLogger<RavenDBPersistedGrantStore>();
             _store = store;
         }
 

@@ -7,15 +7,15 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Contrib.RavenDB.Stores
 {
-    public class ClientStore : IClientStore
+    public class RavenDBClientStore : IClientStore
     {
         private readonly ILogger _logger;
         private readonly IDocumentStore _store;
 
-        public ClientStore(ILoggerFactory loggerFactory, IDocumentStore store)
+        public RavenDBClientStore(ILogger<RavenDBClientStore> logger, IDocumentStore store)
         {
-            _logger = loggerFactory.CreateLogger<ClientStore>();
-            _store = store;
+            _logger = logger ?? throw new ArgumentException("loggerFactory is required", nameof(logger));
+            _store = store ?? throw new ArgumentException("store is required", nameof(store));
         }
 
         public async Task<Client> FindClientByIdAsync(string clientId)
@@ -26,7 +26,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Loading client {clientId}");
-                return await session.LoadAsync<Client>(clientId);
+                return await session.LoadAsync<Client>($"Clients/{clientId}");
             }
         }
     }

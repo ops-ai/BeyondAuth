@@ -8,14 +8,14 @@ using System.Threading.Tasks;
 
 namespace IdentityServer4.Contrib.RavenDB.Stores
 {
-    public class AuthorizationCodeStore : IAuthorizationCodeStore
+    public class RavenDBAuthorizationCodeStore : IAuthorizationCodeStore
     {
         private readonly ILogger _logger;
         private readonly IDocumentStore _store;
 
-        public AuthorizationCodeStore(ILoggerFactory loggerFactory, IDocumentStore store)
+        public RavenDBAuthorizationCodeStore(ILoggerFactory loggerFactory, IDocumentStore store)
         {
-            _logger = loggerFactory.CreateLogger<AuthorizationCodeStore>();
+            _logger = loggerFactory.CreateLogger<RavenDBAuthorizationCodeStore>();
             _store = store;
         }
 
