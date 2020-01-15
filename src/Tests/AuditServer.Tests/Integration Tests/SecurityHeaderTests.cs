@@ -14,14 +14,14 @@ using Xunit.Abstractions;
 
 namespace AuditServer.Tests.Integration_Tests
 {
-    public class SecurityHeaderTests : IClassFixture<PolicyServerWebApplicationFactory<Startup>>
+    public class SecurityHeaderTests : IClassFixture<AuditServerWebApplicationFactory<Startup>>
     {
         private readonly ITestOutputHelper _output;
         private readonly HttpClient _client;
 
         protected readonly Mock<ILoggerFactory> _loggerFactoryMock;
 
-        public SecurityHeaderTests(PolicyServerWebApplicationFactory<Startup> factory, ITestOutputHelper output)
+        public SecurityHeaderTests(AuditServerWebApplicationFactory<Startup> factory, ITestOutputHelper output)
         {
             _output = output;
 
