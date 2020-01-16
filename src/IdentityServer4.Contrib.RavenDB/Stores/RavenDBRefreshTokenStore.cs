@@ -14,9 +14,9 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
         private readonly ILogger _logger;
         private readonly IDocumentStore _store;
 
-        public RavenDBRefreshTokenStore(ILoggerFactory loggerFactory, IDocumentStore store)
+        public RavenDBRefreshTokenStore(ILogger<RavenDBRefreshTokenStore> logger, IDocumentStore store)
         {
-            _logger = loggerFactory.CreateLogger<RavenDBRefreshTokenStore>();
+            _logger = logger;
             _store = store;
         }
 
