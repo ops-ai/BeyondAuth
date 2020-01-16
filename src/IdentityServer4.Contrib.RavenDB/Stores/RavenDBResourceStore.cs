@@ -16,9 +16,9 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
         private readonly ILogger _logger;
         private readonly IDocumentStore _store;
 
-        public RavenDBResourceStore(ILoggerFactory loggerFactory, IDocumentStore store)
+        public RavenDBResourceStore(ILogger<RavenDBResourceStore> logger, IDocumentStore store)
         {
-            _logger = loggerFactory.CreateLogger<RavenDBResourceStore>();
+            _logger = logger;
             _store = store;
         }
 
@@ -30,7 +30,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Loading api resource {name}");
-                return await session.LoadAsync<ApiResource>(name);
+                return await session.LoadAsync<ApiResource>($"ApiResources/{name}");
             }
         }
 
@@ -42,7 +42,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Loading api resources with scopes {string.Join(",", scopeNames)}");
-                return await session.Query<ApiResource>().Where(t => t.Scopes.Any(s => scopeNames.Contains(s.Name))).Take(1024).ToListAsync();
+                return await session.Query<ApiResource>().Where(t => t.Scopes.Any(s => s.Name.In(scopeNames))).Take(1024).ToListAsync();
             }
         }
 
@@ -63,12 +63,10 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Loading all resources");
-                var apiResources = session.Query<ApiResource>().Take(1024).ToListAsync();
-                var identityResources = session.Query<IdentityResource>().Take(1024).ToListAsync();
+                var apiResources = await session.Query<ApiResource>().Take(1024).ToListAsync();
+                var identityResources = await session.Query<IdentityResource>().Take(1024).ToListAsync();
 
-                await Task.WhenAll(apiResources, identityResources);
-
-                return new Resources(identityResources.Result, apiResources.Result);
+                return new Resources(identityResources, apiResources);
             }
         }
     }
