@@ -7,7 +7,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Content Include="..\..\AuditServer\appsettings.json" Link="appsettings.json" />
+    <Content Include="..\..\AuditServer\appsettings.json" Link="appsettings.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
