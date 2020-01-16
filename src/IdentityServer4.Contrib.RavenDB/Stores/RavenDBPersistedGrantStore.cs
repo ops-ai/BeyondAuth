@@ -16,10 +16,10 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
         private readonly IPersistentGrantSerializer _serializer;
         private readonly IDocumentStore _store;
 
-        public RavenDBPersistedGrantStore(IPersistentGrantSerializer serializer, ILoggerFactory loggerFactory, IDocumentStore store)
+        public RavenDBPersistedGrantStore(IPersistentGrantSerializer serializer, ILogger<RavenDBPersistedGrantStore> logger, IDocumentStore store)
         {
             _serializer = serializer;
-            _logger = loggerFactory.CreateLogger<RavenDBPersistedGrantStore>();
+            _logger = logger;
             _store = store;
         }
 
