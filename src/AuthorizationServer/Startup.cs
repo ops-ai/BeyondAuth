@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
+using System.Security.Cryptography.X509Certificates;
 using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
 using IdentityServer4.AccessTokenValidation;
@@ -14,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
+using Raven.Client.Documents;
 
 namespace AuthorizationServer
 {
@@ -37,6 +37,8 @@ namespace AuthorizationServer
                 });
             });
 
+            services.AddCorrelationId();
+
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
                 .AddIdentityServerAuthentication(x =>
                 {
@@ -49,6 +51,17 @@ namespace AuthorizationServer
                     x.CacheDuration = TimeSpan.FromMinutes(1);
                     x.NameClaimType = "sub";
                 });
+
+            services.AddSingleton((ctx) => new DocumentStore
+            {
+                Urls = new[] { Configuration["Raven:Url"] },
+                Database = Configuration["Raven:Database"],
+                Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null
+            }.Initialize());
+
+            services.AddHealthChecks()
+                .AddRavenDB(setup => { setup.Urls = new[] { Configuration["Raven:Url"] }; setup.Database = Configuration["Raven:Database"]; setup.Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null; }, "ravendb");
+
 
             services.AddCorrelationId();
 
@@ -64,6 +77,12 @@ namespace AuthorizationServer
             }
 
             app.UseForwardedHeaders();
+
+            app.UseXContentTypeOptions();
+            app.UseXDownloadOptions();
+            app.UseXfo(options => options.SameOrigin());
+            app.UseXXssProtection(options => options.EnabledWithBlockMode());
+            app.UseHsts(options => options.MaxAge(30).AllResponses());
 
             app.UseRouting();
 

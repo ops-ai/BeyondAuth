@@ -16,6 +16,7 @@ using System.Security.Cryptography.X509Certificates;
 using HealthChecks.UI.Client;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Net;
+using IdentityServer4.Stores;
 
 namespace Authentication
 {
