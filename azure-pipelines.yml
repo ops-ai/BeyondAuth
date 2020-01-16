@@ -40,6 +40,7 @@ steps:
       sonar.dependencyCheck.reportPath=$(Agent.BuildDirectory)\dependency-check-report.xml
       sonar.dependencyCheck.htmlReportPath=$(Agent.BuildDirectory)\dependency-check-report.html
       sonar.cs.opencover.reportsPaths="$(Agent.TempDirectory)\opencover.xml"
+      sonar.coverageReportPaths=$(Agent.TempDirectory)\coverage.xml
       sonar.coverage.exclusions="**Tests*.cs"
       
 - task: dependency-check-build-task@5
@@ -62,7 +63,13 @@ steps:
   inputs:
     command: test
     projects: '**\*test*.csproj'
-    arguments: '--no-restore /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:MergeWith="$(Agent.TempDirectory)\opencover.xml" /p:CoverletOutput="$(Agent.TempDirectory)\opencover.xml"'
+    arguments: '--no-restore /p:CollectCoverage=true /p:CoverletOutputFormat=opencover'
+
+- task: reportgenerator@4
+  inputs:
+    reports: '$(Build.Repository.LocalPath)\**\coverage.opencover.xml"'
+    targetdir: '$(Agent.TempDirectory)\'
+    reporttypes: 'SonarQube'
 
 - task: SonarCloudAnalyze@1
 
