@@ -62,11 +62,11 @@ steps:
   inputs:
     command: test
     projects: '**\*test*.csproj'
-    arguments: '--no-restore /p:CollectCoverage=true /p:CoverletOutputFormat=opencover'
+    arguments: '--no-restore --collect:"XPlat Code Coverage"'
 
 - task: reportgenerator@4
   inputs:
-    reports: '$(Build.Repository.LocalPath)\**\coverage.opencover.xml"'
+    reports: '$(Build.Repository.LocalPath)\**\coverage.cobertura.xml"'
     targetdir: '$(Agent.TempDirectory)\'
     reporttypes: 'SonarQube'
 
