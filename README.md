@@ -20,6 +20,10 @@
 # Acknowledgements
 
 * [ASP.NET Core](https://github.com/aspnet)
+* [IdentityServer4](https://github.com/IdentityServer/IdentityServer4/)
+* [gRPC](https://grpc.io/)
 * [Json.Net](http://www.newtonsoft.com/json)
 * [XUnit](https://xunit.github.io/)
 * [Fluent Assertions](http://www.fluentassertions.com/)
+* [NSwag](https://github.com/RicoSuter/NSwag)
+* [ReDoc](https://github.com/Redocly/redoc)
