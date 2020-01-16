@@ -39,8 +39,7 @@ steps:
     extraProperties: |
       sonar.dependencyCheck.reportPath=$(Agent.BuildDirectory)\dependency-check-report.xml
       sonar.dependencyCheck.htmlReportPath=$(Agent.BuildDirectory)\dependency-check-report.html
-      sonar.cs.opencover.reportsPaths="$(Agent.TempDirectory)\opencover.xml"
-      sonar.coverageReportPaths=$(Agent.TempDirectory)\coverage.xml
+      sonar.coverageReportPaths=$(Agent.TempDirectory)\SonarQube.xml
       sonar.coverage.exclusions="**Tests*.cs"
       
 - task: dependency-check-build-task@5
