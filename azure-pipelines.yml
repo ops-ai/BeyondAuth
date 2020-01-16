@@ -62,7 +62,7 @@ steps:
   inputs:
     command: test
     projects: '**\*test*.csproj'
-    arguments: '--no-restore /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput="$(Agent.TempDirectory)\TestResults\"'
+    arguments: '--no-restore /p:CollectCoverage=true /p:CoverletOutputFormat=opencover'
 
 - task: SonarCloudAnalyze@1
 
