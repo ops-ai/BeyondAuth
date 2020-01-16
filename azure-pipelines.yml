@@ -39,7 +39,7 @@ steps:
     extraProperties: |
       sonar.dependencyCheck.reportPath=$(Agent.BuildDirectory)\dependency-check-report.xml
       sonar.dependencyCheck.htmlReportPath=$(Agent.BuildDirectory)\dependency-check-report.html
-      sonar.cs.opencover.reportsPaths="$(Agent.TempDirectory)\opencover.xml"
+      sonar.cs.opencover.reportsPaths="$(Agent.TempDirectory)\TestResults\"
       sonar.coverage.exclusions="**Tests*.cs"
       
 - task: dependency-check-build-task@5
@@ -62,7 +62,7 @@ steps:
   inputs:
     command: test
     projects: '**\*test*.csproj'
-    arguments: '--no-restore /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput="$(Agent.TempDirectory)\opencover.xml"'
+    arguments: '--no-restore /p:CollectCoverage=true /p:CoverletOutputFormat=opencover /p:CoverletOutput="$(Agent.TempDirectory)\TestResults\"'
 
 - task: SonarCloudAnalyze@1
 
