@@ -8,7 +8,6 @@ using IdentityServer4.Stores;
 using IdentityServer4.Stores.Serialization;
 using Microsoft.Extensions.Logging;
 using Raven.Client.Documents;
-using Raven.TestDriver;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,7 +18,7 @@ using Xunit.Abstractions;
 
 namespace IdentityServer4.Contrib.RavenDB.Tests
 {
-    public class RavenDBPersistedGrantStoreTests : RavenTestDriver
+    public class RavenDBPersistedGrantStoreTests : RavenIdentityServerTestBase
     {
         protected readonly ILoggerFactory _loggerFactory;
 
@@ -38,7 +37,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             _loggerFactory = LogFactory.Create(output);
             _documentStore = GetDocumentStore();
             _store = new RavenDBPersistedGrantStore(new PersistentGrantSerializer(), _loggerFactory.CreateLogger<RavenDBPersistedGrantStore>(), _documentStore);
-
+            
             _codes = new DefaultAuthorizationCodeStore(_store, new PersistentGrantSerializer(), _handleGenerationService, _loggerFactory.CreateLogger<DefaultAuthorizationCodeStore>());
             _refreshTokens = new DefaultRefreshTokenStore(_store, new PersistentGrantSerializer(), _handleGenerationService, _loggerFactory.CreateLogger<DefaultRefreshTokenStore>());
             _referenceTokens = new DefaultReferenceTokenStore(_store, new PersistentGrantSerializer(), _handleGenerationService, _loggerFactory.CreateLogger<DefaultReferenceTokenStore>());
@@ -74,7 +73,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             code1.RequestedScopes.Should().BeEquivalentTo(code2.RequestedScopes);
         }
 
-        [Fact]
+        [Fact(DisplayName = "RemoveAuthorizationCodeAsync should remove grant")]
         public async Task RemoveAuthorizationCodeAsync_should_remove_grant()
         {
             var code1 = new AuthorizationCode()
@@ -97,7 +96,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             code2.Should().BeNull();
         }
 
-        [Fact]
+        [Fact(DisplayName = "StoreRefreshTokenAsync should persist grant")]
         public async Task StoreRefreshTokenAsync_should_persist_grant()
         {
             var token1 = new RefreshToken()
@@ -135,7 +134,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             token1.AccessToken.Type.Should().Be(token2.AccessToken.Type);
         }
 
-        [Fact]
+        [Fact(DisplayName = "RemoveRefreshTokenAsync should remove grant")]
         public async Task RemoveRefreshTokenAsync_should_remove_grant()
         {
             var token1 = new RefreshToken()
@@ -165,7 +164,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             token2.Should().BeNull();
         }
 
-        [Fact]
+        [Fact(DisplayName = "RemoveRefreshTokenAsync by sub and client should remove grant")]
         public async Task RemoveRefreshTokenAsync_by_sub_and_client_should_remove_grant()
         {
             var token1 = new RefreshToken()
@@ -201,7 +200,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             token2.Should().BeNull();
         }
 
-        [Fact]
+        [Fact(DisplayName = "StoreReferenceTokenAsync should persist grant")]
         public async Task StoreReferenceTokenAsync_should_persist_grant()
         {
             var token1 = new Token()
@@ -233,7 +232,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             token1.Version.Should().Be(token2.Version);
         }
 
-        [Fact]
+        [Fact(DisplayName = "RemoveReferenceTokenAsync should remove grant")]
         public async Task RemoveReferenceTokenAsync_should_remove_grant()
         {
             var token1 = new Token()
@@ -258,7 +257,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             token2.Should().BeNull();
         }
 
-        [Fact]
+        [Fact(DisplayName = "RemoveReferenceTokenAsync by sub and client should remove grant")]
         public async Task RemoveReferenceTokenAsync_by_sub_and_client_should_remove_grant()
         {
             var token1 = new Token()
@@ -289,7 +288,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             token2.Should().BeNull();
         }
 
-        [Fact]
+        [Fact(DisplayName = "StoreUserConsentAsync should persist grant")]
         public async Task StoreUserConsentAsync_should_persist_grant()
         {
             var consent1 = new Consent()
@@ -309,7 +308,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             consent2.Scopes.Should().BeEquivalentTo(new string[] { "bar", "foo" });
         }
 
-        [Fact]
+        [Fact(DisplayName = "RemoveUserConsentAsync should remove grant")]
         public async Task RemoveUserConsentAsync_should_remove_grant()
         {
             var consent1 = new Consent()
@@ -328,7 +327,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             consent2.Should().BeNull();
         }
 
-        [Fact]
+        [Fact(DisplayName = "Same key for different grant types should not interfere with each other")]
         public async Task same_key_for_different_grant_types_should_not_interfere_with_each_other()
         {
             _handleGenerationService.Handle = "key";
@@ -385,6 +384,124 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             (await _codes.GetAuthorizationCodeAsync("key")).Lifetime.Should().Be(30);
             (await _refreshTokens.GetRefreshTokenAsync("key")).Lifetime.Should().Be(20);
             (await _referenceTokens.GetReferenceTokenAsync("key")).Lifetime.Should().Be(10);
+        }
+
+        [Fact(DisplayName = "GetAllAnyc should return all stored tokens for subject")]
+        public async Task GetAllAsync()
+        {
+            await _referenceTokens.StoreReferenceTokenAsync(new Token()
+            {
+                ClientId = "client1",
+                Audiences = { "aud" },
+                CreationTime = DateTime.UtcNow,
+                Lifetime = 10,
+                Type = "type",
+                Claims = new List<Claim>
+                {
+                    new Claim("sub", "123"),
+                    new Claim("scope", "bar1"),
+                    new Claim("scope", "bar2")
+                }
+            });
+
+            await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
+            {
+                CreationTime = DateTime.UtcNow,
+                Lifetime = 20,
+                AccessToken = new Token
+                {
+                    ClientId = "client1",
+                    Audiences = { "aud" },
+                    CreationTime = DateTime.UtcNow,
+                    Type = "type",
+                    Claims = new List<Claim>
+                    {
+                        new Claim("sub", "123"),
+                        new Claim("scope", "baz1"),
+                        new Claim("scope", "baz2")
+                    }
+                },
+                Version = 1
+            });
+
+            await _codes.StoreAuthorizationCodeAsync(new AuthorizationCode()
+            {
+                ClientId = "client1",
+                CreationTime = DateTime.UtcNow,
+                Lifetime = 30,
+                Subject = _user,
+                CodeChallenge = "challenge",
+                RedirectUri = "http://client/cb",
+                Nonce = "nonce",
+                RequestedScopes = new string[] { "quux1", "quux2" }
+            });
+
+            WaitForIndexing(_documentStore);
+
+            var tokens = await _store.GetAllAsync("123");
+
+            tokens.Should().NotBeEmpty();
+            tokens.Count().Should().Be(3);
+        }
+
+        [Fact(DisplayName = "RemoveAllAsync should remove all stored tokens for subject and clientid")]
+        public async Task RemoveAllAsync()
+        {
+            await _referenceTokens.StoreReferenceTokenAsync(new Token()
+            {
+                ClientId = "client1",
+                Audiences = { "aud" },
+                CreationTime = DateTime.UtcNow,
+                Lifetime = 10,
+                Type = "type",
+                Claims = new List<Claim>
+                {
+                    new Claim("sub", "123"),
+                    new Claim("scope", "bar1"),
+                    new Claim("scope", "bar2")
+                }
+            });
+
+            await _refreshTokens.StoreRefreshTokenAsync(new RefreshToken()
+            {
+                CreationTime = DateTime.UtcNow,
+                Lifetime = 20,
+                AccessToken = new Token
+                {
+                    ClientId = "client1",
+                    Audiences = { "aud" },
+                    CreationTime = DateTime.UtcNow,
+                    Type = "type",
+                    Claims = new List<Claim>
+                    {
+                        new Claim("sub", "123"),
+                        new Claim("scope", "baz1"),
+                        new Claim("scope", "baz2")
+                    }
+                },
+                Version = 1
+            });
+
+            await _codes.StoreAuthorizationCodeAsync(new AuthorizationCode()
+            {
+                ClientId = "client1",
+                CreationTime = DateTime.UtcNow,
+                Lifetime = 30,
+                Subject = _user,
+                CodeChallenge = "challenge",
+                RedirectUri = "http://client/cb",
+                Nonce = "nonce",
+                RequestedScopes = new string[] { "quux1", "quux2" }
+            });
+
+            WaitForIndexing(_documentStore);
+
+            await _store.RemoveAllAsync("123", "client1");
+
+            WaitForIndexing(_documentStore);
+
+            var tokens = await _store.GetAllAsync("123");
+            tokens.Should().BeEmpty();
         }
 
         [Fact(DisplayName = "Parameter validation should trigger argument exceptions")]

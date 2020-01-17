@@ -1,5 +1,4 @@
-﻿using IdentityModel;
-using IdentityServer4.Contrib.RavenDB.Entities;
+﻿using IdentityServer4.Contrib.RavenDB.Entities;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using IdentityServer4.Stores.Serialization;

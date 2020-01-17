@@ -1,8 +1,8 @@
-﻿using IdentityServer4.Models;
+﻿using IdentityModel;
+using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using Microsoft.Extensions.Logging;
 using Raven.Client.Documents;
-using shortid;
 using System;
 using System.Collections.Generic;
 using System.Threading.Tasks;
@@ -57,7 +57,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             {
                 var token = await session.Query<RefreshToken>().FirstOrDefaultAsync(t => t.SubjectId.Equals(subjectId) && t.ClientId.Equals(clientId));
                 if (token == null)
-                    throw new KeyNotFoundException($"Refresh token with subjectId {subjectId} and clientId {clientId} was not found");
+                    return;
 
                 _logger.LogDebug($"Deleting refresh token with subjectId {subjectId} and clientId {clientId}");
                 session.Delete(token);
@@ -72,7 +72,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
             using (var session = _store.OpenAsyncSession())
             {
-                var newToken = ShortId.Generate(true, false, 14);
+                var newToken = CryptoRandom.CreateUniqueId();
 
                 _logger.LogDebug($"Storing refresh token {newToken}");
                 await session.StoreAsync(refreshToken, $"RefreshTokens/{newToken}");
@@ -100,7 +100,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
                 token.AccessToken = refreshToken.AccessToken;
                 token.CreationTime = refreshToken.CreationTime;
                 token.Lifetime = refreshToken.Lifetime;
-                token.Version++;
+                token.Version = refreshToken.Version;
 
                 await session.SaveChangesAsync();
             }
