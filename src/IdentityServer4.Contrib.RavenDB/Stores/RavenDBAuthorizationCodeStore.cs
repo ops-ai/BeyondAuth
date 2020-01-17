@@ -27,7 +27,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Loading authorization code {code}");
-                return await session.LoadAsync<AuthorizationCode>($"AuthorizationCodes/{code}");
+                return await session.LoadAsync<AuthorizationCode>($"AuthorizationCodes/{code}").ConfigureAwait(false);
             }
         }
 
@@ -40,7 +40,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             {
                 _logger.LogDebug($"Deleting authorization code {code}");
                 session.Delete($"AuthorizationCodes/{code}");
-                await session.SaveChangesAsync();
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -53,8 +53,8 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             {
                 var newCode = ShortId.Generate(true, false, 14);
                 _logger.LogDebug($"Storing authorization code {code}");
-                await session.StoreAsync(code, $"AuthorizationCodes/{newCode}");
-                await session.SaveChangesAsync();
+                await session.StoreAsync(code, $"AuthorizationCodes/{newCode}").ConfigureAwait(false);
+                await session.SaveChangesAsync().ConfigureAwait(false);
                 return newCode;
             }
         }

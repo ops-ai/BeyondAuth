@@ -28,7 +28,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Loading reference token {handle}");
-                return await session.LoadAsync<Token>($"ReferenceTokens/{handle}");
+                return await session.LoadAsync<Token>($"ReferenceTokens/{handle}").ConfigureAwait(false);
             }
         }
 
@@ -41,7 +41,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             {
                 _logger.LogDebug($"Deleting reference token {handle}");
                 session.Delete($"ReferenceTokens/{handle}");
-                await session.SaveChangesAsync();
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -56,9 +56,9 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Deleting reference tokens for subjectId {subjectId} and clientId {clientId}");
-                var grants = await session.Query<Token>().Where(t => t.SubjectId.Equals(subjectId) && t.ClientId.Equals(clientId)).ToListAsync();
+                var grants = await session.Query<Token>().Where(t => t.SubjectId.Equals(subjectId) && t.ClientId.Equals(clientId)).ToListAsync().ConfigureAwait(false);
                 grants.ForEach(session.Delete);
-                await session.SaveChangesAsync();
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -71,8 +71,8 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             {
                 var newCode = ShortId.Generate(true, false, 14);
                 _logger.LogDebug($"Storing reference token {newCode}");
-                await session.StoreAsync(token, $"ReferenceTokens/{newCode}");
-                await session.SaveChangesAsync();
+                await session.StoreAsync(token, $"ReferenceTokens/{newCode}").ConfigureAwait(false);
+                await session.SaveChangesAsync().ConfigureAwait(false);
 
                 return newCode;
             }

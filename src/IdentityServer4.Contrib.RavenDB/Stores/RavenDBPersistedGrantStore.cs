@@ -32,7 +32,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Getting persisted grants for subjectId {subjectId}");
-                return await session.Query<PersistedGrant>().Where(t => t.SubjectId.Equals(subjectId)).ToListAsync();
+                return await session.Query<PersistedGrant>().Where(t => t.SubjectId.Equals(subjectId)).ToListAsync().ConfigureAwait(false);
             }
         }
 
@@ -44,7 +44,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Loading persisted grant {key}");
-                return await session.LoadAsync<PersistedGrant>($"PersistedGrants/{key}");
+                return await session.LoadAsync<PersistedGrant>($"PersistedGrants/{key}").ConfigureAwait(false);
             }
         }
 
@@ -59,9 +59,9 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Deleting persisted grants for subjectId {subjectId} and clientId {clientId}");
-                var grants = await session.Query<PersistedGrant>().Where(t => t.SubjectId.Equals(subjectId) && t.ClientId.Equals(clientId)).ToListAsync();
+                var grants = await session.Query<PersistedGrant>().Where(t => t.SubjectId.Equals(subjectId) && t.ClientId.Equals(clientId)).ToListAsync().ConfigureAwait(false);
                 grants.ForEach(session.Delete);
-                await session.SaveChangesAsync();
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -79,9 +79,9 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Deleting persisted grants for subjectId {subjectId}, clientId {clientId} and type {type}");
-                var grants = await session.Query<PersistedGrant>().Where(t => t.SubjectId.Equals(subjectId) && t.ClientId.Equals(clientId) && t.Type.Equals(type)).ToListAsync();
+                var grants = await session.Query<PersistedGrant>().Where(t => t.SubjectId.Equals(subjectId) && t.ClientId.Equals(clientId) && t.Type.Equals(type)).ToListAsync().ConfigureAwait(false);
                 grants.ForEach(session.Delete);
-                await session.SaveChangesAsync();
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -94,7 +94,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             {
                 _logger.LogDebug($"Deleting persisted grant {key}");
                 session.Delete($"PersistedGrants/{key}");
-                await session.SaveChangesAsync();
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -106,12 +106,12 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Storing persisted grant {grant.Key}");
-                await session.StoreAsync(grant, $"PersistedGrants/{grant.Key}");
+                await session.StoreAsync(grant, $"PersistedGrants/{grant.Key}").ConfigureAwait(false);
 
                 if (grant.Expiration.HasValue)
                     session.Advanced.GetMetadataFor(grant)[Constants.Documents.Metadata.Expires] = grant.Expiration;
 
-                await session.SaveChangesAsync();
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
     }

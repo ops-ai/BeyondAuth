@@ -31,7 +31,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Finding device code {deviceCode}");
-                var entity = await session.Query<DeviceCodeEntity>().FirstOrDefaultAsync(t => t.DeviceCode.Equals(deviceCode));
+                var entity = await session.Query<DeviceCodeEntity>().FirstOrDefaultAsync(t => t.DeviceCode.Equals(deviceCode)).ConfigureAwait(false);
 
                 ClaimsPrincipal principal = null;
                 if (entity.Principal != null)
@@ -59,7 +59,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Loading device code with user code {userCode}");
-                var entity = await session.LoadAsync<DeviceCodeEntity>($"DeviceCodes/{userCode}");
+                var entity = await session.LoadAsync<DeviceCodeEntity>($"DeviceCodes/{userCode}").ConfigureAwait(false);
                 if (entity != null)
                 {
                     ClaimsPrincipal principal = null;
@@ -89,13 +89,13 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
             using (var session = _store.OpenAsyncSession())
             {
-                var code = await session.Query<DeviceCodeEntity>().FirstOrDefaultAsync(t => t.DeviceCode.Equals(deviceCode));
+                var code = await session.Query<DeviceCodeEntity>().FirstOrDefaultAsync(t => t.DeviceCode.Equals(deviceCode)).ConfigureAwait(false);
                 if (code == null)
                     throw new KeyNotFoundException($"Device code {deviceCode} was not found");
 
                 _logger.LogDebug($"Deleting device code {deviceCode}");
                 session.Delete(code);
-                await session.SaveChangesAsync();
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -131,8 +131,8 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
                         AuthenticationType = data.Subject.Identity.AuthenticationType,
                         Claims = data.Subject?.Claims.Select(x => new ClaimLite { Type = x.Type, Value = x.Value, ValueType = x.ValueType }).ToArray()
                     };
-                await session.StoreAsync(code);
-                await session.SaveChangesAsync();
+                await session.StoreAsync(code).ConfigureAwait(false);
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -146,7 +146,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
             using (var session = _store.OpenAsyncSession())
             {
-                var code = await session.LoadAsync<DeviceCodeEntity>($"DeviceCodes/{userCode}");
+                var code = await session.LoadAsync<DeviceCodeEntity>($"DeviceCodes/{userCode}").ConfigureAwait(false);
                 if (code == null)
                     throw new KeyNotFoundException($"Device code with UserCode {userCode} was not found");
 
@@ -166,7 +166,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
                         Claims = data.Subject?.Claims.Select(x => new ClaimLite { Type = x.Type, Value = x.Value, ValueType = x.ValueType }).ToArray()
                     };
 
-                await session.SaveChangesAsync();
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
     }
