@@ -96,5 +96,19 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
                 Assert.NotNull(await codeStore.GetAuthorizationCodeAsync(code));
             }
         }
+
+        [Fact(DisplayName = "Parameter validation should trigger argument exceptions")]
+        public async Task Validation()
+        {
+            using (var store = GetDocumentStore())
+            {
+                var codeStore = new RavenDBAuthorizationCodeStore(_loggerFactory.CreateLogger<RavenDBAuthorizationCodeStore>(), store);
+
+                Assert.Throws<ArgumentException>(() => new RavenDBAuthorizationCodeStore(null, store));
+                Assert.Throws<ArgumentException>(() => new RavenDBAuthorizationCodeStore(_loggerFactory.CreateLogger<RavenDBAuthorizationCodeStore>(), null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await codeStore.RemoveAuthorizationCodeAsync(null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await codeStore.StoreAuthorizationCodeAsync(null));
+            }
+        }
     }
 }

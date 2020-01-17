@@ -3,6 +3,7 @@ using IdentityServer4.Contrib.RavenDB.Stores;
 using IdentityServer4.Models;
 using Microsoft.Extensions.Logging;
 using Raven.TestDriver;
+using System;
 using System.Threading.Tasks;
 using Xunit;
 using Xunit.Abstractions;
@@ -49,6 +50,19 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
 
                 var clientStore = new RavenDBClientStore(_loggerFactory.CreateLogger<RavenDBClientStore>(), store);
                 Assert.Null(await clientStore.FindClientByIdAsync("2"));
+            }
+        }
+
+        [Fact(DisplayName = "Parameter validation should trigger argument exceptions")]
+        public async Task Validation()
+        {
+            using (var store = GetDocumentStore())
+            {
+                var clientStore = new RavenDBClientStore(_loggerFactory.CreateLogger<RavenDBClientStore>(), store);
+
+                Assert.Throws<ArgumentException>(() => new RavenDBClientStore(null, store));
+                Assert.Throws<ArgumentException>(() => new RavenDBClientStore(_loggerFactory.CreateLogger<RavenDBClientStore>(), null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await clientStore.FindClientByIdAsync(null));
             }
         }
     }

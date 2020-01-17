@@ -3,6 +3,7 @@ using IdentityServer4.Contrib.RavenDB.Stores;
 using IdentityServer4.Models;
 using Microsoft.Extensions.Logging;
 using Raven.TestDriver;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -187,6 +188,21 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
                 Assert.Equal("test", resources.IdentityResources.ToList()[0].DisplayName);
                 Assert.Equal("test2", resources.IdentityResources.ToList()[1].Name);
                 Assert.Equal("test2", resources.IdentityResources.ToList()[1].DisplayName);
+            }
+        }
+
+        [Fact(DisplayName = "Parameter validation should trigger argument exceptions")]
+        public async Task Validation()
+        {
+            using (var store = GetDocumentStore())
+            {
+                var resourceStore = new RavenDBResourceStore(_loggerFactory.CreateLogger<RavenDBResourceStore>(), store);
+
+                Assert.Throws<ArgumentException>(() => new RavenDBResourceStore(null, store));
+                Assert.Throws<ArgumentException>(() => new RavenDBResourceStore(_loggerFactory.CreateLogger<RavenDBResourceStore>(), null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await resourceStore.FindApiResourceAsync(null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await resourceStore.FindApiResourcesByScopeAsync(null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await resourceStore.FindIdentityResourcesByScopeAsync(null));
             }
         }
     }

@@ -18,10 +18,10 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
         private readonly ILogger _logger;
         private readonly IDocumentStore _store;
 
-        public RavenDBDeviceFlowStore(ILoggerFactory loggerFactory, IDocumentStore store)
+        public RavenDBDeviceFlowStore(ILogger<RavenDBDeviceFlowStore> logger, IDocumentStore store)
         {
-            _logger = loggerFactory.CreateLogger<RavenDBDeviceFlowStore>();
-            _store = store;
+            _logger = logger ?? throw new ArgumentException("loggerFactory is required", nameof(logger));
+            _store = store ?? throw new ArgumentException("store is required", nameof(store));
         }
 
         public async Task<DeviceCode> FindByDeviceCodeAsync(string deviceCode)
