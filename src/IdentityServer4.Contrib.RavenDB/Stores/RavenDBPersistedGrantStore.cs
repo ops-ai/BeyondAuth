@@ -2,6 +2,7 @@
 using IdentityServer4.Stores;
 using IdentityServer4.Stores.Serialization;
 using Microsoft.Extensions.Logging;
+using Raven.Client;
 using Raven.Client.Documents;
 using System;
 using System.Collections.Generic;
@@ -106,6 +107,10 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             {
                 _logger.LogDebug($"Storing persisted grant {grant.Key}");
                 await session.StoreAsync(grant, $"PersistedGrants/{grant.Key}");
+
+                if (grant.Expiration.HasValue)
+                    session.Advanced.GetMetadataFor(grant)[Constants.Documents.Metadata.Expires] = grant.Expiration;
+
                 await session.SaveChangesAsync();
             }
         }
