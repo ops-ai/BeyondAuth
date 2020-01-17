@@ -1,10 +1,10 @@
 using Divergic.Logging.Xunit;
 using FluentAssertions;
 using IdentityServer4.Contrib.RavenDB.Stores;
+using IdentityServer4.Contrib.RavenDB.Tests.Common;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using Microsoft.Extensions.Logging;
-using Raven.TestDriver;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -14,7 +14,7 @@ using Xunit.Abstractions;
 
 namespace IdentityServer4.Contrib.RavenDB.Tests
 {
-    public class RavenDBDeviceCodeStoreTests : RavenTestDriver
+    public class RavenDBDeviceCodeStoreTests : RavenIdentityServerTestBase
     {
         protected readonly ILoggerFactory _loggerFactory;
         protected readonly IDeviceFlowStore _deviceFlowStore;
@@ -37,7 +37,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
                 Lifetime = 300,
                 IsAuthorized = false,
                 IsOpenId = true,
-                Subject = null,
+                Subject = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim> { new Claim("sub", "123") })),
                 RequestedScopes = new[] { "scope1", "scope2" }
             };
 
@@ -49,7 +49,9 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             foundData.Lifetime.Should().Be(data.Lifetime);
             foundData.IsAuthorized.Should().Be(data.IsAuthorized);
             foundData.IsOpenId.Should().Be(data.IsOpenId);
-            foundData.Subject.Should().Be(data.Subject);
+            foundData.Subject.Claims.Should().BeEquivalentTo(data.Subject.Claims, x => x.IgnoringCyclicReferences());
+            foundData.Subject.Identity.AuthenticationType.Should().BeEquivalentTo(data.Subject.Identity.AuthenticationType);
+            foundData.Subject.Identity.Name.Should().BeEquivalentTo(data.Subject.Identity.Name);
             foundData.RequestedScopes.Should().BeEquivalentTo(data.RequestedScopes);
         }
 
@@ -78,6 +80,36 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             foundData.IsAuthorized.Should().Be(data.IsAuthorized);
             foundData.IsOpenId.Should().Be(data.IsOpenId);
             foundData.Subject.Should().Be(data.Subject);
+            foundData.RequestedScopes.Should().BeEquivalentTo(data.RequestedScopes);
+        }
+
+        [Fact(DisplayName = "StoreDeviceAuthorizationAsync should persist data by device code with no subject")]
+        public async Task PersistByDeviceCodeNoSubject()
+        {
+            var deviceCode = Guid.NewGuid().ToString();
+            var userCode = Guid.NewGuid().ToString();
+            var data = new DeviceCode
+            {
+                ClientId = Guid.NewGuid().ToString(),
+                CreationTime = DateTime.UtcNow,
+                Lifetime = 300,
+                IsAuthorized = false,
+                IsOpenId = true,
+                Subject = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim> { new Claim("sub", "123") })),
+                RequestedScopes = new[] { "scope1", "scope2" }
+            };
+
+            await _deviceFlowStore.StoreDeviceAuthorizationAsync(deviceCode, userCode, data);
+            var foundData = await _deviceFlowStore.FindByDeviceCodeAsync(deviceCode);
+
+            foundData.ClientId.Should().Be(data.ClientId);
+            foundData.CreationTime.Should().Be(data.CreationTime);
+            foundData.Lifetime.Should().Be(data.Lifetime);
+            foundData.IsAuthorized.Should().Be(data.IsAuthorized);
+            foundData.IsOpenId.Should().Be(data.IsOpenId);
+            foundData.Subject.Claims.Should().BeEquivalentTo(data.Subject.Claims, x => x.IgnoringCyclicReferences());
+            foundData.Subject.Identity.AuthenticationType.Should().BeEquivalentTo(data.Subject.Identity.AuthenticationType);
+            foundData.Subject.Identity.Name.Should().BeEquivalentTo(data.Subject.Identity.Name);
             foundData.RequestedScopes.Should().BeEquivalentTo(data.RequestedScopes);
         }
 
@@ -123,6 +155,8 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             foundData.Subject.Identity.AuthenticationType.Should().BeEquivalentTo(updatedData.Subject.Identity.AuthenticationType);
             foundData.Subject.Identity.Name.Should().BeEquivalentTo(updatedData.Subject.Identity.Name);
             foundData.RequestedScopes.Should().BeEquivalentTo(updatedData.RequestedScopes);
+
+            await Assert.ThrowsAsync<KeyNotFoundException>(async () => await _deviceFlowStore.UpdateByUserCodeAsync("wrongcode", updatedData));
         }
 
         [Fact(DisplayName = "RemoveByDeviceCodeAsync should remove code")]
@@ -146,6 +180,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             var foundData = await _deviceFlowStore.FindByUserCodeAsync(userCode);
 
             foundData.Should().BeNull();
+            await Assert.ThrowsAsync<KeyNotFoundException>(async () => await _deviceFlowStore.RemoveByDeviceCodeAsync(deviceCode));
         }
 
         [Fact(DisplayName = "Parameter validation should trigger argument exceptions")]

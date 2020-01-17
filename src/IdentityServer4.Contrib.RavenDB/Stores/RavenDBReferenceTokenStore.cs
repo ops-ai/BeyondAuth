@@ -64,7 +64,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
         public async Task<string> StoreReferenceTokenAsync(Token token)
         {
-            if (token != null)
+            if (token == null)
                 throw new ArgumentException("token is required", nameof(token));
 
             using (var session = _store.OpenAsyncSession())
