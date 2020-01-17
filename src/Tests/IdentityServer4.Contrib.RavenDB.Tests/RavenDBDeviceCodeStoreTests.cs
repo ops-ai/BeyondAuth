@@ -22,7 +22,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         public RavenDBDeviceCodeStoreTests(ITestOutputHelper output)
         {
             _loggerFactory = LogFactory.Create(output);
-            _deviceFlowStore = new RavenDBDeviceFlowStore(_loggerFactory, GetDocumentStore());
+            _deviceFlowStore = new RavenDBDeviceFlowStore(_loggerFactory.CreateLogger<RavenDBDeviceFlowStore>(), GetDocumentStore());
         }
 
         [Fact(DisplayName = "StoreDeviceAuthorizationAsync should persist data by user code")]
@@ -146,6 +146,29 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             var foundData = await _deviceFlowStore.FindByUserCodeAsync(userCode);
 
             foundData.Should().BeNull();
+        }
+
+        [Fact(DisplayName = "Parameter validation should trigger argument exceptions")]
+        public async Task Validation()
+        {
+            using (var store = GetDocumentStore())
+            {
+                var deviceFlowStore = new RavenDBDeviceFlowStore(_loggerFactory.CreateLogger<RavenDBDeviceFlowStore>(), store);
+
+                Assert.Throws<ArgumentException>(() => new RavenDBDeviceFlowStore(null, store));
+                Assert.Throws<ArgumentException>(() => new RavenDBDeviceFlowStore(_loggerFactory.CreateLogger<RavenDBDeviceFlowStore>(), null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await deviceFlowStore.StoreDeviceAuthorizationAsync(null, "test", new DeviceCode { }));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await deviceFlowStore.StoreDeviceAuthorizationAsync("test", null, new DeviceCode { }));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await deviceFlowStore.StoreDeviceAuthorizationAsync("test", "test", null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await deviceFlowStore.FindByUserCodeAsync(null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await deviceFlowStore.FindByDeviceCodeAsync(null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await deviceFlowStore.RemoveByDeviceCodeAsync(null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await deviceFlowStore.StoreDeviceAuthorizationAsync(null, "code", new DeviceCode { }));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await deviceFlowStore.StoreDeviceAuthorizationAsync("code", null, new DeviceCode { }));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await deviceFlowStore.StoreDeviceAuthorizationAsync("code", "code", null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await deviceFlowStore.UpdateByUserCodeAsync(null, new DeviceCode { }));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await deviceFlowStore.UpdateByUserCodeAsync("code", null));
+            }
         }
     }
 }
