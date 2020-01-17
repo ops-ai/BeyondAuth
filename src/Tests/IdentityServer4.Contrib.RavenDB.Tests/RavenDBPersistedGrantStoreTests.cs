@@ -386,5 +386,24 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
             (await _refreshTokens.GetRefreshTokenAsync("key")).Lifetime.Should().Be(20);
             (await _referenceTokens.GetReferenceTokenAsync("key")).Lifetime.Should().Be(10);
         }
+
+        [Fact(DisplayName = "Parameter validation should trigger argument exceptions")]
+        public async Task Validation()
+        {
+            using (var store = GetDocumentStore())
+            {
+                Assert.Throws<ArgumentException>(() => new RavenDBPersistedGrantStore(new PersistentGrantSerializer(), null, store));
+                Assert.Throws<ArgumentException>(() => new RavenDBPersistedGrantStore(new PersistentGrantSerializer(), _loggerFactory.CreateLogger<RavenDBPersistedGrantStore>(), null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await _store.GetAllAsync(null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await _store.GetAsync(null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await _store.RemoveAllAsync("test", null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await _store.RemoveAllAsync(null, "test"));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await _store.RemoveAllAsync(null, "test", "test"));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await _store.RemoveAllAsync("test", null, "test"));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await _store.RemoveAllAsync("test", "test", null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await _store.RemoveAsync(null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await _store.StoreAsync(null));
+            }
+        }
     }
 }

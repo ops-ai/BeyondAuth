@@ -96,5 +96,22 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
                 Assert.NotNull(await consentStore.GetUserConsentAsync("test@test.com", "2"));
             }
         }
+
+        [Fact(DisplayName = "Parameter validation should trigger argument exceptions")]
+        public async Task Validation()
+        {
+            using (var store = GetDocumentStore())
+            {
+                var consentStore = new RavenDBUserConsentStore(_loggerFactory.CreateLogger<RavenDBUserConsentStore>(), store);
+
+                Assert.Throws<ArgumentException>(() => new RavenDBUserConsentStore(null, store));
+                Assert.Throws<ArgumentException>(() => new RavenDBUserConsentStore(_loggerFactory.CreateLogger<RavenDBUserConsentStore>(), null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await consentStore.GetUserConsentAsync(null, "client"));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await consentStore.GetUserConsentAsync("sub", null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await consentStore.RemoveUserConsentAsync(null, "client"));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await consentStore.RemoveUserConsentAsync("sub", null));
+                await Assert.ThrowsAsync<ArgumentException>(async () => await consentStore.StoreUserConsentAsync(null));
+            }
+        }
     }
 }

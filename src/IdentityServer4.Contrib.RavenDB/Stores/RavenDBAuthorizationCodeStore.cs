@@ -15,8 +15,8 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
         public RavenDBAuthorizationCodeStore(ILogger<RavenDBAuthorizationCodeStore> logger, IDocumentStore store)
         {
-            _logger = logger;
-            _store = store;
+            _logger = logger ?? throw new ArgumentException("loggerFactory is required", nameof(logger));
+            _store = store ?? throw new ArgumentException("store is required", nameof(store));
         }
 
         public async Task<AuthorizationCode> GetAuthorizationCodeAsync(string code)
