@@ -28,7 +28,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Loading refresh token {refreshTokenHandle}");
-                return await session.LoadAsync<RefreshToken>($"RefreshTokens/{refreshTokenHandle}");
+                return await session.LoadAsync<RefreshToken>($"RefreshTokens/{refreshTokenHandle}").ConfigureAwait(false);
             }
         }
 
@@ -41,7 +41,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             {
                 _logger.LogDebug($"Deleting refresh token {refreshTokenHandle}");
                 session.Delete($"RefreshTokens/{refreshTokenHandle}");
-                await session.SaveChangesAsync();
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -55,13 +55,13 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
             using (var session = _store.OpenAsyncSession())
             {
-                var token = await session.Query<RefreshToken>().FirstOrDefaultAsync(t => t.SubjectId.Equals(subjectId) && t.ClientId.Equals(clientId));
+                var token = await session.Query<RefreshToken>().FirstOrDefaultAsync(t => t.SubjectId.Equals(subjectId) && t.ClientId.Equals(clientId)).ConfigureAwait(false);
                 if (token == null)
                     return;
 
                 _logger.LogDebug($"Deleting refresh token with subjectId {subjectId} and clientId {clientId}");
                 session.Delete(token);
-                await session.SaveChangesAsync();
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -75,8 +75,8 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
                 var newToken = CryptoRandom.CreateUniqueId();
 
                 _logger.LogDebug($"Storing refresh token {newToken}");
-                await session.StoreAsync(refreshToken, $"RefreshTokens/{newToken}");
-                await session.SaveChangesAsync();
+                await session.StoreAsync(refreshToken, $"RefreshTokens/{newToken}").ConfigureAwait(false);
+                await session.SaveChangesAsync().ConfigureAwait(false);
 
                 return newToken;
             }
@@ -92,7 +92,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
             using (var session = _store.OpenAsyncSession())
             {
-                var token = await session.LoadAsync<RefreshToken>($"RefreshTokens/{handle}");
+                var token = await session.LoadAsync<RefreshToken>($"RefreshTokens/{handle}").ConfigureAwait(false);
                 if (token == null)
                     throw new KeyNotFoundException($"Refresh token with handle {handle} was not found");
 
@@ -102,7 +102,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
                 token.Lifetime = refreshToken.Lifetime;
                 token.Version = refreshToken.Version;
 
-                await session.SaveChangesAsync();
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
     }

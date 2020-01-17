@@ -29,7 +29,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
             using (var session = _store.OpenAsyncSession())
             {
-                return await session.LoadAsync<Consent>($"Consents/{Convert.ToBase64String(Encoding.UTF8.GetBytes(clientId))}-{Convert.ToBase64String(Encoding.UTF8.GetBytes(subjectId))}");
+                return await session.LoadAsync<Consent>($"Consents/{Convert.ToBase64String(Encoding.UTF8.GetBytes(clientId))}-{Convert.ToBase64String(Encoding.UTF8.GetBytes(subjectId))}").ConfigureAwait(false);
             }
         }
 
@@ -44,7 +44,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 session.Delete($"Consents/{Convert.ToBase64String(Encoding.UTF8.GetBytes(clientId))}-{Convert.ToBase64String(Encoding.UTF8.GetBytes(subjectId))}");
-                await session.SaveChangesAsync();
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
 
@@ -56,8 +56,8 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Storing consent for clientId {consent.ClientId} and subjectId {consent.SubjectId}");
-                await session.StoreAsync(consent, $"Consents/{Convert.ToBase64String(Encoding.UTF8.GetBytes(consent.ClientId))}-{Convert.ToBase64String(Encoding.UTF8.GetBytes(consent.SubjectId))}");
-                await session.SaveChangesAsync();
+                await session.StoreAsync(consent, $"Consents/{Convert.ToBase64String(Encoding.UTF8.GetBytes(consent.ClientId))}-{Convert.ToBase64String(Encoding.UTF8.GetBytes(consent.SubjectId))}").ConfigureAwait(false);
+                await session.SaveChangesAsync().ConfigureAwait(false);
             }
         }
     }
