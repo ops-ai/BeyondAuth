@@ -16,8 +16,8 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
 
         public RavenDBReferenceTokenStore(ILogger<RavenDBReferenceTokenStore> logger, IDocumentStore store)
         {
-            _logger = logger;
-            _store = store;
+            _logger = logger ?? throw new ArgumentException("loggerFactory is required", nameof(logger));
+            _store = store ?? throw new ArgumentException("store is required", nameof(store));
         }
 
         public async Task<Token> GetReferenceTokenAsync(string handle)

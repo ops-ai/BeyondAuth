@@ -19,8 +19,8 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
         public RavenDBPersistedGrantStore(IPersistentGrantSerializer serializer, ILogger<RavenDBPersistedGrantStore> logger, IDocumentStore store)
         {
             _serializer = serializer;
-            _logger = logger;
-            _store = store;
+            _logger = logger ?? throw new ArgumentException("loggerFactory is required", nameof(logger));
+            _store = store ?? throw new ArgumentException("store is required", nameof(store));
         }
 
         public async Task<IEnumerable<PersistedGrant>> GetAllAsync(string subjectId)
