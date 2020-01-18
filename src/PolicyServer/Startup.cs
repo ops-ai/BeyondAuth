@@ -31,7 +31,7 @@ namespace PolicyServer
         {
             services.Configure<ForwardedHeadersOptions>(options =>
             {
-                options.ForwardLimit = 2;
+                options.ForwardLimit = 1;
                 Configuration["ProxyNodes"]?.Split(';').ToList().ForEach(t =>
                 {
                     if (!string.IsNullOrEmpty(t))
