@@ -17,6 +17,17 @@ using HealthChecks.UI.Client;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Net;
 using IdentityServer4.Stores;
+using Authentication.Extensions;
+using IdentityServer4;
+using Newtonsoft.Json;
+using IdentityServer4.Stores.Serialization;
+using Microsoft.AspNetCore.Http;
+using System;
+using Microsoft.AspNetCore.DataProtection;
+using IdentityServer4.Services;
+using IdentityServer4.Contrib.RavenDB.Services;
+using IdentityServer4.Validation;
+using IdentityServer4.Contrib.RavenDB.Stores;
 
 namespace Authentication
 {
@@ -33,7 +44,7 @@ namespace Authentication
         {
             services.Configure<ForwardedHeadersOptions>(options =>
             {
-                options.ForwardLimit = 2;
+                options.ForwardLimit = 1;
                 Configuration["ProxyNodes"]?.Split(';').ToList().ForEach(t =>
                 {
                     if (!string.IsNullOrEmpty(t))
@@ -42,6 +53,27 @@ namespace Authentication
             });
 
             services.AddCorrelationId();
+
+            services.AddAntiforgery(options =>
+            {
+                options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+                options.Cookie.HttpOnly = true;
+                options.Cookie.SameSite = SameSiteMode.Strict;
+            });
+
+            services.AddResponseCaching(options =>
+            {
+                options.UseCaseSensitivePaths = false;
+            });
+
+            var dataProtection = services.AddDataProtection()
+                .SetApplicationName("auth.ops.ai");
+
+            if (!string.IsNullOrEmpty(Configuration["DataProtection:KeyIdentifier"]))
+                dataProtection
+                    .ProtectKeysWithAzureKeyVault(Configuration["DataProtection:KeyIdentifier"], Configuration["DataProtection:ClientId"], Configuration["DataProtection:ClientSecret"])
+                    .PersistKeysToAzureBlobStorage(new Uri(Configuration["DataProtection:StorageUri"]));
+
 
             services.AddDbContext<ApplicationDbContext>(options =>
                 options.UseSqlServer(
@@ -52,16 +84,29 @@ namespace Authentication
 
             services.AddControllersWithViews();
             services.AddRazorPages();
+            services.AddSameSiteCookiePolicy();
 
-            services.AddSingleton((ctx) => new DocumentStore
+            services.AddSingleton((ctx) =>
             {
-                Urls = new[] { Configuration["Raven:Url"] },
-                Database = Configuration["Raven:Database"],
-                Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null
-            }.Initialize());
+                var store = new DocumentStore
+                {
+                    Urls = new[] { Configuration["Raven:Url"] },
+                    Database = Configuration["Raven:Database"],
+                    Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null
+                };
+                store.Conventions.CustomizeJsonSerializer += (JsonSerializer serializer) =>
+                {
+                    serializer.Converters.Add(new ClaimConverter());
+                    serializer.Converters.Add(new ClaimsPrincipalConverter());
+                };
+                return store.Initialize();
+            });
 
             services.AddHealthChecks()
                 .AddRavenDB(setup => { setup.Urls = new[] { Configuration["Raven:Url"] }; setup.Database = Configuration["Raven:Database"]; setup.Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null; }, "ravendb");
+
+            //services.AddTransient<IRedirectUriValidator, DemoRedirectValidator>();
+            //services.AddTransient<ICorsPolicyService, CorsPolicyService>();
 
             var builder = services.AddIdentityServer(options =>
             {
@@ -70,22 +115,26 @@ namespace Authentication
                 options.Events.RaiseFailureEvents = true;
                 options.Events.RaiseSuccessEvents = true;
             })
-                .AddInMemoryIdentityResources(Config.Ids)
-                .AddInMemoryApiResources(Config.Apis)
-                .AddInMemoryClients(Config.Clients)
+                //.AddSigningCredential()
+                .AddPersistedGrantStore<RavenDBPersistedGrantStore>()
+                .AddClientStore<RavenDBClientStore>()
+                .AddResourceStore<RavenDBResourceStore>()
+                .AddCorsPolicyService<CorsPolicyService>()
                 .AddAspNetIdentity<ApplicationUser>();
 
             builder.AddDeveloperSigningCredential();
 
-            services.AddAuthentication()
-                .AddGoogle(options =>
-                {
-                    // register your IdentityServer with Google at https://console.developers.google.com
-                    // enable the Google+ API
-                    // set the redirect URI to http://localhost:5000/signin-google
-                    options.ClientId = "copy client ID from Google here";
-                    options.ClientSecret = "copy client secret from Google here";
-                });
+            services.AddAuthentication();
+                //.AddGoogle(options =>
+                //{
+                //    options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+
+                //    // register your IdentityServer with Google at https://console.developers.google.com
+                //    // enable the Google+ API
+                //    // set the redirect URI to http://localhost:5000/signin-google
+                //    options.ClientId = Configuration["ExternalIdps:Google:ClientId"];
+                //    options.ClientSecret = Configuration["ExternalIdps:Google:ClientSecret"];
+                //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -102,6 +151,7 @@ namespace Authentication
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+            app.UseCookiePolicy();
             app.UseHttpsRedirection();
             app.UseStaticFiles();
 
