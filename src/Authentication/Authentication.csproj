@@ -56,6 +56,8 @@
 
 
   <ItemGroup>
+    <PackageReference Include="AspNetCore.HealthChecks.AzureKeyVault" Version="3.0.1" />
+    <PackageReference Include="AspNetCore.HealthChecks.OpenIdConnectServer" Version="3.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.RavenDB" Version="3.0.0" />
     <PackageReference Include="AspNetCore.HealthChecks.UI" Version="3.0.9" />
     <PackageReference Include="Autofac" Version="4.9.4" />
@@ -82,6 +84,7 @@
     <PackageReference Include="RavenDB.Client" Version="4.2.6" />
     <PackageReference Include="scientist" Version="2.0.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
+    <PackageReference Include="Twilio" Version="5.37.2" />
     <PackageReference Include="VaultSharp" Version="0.11.1002" />
   </ItemGroup>
 
