@@ -106,10 +106,12 @@ namespace Authentication
                 return store.Initialize();
             });
 
-            services.AddHealthChecks()
+            var healthChecks = services.AddHealthChecks()
                 .AddRavenDB(setup => { setup.Urls = new[] { Configuration["Raven:Url"] }; setup.Database = Configuration["Raven:Database"]; setup.Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null; }, "ravendb")
-                .AddIdentityServer(new Uri(Configuration["BaseUrl"]), "openid-connect")
-                .AddAzureKeyVault(options =>
+                .AddIdentityServer(new Uri(Configuration["BaseUrl"]), "openid-connect");
+
+            if (!string.IsNullOrEmpty(Configuration["DataProtection:KeyIdentifier"]))
+                healthChecks.AddAzureKeyVault(options =>
                 {
                     options.UseClientSecrets(Configuration["DataProtection:ClientId"], Configuration["DataProtection:ClientSecret"]);
                     options.UseKeyVaultUrl(Configuration["DataProtection:VaultUrl"]);
