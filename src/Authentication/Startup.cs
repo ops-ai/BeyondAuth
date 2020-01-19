@@ -28,6 +28,10 @@ using IdentityServer4.Services;
 using IdentityServer4.Contrib.RavenDB.Services;
 using IdentityServer4.Validation;
 using IdentityServer4.Contrib.RavenDB.Stores;
+using JSNLog;
+using Microsoft.Extensions.Logging;
+using IdentityServer.LdapExtension.Extensions;
+using IdentityServer.LdapExtension.UserModel;
 
 namespace Authentication
 {
@@ -120,7 +124,8 @@ namespace Authentication
                 .AddClientStore<RavenDBClientStore>()
                 .AddResourceStore<RavenDBResourceStore>()
                 .AddCorsPolicyService<CorsPolicyService>()
-                .AddAspNetIdentity<ApplicationUser>();
+                .AddLdapUsers<OpenLdapAppUser>(Configuration.GetSection("IdentityServerLdap"), UserStore.InMemory)
+                /*.AddAspNetIdentity<ApplicationUser>()*/;
 
             builder.AddDeveloperSigningCredential();
 
@@ -138,7 +143,7 @@ namespace Authentication
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -153,6 +158,10 @@ namespace Authentication
             }
             app.UseCookiePolicy();
             app.UseHttpsRedirection();
+
+            var jsnlogConfiguration = new JsnlogConfiguration();
+            app.UseJSNLog(new LoggingAdapter(loggerFactory), jsnlogConfiguration);
+
             app.UseStaticFiles();
 
             app.UseForwardedHeaders();
