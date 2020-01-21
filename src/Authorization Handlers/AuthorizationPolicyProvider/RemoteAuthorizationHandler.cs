@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Http;
 using PolicyServer.Core.Entities;
 using System.Linq;
 
-namespace AuthorizationPolicyProvider
+namespace BeyondAuth.PolicyProvider
 {
     public class RemoteAuthorizationHandler : IAuthorizationHandler
     {

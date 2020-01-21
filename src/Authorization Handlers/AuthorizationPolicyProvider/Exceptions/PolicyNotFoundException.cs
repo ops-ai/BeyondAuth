@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace AuthorizationPolicyProvider.Exceptions
+namespace BeyondAuth.PolicyProvider.Exceptions
 {
     [Serializable]
     public class PolicyNotFoundException : Exception

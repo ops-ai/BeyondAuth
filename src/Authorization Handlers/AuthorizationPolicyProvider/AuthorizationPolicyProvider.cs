@@ -4,9 +4,9 @@ using PolicyServer.Models;
 using System.Net.Http;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
-using AuthorizationPolicyProvider.Exceptions;
+using BeyondAuth.PolicyProvider.Exceptions;
 
-namespace AuthorizationPolicyProvider
+namespace BeyondAuth.PolicyProvider
 {
     public class AuthorizationPolicyProvider : DefaultAuthorizationPolicyProvider
     {
