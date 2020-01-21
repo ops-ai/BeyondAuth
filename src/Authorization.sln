@@ -44,13 +44,17 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authorization Handlers", "A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizationPolicyProvider", "Authorization Handlers\AuthorizationPolicyProvider\AuthorizationPolicyProvider.csproj", "{321484F9-D797-4334-8079-92145751C83A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "PolicyServer.Core", "PolicyServer.Core\PolicyServer.Core.csproj", "{1CC84BD3-5297-471C-BEE7-41432E61817A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PolicyServer.Core", "PolicyServer.Core\PolicyServer.Core.csproj", "{1CC84BD3-5297-471C-BEE7-41432E61817A}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuditServer", "AuditServer\AuditServer.csproj", "{64408365-EC62-4AF4-BF01-758BBD22093C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuditServer", "AuditServer\AuditServer.csproj", "{64408365-EC62-4AF4-BF01-758BBD22093C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AuditServer.Tests", "Tests\AuditServer.Tests\AuditServer.Tests.csproj", "{EF82BD7D-7E61-4CAD-9ECB-AD9AB428DE8C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuditServer.Tests", "Tests\AuditServer.Tests\AuditServer.Tests.csproj", "{EF82BD7D-7E61-4CAD-9ECB-AD9AB428DE8C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityServer4.Contrib.RavenDB.Tests", "Tests\IdentityServer4.Contrib.RavenDB.Tests\IdentityServer4.Contrib.RavenDB.Tests.csproj", "{E1D106FA-50C4-419B-9A92-EFDE80909519}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer4.Contrib.RavenDB.Tests", "Tests\IdentityServer4.Contrib.RavenDB.Tests\IdentityServer4.Contrib.RavenDB.Tests.csproj", "{E1D106FA-50C4-419B-9A92-EFDE80909519}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadiusServer", "RadiusServer\RadiusServer.csproj", "{2135C8D8-C516-4F1A-9EC2-C98A85855C17}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadiusServer.Tests", "Tests\RadiusServer.Tests\RadiusServer.Tests.csproj", "{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -118,6 +122,14 @@ Global
 		{E1D106FA-50C4-419B-9A92-EFDE80909519}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E1D106FA-50C4-419B-9A92-EFDE80909519}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E1D106FA-50C4-419B-9A92-EFDE80909519}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2135C8D8-C516-4F1A-9EC2-C98A85855C17}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2135C8D8-C516-4F1A-9EC2-C98A85855C17}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2135C8D8-C516-4F1A-9EC2-C98A85855C17}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2135C8D8-C516-4F1A-9EC2-C98A85855C17}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -131,9 +143,10 @@ Global
 		{321484F9-D797-4334-8079-92145751C83A} = {84BCB7A7-6678-441F-B075-15D4A7E04ACB}
 		{EF82BD7D-7E61-4CAD-9ECB-AD9AB428DE8C} = {F697BF7F-ED3E-4571-A176-AA937EE763FF}
 		{E1D106FA-50C4-419B-9A92-EFDE80909519} = {F697BF7F-ED3E-4571-A176-AA937EE763FF}
+		{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E} = {F697BF7F-ED3E-4571-A176-AA937EE763FF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
 		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
+		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
 	EndGlobalSection
 EndGlobal
