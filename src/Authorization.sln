@@ -42,7 +42,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizationServer.Tests",
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authorization Handlers", "Authorization Handlers", "{84BCB7A7-6678-441F-B075-15D4A7E04ACB}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuthorizationPolicyProvider", "Authorization Handlers\AuthorizationPolicyProvider\AuthorizationPolicyProvider.csproj", "{321484F9-D797-4334-8079-92145751C83A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.PolicyProvider", "Authorization Handlers\AuthorizationPolicyProvider\BeyondAuth.PolicyProvider.csproj", "{321484F9-D797-4334-8079-92145751C83A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PolicyServer.Core", "PolicyServer.Core\PolicyServer.Core.csproj", "{1CC84BD3-5297-471C-BEE7-41432E61817A}"
 EndProject
@@ -52,9 +52,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuditServer.Tests", "Tests\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityServer4.Contrib.RavenDB.Tests", "Tests\IdentityServer4.Contrib.RavenDB.Tests\IdentityServer4.Contrib.RavenDB.Tests.csproj", "{E1D106FA-50C4-419B-9A92-EFDE80909519}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadiusServer", "RadiusServer\RadiusServer.csproj", "{2135C8D8-C516-4F1A-9EC2-C98A85855C17}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadiusServer", "RadiusServer\RadiusServer.csproj", "{2135C8D8-C516-4F1A-9EC2-C98A85855C17}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RadiusServer.Tests", "Tests\RadiusServer.Tests\RadiusServer.Tests.csproj", "{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadiusServer.Tests", "Tests\RadiusServer.Tests\RadiusServer.Tests.csproj", "{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -146,7 +146,7 @@ Global
 		{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E} = {F697BF7F-ED3E-4571-A176-AA937EE763FF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
 		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
+		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
 	EndGlobalSection
 EndGlobal

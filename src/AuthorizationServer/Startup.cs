@@ -2,9 +2,11 @@
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using BeyondAuth.PolicyProvider;
 using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
 using IdentityServer4.AccessTokenValidation;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
@@ -62,6 +64,9 @@ namespace AuthorizationServer
             services.AddHealthChecks()
                 .AddRavenDB(setup => { setup.Urls = new[] { Configuration["Raven:Url"] }; setup.Database = Configuration["Raven:Database"]; setup.Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null; }, "ravendb");
 
+            services.AddAuthorization();
+            services.AddTransient<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
+            services.AddTransient<IAuthorizationHandler, RemoteAuthorizationHandler>();
 
             services.AddCorrelationId();
 
