@@ -56,6 +56,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadiusServer", "RadiusServe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadiusServer.Tests", "Tests\RadiusServer.Tests\RadiusServer.Tests.csproj", "{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondAuth.Web", "BeyondAuth.Web\BeyondAuth.Web.csproj", "{1D217DD2-3463-45D8-9DC2-A303C5B72797}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -130,6 +132,10 @@ Global
 		{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1D217DD2-3463-45D8-9DC2-A303C5B72797}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1D217DD2-3463-45D8-9DC2-A303C5B72797}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1D217DD2-3463-45D8-9DC2-A303C5B72797}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1D217DD2-3463-45D8-9DC2-A303C5B72797}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
