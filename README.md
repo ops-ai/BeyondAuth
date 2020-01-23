@@ -10,6 +10,25 @@
 
 # How to build
 
+## On windows to build the front-end
+Requirement due to dependency on [node-gyp](https://github.com/nodejs/node-gyp)
+
+### Option 1
+install Visual C++ Build Tools including Vicual C++ build tools
+run `npm config set msvs_version 2019`
+
+### Option 2
+```
+npm install --global windows-build-tools
+
+```
+
+## On Unix to build the front-end install the following
+Python v2.7, v3.5, v3.6, or v3.7
+make
+A proper C/C++ compiler toolchain, like GCC
+
+
 
 # Documentation
 
