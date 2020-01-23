@@ -14,18 +14,33 @@
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
             "progress": false,
+            "rebaseRootRelativeCssUrls": true,
             "extractCss": true,
             "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.ts",
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.app.json",
-            "assets": ["src/assets"],
+            "assets": [
+              "src/assets",
+              "src/favicon.ico",
+              "src/favicon.png",
+              {
+                "glob": "**/*",
+                "input": "node_modules/leaflet/dist/images",
+                "output": "/assets/img/markers"
+              }
+            ],
             "styles": [
               "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "src/app/@theme/styles/styles.scss",
               "src/styles.css"
             ],
-            "scripts": []
+            "scripts": [
+              "node_modules/echarts/dist/echarts.min.js",
+              "node_modules/echarts/dist/extension/bmap.min.js",
+              "node_modules/chart.js/dist/Chart.min.js"
+            ]
           },
           "configurations": {
             "production": {
@@ -71,9 +86,27 @@
             "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.spec.json",
             "karmaConfig": "src/karma.conf.js",
-            "styles": ["src/styles.css"],
-            "scripts": [],
-            "assets": ["src/assets"]
+            "styles": [
+              "node_modules/bootstrap/dist/css/bootstrap.min.css",
+              "src/app/@theme/styles/styles.scss",
+              "src/styles.css"
+            ],
+            "scripts": [
+              "node_modules/pace-js/pace.min.js",
+              "node_modules/echarts/dist/echarts.min.js",
+              "node_modules/echarts/dist/extension/bmap.min.js",
+              "node_modules/chart.js/dist/Chart.min.js"
+            ],
+            "assets": [
+              "src/assets",
+              "src/favicon.ico",
+              "src/favicon.png",
+              {
+                "glob": "**/*",
+                "input": "node_modules/leaflet/dist/images",
+                "output": "/assets/img/markers"
+              }
+            ]
           }
         },
         "lint": {
