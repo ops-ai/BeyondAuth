@@ -6,6 +6,8 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
 COPY ["AuditServer/AuditServer.csproj", "AuditServer/"]
+COPY ["Blockchain/Blockchain.csproj", "Blockchain/"]
+COPY ["Cryptography/Cryptography.csproj", "Cryptography/"]
 RUN dotnet restore "AuditServer/AuditServer.csproj"
 COPY . .
 WORKDIR "/src/AuditServer"

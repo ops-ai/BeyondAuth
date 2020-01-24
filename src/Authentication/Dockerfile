@@ -1,3 +1,5 @@
+#See https://aka.ms/containerfastmode to understand how Visual Studio uses this Dockerfile to build your images for faster debugging.
+
 FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
 WORKDIR /app
 EXPOSE 80
@@ -6,6 +8,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
 COPY ["Authentication/Authentication.csproj", "Authentication/"]
+COPY ["IdentityServer4.Contrib.RavenDB/IdentityServer4.Contrib.RavenDB.csproj", "IdentityServer4.Contrib.RavenDB/"]
 RUN dotnet restore "Authentication/Authentication.csproj"
 COPY . .
 WORKDIR "/src/Authentication"

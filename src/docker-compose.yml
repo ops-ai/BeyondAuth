@@ -1,0 +1,41 @@
+version: '3.4'
+
+services:
+  authentication:
+    image: ${DOCKER_REGISTRY-}authentication
+    build:
+      context: .
+      dockerfile: Authentication/Dockerfile
+
+  policyserver:
+    image: ${DOCKER_REGISTRY-}policyserver
+    build:
+      context: .
+      dockerfile: PolicyServer/Dockerfile
+
+  authorizationserver:
+    image: ${DOCKER_REGISTRY-}authorizationserver
+    build:
+      context: .
+      dockerfile: AuthorizationServer/Dockerfile
+
+  auditserver:
+    image: ${DOCKER_REGISTRY-}auditserver
+    build:
+      context: .
+      dockerfile: AuditServer/Dockerfile
+
+  beyondauth.web:
+    image: ${DOCKER_REGISTRY-}beyondauthweb
+    build:
+      context: .
+      dockerfile: BeyondAuth.Web/Dockerfile
+
+  radiusserver:
+    image: ${DOCKER_REGISTRY-}radiusserver
+    build:
+      context: .
+      dockerfile: RadiusServer/Dockerfile
+
+
+
