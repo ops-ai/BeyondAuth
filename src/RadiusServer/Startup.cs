@@ -11,6 +11,7 @@ using System.IO;
 using Microsoft.Extensions.Logging;
 using Flexinets.Net;
 using Microsoft.Extensions.Configuration;
+using Autofac;
 
 namespace RadiusService
 {
@@ -23,6 +24,8 @@ namespace RadiusService
 
         public IConfiguration Configuration { get; }
 
+        public ILifetimeScope AutofacContainer { get; private set; }
+
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
@@ -31,7 +34,7 @@ namespace RadiusService
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, LoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             var logger = loggerFactory.CreateLogger<Startup>();
             if (env.IsDevelopment())
@@ -42,8 +45,8 @@ namespace RadiusService
             app.UseRouting();
 
             logger.LogInformation("Reading configuration");
-            var path = Path.GetDirectoryName(AppDomain.CurrentDomain.BaseDirectory) + "\\dictionary";
-            var dictionary = new RadiusDictionary(path, loggerFactory.CreateLogger<RadiusDictionary>());
+            
+            var dictionary = new RadiusDictionary("radius.dictionary", loggerFactory.CreateLogger<RadiusDictionary>());
             logger.LogInformation("Configuration read");
 
             var radiusPacketParser = new RadiusPacketParser(loggerFactory.CreateLogger<RadiusPacketParser>(), dictionary);
