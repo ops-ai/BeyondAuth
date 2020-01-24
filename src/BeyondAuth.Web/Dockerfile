@@ -3,6 +3,10 @@ WORKDIR /app
 EXPOSE 80
 EXPOSE 443
 
+RUN apt-get update -y
+RUN curl -sL https://deb.nodesource.com/setup_10.x | bash --debug
+RUN apt-get install nodejs -yq
+
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
 COPY ["BeyondAuth.Web/BeyondAuth.Web.csproj", "BeyondAuth.Web/"]

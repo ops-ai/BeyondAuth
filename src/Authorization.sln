@@ -56,7 +56,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadiusServer", "RadiusServe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadiusServer.Tests", "Tests\RadiusServer.Tests\RadiusServer.Tests.csproj", "{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondAuth.Web", "BeyondAuth.Web\BeyondAuth.Web.csproj", "{1D217DD2-3463-45D8-9DC2-A303C5B72797}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.Web", "BeyondAuth.Web\BeyondAuth.Web.csproj", "{1D217DD2-3463-45D8-9DC2-A303C5B72797}"
+EndProject
+Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{8CE5014B-92D4-4DDE-A130-9A5856047B3E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -136,6 +138,10 @@ Global
 		{1D217DD2-3463-45D8-9DC2-A303C5B72797}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1D217DD2-3463-45D8-9DC2-A303C5B72797}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1D217DD2-3463-45D8-9DC2-A303C5B72797}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8CE5014B-92D4-4DDE-A130-9A5856047B3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8CE5014B-92D4-4DDE-A130-9A5856047B3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8CE5014B-92D4-4DDE-A130-9A5856047B3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8CE5014B-92D4-4DDE-A130-9A5856047B3E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -152,7 +158,7 @@ Global
 		{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E} = {F697BF7F-ED3E-4571-A176-AA937EE763FF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
 		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
+		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
 	EndGlobalSection
 EndGlobal

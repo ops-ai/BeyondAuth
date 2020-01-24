@@ -1,0 +1,72 @@
+version: '3.4'
+
+services:
+  authentication:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/beyondauth.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=c582b846-0fef-4144-b28a-9c343644768f
+    ports:
+      - "5001:443"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  policyserver:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/beyondauth.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=c582b846-0fef-4144-b28a-9c343644768f
+    ports:
+      - "5002:443"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  authorizationserver:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/beyondauth.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=c582b846-0fef-4144-b28a-9c343644768f
+    ports:
+      - "5003:443"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  auditserver:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/beyondauth.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=c582b846-0fef-4144-b28a-9c343644768f
+    ports:
+      - "5004:443"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  beyondauth.web:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/beyondauth.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=c582b846-0fef-4144-b28a-9c343644768f
+    ports:
+      - "5005:443"
+    volumes:
+      - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
+      - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+
+  radiusserver:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/beyondauth.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=c582b846-0fef-4144-b28a-9c343644768f
+    ports:
+      - "5006:443"
+
