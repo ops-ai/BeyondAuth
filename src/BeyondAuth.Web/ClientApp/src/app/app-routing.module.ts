@@ -10,12 +10,8 @@ import {
 } from '@nebular/auth';
 
 const routes: Routes = [
-  //{
-  //  path: 'dashboard',
-  //  component: DashboardComponent,
-  //},
   {
-    path: 'pages',
+    path: 'app',
     loadChildren: () => import('./pages/pages.module')
       .then(m => m.PagesModule),
   },
@@ -49,8 +45,8 @@ const routes: Routes = [
       },
     ],
   },
-  { path: '', redirectTo: 'pages', pathMatch: 'full' },
-  { path: '**', redirectTo: 'pages' },
+  { path: '', redirectTo: 'app', pathMatch: 'full' },
+  { path: '**', redirectTo: 'app' },
 ];
 
 const config: ExtraOptions = {
