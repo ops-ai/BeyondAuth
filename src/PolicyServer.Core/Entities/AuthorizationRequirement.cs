@@ -19,6 +19,11 @@ namespace PolicyServer.Core.Entities
         public abstract string Name { get; }
 
         /// <summary>
+        /// Minimum version of the requirement to verify against
+        /// </summary>
+        public string MinVer { get; }
+
+        /// <summary>
         /// Returns the requirement name and class type
         /// </summary>
         /// <returns></returns>
