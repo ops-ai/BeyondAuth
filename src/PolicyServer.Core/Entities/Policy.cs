@@ -25,6 +25,11 @@ namespace PolicyServer.Core.Entities
         public string Description { get; set; }
 
         /// <summary>
+        /// The resolution of this policy must be committed to the audit server
+        /// </summary>
+        public bool AuditableEvent { get; set; }
+
+        /// <summary>
         /// Authentication schemes it applies to
         /// </summary>
         public List<string> AuthenticationSchemes { get; } = new List<string>();
@@ -33,5 +38,15 @@ namespace PolicyServer.Core.Entities
         /// List of requirements the policy demands
         /// </summary>
         public List<AuthorizationRequirement> Requirements { get; set; } = new List<AuthorizationRequirement>();
+
+        /// <summary>
+        /// Type of policy. Ex: Named vs criteria-based
+        /// </summary>
+        public PolicyTypes PolicyType { get; set; }
+
+        /// <summary>
+        /// Criteria the protected resource must match for this policy to apply
+        /// </summary>
+        public List<KeyValuePair<string, string>> Criteria { get; set; }
     }
 }

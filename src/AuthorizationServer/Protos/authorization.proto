@@ -24,6 +24,7 @@ message AuthorizationRequest {
   }
   repeated Requirement requirements = 6;
   string nonce = 7;
+  bool auditableEvent = 8;
 }
 
 // The response message containing the authorization decision.
