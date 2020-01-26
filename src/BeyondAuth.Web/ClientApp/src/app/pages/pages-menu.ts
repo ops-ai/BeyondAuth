@@ -2,19 +2,97 @@ import { NbMenuItem } from '@nebular/theme';
 
 export const MENU_ITEMS: NbMenuItem[] = [
   {
-    title: 'E-commerce',
-    icon: 'shopping-cart-outline',
+    title: 'Overview',
+    icon: 'activity-outline',
     link: '/pages/dashboard',
     home: true,
   },
   {
-    title: 'IoT Dashboard',
-    icon: 'home-outline',
-    link: '/pages/iot-dashboard',
+    title: 'AUTHORIZATION',
+    group: true,
   },
   {
-    title: 'FEATURES',
+    title: 'Policies',
+    icon: 'shield',
+    link: '/pages/policies',
+  },
+  {
+    title: 'Apps & Devices',
+    icon: 'app-store',
+    link: '/pages/apps',
+  },
+  {
+    title: 'Resolvers',
+    icon: 'fist-raised',
+    link: '/pages/resolvers',
+    children: [
+      {
+        title: 'Groups',
+        link: '/pages/layout/stepper',
+      },
+    ]
+  },
+  {
+    title: 'AUTHENTICATION',
     group: true,
+  },
+  {
+    title: 'Overview',
+    icon: 'chart-bar',
+    link: '/pages/directories',
+  },
+  {
+    title: 'Directories',
+    icon: 'database',
+    link: '/pages/directories',
+  },
+  {
+    title: 'Clients',
+    icon: 'openid',
+    link: '/pages/directories',
+  },
+  {
+    title: 'APIs',
+    icon: 'microchip',
+    link: '/pages/directories',
+  },
+  {
+    title: 'Users',
+    icon: 'people',
+    link: '/pages/users',
+  },
+  {
+    title: 'AUDIT',
+    group: true,
+  },
+  {
+    title: 'Overview',
+    icon: 'home-outline',
+    link: '/pages/audit',
+  },
+  {
+    title: 'Reports',
+    icon: 'home-outline',
+    link: '/pages/audit-reports',
+  },
+  {
+    title: 'Settings',
+    icon: 'home-outline',
+    link: '/pages/audit-settings',
+  },
+  {
+    title: 'Organization',
+    group: true,
+  },
+  {
+    title: 'Org Settings',
+    icon: 'home-outline',
+    link: '/pages/org-settings',
+  },
+  {
+    title: 'Support',
+    icon: 'phone-alt',
+    link: '/pages/support',
   },
   {
     title: 'Layout',
