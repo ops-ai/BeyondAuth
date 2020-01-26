@@ -59,6 +59,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.Web", "BeyondAut
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{8CE5014B-92D4-4DDE-A130-9A5856047B3E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondAuth.Acl", "Authorization Handlers\BeyondAuth.Acl\BeyondAuth.Acl.csproj", "{2CD9342E-4D1D-4CBF-83A5-AA3EECE285CC}"
+EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bridges", "Bridges", "{01BEDBC1-C476-492D-861E-6A3273F8D045}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadiusServer", "Bridges\RadiusServer\RadiusServer.csproj", "{900AF3CC-ED90-4BBB-9F90-71C32D25835B}"
