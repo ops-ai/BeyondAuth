@@ -67,6 +67,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadiusServer", "Bridges\Rad
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiameterServer", "Bridges\DiameterServer\DiameterServer.csproj", "{563D0471-337F-4316-A83E-DE24A0F95A8D}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondAuth.RelatedDataValidation", "Authorization Handlers\BeyondAuth.RelatedDataValidation\BeyondAuth.RelatedDataValidation.csproj", "{19FA5418-A0F5-4C41-8F50-ACB88A782286}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
