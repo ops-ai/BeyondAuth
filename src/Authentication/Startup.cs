@@ -1,4 +1,3 @@
-using Authentication.Data;
 using Authentication.Models;
 using Autofac;
 using CorrelationId.DependencyInjection;
@@ -6,7 +5,6 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
@@ -16,17 +14,13 @@ using System.Security.Cryptography.X509Certificates;
 using HealthChecks.UI.Client;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using System.Net;
-using IdentityServer4.Stores;
 using Authentication.Extensions;
-using IdentityServer4;
 using Newtonsoft.Json;
 using IdentityServer4.Stores.Serialization;
 using Microsoft.AspNetCore.Http;
 using System;
 using Microsoft.AspNetCore.DataProtection;
-using IdentityServer4.Services;
 using IdentityServer4.Contrib.RavenDB.Services;
-using IdentityServer4.Validation;
 using IdentityServer4.Contrib.RavenDB.Stores;
 using JSNLog;
 using Microsoft.Extensions.Logging;
@@ -78,12 +72,7 @@ namespace Authentication
                     .ProtectKeysWithAzureKeyVault(Configuration["DataProtection:KeyIdentifier"], Configuration["DataProtection:ClientId"], Configuration["DataProtection:ClientSecret"])
                     .PersistKeysToAzureBlobStorage(new Uri(Configuration["DataProtection:StorageUri"]));
 
-
-            services.AddDbContext<ApplicationDbContext>(options =>
-                options.UseSqlServer(
-                    Configuration.GetConnectionString("DefaultConnection")));
             services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddEntityFrameworkStores<ApplicationDbContext>()
                 .AddDefaultTokenProviders();
 
             services.AddControllersWithViews();
