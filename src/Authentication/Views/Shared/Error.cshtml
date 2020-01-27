@@ -1,4 +1,4 @@
-@model ErrorViewModel
+@model Authentication.Models.ErrorViewModel
 
 @{
     var error = Model?.Error?.Error;
@@ -8,13 +8,13 @@
 
 <div class="error-page">
     <div class="page-header">
-        <h1>Error</h1>
+        <h1>Oh no!</h1>
     </div>
 
     <div class="row">
         <div class="col-sm-6">
             <div class="alert alert-danger">
-                Sorry, there was an error
+                Looks like something unexpected happend. Give us a few minutes to fix it and try again or shoot us an email.
 
                 @if (error != null)
                 {
@@ -35,6 +35,15 @@
             {
                 <div class="request-id">Request Id: @request_id</div>
             }
+            @if (User.Identity.Name != null)
+            {
+                <p>Email address: @User.Identity.Name</p>
+            }
+            <pre>@Model.Version @DateTime.UtcNow.ToString("yyyy-MM-ddTH:mm:ss.fffZ")</pre>
+        </div>
+        <div class="col-sm-6">
+            <a class="btn btn-full btn-default" href="/">Return Home</a>
+            <a class="btn btn-full btn-default" href="mailto:@Model.SupportEmail">Contact Support</a>
         </div>
     </div>
 </div>
