@@ -19,7 +19,6 @@
 
   <ItemGroup>
     <None Include="compilerconfig.json" />
-    <None Include="Views\Home\Index.cshtml" />
     <None Include="Views\Home\Privacy.cshtml" />
     <None Include="Views\Shared\Error.cshtml" />
     <None Include="Views\Shared\_Layout.cshtml" />
@@ -87,11 +86,6 @@
     <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
     <PackageReference Include="Twilio" Version="5.37.2" />
     <PackageReference Include="VaultSharp" Version="0.11.1002" />
-  </ItemGroup>
-
-
-  <ItemGroup>
-    <Folder Include="Controllers\" />
   </ItemGroup>
 
 
