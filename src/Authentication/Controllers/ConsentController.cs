@@ -5,6 +5,7 @@
 using Authentication.Extensions;
 using Authentication.Filters;
 using Authentication.Models.Consent;
+using Authentication.Options;
 using IdentityServer4.Events;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
@@ -13,6 +14,7 @@ using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -30,19 +32,22 @@ namespace Authentication.Controllers
         private readonly IResourceStore _resourceStore;
         private readonly IEventService _events;
         private readonly ILogger<ConsentController> _logger;
+        private readonly ConsentOptions _consentOptions;
 
         public ConsentController(
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IResourceStore resourceStore,
             IEventService events,
-            ILogger<ConsentController> logger)
+            ILogger<ConsentController> logger,
+            IOptionsMonitor<ConsentOptions> consentOptions)
         {
             _interaction = interaction;
             _clientStore = clientStore;
             _resourceStore = resourceStore;
             _events = events;
             _logger = logger;
+            _consentOptions = consentOptions.CurrentValue;
         }
 
         /// <summary>
@@ -124,7 +129,7 @@ namespace Authentication.Controllers
                 if (model.ScopesConsented != null && model.ScopesConsented.Any())
                 {
                     var scopes = model.ScopesConsented;
-                    if (ConsentOptions.EnableOfflineAccess == false)
+                    if (_consentOptions.EnableOfflineAccess == false)
                     {
                         scopes = scopes.Where(x => x != IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess);
                     }
@@ -140,12 +145,12 @@ namespace Authentication.Controllers
                 }
                 else
                 {
-                    result.ValidationError = ConsentOptions.MustChooseOneErrorMessage;
+                    result.ValidationError = _consentOptions.MustChooseOneErrorMessage;
                 }
             }
             else
             {
-                result.ValidationError = ConsentOptions.InvalidSelectionErrorMessage;
+                result.ValidationError = _consentOptions.InvalidSelectionErrorMessage;
             }
 
             if (grantedConsent != null)
@@ -217,7 +222,7 @@ namespace Authentication.Controllers
 
             vm.IdentityScopes = resources.IdentityResources.Select(x => CreateScopeViewModel(x, vm.ScopesConsented.Contains(x.Name) || model == null)).ToArray();
             vm.ResourceScopes = resources.ApiResources.SelectMany(x => x.Scopes).Select(x => CreateScopeViewModel(x, vm.ScopesConsented.Contains(x.Name) || model == null)).ToArray();
-            if (ConsentOptions.EnableOfflineAccess && resources.OfflineAccess)
+            if (_consentOptions.EnableOfflineAccess && resources.OfflineAccess)
             {
                 vm.ResourceScopes = vm.ResourceScopes.Union(new ScopeViewModel[] {
                     GetOfflineAccessScope(vm.ScopesConsented.Contains(IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess) || model == null)
@@ -258,8 +263,8 @@ namespace Authentication.Controllers
             return new ScopeViewModel
             {
                 Name = IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess,
-                DisplayName = ConsentOptions.OfflineAccessDisplayName,
-                Description = ConsentOptions.OfflineAccessDescription,
+                DisplayName = _consentOptions.OfflineAccessDisplayName,
+                Description = _consentOptions.OfflineAccessDescription,
                 Emphasize = true,
                 Checked = check
             };

@@ -26,6 +26,8 @@ using JSNLog;
 using Microsoft.Extensions.Logging;
 using IdentityServer.LdapExtension.Extensions;
 using IdentityServer.LdapExtension.UserModel;
+using Authentication.Models.Account;
+using Authentication.Options;
 
 namespace Authentication
 {
@@ -49,6 +51,9 @@ namespace Authentication
                         options.KnownProxies.Add(IPAddress.Parse(t));
                 });
             });
+
+            services.Configure<AccountOptions>(Configuration.GetSection("Settings:Account"));
+            services.Configure<ConsentOptions>(Configuration.GetSection("Settings:Consent"));
 
             services.AddCorrelationId();
 
