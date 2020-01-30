@@ -18,6 +18,6 @@ namespace BeyondAuth.RelatedDataValidation
         /// <summary>
         /// List of other properties and values to store
         /// </summary>
-        public Dictionary<string, List<string>> Data { get; set; } = new Dictionary<string, List<string>>();
+        public Dictionary<string, HashSet<string>> Data { get; set; } = new Dictionary<string, HashSet<string>>();
     }
 }

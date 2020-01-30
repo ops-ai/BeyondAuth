@@ -1,4 +1,6 @@
-﻿namespace BeyondAuth.RelatedDataValidation.Requirements
+﻿using System.Collections.Generic;
+
+namespace BeyondAuth.RelatedDataValidation.Requirements
 {
     public interface IRequirementRule
     {
