@@ -24,6 +24,7 @@
     <PackageReference Include="Microsoft.TestPlatform.TestHost" Version="16.5.0-preview-20200116-01" />
     <PackageReference Include="Moq" Version="4.13.1" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="4.9.0" />
+    <PackageReference Include="RavenDB.TestDriver" Version="4.2.8" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.console" Version="2.4.1">
       <PrivateAssets>all</PrivateAssets>
@@ -41,6 +42,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\AuthorizationServer\AuthorizationServer.csproj" />
+    <ProjectReference Include="..\..\Cryptography\Cryptography.csproj" />
   </ItemGroup>
   
 </Project>
