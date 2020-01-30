@@ -49,11 +49,15 @@ steps:
     format: 'ALL'
     additionalArguments: '--disableBundleAudit --disableRubygems --disableNodeJS --disablePyPkg --disablePyDist --out "$(Agent.BuildDirectory)"'
   continueOnError: true
+  
+- task: DotNetCoreCLI@2
+  inputs:
+    command: 'build-server shutdown'
 
 - task: DotNetCoreCLI@2
   inputs:
     command: 'build'
-    projects: '**/*.csproj'
+    projects: '$(solution)'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet test'
