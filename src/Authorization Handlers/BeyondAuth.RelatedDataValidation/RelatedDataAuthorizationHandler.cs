@@ -17,10 +17,7 @@ namespace BeyondAuth.RelatedDataValidation
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, RelatedDataRequirement requirement)
         {
-            if (!(context.Resource is IRelatedDataEntity))
-                return;
-
-            if (await _authService.ValidateResource((IRelatedDataEntity)context.Resource))
+            if (context.Resource is IRelatedDataEntity && await _authService.ValidateResource((IRelatedDataEntity)context.Resource))
                 context.Succeed(requirement);
             else
                 context.Fail();

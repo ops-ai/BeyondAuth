@@ -2,6 +2,9 @@
 using System;
 using System.Collections.Generic;
 using Raven.Client.Documents;
+using System.Linq;
+using BeyondAuth.RelatedDataValidation.Requirements;
+using BeyondAuth.RelatedDataValidation.Indices;
 
 namespace BeyondAuth.RelatedDataValidation
 {
@@ -26,7 +29,7 @@ namespace BeyondAuth.RelatedDataValidation
             }
         }
 
-        public async Task AddResource(string hash, string relatedHash, Dictionary<string, List<string>> data)
+        public async Task AddResource(string hash, string relatedHash, Dictionary<string, HashSet<string>> data)
         {
             using (var session = _store.OpenAsyncSession())
             {
@@ -38,14 +41,45 @@ namespace BeyondAuth.RelatedDataValidation
             }
         }
 
-        public async Task<bool> ValidateResource(IRelatedDataEntity entity)
+        public Task<bool> ValidateResource(IRelatedDataEntity entity)
         {
-            throw new NotImplementedException();
+            return ValidateResource(entity.Sha256HashCode, entity.RelSha256HashCode, entity.Data);
         }
 
-        public async Task<bool> ValidateResource(string hash, string relatedHash, Dictionary<string, List<string>> data)
+        public async Task<bool> ValidateResource(string hash, string relatedHash, Dictionary<string, HashSet<string>> data)
         {
-            throw new NotImplementedException();
+            var aggregateData = await GetRelatedEntityData(hash);
+            foreach (var kvp in data)
+                if (!aggregateData.ContainsKey(kvp.Key))
+                    aggregateData.Add(kvp.Key, kvp.Value);
+                else
+                    aggregateData[kvp.Key].UnionWith(kvp.Value);
+
+            var rules = await GetValidationRules(aggregateData);
+
+            foreach (var requirement in rules.Where(rule => rule.Conditions.All(condition => aggregateData.ContainsKey(condition.Key) && condition.Value.Equals(aggregateData[condition.Key]))).SelectMany(rule => rule.Requirements))
+            {
+                switch (requirement)
+                {
+                    case SingleValueRequirementRule req:
+                        if (aggregateData.ContainsKey(req.PropertyName) && aggregateData[req.PropertyName].Count > 1)
+                            return false;
+                        break;
+                    case ListValueRequirementRule req:
+                        if (aggregateData.ContainsKey(req.PropertyName) && aggregateData[req.PropertyName].Any(t => !req.Values.Contains(t)))
+                            return false;
+                        break;
+                }
+            }
+            return true;
+        }
+
+        public async Task<Dictionary<string, HashSet<string>>> GetRelatedEntityData(string hash)
+        {
+            using (var session = _store.OpenAsyncSession())
+            {
+                return await session.Advanced.AsyncDocumentQuery<KeyValuePair<string, HashSet<string>>, Index_RelatedDataAgg>().WhereEquals("Hashes", hash).ToListAsync().ContinueWith(t => t.Result.ToDictionary(s => s.Key, s => s.Value));
+            }
         }
 
         public async Task<RelatedDataEntity> GetResource(string hash)
@@ -56,12 +90,13 @@ namespace BeyondAuth.RelatedDataValidation
             }
         }
 
-        public async Task AddValidationrule(RelatedDataValidationRule rule)
+        public async Task<string> AddValidationrule(RelatedDataValidationRule rule)
         {
             using (var session = _store.OpenAsyncSession())
             {
                 await session.StoreAsync(rule);
                 await session.SaveChangesAsync();
+                return rule.Id;
             }
         }
 
@@ -73,7 +108,7 @@ namespace BeyondAuth.RelatedDataValidation
             }
         }
 
-        public async Task<List<RelatedDataValidationRule>> GetValidationRules(Dictionary<string, List<string>> data)
+        public async Task<List<RelatedDataValidationRule>> GetValidationRules(Dictionary<string, HashSet<string>> data)
         {
             using (var session = _store.OpenAsyncSession())
             {

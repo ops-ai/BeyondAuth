@@ -1,6 +1,6 @@
 ﻿# Related Data Authorization Handler
 
-This is meant to solve problems around protecting indirect / derived data.
+This is meant to solve problems around protecting data linked by indirect relationships.
 
 ## Prevent accidentally delivering a derived file to the wrong client
 Let's say we have several systems involved in the ingesting, processing and delivery of work based on a file (or resource) provided to you by Client A, and part of this involves some steps in the workflow that are performed by separate systems which don't necessarily directly pass data among themselves.
@@ -17,8 +17,15 @@ Let's say we have several systems involved in the ingesting, processing and deli
 
 
 ## Register services
+```
 services.AddSingleton<IAuthorizationHandler, RelatedDataAuthorizationHandler>();
 services.AddSingleton<IRelatedDataAuthorizationService, RelatedDataAuthorizationService>();
+```
+
+## Execute index
+```
+new Index_RelatedDataAgg().Execute(_store);
+```
 
 ## Usage
 

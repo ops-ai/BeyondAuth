@@ -8,6 +8,6 @@ namespace BeyondAuth.RelatedDataValidation
 
         string RelSha256HashCode { get; }
 
-        Dictionary<string, List<string>> Data { get; }
+        Dictionary<string, HashSet<string>> Data { get; }
     }
 }

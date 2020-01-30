@@ -19,13 +19,13 @@ namespace BeyondAuth.RelatedDataValidation
         /// Conditions that must be met for this rule to apply
         /// Ex: Applies when Organization is ClientA
         /// </summary>
-        public Dictionary<string, string> Conditions { get; set; }
+        public Dictionary<string, string> Conditions { get; set; } = new Dictionary<string, string>();
 
         /// <summary>
         /// Requirements the cummulative property set must meet
         /// Ex: Organization must be one of ClientA ClientA1 MyOrg
         /// Ex2: Organization property must contain only 1 value
         /// </summary>
-        public List<IRequirementRule> Requirements { get; set; }
+        public List<IRequirementRule> Requirements { get; set; } = new List<IRequirementRule>();
     }
 }
