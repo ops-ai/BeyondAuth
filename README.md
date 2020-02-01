@@ -18,6 +18,9 @@ More information on application lifecycle can be found at https://scatteredcode.
 
 # How to build
 
+## Verify GPG Signature
+Commits as of 2/1/2020 are signed using GPG. It's recommended to verify all commits after this date come from a trusted source.
+
 ## On windows to build the front-end
 Requirement due to dependency on [node-gyp](https://github.com/nodejs/node-gyp)
 
