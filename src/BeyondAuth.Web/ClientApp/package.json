@@ -9,7 +9,7 @@
     "build:ssr": "ng run BeyondAuth.Web:server:dev",
     "build:prod": "npm run build -- --prod --aot",
     "test": "ng test",
-    "test:coverage": "rimraf coverage && npm run test -- --code-coverage",
+    "test:coverage": "rimraf coverage && npm run test -- --code-coverage --watch=false",
     "lint": "ng lint",
     "lint:fix": "ng lint beyondauth.web --fix",
     "lint:styles": "stylelint ./src/**/*.scss",
