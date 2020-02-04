@@ -68,9 +68,15 @@ steps:
     projects: '**\*test*.csproj'
     arguments: '--no-restore --no-build --collect:"XPlat Code Coverage"'
 
+- task: Npm@1
+  inputs:
+    command: 'custom'
+    workingDir: 'src/BeyondAuth.Web/ClientApp'
+    customCommand: 'run test "test:coverage"'
+
 - task: reportgenerator@4
   inputs:
-    reports: '$(Agent.TempDirectory)\**\coverage.cobertura.xml"'
+    reports: '$(Agent.TempDirectory)\**\coverage.cobertura.xml;src\BeyondAuth.Web\ClientApp\coverage\cobertura-coverage.xml'
     targetdir: '$(Agent.TempDirectory)\'
     reporttypes: 'SonarQube'
 
