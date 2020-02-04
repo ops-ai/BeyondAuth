@@ -1,5 +1,4 @@
-﻿using AuthorizationServer;
-using AuthorizationServer.Tests.Fakes;
+﻿using AuthorizationServer.Tests.Fakes;
 using Autofac;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.TestHost;

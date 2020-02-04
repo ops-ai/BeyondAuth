@@ -1,10 +1,10 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BeyondAuth.PolicyProvider.Exceptions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
+using Newtonsoft.Json;
 using PolicyServer.Models;
 using System.Net.Http;
 using System.Threading.Tasks;
-using Newtonsoft.Json;
-using BeyondAuth.PolicyProvider.Exceptions;
 
 namespace BeyondAuth.PolicyProvider
 {
@@ -16,10 +16,7 @@ namespace BeyondAuth.PolicyProvider
         /// 
         /// </summary>
         /// <param name="options"></param>
-        public AuthorizationPolicyProvider(IOptions<AuthorizationOptions> options, IHttpClientFactory httpClientFactory) : base(options)
-        {
-            _httpClientFactory = httpClientFactory;
-        }
+        public AuthorizationPolicyProvider(IOptions<AuthorizationOptions> options, IHttpClientFactory httpClientFactory) : base(options) => _httpClientFactory = httpClientFactory;
 
         public new async Task<AuthorizationPolicy> GetPolicyAsync(string policyName)
         {

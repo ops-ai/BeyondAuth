@@ -1,11 +1,11 @@
-﻿using Autofac;
+﻿using AuditServer.Tests.Fakes;
+using Autofac;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Moq;
-using AuditServer.Tests.Fakes;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;

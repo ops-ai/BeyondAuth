@@ -1,33 +1,33 @@
+using Authentication.Extensions;
 using Authentication.Models;
+using Authentication.Models.Account;
+using Authentication.Options;
 using Autofac;
 using CorrelationId.DependencyInjection;
+using HealthChecks.UI.Client;
+using IdentityServer.LdapExtension.Extensions;
+using IdentityServer.LdapExtension.UserModel;
+using IdentityServer4.Contrib.RavenDB.Services;
+using IdentityServer4.Contrib.RavenDB.Stores;
+using IdentityServer4.Stores.Serialization;
+using JSNLog;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
-using Raven.Client.Documents;
-using System.Linq;
-using System.Security.Cryptography.X509Certificates;
-using HealthChecks.UI.Client;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using System.Net;
-using Authentication.Extensions;
-using Newtonsoft.Json;
-using IdentityServer4.Stores.Serialization;
-using Microsoft.AspNetCore.Http;
-using System;
-using Microsoft.AspNetCore.DataProtection;
-using IdentityServer4.Contrib.RavenDB.Services;
-using IdentityServer4.Contrib.RavenDB.Stores;
-using JSNLog;
+using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using IdentityServer.LdapExtension.Extensions;
-using IdentityServer.LdapExtension.UserModel;
-using Authentication.Models.Account;
-using Authentication.Options;
+using Newtonsoft.Json;
+using Raven.Client.Documents;
+using System;
+using System.Linq;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Authentication
 {
@@ -132,16 +132,16 @@ namespace Authentication
             builder.AddDeveloperSigningCredential();
 
             services.AddAuthentication();
-                //.AddGoogle(options =>
-                //{
-                //    options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+            //.AddGoogle(options =>
+            //{
+            //    options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
 
-                //    // register your IdentityServer with Google at https://console.developers.google.com
-                //    // enable the Google+ API
-                //    // set the redirect URI to http://localhost:5000/signin-google
-                //    options.ClientId = Configuration["ExternalIdps:Google:ClientId"];
-                //    options.ClientSecret = Configuration["ExternalIdps:Google:ClientSecret"];
-                //});
+            //    // register your IdentityServer with Google at https://console.developers.google.com
+            //    // enable the Google+ API
+            //    // set the redirect URI to http://localhost:5000/signin-google
+            //    options.ClientId = Configuration["ExternalIdps:Google:ClientId"];
+            //    options.ClientSecret = Configuration["ExternalIdps:Google:ClientSecret"];
+            //});
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

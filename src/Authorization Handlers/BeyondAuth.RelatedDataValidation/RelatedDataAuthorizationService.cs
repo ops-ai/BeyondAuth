@@ -1,10 +1,10 @@
-﻿using System.Threading.Tasks;
+﻿using BeyondAuth.RelatedDataValidation.Indices;
+using BeyondAuth.RelatedDataValidation.Requirements;
+using Raven.Client.Documents;
 using System;
 using System.Collections.Generic;
-using Raven.Client.Documents;
 using System.Linq;
-using BeyondAuth.RelatedDataValidation.Requirements;
-using BeyondAuth.RelatedDataValidation.Indices;
+using System.Threading.Tasks;
 
 namespace BeyondAuth.RelatedDataValidation
 {
@@ -12,10 +12,7 @@ namespace BeyondAuth.RelatedDataValidation
     {
         private readonly IDocumentStore _store;
 
-        public RelatedDataAuthorizationService(IDocumentStore store)
-        {
-            _store = store;
-        }
+        public RelatedDataAuthorizationService(IDocumentStore store) => _store = store;
 
         public async Task AddResource(IRelatedDataEntity entity)
         {
@@ -41,10 +38,7 @@ namespace BeyondAuth.RelatedDataValidation
             }
         }
 
-        public Task<bool> ValidateResource(IRelatedDataEntity entity)
-        {
-            return ValidateResource(entity.Sha256HashCode, entity.RelSha256HashCode, entity.Data);
-        }
+        public Task<bool> ValidateResource(IRelatedDataEntity entity) => ValidateResource(entity.Sha256HashCode, entity.RelSha256HashCode, entity.Data);
 
         public async Task<bool> ValidateResource(string hash, string relatedHash, Dictionary<string, HashSet<string>> data)
         {
@@ -113,11 +107,11 @@ namespace BeyondAuth.RelatedDataValidation
             using (var session = _store.OpenAsyncSession())
             {
                 var propertyNames = data.Keys;
-                
+
                 // Find all the rules that could match
                 var rules = session.Advanced.AsyncDocumentQuery<RelatedDataValidationRule>();
-               
 
+                rules.WhereEquals(t => t.Requirements)
 
                 return await rules.ToListAsync();
             }

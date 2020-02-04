@@ -1,11 +1,11 @@
-﻿using Grpc.Net.Client;
+﻿using AuthorizationServer;
+using Grpc.Net.Client;
 using Microsoft.AspNetCore.Authorization;
-using System.Threading.Tasks;
-using AuthorizationServer;
-using System;
 using Microsoft.AspNetCore.Http;
 using PolicyServer.Core.Entities;
+using System;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace BeyondAuth.PolicyProvider
 {
@@ -13,10 +13,7 @@ namespace BeyondAuth.PolicyProvider
     {
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public RemoteAuthorizationHandler(IHttpContextAccessor httpContextAccessor)
-        {
-            _httpContextAccessor = httpContextAccessor;
-        }
+        public RemoteAuthorizationHandler(IHttpContextAccessor httpContextAccessor) => _httpContextAccessor = httpContextAccessor;
 
         public async Task HandleAsync(AuthorizationHandlerContext context)
         {

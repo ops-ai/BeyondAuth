@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace PolicyServer.Core.Entities
+﻿namespace PolicyServer.Core.Entities
 {
     public enum PolicyTypes
     {

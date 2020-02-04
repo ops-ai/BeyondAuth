@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using BeyondAuth.RelatedDataValidation.Requirements;
+using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
-using System;
-using System.Linq;
-using BeyondAuth.RelatedDataValidation.Requirements;
 
 namespace BeyondAuth.RelatedDataValidation
 {
@@ -10,10 +8,7 @@ namespace BeyondAuth.RelatedDataValidation
     {
         private readonly IRelatedDataAuthorizationService _authService;
 
-        public RelatedDataAuthorizationHandler(IRelatedDataAuthorizationService authService)
-        {
-            _authService = authService;
-        }
+        public RelatedDataAuthorizationHandler(IRelatedDataAuthorizationService authService) => _authService = authService;
 
         protected override async Task HandleRequirementAsync(AuthorizationHandlerContext context, RelatedDataRequirement requirement)
         {

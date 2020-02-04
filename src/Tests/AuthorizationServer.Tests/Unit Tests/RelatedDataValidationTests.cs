@@ -22,7 +22,7 @@ namespace AuthorizationServer.Tests.Unit_Tests
         protected readonly ILoggerFactory _loggerFactory;
         private readonly IAuthorizationHandler _authorizationHandler;
         private readonly IRelatedDataAuthorizationService _relatedDataAuthorizationService;
-        
+
         private readonly IDocumentStore _documentStore;
 
         public RelatedDataValidationTests(ITestOutputHelper output)

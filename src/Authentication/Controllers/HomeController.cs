@@ -5,7 +5,6 @@
 using Authentication.Filters;
 using Authentication.Models;
 using IdentityServer4.Services;
-using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
@@ -34,10 +33,7 @@ namespace Authentication.Controllers
         }
 
         [Authorize]
-        public IActionResult Index()
-        {
-            return Redirect(_configuration["DashboardUrl"]);
-        }
+        public IActionResult Index() => Redirect(_configuration["DashboardUrl"]);
 
         /// <summary>
         /// Shows the error page

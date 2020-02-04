@@ -1,17 +1,15 @@
-using System;
+using Autofac;
+using Flexinets.Net;
+using Flexinets.Radius;
+using Flexinets.Radius.Core;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
-using Flexinets.Radius.Core;
-using Flexinets.Radius;
-using System.Net;
-using System.IO;
 using Microsoft.Extensions.Logging;
-using Flexinets.Net;
-using Microsoft.Extensions.Configuration;
-using Autofac;
+using System.Net;
 
 namespace RadiusService
 {
@@ -45,7 +43,7 @@ namespace RadiusService
             app.UseRouting();
 
             logger.LogInformation("Reading configuration");
-            
+
             var dictionary = new RadiusDictionary("radius.dictionary", loggerFactory.CreateLogger<RadiusDictionary>());
             logger.LogInformation("Configuration read");
 

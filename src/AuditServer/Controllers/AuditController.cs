@@ -1,11 +1,11 @@
-﻿using System;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using Blockchain;
+﻿using Blockchain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Raven.Client.Documents;
+using System;
+using System.Security.Claims;
+using System.Threading.Tasks;
 
 namespace AuditServer.Controllers
 {

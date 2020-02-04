@@ -1,7 +1,6 @@
 ﻿using IdentityServer4.Stores.Serialization;
 using System;
 using System.Collections.Generic;
-using System.Security.Claims;
 
 namespace IdentityServer4.Contrib.RavenDB.Entities
 {

@@ -92,7 +92,7 @@ namespace Blockchain.Tests
 
                 var t1 = new Thread(() =>
                 {
-                    for (int i = 0; i < target; i++)
+                    for (var i = 0; i < target; i++)
                     {
                         transactionPool.AddAuditEntry(new AuditEntry());
                         Interlocked.Increment(ref t1s);
@@ -101,7 +101,7 @@ namespace Blockchain.Tests
                 });
                 var t2 = new Thread(() =>
                 {
-                    for (int i = 0; i < target; i++)
+                    for (var i = 0; i < target; i++)
                     {
                         transactionPool.GetAuditEntry();
                         Interlocked.Increment(ref t2s);

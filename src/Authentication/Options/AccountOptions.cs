@@ -12,7 +12,7 @@ namespace Authentication.Models.Account
         /// Allow email + password login
         /// </summary>
         public bool AllowLocalLogin { get; set; }
-        
+
         /// <summary>
         /// Allow remembering login
         /// </summary>

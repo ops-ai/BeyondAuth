@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 
 namespace BeyondAuth.RelatedDataValidation.Requirements
 {
@@ -10,9 +9,6 @@ namespace BeyondAuth.RelatedDataValidation.Requirements
         /// </summary>
         public string PropertyName { get; set; }
 
-        public bool Equals(SingleValueRequirementRule other)
-        {
-            return other.PropertyName == PropertyName;
-        }
+        public bool Equals(SingleValueRequirementRule other) => other.PropertyName == PropertyName;
     }
 }
