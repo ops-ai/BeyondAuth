@@ -109,9 +109,10 @@ namespace BeyondAuth.RelatedDataValidation
                 var propertyNames = data.Keys;
 
                 // Find all the rules that could match
-                var rules = session.Advanced.AsyncDocumentQuery<RelatedDataValidationRule>();
+                var rules = session.Query<RelatedDataValidationRule>().AsQueryable();
 
-                rules.WhereEquals(t => t.Requirements)
+                foreach (var key in data.Keys)
+                    rules = rules.Where(t => t.Requirements.Any(s => s.PropertyName == key));
 
                 return await rules.ToListAsync();
             }
