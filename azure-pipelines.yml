@@ -72,7 +72,7 @@ steps:
   inputs:
     command: 'custom'
     workingDir: 'src/BeyondAuth.Web/ClientApp'
-    customCommand: 'run test "test:coverage"'
+    customCommand: 'run "test:coverage"'
 
 - task: reportgenerator@4
   inputs:
