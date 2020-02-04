@@ -1,8 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Net;
-using System.Security.Cryptography.X509Certificates;
-using BeyondAuth.PolicyProvider;
+﻿using BeyondAuth.PolicyProvider;
 using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
 using IdentityServer4.AccessTokenValidation;
@@ -16,6 +12,10 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Raven.Client.Documents;
+using System;
+using System.Linq;
+using System.Net;
+using System.Security.Cryptography.X509Certificates;
 
 namespace AuthorizationServer
 {

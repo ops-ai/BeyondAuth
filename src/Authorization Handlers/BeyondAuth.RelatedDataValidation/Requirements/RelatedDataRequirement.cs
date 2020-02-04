@@ -6,7 +6,7 @@ namespace BeyondAuth.RelatedDataValidation.Requirements
     {
         public RelatedDataRequirement()
         {
-            
+
         }
     }
 }

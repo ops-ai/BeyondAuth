@@ -2,7 +2,6 @@
 using IdentityServer4.Services;
 using Microsoft.Extensions.Logging;
 using Raven.Client.Documents;
-using Raven.Client.Documents.Linq;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -24,7 +23,7 @@ namespace IdentityServer4.Contrib.RavenDB.Services
             using (var session = _store.OpenAsyncSession())
             {
                 var isAllowed = await session.Query<Client>().AnyAsync(t => t.AllowedCorsOrigins.Any(c => c == origin)).ConfigureAwait(false);
-                
+
                 _logger.LogDebug("Origin {origin} is allowed: {originAllowed}", origin, isAllowed);
 
                 return isAllowed;

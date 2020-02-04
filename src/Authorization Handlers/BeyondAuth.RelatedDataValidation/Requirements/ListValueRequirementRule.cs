@@ -16,9 +16,6 @@ namespace BeyondAuth.RelatedDataValidation.Requirements
         /// </summary>
         public List<string> Values { get; set; }
 
-        public bool Equals(ListValueRequirementRule other)
-        {
-            return PropertyName == other.PropertyName && Values.Count == other.Values.Count && Values.Intersect(other.Values).Count() == Values.Count;
-        }
+        public bool Equals(ListValueRequirementRule other) => PropertyName == other.PropertyName && Values.Count == other.Values.Count && Values.Intersect(other.Values).Count() == Values.Count;
     }
 }

@@ -30,7 +30,7 @@ namespace Blockchain
         {
             var local = Interlocked.Exchange(ref _queue, null);
             if (local == null) return;
-            
+
             GC.SuppressFinalize(this);
         }
 

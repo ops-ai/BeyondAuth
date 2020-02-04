@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BeyondAuth.Acl
+﻿namespace BeyondAuth.Acl
 {
     public interface ISecurableEntity
     {

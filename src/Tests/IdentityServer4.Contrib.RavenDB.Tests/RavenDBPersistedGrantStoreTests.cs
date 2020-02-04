@@ -31,13 +31,13 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         private IDocumentStore _documentStore;
 
         private ClaimsPrincipal _user = new IdentityServerUser("123").CreatePrincipal();
-        
+
         public RavenDBPersistedGrantStoreTests(ITestOutputHelper output)
         {
             _loggerFactory = LogFactory.Create(output);
             _documentStore = GetDocumentStore();
             _store = new RavenDBPersistedGrantStore(new PersistentGrantSerializer(), _loggerFactory.CreateLogger<RavenDBPersistedGrantStore>(), _documentStore);
-            
+
             _codes = new DefaultAuthorizationCodeStore(_store, new PersistentGrantSerializer(), _handleGenerationService, _loggerFactory.CreateLogger<DefaultAuthorizationCodeStore>());
             _refreshTokens = new DefaultRefreshTokenStore(_store, new PersistentGrantSerializer(), _handleGenerationService, _loggerFactory.CreateLogger<DefaultRefreshTokenStore>());
             _referenceTokens = new DefaultReferenceTokenStore(_store, new PersistentGrantSerializer(), _handleGenerationService, _loggerFactory.CreateLogger<DefaultReferenceTokenStore>());

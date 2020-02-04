@@ -17,10 +17,7 @@ namespace Blockchain
         //     Throws UnauthorizedAccessException if you do not have read and write permissions.
         //     Throws InvalidOperationException if another instance is attached to the backing store.
         /// </summary>
-        public PersistentTransactionPool()
-        {
-            _queue = new PersistentQueue("./transactionpool");
-        }
+        public PersistentTransactionPool() => _queue = new PersistentQueue("./transactionpool");
 
         /// <summary>
         /// Initialize a new transaction pool
@@ -29,10 +26,7 @@ namespace Blockchain
         /// </summary>
         /// <param name="storagePath">Filename / file path to store transaction pool in. Default is a file called "transactionpool"</param>
         /// <param name="maxFilesize">Maximum size in bytes of each file, queue will be rolled into another file once it reaches this</param>
-        public PersistentTransactionPool(string storagePath, int maxFilesize)
-        {
-            _queue = new PersistentQueue(storagePath ?? "./transactionpool", maxFilesize);
-        }
+        public PersistentTransactionPool(string storagePath, int maxFilesize) => _queue = new PersistentQueue(storagePath ?? "./transactionpool", maxFilesize);
 
         /// <summary>
         /// Initialize a new transaction pool
@@ -40,10 +34,7 @@ namespace Blockchain
         //     Throws InvalidOperationException if another instance is attached to the backing store.
         /// </summary>
         /// <param name="storagePath">Filename / file path to store transaction pool in. Default is a file called "transactionpool"</param>
-        public PersistentTransactionPool(string storagePath)
-        {
-            _queue = new PersistentQueue(storagePath ?? "./transactionpool");
-        }
+        public PersistentTransactionPool(string storagePath) => _queue = new PersistentQueue(storagePath ?? "./transactionpool");
 
         /// <summary>
         /// Initialize a new transaction pool
@@ -51,10 +42,7 @@ namespace Blockchain
         //     Throws InvalidOperationException if another instance is attached to the backing store.
         /// </summary>
         /// <param name="queue">A preconfigured PersistentQueue implementation to use</param>
-        public PersistentTransactionPool(IPersistentQueue queue)
-        {
-            _queue = queue;
-        }
+        public PersistentTransactionPool(IPersistentQueue queue) => _queue = queue;
 
         /// <summary>
         /// Queue an audit entry to be processed into the blockchain
