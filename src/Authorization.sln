@@ -59,15 +59,17 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.Web", "BeyondAut
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{8CE5014B-92D4-4DDE-A130-9A5856047B3E}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondAuth.Acl", "Authorization Handlers\BeyondAuth.Acl\BeyondAuth.Acl.csproj", "{2CD9342E-4D1D-4CBF-83A5-AA3EECE285CC}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.Acl", "Authorization Handlers\BeyondAuth.Acl\BeyondAuth.Acl.csproj", "{2CD9342E-4D1D-4CBF-83A5-AA3EECE285CC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bridges", "Bridges", "{01BEDBC1-C476-492D-861E-6A3273F8D045}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadiusServer", "Bridges\RadiusServer\RadiusServer.csproj", "{900AF3CC-ED90-4BBB-9F90-71C32D25835B}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DiameterServer", "Bridges\DiameterServer\DiameterServer.csproj", "{563D0471-337F-4316-A83E-DE24A0F95A8D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiameterServer", "Bridges\DiameterServer\DiameterServer.csproj", "{563D0471-337F-4316-A83E-DE24A0F95A8D}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondAuth.RelatedDataValidation", "Authorization Handlers\BeyondAuth.RelatedDataValidation\BeyondAuth.RelatedDataValidation.csproj", "{19FA5418-A0F5-4C41-8F50-ACB88A782286}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.RelatedDataValidation", "Authorization Handlers\BeyondAuth.RelatedDataValidation\BeyondAuth.RelatedDataValidation.csproj", "{19FA5418-A0F5-4C41-8F50-ACB88A782286}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityManager", "IdentityManager\IdentityManager.csproj", "{5FC6D412-976E-4AA2-B8B3-36294AA9C4C7}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -162,6 +164,14 @@ Global
 		{19FA5418-A0F5-4C41-8F50-ACB88A782286}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19FA5418-A0F5-4C41-8F50-ACB88A782286}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{19FA5418-A0F5-4C41-8F50-ACB88A782286}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FC6D412-976E-4AA2-B8B3-36294AA9C4C7}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FC6D412-976E-4AA2-B8B3-36294AA9C4C7}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FC6D412-976E-4AA2-B8B3-36294AA9C4C7}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FC6D412-976E-4AA2-B8B3-36294AA9C4C7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AF62CB61-FA11-456C-B04D-5102E79B226C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AF62CB61-FA11-456C-B04D-5102E79B226C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AF62CB61-FA11-456C-B04D-5102E79B226C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AF62CB61-FA11-456C-B04D-5102E79B226C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -180,9 +190,10 @@ Global
 		{900AF3CC-ED90-4BBB-9F90-71C32D25835B} = {01BEDBC1-C476-492D-861E-6A3273F8D045}
 		{563D0471-337F-4316-A83E-DE24A0F95A8D} = {01BEDBC1-C476-492D-861E-6A3273F8D045}
 		{19FA5418-A0F5-4C41-8F50-ACB88A782286} = {84BCB7A7-6678-441F-B075-15D4A7E04ACB}
+		{AF62CB61-FA11-456C-B04D-5102E79B226C} = {F697BF7F-ED3E-4571-A176-AA937EE763FF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
 		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
+		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
 	EndGlobalSection
 EndGlobal
