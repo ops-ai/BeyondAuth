@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using PolicyServer.Core.Entities;
 
 namespace BeyondAuth.RelatedDataValidation.Requirements
 {
-    public class RelatedDataRequirement : IAuthorizationRequirement
+    public class RelatedDataRequirement : AuthorizationRequirement
     {
         public RelatedDataRequirement()
         {
 
         }
+
+        public override string Name => "related-data";
     }
 }
