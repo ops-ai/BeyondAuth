@@ -71,6 +71,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.RelatedDataValid
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityManager", "IdentityManager\IdentityManager.csproj", "{5FC6D412-976E-4AA2-B8B3-36294AA9C4C7}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityManager.Tests", "Tests\IdentityManager.Tests\IdentityManager.Tests.csproj", "{AF62CB61-FA11-456C-B04D-5102E79B226C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
