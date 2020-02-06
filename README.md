@@ -1,10 +1,17 @@
 # BeyondAuth
+
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ops-ai_authorization&metric=alert_status)](https://sonarcloud.io/dashboard?id=ops-ai_authorization)
 [![Build Status](https://opsai.visualstudio.com/Authorization/_apis/build/status/ops-ai.authorization?branchName=master)](https://opsai.visualstudio.com/Authorization/_build/latest?definitionId=2&branchName=master)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ops-ai_authorization&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=ops-ai_authorization)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ops-ai_authorization&metric=coverage)](https://sonarcloud.io/dashboard?id=ops-ai_authorization)
 
-Distributed extensible authorization model based on standard protocols, with centralized authorization policies and the ability to define authorization capabilities that can be validated locally or delegated out; with the option to request more identity context using Vectors of Trust; where authorization decisions are published to a blockchain-based audit log which can be analyzed by the owner of the data it's protecting.
+A new standard model for authorization and blockchain-based authorization auditing
+
+A distributed, extensible authorization model, based on standard protocols, with centralized authorization policies and the ability to define authorization capabilities that can be validated locally or delegated out; with the option to request more identity context using Vectors of Trust; where authorization decisions are published to a blockchain-based audit log which can be analyzed by the owner of the data it's protecting.
+
+![Authorization Model](https://ops.ai/wp-content/uploads/2020/02/Authorization-Model-Components.png)
+
+
 
 # Branch structure
 
