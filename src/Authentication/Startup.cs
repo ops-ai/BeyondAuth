@@ -5,6 +5,7 @@ using Authentication.Options;
 using Autofac;
 using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
+using Identity.Core;
 using IdentityServer.LdapExtension.Extensions;
 using IdentityServer.LdapExtension.UserModel;
 using IdentityServer4.Contrib.RavenDB.Services;
@@ -24,6 +25,7 @@ using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using Raven.Client.Documents;
+using Raven.Identity;
 using System;
 using System.Linq;
 using System.Net;
@@ -77,8 +79,9 @@ namespace Authentication
                     .ProtectKeysWithAzureKeyVault(Configuration["DataProtection:KeyIdentifier"], Configuration["DataProtection:ClientId"], Configuration["DataProtection:ClientSecret"])
                     .PersistKeysToAzureBlobStorage(new Uri(Configuration["DataProtection:StorageUri"]));
 
-            services.AddIdentity<ApplicationUser, IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddDefaultTokenProviders();
+            services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddDefaultTokenProviders()
+                .AddRavenDbIdentityStores<ApplicationUser>();
 
             services.AddControllersWithViews();
             services.AddRazorPages();
@@ -127,7 +130,7 @@ namespace Authentication
                 .AddResourceStore<RavenDBResourceStore>()
                 .AddCorsPolicyService<CorsPolicyService>()
                 .AddLdapUsers<OpenLdapAppUser>(Configuration.GetSection("IdentityServerLdap"), UserStore.InMemory)
-                /*.AddAspNetIdentity<ApplicationUser>()*/;
+                .AddAspNetIdentity<ApplicationUser>();
 
             builder.AddDeveloperSigningCredential();
 
@@ -150,7 +153,6 @@ namespace Authentication
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
-                app.UseDatabaseErrorPage();
             }
             else
             {

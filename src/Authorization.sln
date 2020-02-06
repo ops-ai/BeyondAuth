@@ -73,6 +73,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityManager", "Identity
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityManager.Tests", "Tests\IdentityManager.Tests\IdentityManager.Tests.csproj", "{AF62CB61-FA11-456C-B04D-5102E79B226C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Identity.Core", "Identity.Core\Identity.Core.csproj", "{3E602F66-AA3C-4446-9720-FB48A7FB6CA2}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -174,6 +176,10 @@ Global
 		{AF62CB61-FA11-456C-B04D-5102E79B226C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AF62CB61-FA11-456C-B04D-5102E79B226C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AF62CB61-FA11-456C-B04D-5102E79B226C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3E602F66-AA3C-4446-9720-FB48A7FB6CA2}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3E602F66-AA3C-4446-9720-FB48A7FB6CA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3E602F66-AA3C-4446-9720-FB48A7FB6CA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3E602F66-AA3C-4446-9720-FB48A7FB6CA2}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
