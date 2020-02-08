@@ -9,9 +9,7 @@ using Raven.Client.Documents;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
 using System.Net;
-using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace PolicyServer.Controllers
@@ -50,10 +48,7 @@ namespace PolicyServer.Controllers
         [ProducesResponseType(typeof(IList<UserModel>), (int)HttpStatusCode.PartialContent)]
         [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] string firstName, [FromQuery] string lastName, [FromQuery] string displayName, [FromQuery] string organization, [FromQuery] string email, [FromQuery] bool includeDisabled = false, [FromQuery] bool lockedOnly = false, [FromQuery] string sort = "+email", [FromQuery] string range = "0-19")
-        {
-            throw new NotImplementedException();
-        }
+        public async Task<IActionResult> Get([FromQuery] string firstName, [FromQuery] string lastName, [FromQuery] string displayName, [FromQuery] string organization, [FromQuery] string email, [FromQuery] bool includeDisabled = false, [FromQuery] bool lockedOnly = false, [FromQuery] string sort = "+email", [FromQuery] string range = "0-19") => throw new NotImplementedException();
 
         /// <summary>
         /// Check if a user exists
@@ -163,16 +158,9 @@ namespace PolicyServer.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Put(string userId, [FromBody] UserUpdateModel userInfo)
-        {
-            throw new NotImplementedException();
+        public async Task<IActionResult> Put(string userId, [FromBody] UserUpdateModel userInfo) => throw new NotImplementedException();
 
-        }
-
-        private async Task<UserModel> FindUser(string userId)
-        {
-            throw new NotImplementedException();
-        }
+        private async Task<UserModel> FindUser(string userId) => throw new NotImplementedException();
 
         /// <summary>
         /// Update one or more properties on a user

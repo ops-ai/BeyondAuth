@@ -1,5 +1,4 @@
 using Authentication.Extensions;
-using Authentication.Models;
 using Authentication.Models.Account;
 using Authentication.Options;
 using Autofac;
