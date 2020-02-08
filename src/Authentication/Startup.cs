@@ -11,6 +11,7 @@ using IdentityServer4.Contrib.RavenDB.Services;
 using IdentityServer4.Contrib.RavenDB.Stores;
 using IdentityServer4.Stores.Serialization;
 using JSNLog;
+using Microsoft.AspNetCore.Authentication.Certificate;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -122,6 +123,9 @@ namespace Authentication
                 options.Events.RaiseInformationEvents = true;
                 options.Events.RaiseFailureEvents = true;
                 options.Events.RaiseSuccessEvents = true;
+
+                options.MutualTls.Enabled = true;
+                options.MutualTls.ClientCertificateAuthenticationScheme = "Certificate";
             })
                 //.AddSigningCredential()
                 .AddPersistedGrantStore<RavenDBPersistedGrantStore>()
@@ -131,9 +135,15 @@ namespace Authentication
                 .AddLdapUsers<OpenLdapAppUser>(Configuration.GetSection("IdentityServerLdap"), UserStore.InMemory)
                 .AddAspNetIdentity<ApplicationUser>();
 
+            builder.AddMutualTlsSecretValidators();
             builder.AddDeveloperSigningCredential();
 
-            services.AddAuthentication();
+            services.AddAuthentication()
+                .AddCertificate("Certificate", options =>
+                {
+                    // allows both self-signed and CA-based certs. Check the MTLS spec for details.
+                    options.AllowedCertificateTypes = CertificateTypes.All;
+                });
             //.AddGoogle(options =>
             //{
             //    options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
