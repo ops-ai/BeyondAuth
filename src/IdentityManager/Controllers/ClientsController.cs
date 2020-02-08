@@ -1,15 +1,16 @@
-﻿using System;
+﻿using IdentityManager.Domain;
+using IdentityManager.Extensions;
+using IdentityManager.Models;
+using Microsoft.AspNetCore.JsonPatch;
+using Microsoft.AspNetCore.JsonPatch.Exceptions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
+using Raven.Client.Documents;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
-using IdentityManager.Models;
-using IdentityServer4.Models;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
-using Raven.Client.Documents;
-using IdentityManager.Extensions;
 
 namespace IdentityManager.Controllers
 {
@@ -31,9 +32,9 @@ namespace IdentityManager.Controllers
         /// </summary>
         /// <param name="sort">+/- field to sort by</param>
         /// <param name="range">Paging range [from-to]</param>
-        /// <response code="200">Clients information</response>
+        /// <response code="206">Clients information</response>
         /// <response code="500">Server error getting clients</response>
-        [ProducesResponseType(typeof(IEnumerable<ClientModel>), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(IEnumerable<ClientModel>), (int)HttpStatusCode.PartialContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
@@ -43,7 +44,7 @@ namespace IdentityManager.Controllers
             {
                 using (var session = _documentStore.OpenAsyncSession())
                 {
-                    var query = session.Query<Client>().AsQueryable();
+                    var query = session.Query<ClientEntity>().AsQueryable();
                     if (sort.StartsWith("-"))
                         query = query.OrderByDescending(sort.Substring(1), Raven.Client.Documents.Session.OrderingType.String);
                     else
@@ -52,7 +53,7 @@ namespace IdentityManager.Controllers
                     var from = int.Parse(range.Split('-')[0]);
                     var to = int.Parse(range.Split('-')[1]) + 1;
 
-                    return Ok(await query.Skip(from).Take(to - from).ToListAsync().ContinueWith(t => t.Result.Select(c => c.ToModel())));
+                    return this.Partial(await query.Skip(from).Take(to - from).ToListAsync().ContinueWith(t => t.Result.Select(c => c.ToModel())));
                 }
             }
             catch (Exception ex)
@@ -79,7 +80,7 @@ namespace IdentityManager.Controllers
             {
                 using (var session = _documentStore.OpenAsyncSession())
                 {
-                    var client = await session.LoadAsync<Client>($"Clients/{clientId}");
+                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
                     if (client == null)
                         throw new KeyNotFoundException($"Client {clientId} was not found");
 
@@ -89,7 +90,7 @@ namespace IdentityManager.Controllers
             catch (KeyNotFoundException ex)
             {
                 _logger.LogWarning(ex, "Client not found");
-                throw;
+                return NotFound();
             }
             catch (Exception ex)
             {
@@ -102,7 +103,7 @@ namespace IdentityManager.Controllers
         /// Create new client
         /// </summary>
         /// <param name="client"></param>
-        /// <response code="201">Client created</response>
+        /// <response code="204">Client created</response>
         /// <response code="400">Validation failed</response>
         /// <response code="500">Server error creating client</response>
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
@@ -149,7 +150,7 @@ namespace IdentityManager.Controllers
         /// Update a client
         /// </summary>
         /// <param name="model"></param>
-        /// <response code="201">Client updated</response>
+        /// <response code="204">Client updated</response>
         /// <response code="404">Client not found</response>
         /// <response code="500">Server error updating client</response>
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
@@ -162,7 +163,7 @@ namespace IdentityManager.Controllers
             {
                 using (var session = _documentStore.OpenAsyncSession())
                 {
-                    var client = await session.LoadAsync<Client>($"Clients/{model.ClientId}");
+                    var client = await session.LoadAsync<ClientEntity>($"Clients/{model.ClientId}");
                     if (client == null)
                         throw new KeyNotFoundException($"Client {model.ClientId} was not found");
 
@@ -220,12 +221,50 @@ namespace IdentityManager.Controllers
             catch (KeyNotFoundException ex)
             {
                 _logger.LogWarning(ex, "Client not found");
-                throw;
+                return NotFound();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting client");
                 throw;
+            }
+        }
+
+        /// <summary>
+        /// Update one or more properties on a client
+        /// </summary>
+        /// <param name="clientId"></param>
+        /// <param name="patch"></param>
+        /// <remarks>This is the preferred way to modify a client</remarks>
+        /// <response code="204">Client was updated</response>
+        /// <response code="400">Validation failed. Returns a list of fields and errors for each field</response>
+        /// <response code="404">Client was not found</response>
+        /// <response code="500">Error updating client</response>
+        [HttpPatch("{clientId}")]
+        [ProducesResponseType(typeof(void), 204)]
+        [ProducesResponseType(typeof(void), 404)]
+        [ProducesResponseType(typeof(IDictionary<string, string>), 400)]
+        [ProducesResponseType(typeof(void), 500)]
+        public async Task<IActionResult> Patch(string clientId, [FromBody] JsonPatchDocument<ClientModel> patch)
+        {
+            try
+            {
+                var originalClientObj = await Get(clientId) as OkObjectResult;
+                var originalClient = (ClientModel)originalClientObj.Value;
+
+                patch.ApplyTo(originalClient);
+                return await Put(originalClient);
+            }
+            catch (JsonPatchException ex)
+            {
+                _logger.LogError(ex, $"Invalid JsonPatch Operation:{ex.FailedOperation.OperationType} while attempting to update client {clientId}.");
+
+                return BadRequest(new Dictionary<string, string> { { "reason", ex.FailedOperation.op } });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, $"Error updating client");
+                return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
             }
         }
 
@@ -246,7 +285,7 @@ namespace IdentityManager.Controllers
             {
                 using (var session = _documentStore.OpenAsyncSession())
                 {
-                    var client = await session.LoadAsync<Client>($"Clients/{clientId}");
+                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
                     if (client == null)
                         throw new KeyNotFoundException($"Client {clientId} was not found");
 

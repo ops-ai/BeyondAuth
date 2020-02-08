@@ -117,7 +117,7 @@ namespace IdentityManager.Models
         /// Gets or sets a value to prefix it on client claim types. Defaults to client_.
         /// </summary>
         public string ClientClaimsPrefix { get; set; }
-        
+
         /// <summary>
         /// Gets or sets a salt value used in pair-wise subjectId generation for users of
         /// this client.
@@ -128,12 +128,12 @@ namespace IdentityManager.Models
         /// The maximum duration (in seconds) since the last time the user authenticated.
         /// </summary>
         public int? UserSsoLifetime { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the type of the device flow user code.
         /// </summary>
         public string UserCodeType { get; set; }
-        
+
         /// <summary>
         /// Gets or sets the device code lifetime.
         /// </summary>
@@ -165,7 +165,7 @@ namespace IdentityManager.Models
         /// The protocol type.
         /// </value>
         public string ProtocolType { get; set; } = IdentityServerConstants.ProtocolTypes.OpenIdConnect;
-        
+
         /// <summary>
         /// If set to false, no client secret is needed to request tokens at the token endpoint (defaults to <c>true</c>)
         /// </summary>
