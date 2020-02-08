@@ -31,6 +31,8 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Authorization Handlers\AuthorizationPolicyProvider\BeyondAuth.PolicyProvider.csproj" />
+    <ProjectReference Include="..\Authorization Handlers\BeyondAuth.Acl\BeyondAuth.Acl.csproj" />
     <ProjectReference Include="..\IdentityServer4.Contrib.RavenDB\IdentityServer4.Contrib.RavenDB.csproj" />
   </ItemGroup>
 
