@@ -54,7 +54,7 @@ namespace IdentityManager.Tests.Integration_Tests
         [Fact(DisplayName = "Security headers are present")]
         public async Task ServerHeadersPresent()
         {
-            var response = await _client.GetAsync("policies");
+            var response = await _client.GetAsync("clients");
 
             Assert.Contains(response.Headers, t => t.Key == "X-Content-Type-Options");
             Assert.Contains(response.Headers, t => t.Key == "X-Download-Options");

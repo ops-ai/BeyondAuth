@@ -72,7 +72,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(ClientModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        [HttpGet("{clientId}", Name = "Get")]
+        [HttpGet("{clientId}")]
         public async Task<IActionResult> Get(int clientId)
         {
             try
