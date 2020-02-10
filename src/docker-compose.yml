@@ -34,18 +34,16 @@ services:
   radiusserver:
     image: ${DOCKER_REGISTRY-}radiusserver
     build:
-      context: .
+      context: ./Bridges
       dockerfile: RadiusServer/Dockerfile
 
   openldap:
     container_name: ${DOCKER_REGISTRY-}openldap
     image: osixia/openldap:latest
-    ports: 
-      - "389:389"
-      - "636:636"
-    env_file:
-      - ./OpenLdap/ldap.env
-    volumes:
-      - ./OpenLdap/ldap:/data/ldif
 
+  zookeeper:
+    image: wurstmeister/zookeeper
+      
+  kafka:
+    image: wurstmeister/kafka
 

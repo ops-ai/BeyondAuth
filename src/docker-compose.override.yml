@@ -86,3 +86,16 @@ services:
     volumes:
       - ./OpenLdap/ldap:/data/ldif
 
+  zookeeper:
+    ports:
+      - "2181:2181"
+      
+  kafka:
+    ports:
+      - "9092"
+    environment:
+      KAFKA_ADVERTISED_HOST_NAME: 10.10.11.3
+      KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    
