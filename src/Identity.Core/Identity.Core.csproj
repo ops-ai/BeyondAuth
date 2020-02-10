@@ -5,6 +5,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="IdentityServer.LdapExtension" Version="2.1.29" />
     <PackageReference Include="RavenDB.Identity" Version="7.0.1" />
   </ItemGroup>
   
