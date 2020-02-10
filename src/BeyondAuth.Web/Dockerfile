@@ -21,7 +21,7 @@ RUN apt-get install nodejs -yq
 RUN dotnet restore "BeyondAuth.Web/BeyondAuth.Web.csproj"
 COPY . .
 WORKDIR "/src/BeyondAuth.Web"
-RUN dotnet build "BeyondAuth.Web.csproj" -c Release -o /app/build
+#RUN dotnet build "BeyondAuth.Web.csproj" -c Release -o /app/build
 
 FROM build AS publish
 RUN dotnet publish "BeyondAuth.Web.csproj" -c Release -o /app/publish
