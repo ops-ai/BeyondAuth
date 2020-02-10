@@ -14,18 +14,17 @@ using System.Threading.Tasks;
 
 namespace PolicyServer.Controllers
 {
-    [ApiController]
     [Route("[controller]")]
-    [Authorize]
+    [ApiController]
     public class UsersController : ControllerBase
     {
         private readonly IDocumentStore _documentStore;
         private readonly ILogger<UsersController> _logger;
 
-        public UsersController(IDocumentStore documentStore, ILoggerFactory factory)
+        public UsersController(IDocumentStore documentStore, ILogger<UsersController> logger)
         {
             _documentStore = documentStore;
-            _logger = factory.CreateLogger<UsersController>();
+            _logger = logger;
         }
 
         /// <summary>
