@@ -131,8 +131,7 @@ namespace Authentication
                 .AddClientStore<RavenDBClientStore>()
                 .AddResourceStore<RavenDBResourceStore>()
                 .AddCorsPolicyService<CorsPolicyService>()
-                .AddLdapUsers<OpenLdapAppUser>(Configuration.GetSection("IdentityServerLdap"), UserStore.InMemory)
-                .AddAspNetIdentity<ApplicationUser>();
+                .AddLdapUsers<ApplicationUser, RavenDBUserStore<ApplicationUser>>(Configuration.GetSection("IdentityServerLdap"));
 
             builder.AddMutualTlsSecretValidators();
             builder.AddDeveloperSigningCredential();
