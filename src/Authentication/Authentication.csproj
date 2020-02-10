@@ -76,7 +76,6 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.10" />
     <PackageReference Include="NWebsec.AspNetCore.Middleware" Version="3.0.0" />
     <PackageReference Include="RavenDB.Client" Version="4.2.8" />
-    <PackageReference Include="RavenDB.Identity" Version="7.0.1" />
     <PackageReference Include="scientist" Version="2.0.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.0.601" />
     <PackageReference Include="Twilio" Version="5.37.4" />

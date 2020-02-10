@@ -1,9 +1,14 @@
-﻿using System;
+﻿using Identity.Core.Extensions;
+using IdentityModel;
+using IdentityServer.LdapExtension.UserModel;
+using Novell.Directory.Ldap;
+using System;
 using System.Collections.Generic;
+using System.Security.Claims;
 
 namespace Identity.Core
 {
-    public class ApplicationUser : Raven.Identity.IdentityUser
+    public class ApplicationUser : IAppUser
     {
         /// <summary>
         /// First Name

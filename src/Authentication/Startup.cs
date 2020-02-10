@@ -80,8 +80,7 @@ namespace Authentication
                     .PersistKeysToAzureBlobStorage(new Uri(Configuration["DataProtection:StorageUri"]));
 
             services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddDefaultTokenProviders()
-                .AddRavenDbIdentityStores<ApplicationUser>();
+                .AddDefaultTokenProviders();
 
             services.AddControllersWithViews();
             services.AddRazorPages();
