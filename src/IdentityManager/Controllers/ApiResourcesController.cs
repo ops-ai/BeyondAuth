@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
 {
-    [Route("api/api-resources")]
+    [Route("api-resources")]
     [ApiController]
     public class ApiResourcesController : ControllerBase
     {

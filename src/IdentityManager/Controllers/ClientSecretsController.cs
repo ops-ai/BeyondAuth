@@ -14,21 +14,21 @@ using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
 {
-    [Route("clients")]
+    [Route("api/clients/{clientId}/secrets")]
     [ApiController]
-    public class ClientsController : ControllerBase
+    public class ClientSecretsController : ControllerBase
     {
         private readonly IDocumentStore _documentStore;
         private readonly ILogger<ClientsController> _logger;
 
-        public ClientsController(IDocumentStore documentStore, ILogger<ClientsController> logger)
+        public ClientSecretsController(IDocumentStore documentStore, ILogger<ClientsController> logger)
         {
             _documentStore = documentStore;
             _logger = logger;
         }
 
         /// <summary>
-        /// Get clients
+        /// Get secrets
         /// </summary>
         /// <param name="sort">+/- field to sort by</param>
         /// <param name="range">Paging range [from-to]</param>
@@ -38,7 +38,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string sort = "+clientName", [FromQuery] string range = "0-19")
+        public async Task<IActionResult> Get(string clientId, [FromQuery] string sort = "+clientName", [FromQuery] string range = "0-19")
         {
             try
             {
@@ -73,8 +73,8 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(ClientModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        [HttpGet("{clientId}")]
-        public async Task<IActionResult> Get(string clientId)
+        [HttpGet("{id}")]
+        public async Task<IActionResult> Get(string clientId, string id)
         {
             try
             {
@@ -110,24 +110,24 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] ClientModel client)
+        public async Task<IActionResult> Post(string clientId, [FromBody] ClientSecretModel client)
         {
             try
             {
                 if (client == null)
                     throw new ArgumentException("client is required", nameof(client));
 
-                if (string.IsNullOrEmpty(client.ClientId))
-                    throw new ArgumentException("clientId is required", nameof(client.ClientId));
+                if (string.IsNullOrEmpty(clientId))
+                    throw new ArgumentException("clientId is required", nameof(clientId));
 
                 using (var session = _documentStore.OpenAsyncSession())
                 {
-                    _logger.LogDebug($"Creating client {client.ClientId}");
+                    _logger.LogDebug($"Creating client {clientId}");
 
-                    if (await session.Advanced.ExistsAsync($"Clients/{client.ClientId}"))
+                    if (await session.Advanced.ExistsAsync($"Clients/{clientId}"))
                         throw new ArgumentException("Client already exists");
 
-                    await session.StoreAsync(client.FromModel(), $"Clients/{client.ClientId}");
+                    await session.StoreAsync(client.FromModel(), $"Clients/{clientId}");
                     await session.SaveChangesAsync();
                 }
 
@@ -156,7 +156,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        [HttpPut("{clientId}")]
+        [HttpPut("{id}")]
         public async Task<IActionResult> Put([FromBody] ClientModel model)
         {
             try
@@ -240,7 +240,7 @@ namespace IdentityManager.Controllers
         /// <response code="400">Validation failed. Returns a list of fields and errors for each field</response>
         /// <response code="404">Client was not found</response>
         /// <response code="500">Error updating client</response>
-        [HttpPatch("{clientId}")]
+        [HttpPatch("{id}")]
         [ProducesResponseType(typeof(void), 204)]
         [ProducesResponseType(typeof(void), 404)]
         [ProducesResponseType(typeof(IDictionary<string, string>), 400)]
@@ -278,8 +278,8 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        [HttpDelete("{clientId}")]
-        public async Task<IActionResult> Delete(string clientId)
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> Delete(int clientId)
         {
             try
             {

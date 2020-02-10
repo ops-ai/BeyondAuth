@@ -9,9 +9,9 @@ namespace IdentityManager.Models
     public class ClientSecretModel
     {
         /// <summary>
-        /// Unique ID of the client
+        /// Unique ID representing the secret
         /// </summary>
-        public string ClientId { get; set; }
+        public string Id { get; set; }
 
         /// <summary>
         /// Type of secret. SecretTypes.SharedSecret or SecretTypes.X509CertificateBase64
