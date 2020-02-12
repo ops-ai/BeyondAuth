@@ -1,9 +1,11 @@
+using JSNLog;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.SpaServices.AngularCli;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 
 namespace BeyondAuth.Web
 {
@@ -25,7 +27,7 @@ namespace BeyondAuth.Web
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -37,6 +39,10 @@ namespace BeyondAuth.Web
                 // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
                 app.UseHsts();
             }
+
+            // Configure JSNLog
+            var jsnlogConfiguration = new JsnlogConfiguration();
+            app.UseJSNLog(new LoggingAdapter(loggerFactory), jsnlogConfiguration);
 
             app.UseHttpsRedirection();
             app.UseStaticFiles();

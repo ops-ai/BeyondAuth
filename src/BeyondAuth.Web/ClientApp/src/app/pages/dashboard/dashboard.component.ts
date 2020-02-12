@@ -1,7 +1,8 @@
-import {Component, OnDestroy} from '@angular/core';
+import {Component, OnDestroy, Inject } from '@angular/core';
 import { NbThemeService } from '@nebular/theme';
 import { takeWhile } from 'rxjs/operators' ;
 import { SolarData } from '../../@core/data/solar';
+import { JL } from 'jsnlog';
 
 interface CardSettings {
   title: string;
@@ -15,6 +16,8 @@ interface CardSettings {
   templateUrl: './dashboard.component.html',
 })
 export class DashboardComponent implements OnDestroy {
+
+  JL: JL.JSNLog;
 
   private alive = true;
 
@@ -79,7 +82,13 @@ export class DashboardComponent implements OnDestroy {
   };
 
   constructor(private themeService: NbThemeService,
-              private solarService: SolarData) {
+      private solarService: SolarData,
+      @Inject('JSNLOG') JL: JL.JSNLog) {
+
+    this.JL = JL;
+
+    this.JL().info("app loaded");
+
     this.themeService.getJsTheme()
       .pipe(takeWhile(() => this.alive))
       .subscribe(theme => {
