@@ -60,6 +60,15 @@ services:
     volumes:
       - ${APPDATA}/Microsoft/UserSecrets:/root/.microsoft/usersecrets:ro
       - ${APPDATA}/ASP.NET/Https:/root/.aspnet/https:ro
+      
+  identitymanager:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/beyondauth.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=c582b846-0fef-4144-b28a-9c343644768f
+    ports:
+      - "5006:443"
 
   radiusserver:
     environment:
@@ -68,7 +77,7 @@ services:
       - ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/beyondauth.pfx
       - ASPNETCORE_Kestrel__Certificates__Default__Password=c582b846-0fef-4144-b28a-9c343644768f
     ports:
-      - "5006:443"
+      - "5010:443"
 
       
   openldap:
