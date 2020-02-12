@@ -29,7 +29,13 @@ services:
     image: ${DOCKER_REGISTRY-}beyondauthweb
     build:
       context: .
-      dockerfile: BeyondAuth.Web/Dockerfile
+
+  identitymanager:
+    image: ${DOCKER_REGISTRY-}identitymanager
+    build:
+      context: .
+      dockerfile: Identitymanager/Dockerfile
+      dockerfile: Identitymanager/Dockerfile
 
   radiusserver:
     image: ${DOCKER_REGISTRY-}radiusserver
