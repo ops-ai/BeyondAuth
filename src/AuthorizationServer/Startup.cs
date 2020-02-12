@@ -1,4 +1,6 @@
-﻿using BeyondAuth.PolicyProvider;
+﻿using Autofac;
+using Autofac.Configuration;
+using BeyondAuth.PolicyProvider;
 using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
 using IdentityServer4.AccessTokenValidation;
@@ -24,6 +26,8 @@ namespace AuthorizationServer
         public Startup(IConfiguration configuration) => Configuration = configuration;
 
         public IConfiguration Configuration { get; }
+
+        public ILifetimeScope AutofacContainer { get; private set; }
 
         // This method gets called by the runtime. Use this method to add services to the container.
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
@@ -65,12 +69,25 @@ namespace AuthorizationServer
                 .AddRavenDB(setup => { setup.Urls = new[] { Configuration["Raven:Url"] }; setup.Database = Configuration["Raven:Database"]; setup.Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null; }, "ravendb");
 
             services.AddAuthorization();
+            services.AddHttpContextAccessor();
             services.AddTransient<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
             services.AddTransient<IAuthorizationHandler, RemoteAuthorizationHandler>();
 
             services.AddCorrelationId();
 
             services.AddGrpc();
+        }
+
+        /// <summary>
+        /// ConfigureContainer is where you can register things directly
+        /// with Autofac. This runs after ConfigureServices so the things
+        /// here will override registrations made in ConfigureServices.
+        /// </summary>
+        /// <param name="builder"></param>
+        public void ConfigureContainer(ContainerBuilder builder)
+        {
+            var module = new ConfigurationModule(Configuration);
+            builder.RegisterModule(module);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
