@@ -1,5 +1,4 @@
-﻿using Identity.Core.Exceptions;
-using IdentityModel;
+﻿using IdentityModel;
 using IdentityServer.LdapExtension;
 using IdentityServer.LdapExtension.UserModel;
 using IdentityServer.LdapExtension.UserStore;
@@ -10,7 +9,6 @@ using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
-using System.Text;
 
 namespace Identity.Core
 {
@@ -191,7 +189,7 @@ namespace Identity.Core
                     return user;
                 }
             }
-            catch (LoginFailedException ex)
+            catch (Exception ex) when (ex.Message == "Login failed.")
             {
                 _logger.LogWarning(ex, "Login failed");
 
@@ -223,7 +221,7 @@ namespace Identity.Core
                     return user;
                 }
             }
-            catch (LoginFailedException ex)
+            catch (Exception ex) when (ex.Message == "Login failed.")
             {
                 _logger.LogWarning(ex, "Login failed");
 
