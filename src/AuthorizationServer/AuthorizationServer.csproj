@@ -36,4 +36,10 @@
     <ProjectReference Include="..\Authorization Handlers\BeyondAuth.RelatedDataValidation\BeyondAuth.RelatedDataValidation.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="AuthorizationServer.pfx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
+
 </Project>

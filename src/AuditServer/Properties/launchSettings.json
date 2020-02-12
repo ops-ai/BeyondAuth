@@ -24,7 +24,7 @@
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
-      "applicationUrl": "https://localhost:5001;http://localhost:5000"
+      "applicationUrl": "https://localhost:5004"
     },
     "Docker": {
       "commandName": "Docker",
@@ -32,11 +32,11 @@
       "launchUrl": "{Scheme}://{ServiceHost}:{ServicePort}/weatherforecast",
       "environmentVariables": {
         "ASPNETCORE_URLS": "https://+:443;http://+:80",
-        "ASPNETCORE_HTTPS_PORT": "44301"
+        "ASPNETCORE_HTTPS_PORT": "5004"
       },
       "httpPort": 56440,
       "useSSL": true,
-      "sslPort": 44301
+      "sslPort": 5004
     }
   }
 }
