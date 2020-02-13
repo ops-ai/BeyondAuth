@@ -71,7 +71,8 @@
     "typeface-exo": "0.0.22",
     "web-animations-js": "github:angular/web-animations-js#release_pr208",
     "zone.js": "~0.9.1",
-    "jsnlog": "2.29.0"
+    "jsnlog": "2.29.0",
+    "angular-auth-oidc-client": "^10.0.14"
   },
   "devDependencies": {
     "@angular-devkit/build-angular": "~0.800.2",
