@@ -6,6 +6,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Logging;
 using Moq;
+using Raven.TestDriver;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
@@ -14,7 +15,7 @@ using Xunit.Abstractions;
 
 namespace IdentityManager.Tests.Integration_Tests
 {
-    public class SecurityHeaderTests : IClassFixture<AuthorizationServerWebApplicationFactory<Startup>>
+    public class SecurityHeaderTests : RavenTestDriver, IClassFixture<AuthorizationServerWebApplicationFactory<Startup>>
     {
         private readonly ITestOutputHelper _output;
         private readonly HttpClient _client;
@@ -37,6 +38,7 @@ namespace IdentityManager.Tests.Integration_Tests
                 });
                 builder.ConfigureTestServices(services =>
                  {
+                     services.AddSingleton(GetDocumentStore());
                      services.AddControllers(opt =>
                      {
                          opt.Filters.Add(new AllowAnonymousFilter());
