@@ -9,7 +9,9 @@ A new standard model for authorization and blockchain-based authorization auditi
 
 A distributed, extensible authorization model, based on standard protocols, with centralized authorization policies and the ability to define authorization capabilities that can be validated locally or delegated out; with the option to request more identity context using Vectors of Trust; where authorization decisions are published to a blockchain-based audit log which can be analyzed by the owner of the data it's protecting.
 
-![Authorization Model Architecture](docs/Architecture.PNG)
+<p align="center">
+  <img width="723" height="820" src="docs/Architecture.PNG">
+</p>
 
 
 
