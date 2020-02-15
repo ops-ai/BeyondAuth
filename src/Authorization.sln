@@ -69,11 +69,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DiameterServer", "Bridges\D
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.RelatedDataValidation", "Authorization Handlers\BeyondAuth.RelatedDataValidation\BeyondAuth.RelatedDataValidation.csproj", "{19FA5418-A0F5-4C41-8F50-ACB88A782286}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityManager", "IdentityManager\IdentityManager.csproj", "{5FC6D412-976E-4AA2-B8B3-36294AA9C4C7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityManager", "IdentityManager\IdentityManager.csproj", "{5FC6D412-976E-4AA2-B8B3-36294AA9C4C7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IdentityManager.Tests", "Tests\IdentityManager.Tests\IdentityManager.Tests.csproj", "{AF62CB61-FA11-456C-B04D-5102E79B226C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityManager.Tests", "Tests\IdentityManager.Tests\IdentityManager.Tests.csproj", "{AF62CB61-FA11-456C-B04D-5102E79B226C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Identity.Core", "Identity.Core\Identity.Core.csproj", "{3E602F66-AA3C-4446-9720-FB48A7FB6CA2}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Identity.Core", "Identity.Core\Identity.Core.csproj", "{3E602F66-AA3C-4446-9720-FB48A7FB6CA2}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Documentation", "Documentation\Documentation.csproj", "{FDFA6D6F-6BCE-43DC-B581-7E5B1901843C}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -180,6 +182,10 @@ Global
 		{3E602F66-AA3C-4446-9720-FB48A7FB6CA2}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3E602F66-AA3C-4446-9720-FB48A7FB6CA2}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{3E602F66-AA3C-4446-9720-FB48A7FB6CA2}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FDFA6D6F-6BCE-43DC-B581-7E5B1901843C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FDFA6D6F-6BCE-43DC-B581-7E5B1901843C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FDFA6D6F-6BCE-43DC-B581-7E5B1901843C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FDFA6D6F-6BCE-43DC-B581-7E5B1901843C}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -201,7 +207,7 @@ Global
 		{AF62CB61-FA11-456C-B04D-5102E79B226C} = {F697BF7F-ED3E-4571-A176-AA937EE763FF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
 		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
+		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
 	EndGlobalSection
 EndGlobal
