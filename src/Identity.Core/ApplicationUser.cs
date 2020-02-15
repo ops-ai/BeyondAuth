@@ -146,7 +146,7 @@ namespace Identity.Core
 
         private Claim GetClaimFromLdapAttributes(LdapEntry user, string claim, OpenLdapAttributes ldapAttribute)
         {
-            string value = string.Empty;
+            var value = string.Empty;
 
             try
             {

@@ -12,7 +12,7 @@ using System.Security.Claims;
 
 namespace Identity.Core
 {
-    public class RavenDBUserStore<TUser> : ILdapUserStore 
+    public class RavenDBUserStore<TUser> : ILdapUserStore
         where TUser : IAppUser, new()
     {
         private readonly IDocumentStore _documentStore;

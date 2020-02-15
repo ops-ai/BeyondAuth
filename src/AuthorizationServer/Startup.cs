@@ -13,8 +13,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using NSwag;
+using NSwag.Generation.Processors.Security;
 using Raven.Client.Documents;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
@@ -74,8 +80,50 @@ namespace AuthorizationServer
             services.AddTransient<IAuthorizationHandler, RemoteAuthorizationHandler>();
 
             services.AddCorrelationId();
+            
+            services.AddOpenApiDocument(config =>
+            {
+                config.DocumentName = "v1";
+                config.PostProcess = document =>
+                {
+                    document.Info.Version = "v1";
+                    document.Info.Title = "BeyondAuth Authorization Server";
+                    document.Info.Description = File.ReadAllText("readme.md");
+                    document.Info.ExtensionData = new Dictionary<string, object>
+                    {
+                        { "x-logo", new { url = "/logo.png", altText = "BeyondAuth" } }
+                    };
+                    //document.ExtensionData.Add("x-tagGroups", new { name = "General", tags = new [] { "Discovery", "Tickets" }});
+
+                    document.Info.Contact = new OpenApiContact
+                    {
+                        Name = "opsAI Support",
+                        Email = "support@ops.ai",
+                        Url = "https://support.ops.ai"
+                    };
+                };
+
+                config.AddSecurity("bearer", Enumerable.Empty<string>(), new OpenApiSecurityScheme
+                {
+                    Type = OpenApiSecuritySchemeType.OpenIdConnect,
+                    Flow = OpenApiOAuth2Flow.AccessCode,
+                    OpenIdConnectUrl = $"{Configuration["AuthorityUrl"]}.well-known/openid-configuration",
+                    Scopes = new Dictionary<string, string>
+                    {
+                        { "authorizationserver", "authorizationserver" }
+                    }
+                });
+                config.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("bearer"));
+
+                config.SerializerSettings = new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                };
+                config.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+            });
 
             services.AddGrpc();
+            services.AddControllers();
         }
 
         /// <summary>
@@ -109,6 +157,9 @@ namespace AuthorizationServer
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseOpenApi();
+            app.UseSwaggerUi3();
 
             app.UseHealthChecks(Configuration["HealthChecks:FullEndpoint"], new HealthCheckOptions()
             {

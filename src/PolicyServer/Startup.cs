@@ -10,8 +10,14 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
+using NSwag;
+using NSwag.Generation.Processors.Security;
 using Raven.Client.Documents;
 using System;
+using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
@@ -64,6 +70,46 @@ namespace PolicyServer
             services.AddHealthChecks()
                 .AddRavenDB(setup => { setup.Urls = new[] { Configuration["Raven:Url"] }; setup.Database = Configuration["Raven:Database"]; setup.Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null; }, "ravendb");
 
+            services.AddOpenApiDocument(config =>
+            {
+                config.DocumentName = "v1";
+                config.PostProcess = document =>
+                {
+                    document.Info.Version = "v1";
+                    document.Info.Title = "BeyondAuth Policy Server";
+                    document.Info.Description = File.ReadAllText("readme.md");
+                    document.Info.ExtensionData = new Dictionary<string, object>
+                    {
+                        { "x-logo", new { url = "/logo.png", altText = "BeyondAuth" } }
+                    };
+
+                    document.Info.Contact = new OpenApiContact
+                    {
+                        Name = "opsAI Support",
+                        Email = "support@ops.ai",
+                        Url = "https://support.ops.ai"
+                    };
+                };
+
+                config.AddSecurity("bearer", Enumerable.Empty<string>(), new OpenApiSecurityScheme
+                {
+                    Type = OpenApiSecuritySchemeType.OpenIdConnect,
+                    Flow = OpenApiOAuth2Flow.AccessCode,
+                    OpenIdConnectUrl = $"{Configuration["AuthorityUrl"]}.well-known/openid-configuration",
+                    Scopes = new Dictionary<string, string>
+                    {
+                        { "policyserver", "policyserver" }
+                    }
+                });
+                config.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("bearer"));
+
+                config.SerializerSettings = new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                };
+                config.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+            });
+
             services.AddControllers();
         }
 
@@ -102,6 +148,9 @@ namespace PolicyServer
             app.UseRouting();
 
             app.UseAuthorization();
+
+            app.UseOpenApi();
+            app.UseSwaggerUi3();
 
             app.UseHealthChecks(Configuration["HealthChecks:FullEndpoint"], new HealthCheckOptions()
             {
