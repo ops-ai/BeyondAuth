@@ -35,7 +35,12 @@ services:
     build:
       context: .
       dockerfile: Identitymanager/Dockerfile
-      dockerfile: Identitymanager/Dockerfile
+      
+  documentation:
+    image: ${DOCKER_REGISTRY-}documentation
+    build:
+      context: .
+      dockerfile: Documentation/Dockerfile
 
   radiusserver:
     image: ${DOCKER_REGISTRY-}radiusserver

@@ -70,6 +70,15 @@ services:
     ports:
       - "5006:443"
 
+  documentation:
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Staging
+      - ASPNETCORE_URLS=https://+:443;http://+:80
+      - ASPNETCORE_Kestrel__Certificates__Default__Path=/root/.aspnet/https/beyondauth.pfx
+      - ASPNETCORE_Kestrel__Certificates__Default__Password=c582b846-0fef-4144-b28a-9c343644768f
+    ports:
+      - "5007:443"
+
   radiusserver:
     environment:
       - ASPNETCORE_ENVIRONMENT=Staging
