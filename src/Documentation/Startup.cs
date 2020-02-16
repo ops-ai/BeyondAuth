@@ -69,12 +69,17 @@ namespace Documentation
 
                 config.AddSecurity("bearer", Enumerable.Empty<string>(), new OpenApiSecurityScheme
                 {
-                    Type = OpenApiSecuritySchemeType.OpenIdConnect,
+                    Type = OpenApiSecuritySchemeType.OAuth2,
+                    Description = "Auth",
                     Flow = OpenApiOAuth2Flow.AccessCode,
-                    OpenIdConnectUrl = $"{Configuration["AuthorityUrl"]}.well-known/openid-configuration",
-                    Scopes = new Dictionary<string, string>
+                    OpenIdConnectUrl = $"{Configuration["Authentication:Authority"]}/.well-known/openid-configuration",
+                    Flows = new OpenApiOAuthFlows
                     {
-
+                        AuthorizationCode = new OpenApiOAuthFlow
+                        {
+                            AuthorizationUrl = $"{Configuration["Authentication:Authority"]}/connect/authorize",
+                            TokenUrl = $"{Configuration["Authentication:Authority"]}/connect/token"
+                        }
                     }
                 });
                 config.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("bearer"));
@@ -105,7 +110,15 @@ namespace Documentation
                 settings.Path = "/redoc";
             });
 
-            app.UseSwaggerUi3();
+            app.UseSwaggerUi3(options =>
+            {
+                options.OAuth2Client = new OAuth2ClientSettings
+                {
+                    ClientId = "swagger",
+                    AppName = "docs",
+                    UsePkceWithAuthorizationCodeGrant = true,
+                };
+            });
 
             app.UseEndpoints(endpoints =>
             {

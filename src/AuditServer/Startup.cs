@@ -14,6 +14,7 @@ using Microsoft.Extensions.Hosting;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using NSwag;
+using NSwag.AspNetCore;
 using NSwag.Generation.Processors.Security;
 using Raven.Client.Documents;
 using System;
@@ -96,12 +97,17 @@ namespace AuditServer
 
                 config.AddSecurity("bearer", Enumerable.Empty<string>(), new OpenApiSecurityScheme
                 {
-                    Type = OpenApiSecuritySchemeType.OpenIdConnect,
+                    Type = OpenApiSecuritySchemeType.OAuth2,
+                    Description = "Auth",
                     Flow = OpenApiOAuth2Flow.AccessCode,
-                    OpenIdConnectUrl = $"{Configuration["AuthorityUrl"]}.well-known/openid-configuration",
-                    Scopes = new Dictionary<string, string>
+                    OpenIdConnectUrl = $"{Configuration["Authentication:Authority"]}/.well-known/openid-configuration",
+                    Flows = new OpenApiOAuthFlows
                     {
-                        { "auditserver", "auditserver" }
+                        AuthorizationCode = new OpenApiOAuthFlow
+                        {
+                            AuthorizationUrl = $"{Configuration["Authentication:Authority"]}/connect/authorize",
+                            TokenUrl = $"{Configuration["Authentication:Authority"]}/connect/token"
+                        }
                     }
                 });
                 config.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("bearer"));
@@ -153,7 +159,15 @@ namespace AuditServer
             app.UseAuthorization();
 
             app.UseOpenApi();
-            app.UseSwaggerUi3();
+            app.UseSwaggerUi3(options =>
+            {
+                options.OAuth2Client = new OAuth2ClientSettings
+                {
+                    ClientId = "swagger",
+                    AppName = "auditserver",
+                    UsePkceWithAuthorizationCodeGrant = true,
+                };
+            });
 
             app.UseHealthChecks(Configuration["HealthChecks:FullEndpoint"], new HealthCheckOptions()
             {
