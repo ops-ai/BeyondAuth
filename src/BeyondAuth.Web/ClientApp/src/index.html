@@ -10,16 +10,76 @@
   <link rel="icon" type="image/x-icon" href="favicon.ico">
 </head>
   <body>
-  <ngx-app>Loading...</ngx-app>
+    <ngx-app>
+      <style type="text/css">
+        body {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          min-height: 100vh;
+        }
 
-  <style>@-webkit-keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}@-moz-keyframes spin{0%{-moz-transform:rotate(0)}100%{-moz-transform:rotate(360deg)}}@keyframes spin{0%{transform:rotate(0)}100%{transform:rotate(360deg)}}.spinner{position:fixed;top:0;left:0;width:100%;height:100%;z-index:1003;background: #000000;overflow:hidden}  .spinner div:first-child{display:block;position:relative;left:50%;top:50%;width:150px;height:150px;margin:-75px 0 0 -75px;border-radius:50%;box-shadow:0 3px 3px 0 rgba(255,56,106,1);transform:translate3d(0,0,0);animation:spin 2s linear infinite}  .spinner div:first-child:after,.spinner div:first-child:before{content:'';position:absolute;border-radius:50%}  .spinner div:first-child:before{top:5px;left:5px;right:5px;bottom:5px;box-shadow:0 3px 3px 0 rgb(255, 228, 32);-webkit-animation:spin 3s linear infinite;animation:spin 3s linear infinite}  .spinner div:first-child:after{top:15px;left:15px;right:15px;bottom:15px;box-shadow:0 3px 3px 0 rgba(61, 175, 255,1);animation:spin 1.5s linear infinite}</style>
-  <div id="nb-global-spinner" class="spinner">
-    <div class="blob blob-0"></div>
-    <div class="blob blob-1"></div>
-    <div class="blob blob-2"></div>
-    <div class="blob blob-3"></div>
-    <div class="blob blob-4"></div>
-    <div class="blob blob-5"></div>
-  </div>
+        .loading {
+          max-width:100%;
+          line-height: 1.4;
+          font-size: 1.2rem;
+          font-weight: bold;
+          text-align: center;
+        }
+        #loading__message
+        {
+          max-width:75%;
+          margin:auto;
+        }
+
+        #loading__author {
+          font-weight: normal;
+          font-size: 0.9rem;
+          color: rgba(189,189,189,1);
+          margin: 0.6rem 0 2rem 0;
+          display: block;
+        }
+
+        .loading__anim {
+          width: 35px;
+          height: 35px;
+          border: 5px solid rgba(189,189,189,0.25);
+          border-left-color: rgba(3,155,229,1);
+          border-top-color: rgba(3,155,229,1);
+          border-radius: 50%;
+          display: inline-block;
+          animation: rotate 600ms infinite linear;
+        }
+
+        .logo {
+          margin-bottom: 20px;
+        }
+
+        @keyframes rotate {
+          to {
+            transform: rotate(1turn)
+          }
+        }
+      </style>
+      <section class="loading">
+        <div id="loading__message"></div>
+        <div id="loading__author"> </div>
+
+        <span class="loading__anim"></span>
+      </section>
+      <script type="text/javascript">
+        var quotes = [];
+        quotes.push({ message: "“There are risks and costs to a program of action — but they are far less than the long range cost of comfortable inaction.”", author: "- John F. Kennedy", title: " 35th President of the United States" });
+        quotes.push({ message: "“One of the tests of leadership is the ability to recognize a problem before it becomes an emergency.”", author: "- Arnold H. Glasow", title: "Author & Businessman" });
+        quotes.push({ message: "“There’s no silver bullet solution with cyber security, a layered defense is the only viable defense.”", author: "- James Scott", title: "Institute for Critical Infrastructure Technology" });
+        quotes.push({ message: "“The best way to get management excited about a disaster plan is to burn down the building across the street.”", author: "- Dan Erwin", title: "Security Officer, Dow Chemical Co." }); 
+        quotes.push({ message: "“As a Global CISO, the best advice I can give is don’t try to do something different for every part of the world. Pick and choose what you’re going to use from a policy and procedure standpoint. Generally, pick from a global perspective the most onerous and strict regulations you have to comply with and implement them globally.”", author: "- James Waters", title: "Global CISO, Black & Veatch" });
+        quotes.push({ message: "“I really think that if we change our own approach and thinking about what we have available to us, that is what will unlock our ability to truly excel in security. It’s a perspectives exercise. What would it look like if abundance were the reality and not resource constraint?”", author: "- Greg York", title: "VP, Information Security, Tribune Media" });
+
+        var randomNumber = Math.floor(Math.random() * quotes.length);
+        document.getElementById("loading__message").innerHTML = quotes[randomNumber].message;
+        document.getElementById("loading__author").innerHTML = quotes[randomNumber].author;
+      </script>
+    </ngx-app>
   </body>
 </html>
