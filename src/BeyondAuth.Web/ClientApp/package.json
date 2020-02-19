@@ -43,7 +43,7 @@
     "@nguniversal/module-map-ngfactory-loader": "8.1.1",
     "@swimlane/ngx-charts": "^10.0.0",
     "angular2-chartjs": "0.4.1",
-    "angular2-toaster": "^7.0.0",
+    "angular2-toaster": "^8.0.0",
     "bootstrap": "4.3.1",
     "chart.js": "2.7.1",
     "aspnet-prerendering": "^3.0.1",
