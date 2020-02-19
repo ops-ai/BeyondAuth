@@ -36,10 +36,10 @@
     "@angular/platform-server": "8.0.0",
     "@angular/router": "8.0.0",
     "@asymmetrik/ngx-leaflet": "3.0.1",
-    "@nebular/auth": "4.4.0",
-    "@nebular/eva-icons": "4.4.0",
-    "@nebular/security": "4.4.0",
-    "@nebular/theme": "4.4.0",
+    "@nebular/auth": "4.6.0",
+    "@nebular/eva-icons": "4.6.0",
+    "@nebular/security": "4.6.0",
+    "@nebular/theme": "4.6.0",
     "@nguniversal/module-map-ngfactory-loader": "8.1.1",
     "@swimlane/ngx-charts": "^10.0.0",
     "angular2-chartjs": "0.4.1",
@@ -103,7 +103,6 @@
     "stylelint": "7.13.0",
     "ts-node": "3.2.2",
     "tslint": "^5.20.1",
-    "tslint-language-service": "^0.9.9",
     "typescript": "3.4.5"
   },
   "optionalDependencies": {}
