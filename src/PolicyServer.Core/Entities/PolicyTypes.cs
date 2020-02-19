@@ -1,6 +1,6 @@
 ﻿namespace PolicyServer.Core.Entities
 {
-    public enum PolicyTypes
+    public enum PolicyMatch
     {
         Named,
         Criteria

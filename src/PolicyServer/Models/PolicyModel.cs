@@ -32,5 +32,10 @@ namespace PolicyServer.Models
         /// List of requirements the policy demands
         /// </summary>
         public List<AuthorizationRequirement> Requirements { get; set; } = new List<AuthorizationRequirement>();
+
+        /// <summary>
+        /// Criteria the protected resource must match for this policy to apply
+        /// </summary>
+        public List<KeyValuePair<string, string>> Criteria { get; set; }
     }
 }
