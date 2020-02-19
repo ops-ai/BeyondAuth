@@ -42,7 +42,12 @@ namespace PolicyServer.Core.Entities
         /// <summary>
         /// Type of policy. Ex: Named vs criteria-based
         /// </summary>
-        public PolicyTypes PolicyType { get; set; }
+        public PolicyMatch Matching { get; set; }
+
+        /// <summary>
+        /// Infrastructure segment applicability of policy
+        /// </summary>
+        public PolicyApplicability Applicability { get; set; }
 
         /// <summary>
         /// Criteria the protected resource must match for this policy to apply
