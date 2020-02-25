@@ -75,7 +75,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "IdentityManager.Tests", "Te
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Identity.Core", "Identity.Core\Identity.Core.csproj", "{3E602F66-AA3C-4446-9720-FB48A7FB6CA2}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Documentation", "Documentation\Documentation.csproj", "{FDFA6D6F-6BCE-43DC-B581-7E5B1901843C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Documentation", "Documentation\Documentation.csproj", "{FDFA6D6F-6BCE-43DC-B581-7E5B1901843C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondAuth.Swim", "BeyondAuth.Swim\BeyondAuth.Swim.csproj", "{8F00ED31-7EE0-4DB7-AD6F-27BA7E910674}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -186,6 +188,10 @@ Global
 		{FDFA6D6F-6BCE-43DC-B581-7E5B1901843C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{FDFA6D6F-6BCE-43DC-B581-7E5B1901843C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{FDFA6D6F-6BCE-43DC-B581-7E5B1901843C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8F00ED31-7EE0-4DB7-AD6F-27BA7E910674}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8F00ED31-7EE0-4DB7-AD6F-27BA7E910674}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8F00ED31-7EE0-4DB7-AD6F-27BA7E910674}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8F00ED31-7EE0-4DB7-AD6F-27BA7E910674}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -207,7 +213,7 @@ Global
 		{AF62CB61-FA11-456C-B04D-5102E79B226C} = {F697BF7F-ED3E-4571-A176-AA937EE763FF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
 		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
+		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
 	EndGlobalSection
 EndGlobal

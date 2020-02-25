@@ -25,16 +25,17 @@ services:
       context: .
       dockerfile: AuditServer/Dockerfile
 
-  beyondauth.web:
+  beyondauthweb:
     image: ${DOCKER_REGISTRY-}beyondauthweb
     build:
       context: .
+      dockerfile: BeyondAuth.Web/Dockerfile
 
   identitymanager:
     image: ${DOCKER_REGISTRY-}identitymanager
     build:
       context: .
-      dockerfile: Identitymanager/Dockerfile
+      dockerfile: IdentityManager/Dockerfile
       
   documentation:
     image: ${DOCKER_REGISTRY-}documentation
@@ -42,14 +43,14 @@ services:
       context: .
       dockerfile: Documentation/Dockerfile
 
-  radiusserver:
-    image: ${DOCKER_REGISTRY-}radiusserver
-    build:
-      context: ./Bridges
-      dockerfile: RadiusServer/Dockerfile
+  #radiusserver:
+  #  image: ${DOCKER_REGISTRY-}radiusserver
+  #  build:
+  #    context: ./Bridges
+  #    dockerfile: RadiusServer/Dockerfile
 
   openldap:
-    container_name: ${DOCKER_REGISTRY-}openldap
+    #container_name: ${DOCKER_REGISTRY-}openldap
     image: osixia/openldap:latest
 
   zookeeper:
