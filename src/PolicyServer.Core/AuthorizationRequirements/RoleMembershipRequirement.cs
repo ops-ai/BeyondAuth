@@ -1,4 +1,4 @@
-﻿namespace PolicyServer.Core.Entities.Requirements
+﻿namespace PolicyServer.Core.Entities.AuthorizationRequirements
 {
     /// <summary>
     /// Role membership requirement

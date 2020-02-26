@@ -10,13 +10,15 @@ namespace PolicyServer.Core.Entities
     /// Authorization requirements base class
     /// </summary>
     [JsonConverter(typeof(JsonInheritanceConverter), "name")]
-    [JsonSubtypes.KnownSubType(typeof(AuthenticatedRequirement), "authenticated")]
-    [JsonSubtypes.KnownSubType(typeof(ClaimRequirement), "claim")]
-    [JsonSubtypes.KnownSubType(typeof(GroupMembershipRequirement), "group")]
-    [JsonSubtypes.KnownSubType(typeof(RoleMembershipRequirement), "role")]
-    [JsonSubtypes.KnownSubType(typeof(ScopeRequirement), "scope")]
-    [JsonSubtypes.KnownSubType(typeof(UsernameRequirement), "username")]
-    public abstract class AuthorizationRequirement : IAuthorizationRequirement
+    [JsonSubtypes.KnownSubType(typeof(ComplexityRequirement), "complexity")]
+    [JsonSubtypes.KnownSubType(typeof(MinPasswordAgeRequirement), "min-age")]
+    [JsonSubtypes.KnownSubType(typeof(MaxPasswordAgeRequirement), "max-age")]
+    [JsonSubtypes.KnownSubType(typeof(MinPasswordLengthRequirement), "min-length")]
+    [JsonSubtypes.KnownSubType(typeof(PasswordDictionaryRequirement), "dictionary")]
+    [JsonSubtypes.KnownSubType(typeof(PasswordHistoryRequirement), "history")]
+    [JsonSubtypes.KnownSubType(typeof(LeakedPasswordRequirement), "leaked-passwords")]
+    [JsonSubtypes.KnownSubType(typeof(PasswordTopologyRequirement), "topology")]
+    public abstract class PasswordRequirement
     {
         /// <summary>
         /// Unique name of requirement
