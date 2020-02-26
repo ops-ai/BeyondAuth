@@ -1,5 +1,4 @@
 ﻿using JsonSubTypes;
-using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
 using NJsonSchema.Converters;
 using PolicyServer.Core.Entities.AuthorizationRequirements;
@@ -10,13 +9,8 @@ namespace PolicyServer.Core.Entities
     /// Authorization requirements base class
     /// </summary>
     [JsonConverter(typeof(JsonInheritanceConverter), "name")]
-    [JsonSubtypes.KnownSubType(typeof(AuthenticatedRequirement), "authenticated")]
-    [JsonSubtypes.KnownSubType(typeof(ClaimRequirement), "claim")]
-    [JsonSubtypes.KnownSubType(typeof(GroupMembershipRequirement), "group")]
-    [JsonSubtypes.KnownSubType(typeof(RoleMembershipRequirement), "role")]
-    [JsonSubtypes.KnownSubType(typeof(ScopeRequirement), "scope")]
-    [JsonSubtypes.KnownSubType(typeof(UsernameRequirement), "username")]
-    public abstract class AuthorizationRequirement : IAuthorizationRequirement
+    [JsonSubtypes.KnownSubType(typeof(LockoutRequirement), "complexity")]
+    public abstract class AccountRequirement
     {
         /// <summary>
         /// Unique name of requirement

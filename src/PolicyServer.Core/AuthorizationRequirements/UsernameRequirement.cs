@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PolicyServer.Core.Entities.Requirements
+namespace PolicyServer.Core.Entities.AuthorizationRequirements
 {
     /// <summary>
     /// Username requirement
