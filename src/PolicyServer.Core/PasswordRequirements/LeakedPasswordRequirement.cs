@@ -1,4 +1,4 @@
-﻿namespace PolicyServer.Core.Entities.AuthorizationRequirements
+﻿namespace PolicyServer.Core.Entities.PasswordRequirements
 {
     /// <summary>
     /// Prevent passwords found in data breaches from being used

@@ -16,6 +16,7 @@ namespace PolicyServer.Core.Entities
     [JsonSubtypes.KnownSubType(typeof(RoleMembershipRequirement), "role")]
     [JsonSubtypes.KnownSubType(typeof(ScopeRequirement), "scope")]
     [JsonSubtypes.KnownSubType(typeof(UsernameRequirement), "username")]
+    [JsonSubtypes.KnownSubType(typeof(MfaRequirement), "mfa")]
     public abstract class AuthorizationRequirement : IAuthorizationRequirement
     {
         /// <summary>

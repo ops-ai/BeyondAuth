@@ -1,4 +1,4 @@
-﻿namespace PolicyServer.Core.Entities.AuthorizationRequirements
+﻿namespace PolicyServer.Core.Entities.RoutingRequirements
 {
     /// <summary>
     /// Data must be encrypted at rest
