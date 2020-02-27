@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace PolicyServer.Core.Entities.AuthorizationRequirements
+namespace PolicyServer.Core.Entities.AccountRequirements
 {
     /// <summary>
     /// Account lockout requirement

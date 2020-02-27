@@ -1,4 +1,4 @@
-﻿namespace PolicyServer.Core.Entities.AuthorizationRequirements
+﻿namespace PolicyServer.Core.Entities.PasswordRequirements
 {
     /// <summary>
     /// Minimum password length requirement

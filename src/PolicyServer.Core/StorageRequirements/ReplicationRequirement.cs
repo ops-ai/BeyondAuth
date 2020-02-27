@@ -1,4 +1,4 @@
-﻿namespace PolicyServer.Core.Entities.AuthorizationRequirements
+﻿namespace PolicyServer.Core.Entities.StorageRequirements
 {
     /// <summary>
     /// Replication requirement
@@ -16,7 +16,7 @@
         public ushort MinReplicas { get; set; }
 
         /// <summary>
-        /// Minimum number of different storage providers data must be replicated on
+        /// Minimum number of different storage providers data must be replicated onStorageRequirements
         /// </summary>
         public ushort MinDataSourceTypes { get; set; }
     }
