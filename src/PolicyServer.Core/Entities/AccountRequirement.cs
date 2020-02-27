@@ -1,7 +1,7 @@
 ﻿using JsonSubTypes;
 using Newtonsoft.Json;
 using NJsonSchema.Converters;
-using PolicyServer.Core.Entities.AuthorizationRequirements;
+using PolicyServer.Core.Entities.AccountRequirements;
 
 namespace PolicyServer.Core.Entities
 {
