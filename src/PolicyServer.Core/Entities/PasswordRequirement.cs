@@ -1,8 +1,7 @@
 ﻿using JsonSubTypes;
-using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
 using NJsonSchema.Converters;
-using PolicyServer.Core.Entities.AuthorizationRequirements;
+using PolicyServer.Core.Entities.PasswordRequirements;
 
 namespace PolicyServer.Core.Entities
 {
