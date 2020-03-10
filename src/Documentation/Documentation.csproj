@@ -17,7 +17,7 @@
     <PackageReference Include="JsonSubTypes" Version="1.6.0" />
     <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="3.1.2" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="3.1.2" />
-    <PackageReference Include="NJsonSchema" Version="10.1.7" />
+    <PackageReference Include="NJsonSchema" Version="10.1.8" />
     <PackageReference Include="NSwag.AspNetCore" Version="13.2.5" />
     <PackageReference Include="NSwag.Core" Version="13.2.5" />
     <PackageReference Include="NWebsec.AspNetCore.Middleware" Version="3.0.0" />
