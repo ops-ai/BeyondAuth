@@ -6,6 +6,17 @@ import { UserActive, UserActivityData } from '../data/user-activity';
 @Injectable()
 export class UserActivityService extends UserActivityData {
 
+  constructor(private periods: PeriodsService) {
+    super();
+    this.data = {
+      week: this.getDataWeek(),
+      month: this.getDataMonth(),
+      year: this.getDataYear(),
+    };
+  }
+
+  data = {};
+
   private getRandom = (roundTo: number) => Math.round(Math.random() * roundTo);
   private generateUserActivityRandomData(date) {
     return {
@@ -13,17 +24,6 @@ export class UserActivityService extends UserActivityData {
       pagesVisitCount: this.getRandom(1000),
       deltaUp: this.getRandom(1) % 2 === 0,
       newVisits: this.getRandom(100),
-    };
-  }
-
-  data = {};
-
-  constructor(private periods: PeriodsService) {
-    super();
-    this.data = {
-      week: this.getDataWeek(),
-      month: this.getDataMonth(),
-      year: this.getDataYear(),
     };
   }
 

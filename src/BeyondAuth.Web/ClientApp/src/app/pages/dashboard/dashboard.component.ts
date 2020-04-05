@@ -83,11 +83,11 @@ export class DashboardComponent implements OnDestroy {
 
   constructor(private themeService: NbThemeService,
       private solarService: SolarData,
-      @Inject('JSNLOG') JL: JL.JSNLog) {
+      @Inject('JSNLOG') jl: JL.JSNLog) {
 
-    this.JL = JL;
+    this.JL = jl;
 
-    this.JL().info("app loaded");
+    this.JL().info('app loaded');
 
     this.themeService.getJsTheme()
       .pipe(takeWhile(() => this.alive))

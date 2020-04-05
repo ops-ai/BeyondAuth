@@ -1,4 +1,4 @@
-const botAvatar: string = 'https://i.ytimg.com/vi/Erqi5ckVoEo/hqdefault.jpg';
+const botAvatar = 'https://i.ytimg.com/vi/Erqi5ckVoEo/hqdefault.jpg';
 
 export const gifsLinks: string[] = [
   'https://media.tenor.com/images/ac287fd06319e47b1533737662d5bfe8/tenor.gif',
@@ -14,7 +14,7 @@ export const imageLinks: string[] = [
   'https://picsum.photos/320/240/?image=30',
   'https://picsum.photos/320/240/?image=271',
 ];
-const fileLink: string = 'http://google.com';
+const fileLink = 'http://google.com';
 
 export const botReplies = [
   {
