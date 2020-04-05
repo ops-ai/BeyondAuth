@@ -15,7 +15,7 @@ export class TrafficRevealCardComponent implements OnDestroy {
   trafficBarData: TrafficBar;
   trafficListData: TrafficList;
   revealed = false;
-  period: string = 'week';
+  period = 'week';
 
   constructor(private trafficListService: TrafficListData,
               private trafficBarService: TrafficBarData) {

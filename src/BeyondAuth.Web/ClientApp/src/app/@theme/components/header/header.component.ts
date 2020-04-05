@@ -14,7 +14,7 @@ import { Subject } from 'rxjs';
 export class HeaderComponent implements OnInit, OnDestroy {
 
   private destroy$: Subject<void> = new Subject<void>();
-  userPictureOnly: boolean = false;
+  userPictureOnly = false;
   user: any;
 
   themes = [
@@ -38,7 +38,7 @@ export class HeaderComponent implements OnInit, OnDestroy {
 
   currentTheme = 'default';
 
-  userMenu = [{ title: 'My Profile', link: './profile', icon:'person' }, { title: 'Billing History', link: './billing', icon: 'file-text' },  { title: 'Log out', link: '../auth/login', icon: 'lock' }];
+  userMenu = [{ title: 'My Profile', link: './profile', icon: 'person' }, { title: 'Billing History', link: './billing', icon: 'file-text' },  { title: 'Log out', link: '../auth/login', icon: 'lock' }];
 
   constructor(private sidebarService: NbSidebarService,
               private menuService: NbMenuService,

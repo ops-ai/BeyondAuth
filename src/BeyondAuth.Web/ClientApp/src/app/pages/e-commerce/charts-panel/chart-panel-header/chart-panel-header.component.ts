@@ -14,7 +14,7 @@ export class ChartPanelHeaderComponent implements OnDestroy {
 
   @Output() periodChange = new EventEmitter<string>();
 
-  @Input() type: string = 'week';
+  @Input() type = 'week';
 
   types: string[] = ['week', 'month', 'year'];
   chartLegend: {iconColor: string; title: string}[];
