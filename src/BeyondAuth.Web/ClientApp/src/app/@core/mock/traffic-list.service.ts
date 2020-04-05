@@ -6,8 +6,8 @@ import { TrafficList, TrafficListData } from '../data/traffic-list';
 @Injectable()
 export class TrafficListService extends TrafficListData {
 
-  private getRandom = (roundTo: number) => Math.round(Math.random() * roundTo);
   private data = {};
+  private getRandom = (roundTo: number) => Math.round(Math.random() * roundTo);
 
   constructor(private period: PeriodsService) {
     super();
