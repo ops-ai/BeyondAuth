@@ -22,7 +22,7 @@
     <PackageReference Include="CorrelationId" Version="3.0.0-preview.1" />
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
     <PackageReference Include="JsonSubTypes" Version="1.7.0" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.9.10" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.8" />
     <PackageReference Include="NJsonSchema" Version="10.1.12" />
     <PackageReference Include="NSwag.AspNetCore" Version="13.3.0" />
     <PackageReference Include="NSwag.Core" Version="13.3.0" />
