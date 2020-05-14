@@ -78,7 +78,7 @@
     <PackageReference Include="RavenDB.Client" Version="4.2.101" />
     <PackageReference Include="scientist" Version="2.0.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.1.30" />
-    <PackageReference Include="Twilio" Version="5.39.0" />
+    <PackageReference Include="Twilio" Version="5.41.0" />
     <PackageReference Include="VaultSharp" Version="0.11.1002" />
   </ItemGroup>
 
