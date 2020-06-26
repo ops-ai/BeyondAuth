@@ -128,7 +128,7 @@ namespace Identity.Core
             {
                 try
                 {
-                    var userRoles = ldapEntry.getAttribute(OpenLdapAttributes.MemberOf.ToDescriptionString()).StringValues;
+                    var userRoles = ldapEntry.GetAttribute(OpenLdapAttributes.MemberOf.ToDescriptionString()).StringValues;
                     while (userRoles.MoveNext())
                     {
                         Claims.Add(new Claim(JwtClaimTypes.Role, userRoles.Current.ToString()));
@@ -150,7 +150,7 @@ namespace Identity.Core
 
             try
             {
-                value = user.getAttribute(ldapAttribute.ToDescriptionString()).StringValue;
+                value = user.GetAttribute(ldapAttribute.ToDescriptionString()).StringValue;
                 return new Claim(claim, value);
             }
             catch (Exception)
@@ -176,8 +176,8 @@ namespace Identity.Core
         /// <param name="providerName">Specific provider such as Google, Facebook, etc.</param>
         public void SetBaseDetails(LdapEntry ldapEntry, string providerName)
         {
-            DisplayName = ldapEntry.getAttribute(OpenLdapAttributes.DisplayName.ToDescriptionString()).StringValue;
-            Username = ldapEntry.getAttribute(OpenLdapAttributes.UserName.ToDescriptionString()).StringValue;
+            DisplayName = ldapEntry.GetAttribute(OpenLdapAttributes.DisplayName.ToDescriptionString()).StringValue;
+            Username = ldapEntry.GetAttribute(OpenLdapAttributes.UserName.ToDescriptionString()).StringValue;
             ProviderName = providerName;
             SubjectId = Username; // Extra: We could use the uidNumber instead in a sha algo.
             ProviderSubjectId = Username;
