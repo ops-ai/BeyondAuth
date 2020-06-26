@@ -105,7 +105,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// Allows settings claims for the client (will be included in the access token).
         /// </summary>
-        public ICollection<Claim> Claims { get; set; }
+        public ICollection<ClientClaim> Claims { get; set; }
 
         /// <summary>
         /// Gets or sets a value indicating whether client claims should be always included

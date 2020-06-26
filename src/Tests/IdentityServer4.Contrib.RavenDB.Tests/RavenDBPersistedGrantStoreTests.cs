@@ -22,7 +22,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
     {
         protected readonly ILoggerFactory _loggerFactory;
 
-        private RavenDBPersistedGrantStore _store;
+        private IPersistedGrantStore _store;
         private IAuthorizationCodeStore _codes;
         private IRefreshTokenStore _refreshTokens;
         private IReferenceTokenStore _referenceTokens;
@@ -438,7 +438,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
 
             WaitForIndexing(_documentStore);
 
-            var tokens = await _store.GetAllAsync("123");
+            var tokens = await _store.GetAllAsync(new PersistedGrantFilter { SubjectId = "123" });
 
             tokens.Should().NotBeEmpty();
             tokens.Count().Should().Be(3);
@@ -496,11 +496,11 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
 
             WaitForIndexing(_documentStore);
 
-            await _store.RemoveAllAsync("123", "client1");
+            await _store.RemoveAllAsync(new PersistedGrantFilter { SubjectId = "123", ClientId = "client1" });
 
             WaitForIndexing(_documentStore);
 
-            var tokens = await _store.GetAllAsync("123");
+            var tokens = await _store.GetAllAsync(new PersistedGrantFilter { SubjectId = "123" });
             tokens.Should().BeEmpty();
         }
 
@@ -513,11 +513,6 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
                 Assert.Throws<ArgumentException>(() => new RavenDBPersistedGrantStore(new PersistentGrantSerializer(), _loggerFactory.CreateLogger<RavenDBPersistedGrantStore>(), null));
                 await Assert.ThrowsAsync<ArgumentException>(async () => await _store.GetAllAsync(null));
                 await Assert.ThrowsAsync<ArgumentException>(async () => await _store.GetAsync(null));
-                await Assert.ThrowsAsync<ArgumentException>(async () => await _store.RemoveAllAsync("test", null));
-                await Assert.ThrowsAsync<ArgumentException>(async () => await _store.RemoveAllAsync(null, "test"));
-                await Assert.ThrowsAsync<ArgumentException>(async () => await _store.RemoveAllAsync(null, "test", "test"));
-                await Assert.ThrowsAsync<ArgumentException>(async () => await _store.RemoveAllAsync("test", null, "test"));
-                await Assert.ThrowsAsync<ArgumentException>(async () => await _store.RemoveAllAsync("test", "test", null));
                 await Assert.ThrowsAsync<ArgumentException>(async () => await _store.RemoveAsync(null));
                 await Assert.ThrowsAsync<ArgumentException>(async () => await _store.StoreAsync(null));
             }

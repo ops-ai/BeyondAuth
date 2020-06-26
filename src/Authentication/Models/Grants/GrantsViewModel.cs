@@ -20,6 +20,8 @@ namespace Authentication.Models.Grants
 
         public string ClientUrl { get; set; }
 
+        public string Description { get; set; }
+
         public string ClientLogoUrl { get; set; }
 
         public DateTime Created { get; set; }
