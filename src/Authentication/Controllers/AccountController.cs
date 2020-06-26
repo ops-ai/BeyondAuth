@@ -85,13 +85,15 @@ namespace Authentication.Controllers
                     // if the user cancels, send a result back into IdentityServer as if they 
                     // denied the consent (even if this client does not require consent).
                     // this will send back an access denied OIDC error response to the client.
-                    await _interaction.GrantConsentAsync(context, ConsentResponse.Denied);
+                    await _interaction.DenyAuthorizationAsync(context, AuthorizationError.AccessDenied);
 
                     // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
-                    if (await _clientStore.IsPkceClientAsync(context.ClientId))
-                        // if the client is PKCE then we assume it's native, so this change in how to
+                    if (context.IsNativeClient())
+                    {
+                        // The client is native, so this change in how to
                         // return the response is for better UX for the end user.
                         return this.LoadingPage("Redirect", model.ReturnUrl);
+                    }
 
                     return Redirect(model.ReturnUrl);
                 }
@@ -105,7 +107,7 @@ namespace Authentication.Controllers
                 var user = _userStore.ValidateCredentials(model.Email, model.Password);
                 if (user != null && user.IsActive)
                 {
-                    await _events.RaiseAsync(new UserLoginSuccessEvent(user.Username, user.SubjectId, user.Username, clientId: context?.ClientId));
+                    await _events.RaiseAsync(new UserLoginSuccessEvent(user.Username, user.SubjectId, user.Username, clientId: context?.Client.ClientId));
 
                     // only set explicit expiration here if user chooses "remember me". 
                     // otherwise we rely upon expiration configured in cookie middleware.
@@ -127,10 +129,12 @@ namespace Authentication.Controllers
 
                     if (context != null)
                     {
-                        if (await _clientStore.IsPkceClientAsync(context.ClientId))
-                            // if the client is PKCE then we assume it's native, so this change in how to
+                        if (context.IsNativeClient())
+                        {
+                            // The client is native, so this change in how to
                             // return the response is for better UX for the end user.
                             return this.LoadingPage("Redirect", model.ReturnUrl);
+                        }
 
                         // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
                         return Redirect(model.ReturnUrl);
@@ -146,7 +150,7 @@ namespace Authentication.Controllers
                         throw new Exception("invalid return URL");
                 }
 
-                await _events.RaiseAsync(new UserLoginFailureEvent(model.Email, "invalid credentials", clientId: context?.ClientId));
+                await _events.RaiseAsync(new UserLoginFailureEvent(model.Email, "invalid credentials", clientId: context?.Client.ClientId));
                 ModelState.AddModelError(string.Empty, _accountOptions.InvalidCredentialsErrorMessage);
             }
 
@@ -248,9 +252,9 @@ namespace Authentication.Controllers
                 }).ToList();
 
             var allowLocal = true;
-            if (context?.ClientId != null)
+            if (context?.Client.ClientId != null)
             {
-                var client = await _clientStore.FindEnabledClientByIdAsync(context.ClientId);
+                var client = await _clientStore.FindEnabledClientByIdAsync(context?.Client.ClientId);
                 if (client != null)
                 {
                     allowLocal = client.EnableLocalLogin;

@@ -32,17 +32,17 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         {
             using (var session = _documentStore.OpenSession())
             {
-                session.Store(new ApiResource { DisplayName = "test", Scopes = new List<Scope> { new Scope { Name = "testscope" } }, Name = "test" }, "ApiResources/test");
-                session.Store(new ApiResource { DisplayName = "test2", Scopes = new List<Scope> { new Scope { Name = "scope2" } }, Name = "test2" }, "ApiResources/test2");
+                session.Store(new ApiResource { DisplayName = "test", Scopes = new[] { "testscope" }, Name = "test" }, "ApiResources/test");
+                session.Store(new ApiResource { DisplayName = "test2", Scopes = new [] { "scope2" }, Name = "test2" }, "ApiResources/test2");
                 session.SaveChanges();
                 WaitForIndexing(_documentStore);
             }
 
-            var resource = await _resourceStore.FindApiResourceAsync("test");
+            var resource = await _resourceStore.FindApiResourcesByNameAsync(new[] { "test" });
 
-            Assert.NotNull(resource);
-            Assert.Equal("test", resource.Name);
-            Assert.Equal("test", resource.DisplayName);
+            Assert.NotNull(resource.FirstOrDefault());
+            Assert.Equal("test", resource.FirstOrDefault().Name);
+            Assert.Equal("test", resource.FirstOrDefault().DisplayName);
         }
 
         [Fact(DisplayName = "FindApiResourceAsync should return null when resource doesn't exist")]
@@ -50,15 +50,15 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         {
             using (var session = _documentStore.OpenSession())
             {
-                session.Store(new ApiResource { DisplayName = "test", Scopes = new List<Scope> { new Scope { Name = "testscope" } }, Name = "test" }, "ApiResources/test");
-                session.Store(new ApiResource { DisplayName = "test2", Scopes = new List<Scope> { new Scope { Name = "scope2" } }, Name = "test2" }, "ApiResources/test2");
+                session.Store(new ApiResource { DisplayName = "test", Scopes = new [] { "testscope" }, Name = "test" }, "ApiResources/test");
+                session.Store(new ApiResource { DisplayName = "test2", Scopes = new [] { "scope2" }, Name = "test2" }, "ApiResources/test2");
                 session.SaveChanges();
                 WaitForIndexing(_documentStore);
             }
 
-            var resource = await _resourceStore.FindApiResourceAsync("test3");
+            var resource = await _resourceStore.FindApiResourcesByNameAsync(new[] { "test3" });
 
-            Assert.Null(resource);
+            Assert.False(resource.Any());
         }
 
         [Fact(DisplayName = "FindApiResourcesByScopeAsync should return resource")]
@@ -66,14 +66,14 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         {
             using (var session = _documentStore.OpenSession())
             {
-                session.Store(new ApiResource { DisplayName = "test", Scopes = new List<Scope> { new Scope { Name = "testscope" } }, Name = "test" }, "ApiResources/test");
-                session.Store(new ApiResource { DisplayName = "test2", Scopes = new List<Scope> { new Scope { Name = "scope2" } }, Name = "test2" }, "ApiResources/test2");
-                session.Store(new ApiResource { DisplayName = "test3", Scopes = new List<Scope> { new Scope { Name = "scope2" } }, Name = "test3" }, "ApiResources/test3");
+                session.Store(new ApiResource { DisplayName = "test", Scopes = new [] { "testscope" }, Name = "test" }, "ApiResources/test");
+                session.Store(new ApiResource { DisplayName = "test2", Scopes = new [] { "scope2" }, Name = "test2" }, "ApiResources/test2");
+                session.Store(new ApiResource { DisplayName = "test3", Scopes = new [] { "scope2" }, Name = "test3" }, "ApiResources/test3");
                 session.SaveChanges();
                 WaitForIndexing(_documentStore);
             }
 
-            var resources = (await _resourceStore.FindApiResourcesByScopeAsync(new List<string> { "scope2" })).ToList();
+            var resources = (await _resourceStore.FindApiResourcesByScopeNameAsync(new [] { "scope2" })).ToList();
 
             Assert.NotEmpty(resources);
             Assert.Equal(2, resources.Count);
@@ -88,14 +88,14 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         {
             using (var session = _documentStore.OpenSession())
             {
-                session.Store(new ApiResource { DisplayName = "test", Scopes = new List<Scope> { new Scope { Name = "testscope" } }, Name = "test" }, "ApiResources/test");
-                session.Store(new ApiResource { DisplayName = "test2", Scopes = new List<Scope> { new Scope { Name = "scope2" } }, Name = "test2" }, "ApiResources/test2");
-                session.Store(new ApiResource { DisplayName = "test3", Scopes = new List<Scope> { new Scope { Name = "scope2" } }, Name = "test3" }, "ApiResources/test3");
+                session.Store(new ApiResource { DisplayName = "test", Scopes = new [] { "testscope" }, Name = "test" }, "ApiResources/test");
+                session.Store(new ApiResource { DisplayName = "test2", Scopes = new [] { "scope2" }, Name = "test2" }, "ApiResources/test2");
+                session.Store(new ApiResource { DisplayName = "test3", Scopes = new [] { "scope2" }, Name = "test3" }, "ApiResources/test3");
                 session.SaveChanges();
                 WaitForIndexing(_documentStore);
             }
 
-            var resources = (await _resourceStore.FindApiResourcesByScopeAsync(new List<string> { "scope3" })).ToList();
+            var resources = (await _resourceStore.FindApiResourcesByScopeNameAsync(new List<string> { "scope3" })).ToList();
 
             Assert.Empty(resources);
         }
@@ -112,7 +112,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
                 WaitForIndexing(_documentStore);
             }
 
-            var resources = (await _resourceStore.FindIdentityResourcesByScopeAsync(new List<string> { "test2", "test3" })).ToList();
+            var resources = (await _resourceStore.FindIdentityResourcesByScopeNameAsync(new List<string> { "test2", "test3" })).ToList();
 
             Assert.NotEmpty(resources);
             Assert.Equal(2, resources.Count);
@@ -133,7 +133,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
                 WaitForIndexing(_documentStore);
             }
 
-            var resources = (await _resourceStore.FindIdentityResourcesByScopeAsync(new List<string> { "test3" })).ToList();
+            var resources = (await _resourceStore.FindIdentityResourcesByScopeNameAsync(new List<string> { "test3" })).ToList();
 
             Assert.Empty(resources);
         }
@@ -143,9 +143,9 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         {
             using (var session = _documentStore.OpenSession())
             {
-                session.Store(new ApiResource { DisplayName = "test", Scopes = new List<Scope> { new Scope { Name = "testscope" } }, Name = "test" }, "ApiResources/test");
-                session.Store(new ApiResource { DisplayName = "test2", Scopes = new List<Scope> { new Scope { Name = "scope2" } }, Name = "test2" }, "ApiResources/test2");
-                session.Store(new ApiResource { DisplayName = "test3", Scopes = new List<Scope> { new Scope { Name = "scope2" } }, Name = "test3" }, "ApiResources/test3");
+                session.Store(new ApiResource { DisplayName = "test", Scopes = new [] { "testscope" }, Name = "test" }, "ApiResources/test");
+                session.Store(new ApiResource { DisplayName = "test2", Scopes = new [] { "scope2" }, Name = "test2" }, "ApiResources/test2");
+                session.Store(new ApiResource { DisplayName = "test3", Scopes = new [] { "scope2" }, Name = "test3" }, "ApiResources/test3");
                 session.Store(new IdentityResource { DisplayName = "test", Name = "test" }, "IdentityResources/test");
                 session.Store(new IdentityResource { DisplayName = "test2", Name = "test2" }, "IdentityResources/test2");
                 session.Store(new IdentityResource { DisplayName = "test3", Name = "test3" }, "IdentityResources/test3");
@@ -174,9 +174,11 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         {
             Assert.Throws<ArgumentException>(() => new RavenDBResourceStore(null, _documentStore));
             Assert.Throws<ArgumentException>(() => new RavenDBResourceStore(_loggerFactory.CreateLogger<RavenDBResourceStore>(), null));
-            await Assert.ThrowsAsync<ArgumentException>(async () => await _resourceStore.FindApiResourceAsync(null));
-            await Assert.ThrowsAsync<ArgumentException>(async () => await _resourceStore.FindApiResourcesByScopeAsync(null));
-            await Assert.ThrowsAsync<ArgumentException>(async () => await _resourceStore.FindIdentityResourcesByScopeAsync(null));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await _resourceStore.FindApiResourcesByNameAsync(null));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await _resourceStore.FindApiResourcesByScopeNameAsync(null));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await _resourceStore.FindEnabledResourcesByScopeAsync(null));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await _resourceStore.FindIdentityResourcesByScopeNameAsync(null));
+            await Assert.ThrowsAsync<ArgumentException>(async () => await _resourceStore.FindEnabledIdentityResourcesByScopeAsync(null));
         }
     }
 }

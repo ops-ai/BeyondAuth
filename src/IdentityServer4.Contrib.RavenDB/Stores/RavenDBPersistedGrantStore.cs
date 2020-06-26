@@ -4,6 +4,7 @@ using IdentityServer4.Stores.Serialization;
 using Microsoft.Extensions.Logging;
 using Raven.Client;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -24,15 +25,26 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             _store = store ?? throw new ArgumentException("store is required", nameof(store));
         }
 
-        public async Task<IEnumerable<PersistedGrant>> GetAllAsync(string subjectId)
+        public async Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter)
         {
-            if (string.IsNullOrEmpty(subjectId))
-                throw new ArgumentException("subjectId is required", nameof(subjectId));
+            if (filter == null)
+                throw new ArgumentException("filter is required", nameof(filter));
 
             using (var session = _store.OpenAsyncSession())
             {
-                _logger.LogDebug($"Getting persisted grants for subjectId {subjectId}");
-                return await session.Query<PersistedGrant>().Where(t => t.SubjectId.Equals(subjectId)).ToListAsync().ConfigureAwait(false);
+                _logger.LogDebug($"Getting persisted grants by filter");
+                IRavenQueryable<PersistedGrant> query = session.Query<PersistedGrant>();
+
+                if (!string.IsNullOrEmpty(filter.SubjectId))
+                    query = query.Where(t => t.SubjectId.Equals(filter.SubjectId));
+                if (!string.IsNullOrEmpty(filter.ClientId))
+                    query = query.Where(t => t.ClientId.Equals(filter.ClientId));
+                if (!string.IsNullOrEmpty(filter.SessionId))
+                    query = query.Where(t => t.SessionId.Equals(filter.SessionId));
+                if (!string.IsNullOrEmpty(filter.Type))
+                    query = query.Where(t => t.Type.Equals(filter.Type));
+
+                return await query.ToListAsync().ConfigureAwait(false);
             }
         }
 
@@ -48,38 +60,27 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             }
         }
 
-        public async Task RemoveAllAsync(string subjectId, string clientId)
+        public async Task RemoveAllAsync(PersistedGrantFilter filter)
         {
-            if (string.IsNullOrEmpty(subjectId))
-                throw new ArgumentException("subjectId is required", nameof(subjectId));
-
-            if (string.IsNullOrEmpty(clientId))
-                throw new ArgumentException("clientId is required", nameof(clientId));
+            if (filter == null)
+                throw new ArgumentException("filter is required", nameof(filter));
 
             using (var session = _store.OpenAsyncSession())
             {
-                _logger.LogDebug($"Deleting persisted grants for subjectId {subjectId} and clientId {clientId}");
-                var grants = await session.Query<PersistedGrant>().Where(t => t.SubjectId.Equals(subjectId) && t.ClientId.Equals(clientId)).ToListAsync().ConfigureAwait(false);
-                grants.ForEach(session.Delete);
-                await session.SaveChangesAsync().ConfigureAwait(false);
-            }
-        }
+                _logger.LogDebug($"Getting persisted grants by filter");
+                IRavenQueryable<PersistedGrant> query = session.Query<PersistedGrant>();
 
-        public async Task RemoveAllAsync(string subjectId, string clientId, string type)
-        {
-            if (string.IsNullOrEmpty(subjectId))
-                throw new ArgumentException("subjectId is required", nameof(subjectId));
+                if (!string.IsNullOrEmpty(filter.SubjectId))
+                    query = query.Where(t => t.SubjectId.Equals(filter.SubjectId));
+                if (!string.IsNullOrEmpty(filter.ClientId))
+                    query = query.Where(t => t.ClientId.Equals(filter.ClientId));
+                if (!string.IsNullOrEmpty(filter.SessionId))
+                    query = query.Where(t => t.SessionId.Equals(filter.SessionId));
+                if (!string.IsNullOrEmpty(filter.Type))
+                    query = query.Where(t => t.Type.Equals(filter.Type));
 
-            if (string.IsNullOrEmpty(clientId))
-                throw new ArgumentException("clientId is required", nameof(clientId));
+                var grants = await query.ToListAsync().ConfigureAwait(false);
 
-            if (string.IsNullOrEmpty(type))
-                throw new ArgumentException("type is required", nameof(type));
-
-            using (var session = _store.OpenAsyncSession())
-            {
-                _logger.LogDebug($"Deleting persisted grants for subjectId {subjectId}, clientId {clientId} and type {type}");
-                var grants = await session.Query<PersistedGrant>().Where(t => t.SubjectId.Equals(subjectId) && t.ClientId.Equals(clientId) && t.Type.Equals(type)).ToListAsync().ConfigureAwait(false);
                 grants.ForEach(session.Delete);
                 await session.SaveChangesAsync().ConfigureAwait(false);
             }

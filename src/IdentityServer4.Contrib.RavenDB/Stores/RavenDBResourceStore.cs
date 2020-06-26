@@ -21,19 +21,20 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             _store = store ?? throw new ArgumentException("store is required", nameof(store));
         }
 
-        public async Task<ApiResource> FindApiResourceAsync(string name)
+        public async Task<IEnumerable<ApiResource>> FindApiResourcesByNameAsync(IEnumerable<string> apiResourceNames)
         {
-            if (string.IsNullOrEmpty(name))
-                throw new ArgumentException("name is required", nameof(name));
+            if (apiResourceNames == null || !apiResourceNames.Any())
+                throw new ArgumentException("apiResourceName is required", nameof(apiResourceNames));
 
             using (var session = _store.OpenAsyncSession())
             {
-                _logger.LogDebug($"Loading api resource {name}");
-                return await session.LoadAsync<ApiResource>($"ApiResources/{name}").ConfigureAwait(false);
+                _logger.LogDebug($"Loading api resource {string.Join(", ", apiResourceNames)}");
+                var apiResources = await session.LoadAsync<ApiResource>(apiResourceNames.Select(t => $"ApiResources/{t}").ToList()).ConfigureAwait(false);
+                return apiResources.Where(t => t.Value != null).Select(t => t.Value);
             }
         }
 
-        public async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeAsync(IEnumerable<string> scopeNames)
+        public async Task<IEnumerable<ApiResource>> FindApiResourcesByScopeNameAsync(IEnumerable<string> scopeNames)
         {
             if (scopeNames == null)
                 throw new ArgumentException("scopeNames is required", nameof(scopeNames));
@@ -41,11 +42,24 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             using (var session = _store.OpenAsyncSession())
             {
                 _logger.LogDebug($"Loading api resources with scopes {string.Join(",", scopeNames)}");
-                return await session.Query<ApiResource>().Where(t => t.Scopes.Any(s => s.Name.In(scopeNames))).Take(1024).ToListAsync().ConfigureAwait(false);
+                return await session.Query<ApiResource>().Where(t => t.Scopes.Any(s => s.In(scopeNames))).Take(1024).ToListAsync().ConfigureAwait(false);
             }
         }
 
-        public async Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeAsync(IEnumerable<string> scopeNames)
+        public async Task<IEnumerable<ApiScope>> FindApiScopesByNameAsync(IEnumerable<string> scopeNames)
+        {
+            if (scopeNames == null)
+                throw new ArgumentException("scopeNames is required", nameof(scopeNames));
+
+            using (var session = _store.OpenAsyncSession())
+            {
+                _logger.LogDebug($"Loading api resource {string.Join(", ", scopeNames)}");
+                var apiResources = await session.LoadAsync<ApiScope>(scopeNames.Select(t => $"Scopes/{t}").ToList()).ConfigureAwait(false);
+                return apiResources.Where(t => t.Value != null).Select(t => t.Value);
+            }
+        }
+
+        public async Task<IEnumerable<IdentityResource>> FindIdentityResourcesByScopeNameAsync(IEnumerable<string> scopeNames)
         {
             if (scopeNames == null)
                 throw new ArgumentException("scopeNames is required", nameof(scopeNames));
@@ -64,8 +78,9 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
                 _logger.LogDebug($"Loading all resources");
                 var apiResources = await session.Query<ApiResource>().Take(1024).ToListAsync().ConfigureAwait(false);
                 var identityResources = await session.Query<IdentityResource>().Take(1024).ToListAsync().ConfigureAwait(false);
+                var apiScopes = await session.Query<ApiScope>().Take(1024).ToListAsync().ConfigureAwait(false);
 
-                return new Resources(identityResources, apiResources);
+                return new Resources(identityResources, apiResources, apiScopes);
             }
         }
     }

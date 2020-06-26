@@ -37,7 +37,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// An API must have at least one scope. Each scope can have different settings.
         /// </summary>
-        public ICollection<Scope> Scopes { get; set; } = new List<Scope>();
+        public ICollection<string> Scopes { get; set; } = new List<string>();
 
         /// <summary>
         /// Gets or sets the custom properties for the resource.
