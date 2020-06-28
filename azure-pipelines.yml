@@ -34,7 +34,7 @@ steps:
     organization: 'ops-ai'
     scannerMode: 'MSBuild'
     projectKey: 'ops-ai_authorization'
-    projectName: 'ops.ai Authorization'
+    projectName: 'BeyondAuth'
     projectVersion: '0.1'
     extraProperties: |
       sonar.dependencyCheck.reportPath=$(Agent.BuildDirectory)\dependency-check-report.xml
