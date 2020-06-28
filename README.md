@@ -1,7 +1,7 @@
 # BeyondAuth
 
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=ops-ai_authorization&metric=alert_status)](https://sonarcloud.io/dashboard?id=ops-ai_authorization)
-[![Build Status](https://opsai.visualstudio.com/Authorization/_apis/build/status/ops-ai.authorization?branchName=master)](https://opsai.visualstudio.com/Authorization/_build/latest?definitionId=2&branchName=master)
+[![Build Status](https://opsai.visualstudio.com/Authorization/_apis/build/status/ops-ai.authorization?branchName=master)](https://opsai.visualstudio.com/Authorization/_build/latest?definitionId=2&branchName=develop)
 [![Vulnerabilities](https://sonarcloud.io/api/project_badges/measure?project=ops-ai_authorization&metric=vulnerabilities)](https://sonarcloud.io/dashboard?id=ops-ai_authorization)
 [![Coverage](https://sonarcloud.io/api/project_badges/measure?project=ops-ai_authorization&metric=coverage)](https://sonarcloud.io/dashboard?id=ops-ai_authorization)
 
@@ -17,7 +17,7 @@ A distributed, extensible authorization model, based on standard protocols, with
 
 # Branch structure
 
-Active development happens on the `master` branch. This always contains the latest version and is released nightly to the CI environment. Release branches follow the format `release/0.1.0`. Features and fixes branches follow the format `feature/feature-name` and are submitted as Pull requests to `master`
+Active development happens on the `develop` branch. This always contains the latest version and is released nightly to the CI environment. Release branches follow the format `release/0.1.0`. Features and fixes branches follow the format `feature/feature-name` and are submitted as Pull requests to `master`
 
 Branch structure follows Microsoft's [Release Flow](https://docs.microsoft.com/en-us/azure/devops/learn/devops-at-microsoft/release-flow)
 
