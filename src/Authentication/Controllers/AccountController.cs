@@ -33,7 +33,7 @@ namespace Authentication.Controllers
         private readonly IClientStore _clientStore;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly IEventService _events;
-        private readonly AccountOptions _accountOptions;
+        private readonly IOptions<AccountOptions> _accountOptions;
 
         public AccountController(
             IIdentityServerInteractionService interaction,
@@ -41,7 +41,7 @@ namespace Authentication.Controllers
             IAuthenticationSchemeProvider schemeProvider,
             IEventService events,
             ILdapUserStore userStore,
-            IOptionsMonitor<AccountOptions> accountOptions)
+            IOptions<AccountOptions> accountOptions)
         {
             _userStore = userStore;
 
@@ -49,7 +49,7 @@ namespace Authentication.Controllers
             _clientStore = clientStore;
             _schemeProvider = schemeProvider;
             _events = events;
-            _accountOptions = accountOptions.CurrentValue;
+            _accountOptions = accountOptions;
         }
 
         /// <summary>
@@ -112,11 +112,11 @@ namespace Authentication.Controllers
                     // only set explicit expiration here if user chooses "remember me". 
                     // otherwise we rely upon expiration configured in cookie middleware.
                     AuthenticationProperties props = null;
-                    if (_accountOptions.AllowRememberLogin && model.RememberLogin)
+                    if (_accountOptions.Value.AllowRememberLogin && model.RememberLogin)
                         props = new AuthenticationProperties
                         {
                             IsPersistent = true,
-                            ExpiresUtc = DateTimeOffset.UtcNow.Add(_accountOptions.RememberMeLoginDuration)
+                            ExpiresUtc = DateTimeOffset.UtcNow.Add(_accountOptions.Value.RememberMeLoginDuration)
                         };
 
                     // issue authentication cookie with subject ID and username
@@ -151,7 +151,7 @@ namespace Authentication.Controllers
                 }
 
                 await _events.RaiseAsync(new UserLoginFailureEvent(model.Email, "invalid credentials", clientId: context?.Client.ClientId));
-                ModelState.AddModelError(string.Empty, _accountOptions.InvalidCredentialsErrorMessage);
+                ModelState.AddModelError(string.Empty, _accountOptions.Value.InvalidCredentialsErrorMessage);
             }
 
             // something went wrong, show form with error
@@ -243,7 +243,7 @@ namespace Authentication.Controllers
 
             var providers = schemes
                 .Where(x => x.DisplayName != null ||
-                            x.Name.Equals(_accountOptions.WindowsAuthenticationSchemeName, StringComparison.OrdinalIgnoreCase)
+                            x.Name.Equals(_accountOptions.Value.WindowsAuthenticationSchemeName, StringComparison.OrdinalIgnoreCase)
                 )
                 .Select(x => new ExternalProvider
                 {
@@ -266,8 +266,8 @@ namespace Authentication.Controllers
 
             return new LoginViewModel
             {
-                AllowRememberLogin = _accountOptions.AllowRememberLogin,
-                EnableLocalLogin = allowLocal && _accountOptions.AllowLocalLogin,
+                AllowRememberLogin = _accountOptions.Value.AllowRememberLogin,
+                EnableLocalLogin = allowLocal && _accountOptions.Value.AllowLocalLogin,
                 ReturnUrl = returnUrl,
                 Email = context?.LoginHint,
                 ExternalProviders = providers.ToArray()
@@ -284,7 +284,7 @@ namespace Authentication.Controllers
 
         private async Task<LogoutViewModel> BuildLogoutViewModelAsync(string logoutId)
         {
-            var vm = new LogoutViewModel { LogoutId = logoutId, ShowLogoutPrompt = _accountOptions.ShowLogoutPrompt };
+            var vm = new LogoutViewModel { LogoutId = logoutId, ShowLogoutPrompt = _accountOptions.Value.ShowLogoutPrompt };
 
             if (User?.Identity.IsAuthenticated != true)
             {
@@ -313,7 +313,7 @@ namespace Authentication.Controllers
 
             var vm = new LoggedOutViewModel
             {
-                AutomaticRedirectAfterSignOut = _accountOptions.AutomaticRedirectAfterSignOut,
+                AutomaticRedirectAfterSignOut = _accountOptions.Value.AutomaticRedirectAfterSignOut,
                 PostLogoutRedirectUri = logout?.PostLogoutRedirectUri,
                 ClientName = string.IsNullOrEmpty(logout?.ClientName) ? logout?.ClientId : logout?.ClientName,
                 SignOutIframeUrl = logout?.SignOutIFrameUrl,
