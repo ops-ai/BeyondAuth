@@ -19,9 +19,19 @@ namespace Authentication.Models.Account
         public bool AllowRememberLogin { get; set; }
 
         /// <summary>
+        /// Allow resetting password
+        /// </summary>
+        public bool AllowPasswordReset { get; set; }
+
+        /// <summary>
         /// Remember me cookie lifetime
         /// </summary>
         public TimeSpan RememberMeLoginDuration { get; set; }
+
+        /// <summary>
+        /// Default place to redirect to if redirectUrl is not provided
+        /// </summary>
+        public string DashboardUrl { get; set; }
 
         /// <summary>
         /// Show logout prompt
