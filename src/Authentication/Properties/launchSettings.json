@@ -17,7 +17,6 @@
     },
     "Authentication": {
       "commandName": "Project",
-      "launchBrowser": false,
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
@@ -34,6 +33,9 @@
       "httpPort": 60961,
       "useSSL": true,
       "sslPort": 44324
+    },
+    "Azure Dev Spaces": {
+      "commandName": "AzureDevSpaces"
     }
   }
 }
