@@ -1,7 +1,9 @@
-﻿using IdentityServer4.Models;
+﻿using IdentityServer4.Contrib.RavenDB.Options;
+using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using IdentityServer4.Stores.Serialization;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Raven.Client;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Linq;
@@ -17,12 +19,14 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
         private readonly ILogger _logger;
         private readonly IPersistentGrantSerializer _serializer;
         private readonly IDocumentStore _store;
+        private readonly IOptions<IdentityStoreOptions> _identityStoreOptions;
 
-        public RavenDBPersistedGrantStore(IPersistentGrantSerializer serializer, ILogger<RavenDBPersistedGrantStore> logger, IDocumentStore store)
+        public RavenDBPersistedGrantStore(IPersistentGrantSerializer serializer, ILogger<RavenDBPersistedGrantStore> logger, IDocumentStore store, IOptions<IdentityStoreOptions> identityStoreOptions)
         {
             _serializer = serializer;
             _logger = logger ?? throw new ArgumentException("loggerFactory is required", nameof(logger));
             _store = store ?? throw new ArgumentException("store is required", nameof(store));
+            _identityStoreOptions = identityStoreOptions;
         }
 
         public async Task<IEnumerable<PersistedGrant>> GetAllAsync(PersistedGrantFilter filter)
@@ -30,7 +34,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             if (filter == null)
                 throw new ArgumentException("filter is required", nameof(filter));
 
-            using (var session = _store.OpenAsyncSession())
+            using (var session = _store.OpenAsyncSession(_identityStoreOptions?.Value.DatabaseName))
             {
                 _logger.LogDebug($"Getting persisted grants by filter");
                 IRavenQueryable<PersistedGrant> query = session.Query<PersistedGrant>();
@@ -53,7 +57,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException("key is required", nameof(key));
 
-            using (var session = _store.OpenAsyncSession())
+            using (var session = _store.OpenAsyncSession(_identityStoreOptions?.Value.DatabaseName))
             {
                 _logger.LogDebug($"Loading persisted grant {key}");
                 return await session.LoadAsync<PersistedGrant>($"PersistedGrants/{key}").ConfigureAwait(false);
@@ -65,7 +69,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             if (filter == null)
                 throw new ArgumentException("filter is required", nameof(filter));
 
-            using (var session = _store.OpenAsyncSession())
+            using (var session = _store.OpenAsyncSession(_identityStoreOptions?.Value.DatabaseName))
             {
                 _logger.LogDebug($"Getting persisted grants by filter");
                 IRavenQueryable<PersistedGrant> query = session.Query<PersistedGrant>();
@@ -91,7 +95,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             if (string.IsNullOrEmpty(key))
                 throw new ArgumentException("key is required", nameof(key));
 
-            using (var session = _store.OpenAsyncSession())
+            using (var session = _store.OpenAsyncSession(_identityStoreOptions?.Value.DatabaseName))
             {
                 _logger.LogDebug($"Deleting persisted grant {key}");
                 session.Delete($"PersistedGrants/{key}");
@@ -104,7 +108,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             if (grant == null)
                 throw new ArgumentException("grant is required", nameof(grant));
 
-            using (var session = _store.OpenAsyncSession())
+            using (var session = _store.OpenAsyncSession(_identityStoreOptions?.Value.DatabaseName))
             {
                 _logger.LogDebug($"Storing persisted grant {grant.Key}");
                 await session.StoreAsync(grant, $"PersistedGrants/{grant.Key}").ConfigureAwait(false);

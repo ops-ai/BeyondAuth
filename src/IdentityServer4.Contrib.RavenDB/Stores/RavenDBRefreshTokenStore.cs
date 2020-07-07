@@ -1,7 +1,9 @@
 ﻿using IdentityModel;
+using IdentityServer4.Contrib.RavenDB.Options;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Raven.Client.Documents;
 using System;
 using System.Collections.Generic;
@@ -13,11 +15,13 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
     {
         private readonly ILogger _logger;
         private readonly IDocumentStore _store;
+        private readonly IOptions<IdentityStoreOptions> _identityStoreOptions;
 
-        public RavenDBRefreshTokenStore(ILogger<RavenDBRefreshTokenStore> logger, IDocumentStore store)
+        public RavenDBRefreshTokenStore(ILogger<RavenDBRefreshTokenStore> logger, IDocumentStore store, IOptions<IdentityStoreOptions> identityStoreOptions)
         {
             _logger = logger ?? throw new ArgumentException("loggerFactory is required", nameof(logger));
             _store = store ?? throw new ArgumentException("store is required", nameof(store));
+            _identityStoreOptions = identityStoreOptions;
         }
 
         public async Task<RefreshToken> GetRefreshTokenAsync(string refreshTokenHandle)
@@ -25,7 +29,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             if (string.IsNullOrEmpty(refreshTokenHandle))
                 throw new ArgumentException("refreshTokenHandle is required", nameof(refreshTokenHandle));
 
-            using (var session = _store.OpenAsyncSession())
+            using (var session = _store.OpenAsyncSession(_identityStoreOptions?.Value.DatabaseName))
             {
                 _logger.LogDebug($"Loading refresh token {refreshTokenHandle}");
                 return await session.LoadAsync<RefreshToken>($"RefreshTokens/{refreshTokenHandle}").ConfigureAwait(false);
@@ -37,7 +41,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             if (string.IsNullOrEmpty(refreshTokenHandle))
                 throw new ArgumentException("refreshTokenHandle is required", nameof(refreshTokenHandle));
 
-            using (var session = _store.OpenAsyncSession())
+            using (var session = _store.OpenAsyncSession(_identityStoreOptions?.Value.DatabaseName))
             {
                 _logger.LogDebug($"Deleting refresh token {refreshTokenHandle}");
                 session.Delete($"RefreshTokens/{refreshTokenHandle}");
@@ -53,7 +57,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             if (string.IsNullOrEmpty(clientId))
                 throw new ArgumentException("clientId is required", nameof(clientId));
 
-            using (var session = _store.OpenAsyncSession())
+            using (var session = _store.OpenAsyncSession(_identityStoreOptions?.Value.DatabaseName))
             {
                 var token = await session.Query<RefreshToken>().FirstOrDefaultAsync(t => t.SubjectId.Equals(subjectId) && t.ClientId.Equals(clientId)).ConfigureAwait(false);
                 if (token == null)
@@ -70,7 +74,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             if (refreshToken == null)
                 throw new ArgumentException("refreshToken is required", nameof(refreshToken));
 
-            using (var session = _store.OpenAsyncSession())
+            using (var session = _store.OpenAsyncSession(_identityStoreOptions?.Value.DatabaseName))
             {
                 var newToken = CryptoRandom.CreateUniqueId();
 
@@ -90,7 +94,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             if (refreshToken == null)
                 throw new ArgumentException("refreshToken is required", nameof(refreshToken));
 
-            using (var session = _store.OpenAsyncSession())
+            using (var session = _store.OpenAsyncSession(_identityStoreOptions?.Value.DatabaseName))
             {
                 var token = await session.LoadAsync<RefreshToken>($"RefreshTokens/{handle}").ConfigureAwait(false);
                 if (token == null)

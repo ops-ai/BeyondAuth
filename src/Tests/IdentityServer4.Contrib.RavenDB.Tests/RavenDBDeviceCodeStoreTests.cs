@@ -1,10 +1,13 @@
 using Divergic.Logging.Xunit;
 using FluentAssertions;
+using IdentityServer4.Contrib.RavenDB.Options;
 using IdentityServer4.Contrib.RavenDB.Stores;
 using IdentityServer4.Contrib.RavenDB.Tests.Common;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using Raven.Client.ServerWide.Operations;
 using System;
 using System.Collections.Generic;
 using System.Security.Claims;
@@ -18,11 +21,17 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
     {
         protected readonly ILoggerFactory _loggerFactory;
         protected readonly IDeviceFlowStore _deviceFlowStore;
+        private readonly IOptions<IdentityStoreOptions> _identityStoreOptions;
+        private string database = Guid.NewGuid().ToString();
 
         public RavenDBDeviceCodeStoreTests(ITestOutputHelper output)
         {
             _loggerFactory = LogFactory.Create(output);
-            _deviceFlowStore = new RavenDBDeviceFlowStore(_loggerFactory.CreateLogger<RavenDBDeviceFlowStore>(), GetDocumentStore());
+            var documentStore = GetDocumentStore();
+            documentStore.EnsureDatabaseExists(database);
+            _identityStoreOptions = Microsoft.Extensions.Options.Options.Create(new IdentityStoreOptions { DatabaseName = database });
+
+            _deviceFlowStore = new RavenDBDeviceFlowStore(_loggerFactory.CreateLogger<RavenDBDeviceFlowStore>(), documentStore, _identityStoreOptions);
         }
 
         [Fact(DisplayName = "StoreDeviceAuthorizationAsync should persist data by user code")]
@@ -188,10 +197,10 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         {
             using (var store = GetDocumentStore())
             {
-                var deviceFlowStore = new RavenDBDeviceFlowStore(_loggerFactory.CreateLogger<RavenDBDeviceFlowStore>(), store);
+                var deviceFlowStore = new RavenDBDeviceFlowStore(_loggerFactory.CreateLogger<RavenDBDeviceFlowStore>(), store, _identityStoreOptions);
 
-                Assert.Throws<ArgumentException>(() => new RavenDBDeviceFlowStore(null, store));
-                Assert.Throws<ArgumentException>(() => new RavenDBDeviceFlowStore(_loggerFactory.CreateLogger<RavenDBDeviceFlowStore>(), null));
+                Assert.Throws<ArgumentException>(() => new RavenDBDeviceFlowStore(null, store, _identityStoreOptions));
+                Assert.Throws<ArgumentException>(() => new RavenDBDeviceFlowStore(_loggerFactory.CreateLogger<RavenDBDeviceFlowStore>(), null, _identityStoreOptions));
                 await Assert.ThrowsAsync<ArgumentException>(async () => await deviceFlowStore.StoreDeviceAuthorizationAsync(null, "test", new DeviceCode { }));
                 await Assert.ThrowsAsync<ArgumentException>(async () => await deviceFlowStore.StoreDeviceAuthorizationAsync("test", null, new DeviceCode { }));
                 await Assert.ThrowsAsync<ArgumentException>(async () => await deviceFlowStore.StoreDeviceAuthorizationAsync("test", "test", null));
