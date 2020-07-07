@@ -10,7 +10,9 @@ using IdentityServer4.Contrib.RavenDB.Services;
 using IdentityServer4.Contrib.RavenDB.Stores;
 using IdentityServer4.Stores.Serialization;
 using JSNLog;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Certificate;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -52,9 +54,6 @@ namespace Authentication
                 });
             });
 
-            services.Configure<AccountOptions>(Configuration.GetSection("Settings:Account"));
-            services.Configure<ConsentOptions>(Configuration.GetSection("Settings:Consent"));
-
             services.AddCorrelationId();
 
             services.AddAntiforgery(options =>
@@ -80,24 +79,50 @@ namespace Authentication
             services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddDefaultTokenProviders();
 
+            IDocumentStore store = new DocumentStore
+            {
+                Urls = new[] { Configuration["Raven:Url"] },
+                Database = Configuration["Raven:Database"],
+                Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null
+            };
+            store.Conventions.CustomizeJsonSerializer += (JsonSerializer serializer) =>
+            {
+                serializer.Converters.Add(new ClaimConverter());
+                serializer.Converters.Add(new ClaimsPrincipalConverter());
+            };
+            store.Initialize();
+
+            services.AddMultiTenant<TenantSetting>().WithHostStrategy("__tenant__").WithStore<RavenDBMultitenantStore>(new ServiceLifetime(), store)
+                .WithPerTenantOptions<AccountOptions>((options, tenantInfo) =>
+                {
+                    options.AllowLocalLogin = tenantInfo.AccountOptions.AllowLocalLogin;
+                    options.AllowRememberLogin = tenantInfo.AccountOptions.AllowRememberLogin;
+                    options.AutomaticRedirectAfterSignOut = tenantInfo.AccountOptions.AutomaticRedirectAfterSignOut;
+                    options.IncludeWindowsGroups = tenantInfo.AccountOptions.IncludeWindowsGroups;
+                    options.InvalidCredentialsErrorMessage = tenantInfo.AccountOptions.InvalidCredentialsErrorMessage;
+                    options.RememberMeLoginDuration = tenantInfo.AccountOptions.RememberMeLoginDuration;
+                    options.ShowLogoutPrompt = tenantInfo.AccountOptions.ShowLogoutPrompt;
+                    options.WindowsAuthenticationSchemeName = tenantInfo.AccountOptions.WindowsAuthenticationSchemeName;
+                })
+                .WithPerTenantOptions<ConsentOptions>((options, tenantInfo) =>
+                {
+                    options = tenantInfo.ConsentOptions;
+                })
+                .WithPerTenantOptions<AuthenticationOptions>((options, tenantInfo) =>
+                {
+                    //options.DefaultChallengeScheme = ;
+                }).WithPerTenantOptions<CookieAuthenticationOptions>((o, tenantInfo) =>
+                {
+                    o.Cookie.Name += tenantInfo.Id;
+                });
+
             services.AddControllersWithViews();
             services.AddRazorPages();
             services.AddSameSiteCookiePolicy();
 
             services.AddSingleton((ctx) =>
             {
-                var store = new DocumentStore
-                {
-                    Urls = new[] { Configuration["Raven:Url"] },
-                    Database = Configuration["Raven:Database"],
-                    Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null
-                };
-                store.Conventions.CustomizeJsonSerializer += (JsonSerializer serializer) =>
-                {
-                    serializer.Converters.Add(new ClaimConverter());
-                    serializer.Converters.Add(new ClaimsPrincipalConverter());
-                };
-                return store.Initialize();
+                return store;
             });
 
             var healthChecks = services.AddHealthChecks()
@@ -134,11 +159,14 @@ namespace Authentication
             builder.AddMutualTlsSecretValidators();
             builder.AddDeveloperSigningCredential();
 
-            services.AddAuthentication()
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
                 .AddCertificate("Certificate", options =>
                 {
                     // allows both self-signed and CA-based certs. Check the MTLS spec for details.
                     options.AllowedCertificateTypes = CertificateTypes.All;
+                }).AddCookie(options =>
+                {
+                    options.Cookie.Name = "MyAppCookie.";
                 });
             //.AddGoogle(options =>
             //{
@@ -197,6 +225,8 @@ namespace Authentication
             {
                 Predicate = _ => _.FailureStatus == HealthStatus.Unhealthy
             });
+
+            app.UseMultiTenant<TenantSetting>();
 
             app.UseEndpoints(endpoints =>
             {
