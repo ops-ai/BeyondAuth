@@ -6,6 +6,7 @@ using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
 using Identity.Core;
 using IdentityServer.LdapExtension.Extensions;
+using IdentityServer4.Contrib.RavenDB.Options;
 using IdentityServer4.Contrib.RavenDB.Services;
 using IdentityServer4.Contrib.RavenDB.Stores;
 using IdentityServer4.Stores.Serialization;
@@ -111,7 +112,12 @@ namespace Authentication
                 .WithPerTenantOptions<AuthenticationOptions>((options, tenantInfo) =>
                 {
                     //options.DefaultChallengeScheme = ;
-                }).WithPerTenantOptions<CookieAuthenticationOptions>((o, tenantInfo) =>
+                })
+                .WithPerTenantOptions<IdentityStoreOptions>((options, tenantInfo) =>
+                {
+                    options.DatabaseName = $"TenantIdentity-{tenantInfo.Identifier}";
+                })
+                .WithPerTenantOptions<CookieAuthenticationOptions>((o, tenantInfo) =>
                 {
                     o.Cookie.Name += tenantInfo.Id;
                 });

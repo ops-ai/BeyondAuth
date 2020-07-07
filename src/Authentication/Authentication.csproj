@@ -68,8 +68,8 @@
     <PackageReference Include="Finbuckle.MultiTenant" Version="6.0.0-preview4" />
     <PackageReference Include="Finbuckle.MultiTenant.AspNetCore" Version="6.0.0-preview4" />
     <PackageReference Include="IdentityServer.LdapExtension" Version="2.1.49" />
-    <PackageReference Include="IdentityServer4" Version="4.0.0" />
-    <PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.0.0" />
+    <PackageReference Include="IdentityServer4" Version="4.0.2" />
+    <PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.0.2" />
     <PackageReference Include="JSNLog" Version="2.29.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="3.1.5" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="3.1.5" />

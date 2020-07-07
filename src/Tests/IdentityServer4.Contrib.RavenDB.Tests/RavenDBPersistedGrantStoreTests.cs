@@ -1,5 +1,6 @@
 using Divergic.Logging.Xunit;
 using FluentAssertions;
+using IdentityServer4.Contrib.RavenDB.Options;
 using IdentityServer4.Contrib.RavenDB.Stores;
 using IdentityServer4.Contrib.RavenDB.Tests.Common;
 using IdentityServer4.Extensions;
@@ -7,7 +8,9 @@ using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using IdentityServer4.Stores.Serialization;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Raven.Client.Documents;
+using Raven.Client.ServerWide.Operations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -29,6 +32,8 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         private IUserConsentStore _userConsent;
         private StubHandleGenerationService _handleGenerationService = new StubHandleGenerationService();
         private IDocumentStore _documentStore;
+        private readonly IOptions<IdentityStoreOptions> _identityStoreOptions;
+        private string database = Guid.NewGuid().ToString();
 
         private ClaimsPrincipal _user = new IdentityServerUser("123").CreatePrincipal();
 
@@ -36,7 +41,10 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         {
             _loggerFactory = LogFactory.Create(output);
             _documentStore = GetDocumentStore();
-            _store = new RavenDBPersistedGrantStore(new PersistentGrantSerializer(), _loggerFactory.CreateLogger<RavenDBPersistedGrantStore>(), _documentStore);
+            _documentStore.EnsureDatabaseExists(database);
+            _identityStoreOptions = Microsoft.Extensions.Options.Options.Create(new IdentityStoreOptions { DatabaseName = database });
+
+            _store = new RavenDBPersistedGrantStore(new PersistentGrantSerializer(), _loggerFactory.CreateLogger<RavenDBPersistedGrantStore>(), _documentStore, _identityStoreOptions);
 
             _codes = new DefaultAuthorizationCodeStore(_store, new PersistentGrantSerializer(), _handleGenerationService, _loggerFactory.CreateLogger<DefaultAuthorizationCodeStore>());
             _refreshTokens = new DefaultRefreshTokenStore(_store, new PersistentGrantSerializer(), _handleGenerationService, _loggerFactory.CreateLogger<DefaultRefreshTokenStore>());
@@ -509,8 +517,8 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         {
             using (var store = GetDocumentStore())
             {
-                Assert.Throws<ArgumentException>(() => new RavenDBPersistedGrantStore(new PersistentGrantSerializer(), null, store));
-                Assert.Throws<ArgumentException>(() => new RavenDBPersistedGrantStore(new PersistentGrantSerializer(), _loggerFactory.CreateLogger<RavenDBPersistedGrantStore>(), null));
+                Assert.Throws<ArgumentException>(() => new RavenDBPersistedGrantStore(new PersistentGrantSerializer(), null, store, _identityStoreOptions));
+                Assert.Throws<ArgumentException>(() => new RavenDBPersistedGrantStore(new PersistentGrantSerializer(), _loggerFactory.CreateLogger<RavenDBPersistedGrantStore>(), null, _identityStoreOptions));
                 await Assert.ThrowsAsync<ArgumentException>(async () => await _store.GetAllAsync(null));
                 await Assert.ThrowsAsync<ArgumentException>(async () => await _store.GetAsync(null));
                 await Assert.ThrowsAsync<ArgumentException>(async () => await _store.RemoveAsync(null));

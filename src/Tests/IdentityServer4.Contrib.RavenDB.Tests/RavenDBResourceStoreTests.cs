@@ -1,10 +1,13 @@
 using Divergic.Logging.Xunit;
+using IdentityServer4.Contrib.RavenDB.Options;
 using IdentityServer4.Contrib.RavenDB.Stores;
 using IdentityServer4.Contrib.RavenDB.Tests.Common;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Raven.Client.Documents;
+using Raven.Client.ServerWide.Operations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -19,18 +22,23 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         protected readonly ILoggerFactory _loggerFactory;
         protected readonly IDocumentStore _documentStore;
         private readonly IResourceStore _resourceStore;
+        private readonly IOptions<IdentityStoreOptions> _identityStoreOptions;
+        private string database = Guid.NewGuid().ToString();
 
         public RavenDBResourceStoreTests(ITestOutputHelper output)
         {
             _loggerFactory = LogFactory.Create(output);
             _documentStore = GetDocumentStore();
-            _resourceStore = new RavenDBResourceStore(_loggerFactory.CreateLogger<RavenDBResourceStore>(), _documentStore);
+            _documentStore.EnsureDatabaseExists(database);
+            _identityStoreOptions = Microsoft.Extensions.Options.Options.Create(new IdentityStoreOptions { DatabaseName = database });
+
+            _resourceStore = new RavenDBResourceStore(_loggerFactory.CreateLogger<RavenDBResourceStore>(), _documentStore, _identityStoreOptions);
         }
 
         [Fact(DisplayName = "FindApiResourceAsync should return resource")]
         public async Task FindApiResourceAsync()
         {
-            using (var session = _documentStore.OpenSession())
+            using (var session = _documentStore.OpenSession(database))
             {
                 session.Store(new ApiResource { DisplayName = "test", Scopes = new[] { "testscope" }, Name = "test" }, "ApiResources/test");
                 session.Store(new ApiResource { DisplayName = "test2", Scopes = new [] { "scope2" }, Name = "test2" }, "ApiResources/test2");
@@ -48,7 +56,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         [Fact(DisplayName = "FindApiResourceAsync should return null when resource doesn't exist")]
         public async Task FindApiResourceAsyncNull()
         {
-            using (var session = _documentStore.OpenSession())
+            using (var session = _documentStore.OpenSession(database))
             {
                 session.Store(new ApiResource { DisplayName = "test", Scopes = new [] { "testscope" }, Name = "test" }, "ApiResources/test");
                 session.Store(new ApiResource { DisplayName = "test2", Scopes = new [] { "scope2" }, Name = "test2" }, "ApiResources/test2");
@@ -64,7 +72,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         [Fact(DisplayName = "FindApiResourcesByScopeAsync should return resource")]
         public async Task FindApiResourcesByScopeAsync()
         {
-            using (var session = _documentStore.OpenSession())
+            using (var session = _documentStore.OpenSession(database))
             {
                 session.Store(new ApiResource { DisplayName = "test", Scopes = new [] { "testscope" }, Name = "test" }, "ApiResources/test");
                 session.Store(new ApiResource { DisplayName = "test2", Scopes = new [] { "scope2" }, Name = "test2" }, "ApiResources/test2");
@@ -86,7 +94,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         [Fact(DisplayName = "FindApiResourcesByScopeAsync should return null when resource doesn't exist")]
         public async Task FindApiResourcesByScopeAsyncNull()
         {
-            using (var session = _documentStore.OpenSession())
+            using (var session = _documentStore.OpenSession(database))
             {
                 session.Store(new ApiResource { DisplayName = "test", Scopes = new [] { "testscope" }, Name = "test" }, "ApiResources/test");
                 session.Store(new ApiResource { DisplayName = "test2", Scopes = new [] { "scope2" }, Name = "test2" }, "ApiResources/test2");
@@ -103,7 +111,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         [Fact(DisplayName = "FindIdentityResourcesByScopeAsync should return resource")]
         public async Task FindIdentityResourcesByScopeAsync()
         {
-            using (var session = _documentStore.OpenSession())
+            using (var session = _documentStore.OpenSession(database))
             {
                 session.Store(new IdentityResource { DisplayName = "test", Name = "test" }, "IdentityResources/test");
                 session.Store(new IdentityResource { DisplayName = "test2", Name = "test2" }, "IdentityResources/test2");
@@ -125,7 +133,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         [Fact(DisplayName = "FindIdentityResourcesByScopeAsync should return null when resource doesn't exist")]
         public async Task FindIdentityResourcesByScopeAsyncNull()
         {
-            using (var session = _documentStore.OpenSession())
+            using (var session = _documentStore.OpenSession(database))
             {
                 session.Store(new IdentityResource { DisplayName = "test", Name = "test" }, "IdentityResources/test");
                 session.Store(new IdentityResource { DisplayName = "test2", Name = "test2" }, "IdentityResources/test2");
@@ -141,7 +149,7 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         [Fact(DisplayName = "GetAllResourcesAsync should return both identity and api resources")]
         public async Task GetAllResourcesAsync()
         {
-            using (var session = _documentStore.OpenSession())
+            using (var session = _documentStore.OpenSession(database))
             {
                 session.Store(new ApiResource { DisplayName = "test", Scopes = new [] { "testscope" }, Name = "test" }, "ApiResources/test");
                 session.Store(new ApiResource { DisplayName = "test2", Scopes = new [] { "scope2" }, Name = "test2" }, "ApiResources/test2");
@@ -172,8 +180,8 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         [Fact(DisplayName = "Parameter validation should trigger argument exceptions")]
         public async Task Validation()
         {
-            Assert.Throws<ArgumentException>(() => new RavenDBResourceStore(null, _documentStore));
-            Assert.Throws<ArgumentException>(() => new RavenDBResourceStore(_loggerFactory.CreateLogger<RavenDBResourceStore>(), null));
+            Assert.Throws<ArgumentException>(() => new RavenDBResourceStore(null, _documentStore, _identityStoreOptions));
+            Assert.Throws<ArgumentException>(() => new RavenDBResourceStore(_loggerFactory.CreateLogger<RavenDBResourceStore>(), null, _identityStoreOptions));
             await Assert.ThrowsAsync<ArgumentException>(async () => await _resourceStore.FindApiResourcesByNameAsync(null));
             await Assert.ThrowsAsync<ArgumentException>(async () => await _resourceStore.FindApiResourcesByScopeNameAsync(null));
             await Assert.ThrowsAsync<ArgumentException>(async () => await _resourceStore.FindEnabledResourcesByScopeAsync(null));

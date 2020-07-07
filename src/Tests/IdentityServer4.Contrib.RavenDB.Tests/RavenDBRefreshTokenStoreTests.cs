@@ -1,12 +1,15 @@
 using Divergic.Logging.Xunit;
 using FluentAssertions;
+using IdentityServer4.Contrib.RavenDB.Options;
 using IdentityServer4.Contrib.RavenDB.Stores;
 using IdentityServer4.Contrib.RavenDB.Tests.Common;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Raven.Client.Documents;
+using Raven.Client.ServerWide.Operations;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -22,12 +25,17 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         protected readonly ILoggerFactory _loggerFactory;
         protected readonly IDocumentStore _documentStore;
         protected readonly IRefreshTokenStore _tokenStore;
+        private readonly IOptions<IdentityStoreOptions> _identityStoreOptions;
+        private string database = Guid.NewGuid().ToString();
 
         public RavenDBRefreshTokenStoreTests(ITestOutputHelper output)
         {
             _loggerFactory = LogFactory.Create(output);
             _documentStore = GetDocumentStore();
-            _tokenStore = new RavenDBRefreshTokenStore(_loggerFactory.CreateLogger<RavenDBRefreshTokenStore>(), _documentStore);
+            _documentStore.EnsureDatabaseExists(database);
+            _identityStoreOptions = Microsoft.Extensions.Options.Options.Create(new IdentityStoreOptions { DatabaseName = database });
+
+            _tokenStore = new RavenDBRefreshTokenStore(_loggerFactory.CreateLogger<RavenDBRefreshTokenStore>(), _documentStore, _identityStoreOptions);
         }
 
         [Fact(DisplayName = "Reference token should be retrievable after storage")]
@@ -234,8 +242,8 @@ namespace IdentityServer4.Contrib.RavenDB.Tests
         [Fact(DisplayName = "Parameter validation should trigger argument exceptions")]
         public async Task Validation()
         {
-            Assert.Throws<ArgumentException>(() => new RavenDBRefreshTokenStore(null, _documentStore));
-            Assert.Throws<ArgumentException>(() => new RavenDBRefreshTokenStore(_loggerFactory.CreateLogger<RavenDBRefreshTokenStore>(), null));
+            Assert.Throws<ArgumentException>(() => new RavenDBRefreshTokenStore(null, _documentStore, _identityStoreOptions));
+            Assert.Throws<ArgumentException>(() => new RavenDBRefreshTokenStore(_loggerFactory.CreateLogger<RavenDBRefreshTokenStore>(), null, _identityStoreOptions));
             await Assert.ThrowsAsync<ArgumentException>(async () => await _tokenStore.GetRefreshTokenAsync(null));
             await Assert.ThrowsAsync<ArgumentException>(async () => await _tokenStore.RemoveRefreshTokenAsync(null));
             await Assert.ThrowsAsync<ArgumentException>(async () => await _tokenStore.RemoveRefreshTokensAsync(null, "client"));

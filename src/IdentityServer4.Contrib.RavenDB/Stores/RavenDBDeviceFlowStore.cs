@@ -1,8 +1,10 @@
 ﻿using IdentityServer4.Contrib.RavenDB.Entities;
+using IdentityServer4.Contrib.RavenDB.Options;
 using IdentityServer4.Models;
 using IdentityServer4.Stores;
 using IdentityServer4.Stores.Serialization;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Raven.Client.Documents;
 using System;
 using System.Collections.Generic;
@@ -16,11 +18,13 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
     {
         private readonly ILogger _logger;
         private readonly IDocumentStore _store;
+        private readonly IOptions<IdentityStoreOptions> _identityStoreOptions;
 
-        public RavenDBDeviceFlowStore(ILogger<RavenDBDeviceFlowStore> logger, IDocumentStore store)
+        public RavenDBDeviceFlowStore(ILogger<RavenDBDeviceFlowStore> logger, IDocumentStore store, IOptions<IdentityStoreOptions> identityStoreOptions)
         {
             _logger = logger ?? throw new ArgumentException("loggerFactory is required", nameof(logger));
             _store = store ?? throw new ArgumentException("store is required", nameof(store));
+            _identityStoreOptions = identityStoreOptions;
         }
 
         public async Task<DeviceCode> FindByDeviceCodeAsync(string deviceCode)
@@ -28,7 +32,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             if (string.IsNullOrEmpty(deviceCode))
                 throw new ArgumentException("deviceCode is required", nameof(deviceCode));
 
-            using (var session = _store.OpenAsyncSession())
+            using (var session = _store.OpenAsyncSession(_identityStoreOptions?.Value.DatabaseName))
             {
                 _logger.LogDebug($"Finding device code {deviceCode}");
                 var entity = await session.Query<DeviceCodeEntity>().FirstOrDefaultAsync(t => t.DeviceCode.Equals(deviceCode)).ConfigureAwait(false);
@@ -56,7 +60,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             if (string.IsNullOrEmpty(userCode))
                 throw new ArgumentException("userCode is required", nameof(userCode));
 
-            using (var session = _store.OpenAsyncSession())
+            using (var session = _store.OpenAsyncSession(_identityStoreOptions?.Value.DatabaseName))
             {
                 _logger.LogDebug($"Loading device code with user code {userCode}");
                 var entity = await session.LoadAsync<DeviceCodeEntity>($"DeviceCodes/{userCode}").ConfigureAwait(false);
@@ -87,7 +91,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             if (string.IsNullOrEmpty(deviceCode))
                 throw new ArgumentException("Device code is required", nameof(deviceCode));
 
-            using (var session = _store.OpenAsyncSession())
+            using (var session = _store.OpenAsyncSession(_identityStoreOptions?.Value.DatabaseName))
             {
                 var code = await session.Query<DeviceCodeEntity>().FirstOrDefaultAsync(t => t.DeviceCode.Equals(deviceCode)).ConfigureAwait(false);
                 if (code == null)
@@ -111,7 +115,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
                 throw new ArgumentException("data is required", nameof(data));
 
             _logger.LogDebug($"Storing device code with user code {userCode}");
-            using (var session = _store.OpenAsyncSession())
+            using (var session = _store.OpenAsyncSession(_identityStoreOptions?.Value.DatabaseName))
             {
                 var code = new DeviceCodeEntity
                 {
@@ -144,7 +148,7 @@ namespace IdentityServer4.Contrib.RavenDB.Stores
             if (data == null)
                 throw new ArgumentException("data is required", nameof(data));
 
-            using (var session = _store.OpenAsyncSession())
+            using (var session = _store.OpenAsyncSession(_identityStoreOptions?.Value.DatabaseName))
             {
                 var code = await session.LoadAsync<DeviceCodeEntity>($"DeviceCodes/{userCode}").ConfigureAwait(false);
                 if (code == null)

@@ -1,6 +1,5 @@
 ﻿using Authentication.Models.Account;
 using Finbuckle.MultiTenant;
-using Raven.DependencyInjection;
 
 namespace Authentication.Options
 {
@@ -21,11 +20,6 @@ namespace Authentication.Options
         /// Consent behavior
         /// </summary>
         public ConsentOptions ConsentOptions { get; set; }
-
-        /// <summary>
-        /// RavenDB connection information
-        /// </summary>
-        public RavenSettings RavenSettings { get; set; }
 
         /// <summary>
         /// The value used to actually resolve a tenant and should have a syntax compatible for the app (i.e. no crazy symbols in a web app where the identifier will be part of the URL). 
