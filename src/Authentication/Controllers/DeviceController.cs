@@ -33,7 +33,7 @@ namespace Authentication.Controllers
         private readonly IResourceStore _resourceStore;
         private readonly IEventService _events;
         private readonly ILogger<DeviceController> _logger;
-        private readonly ConsentOptions _consentOptions;
+        private readonly IOptions<ConsentOptions> _consentOptions;
         private readonly IOptions<IdentityServerOptions> _options;
 
         public DeviceController(
@@ -42,7 +42,7 @@ namespace Authentication.Controllers
             IResourceStore resourceStore,
             IEventService eventService,
             ILogger<DeviceController> logger,
-            IOptionsMonitor<ConsentOptions> consentOptions,
+            IOptions<ConsentOptions> consentOptions,
             IOptions<IdentityServerOptions> options)
         {
             _interaction = interaction;
@@ -50,7 +50,7 @@ namespace Authentication.Controllers
             _resourceStore = resourceStore;
             _events = eventService;
             _logger = logger;
-            _consentOptions = consentOptions.CurrentValue;
+            _consentOptions = consentOptions;
             _options = options;
         }
 
@@ -114,7 +114,7 @@ namespace Authentication.Controllers
                 if (model.ScopesConsented != null && model.ScopesConsented.Any())
                 {
                     var scopes = model.ScopesConsented;
-                    if (_consentOptions.EnableOfflineAccess == false)
+                    if (_consentOptions.Value.EnableOfflineAccess == false)
                     {
                         scopes = scopes.Where(x => x != IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess);
                     }
@@ -131,12 +131,12 @@ namespace Authentication.Controllers
                 }
                 else
                 {
-                    result.ValidationError = _consentOptions.MustChooseOneErrorMessage;
+                    result.ValidationError = _consentOptions.Value.MustChooseOneErrorMessage;
                 }
             }
             else
             {
-                result.ValidationError = _consentOptions.InvalidSelectionErrorMessage;
+                result.ValidationError = _consentOptions.Value.InvalidSelectionErrorMessage;
             }
 
             if (grantedConsent != null)
@@ -196,7 +196,7 @@ namespace Authentication.Controllers
                     apiScopes.Add(scopeVm);
                 }
             }
-            if (_consentOptions.EnableOfflineAccess && request.ValidatedResources.Resources.OfflineAccess)
+            if (_consentOptions.Value.EnableOfflineAccess && request.ValidatedResources.Resources.OfflineAccess)
             {
                 apiScopes.Add(GetOfflineAccessScope(vm.ScopesConsented.Contains(IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess) || model == null));
             }
@@ -237,8 +237,8 @@ namespace Authentication.Controllers
             return new ScopeViewModel
             {
                 Value = IdentityServer4.IdentityServerConstants.StandardScopes.OfflineAccess,
-                DisplayName = _consentOptions.OfflineAccessDisplayName,
-                Description = _consentOptions.OfflineAccessDescription,
+                DisplayName = _consentOptions.Value.OfflineAccessDisplayName,
+                Description = _consentOptions.Value.OfflineAccessDescription,
                 Emphasize = true,
                 Checked = check
             };
