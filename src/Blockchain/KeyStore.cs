@@ -1,18 +1,34 @@
 ﻿using Cryptography;
-using System;
+using Org.BouncyCastle.Asn1.Sec;
+using Org.BouncyCastle.Crypto.Generators;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Security;
 
 namespace Blockchain
 {
     public class KeyStore : IKeyStore
     {
-        private DigitalSignature DigitalSignature { get; set; } = new DigitalSignature();
+        public KeyStore(byte[] authenticatedHashKey)
+        {
+            AuthenticatedHashKey = authenticatedHashKey;
+
+            var ecKeyPairGenerator = new ECKeyPairGenerator();
+            var ecKeyGenParams = new ECKeyGenerationParameters(SecObjectIdentifiers.SecP256k1, new SecureRandom());
+            ecKeyPairGenerator.Init(ecKeyGenParams);
+            var keyPair = ecKeyPairGenerator.GenerateKeyPair();
+
+            _privateKey = keyPair.Private as ECPrivateKeyParameters;
+            PublicKey = keyPair.Public as ECPublicKeyParameters;
+        }
 
         public byte[] AuthenticatedHashKey { get; private set; }
 
-        public KeyStore(byte[] authenticatedHashKey) => AuthenticatedHashKey = authenticatedHashKey;
+        public ECPublicKeyParameters PublicKey { get; private set; }
 
-        public string SignBlock(string blockHash) => Convert.ToBase64String(DigitalSignature.SignData(Convert.FromBase64String(blockHash)));
+        private ECPrivateKeyParameters _privateKey;
 
-        public bool VerifyBlock(string blockHash, string signature) => DigitalSignature.VerifySignature(Convert.FromBase64String(blockHash), Convert.FromBase64String(signature));
+        public string SignBlock(string blockHash) => DigitalSignature.SignData(_privateKey, blockHash);
+
+        public bool VerifyBlock(string blockHash, string signature) => DigitalSignature.VerifySignature(blockHash, PublicKey, signature);
     }
 }

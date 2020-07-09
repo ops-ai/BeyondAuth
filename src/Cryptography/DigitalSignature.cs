@@ -1,47 +1,68 @@
-﻿using System.Security.Cryptography;
+﻿using Org.BouncyCastle.Crypto;
+using Org.BouncyCastle.Crypto.Parameters;
+using Org.BouncyCastle.Security;
+using System;
+using System.Globalization;
+using System.Numerics;
+using System.Text;
 
 namespace Cryptography
 {
-    public class DigitalSignature
+    public static class DigitalSignature
     {
-        private RSAParameters _publicKey;
-        private RSAParameters _privateKey;
-
-        public DigitalSignature()
+        public static string SignData(ECPrivateKeyParameters privKey, string message)
         {
-            using (var rsa = new RSACryptoServiceProvider(2048))
+            try
             {
-                rsa.PersistKeyInCsp = false;
-                _publicKey = rsa.ExportParameters(false);
-                _privateKey = rsa.ExportParameters(true);
+                byte[] msgBytes = Encoding.UTF8.GetBytes(message);
+
+                ISigner signer = SignerUtilities.GetSigner("SHA-256withECDSA");
+                signer.Init(true, privKey);
+                signer.BlockUpdate(msgBytes, 0, msgBytes.Length);
+                byte[] sigBytes = signer.GenerateSignature();
+
+                return Convert.ToBase64String(sigBytes);
+            }
+            catch (Exception exc)
+            {
+                Console.WriteLine("Signing Failed: " + exc.ToString());
+                return null;
             }
         }
 
-        public byte[] SignData(byte[] hashOfDataToSign)
+        public static bool VerifySignature(string message, ECPublicKeyParameters pubKey, string signature)
         {
-            using (var rsa = new RSACryptoServiceProvider(2048))
+            try
             {
-                rsa.PersistKeyInCsp = false;
-                rsa.ImportParameters(_privateKey);
+                byte[] msgBytes = Encoding.UTF8.GetBytes(message);
+                byte[] sigBytes = Convert.FromBase64String(signature);
 
-                var rsaFormatter = new RSAPKCS1SignatureFormatter(rsa);
-                rsaFormatter.SetHashAlgorithm("SHA256");
-
-                return rsaFormatter.CreateSignature(hashOfDataToSign);
+                ISigner signer = SignerUtilities.GetSigner("SHA-256withECDSA");
+                signer.Init(false, pubKey);
+                signer.BlockUpdate(msgBytes, 0, msgBytes.Length);
+                return signer.VerifySignature(sigBytes);
+            }
+            catch (Exception exc)
+            {
+                Console.WriteLine("Verification failed with the error: " + exc.ToString());
+                return false;
             }
         }
 
-        public bool VerifySignature(byte[] hashOfDataToSign, byte[] signature)
+        public static string GetPublicKeyFromPrivateKey(string privateKey)
         {
-            using (var rsa = new RSACryptoServiceProvider(2048))
-            {
-                rsa.ImportParameters(_publicKey);
+            var p = BigInteger.Parse("0FFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F", NumberStyles.HexNumber);
+            var b = (BigInteger)7;
+            var a = BigInteger.Zero;
+            var Gx = BigInteger.Parse("79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798", NumberStyles.HexNumber);
+            var Gy = BigInteger.Parse("483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8", NumberStyles.HexNumber);
 
-                var rsaDeformatter = new RSAPKCS1SignatureDeformatter(rsa);
-                rsaDeformatter.SetHashAlgorithm("SHA256");
+            var curve256 = new CurveFp(p, a, b);
+            var generator256 = new Point(curve256, Gx, Gy);
 
-                return rsaDeformatter.VerifySignature(hashOfDataToSign, signature);
-            }
+            var secret = BigInteger.Parse(privateKey, NumberStyles.HexNumber);
+            var pubkeyPoint = generator256 * secret;
+            return pubkeyPoint.X.ToString("X") + pubkeyPoint.Y.ToString("X");
         }
     }
 }
