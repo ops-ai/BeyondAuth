@@ -1,11 +1,18 @@
-﻿namespace Blockchain
+﻿using Org.BouncyCastle.Crypto.Parameters;
+
+namespace Blockchain
 {
     public interface IKeyStore
     {
         /// <summary>
-        /// HMAC key
+        /// HMAC
         /// </summary>
         byte[] AuthenticatedHashKey { get; }
+
+        /// <summary>
+        /// Public Key
+        /// </summary>
+        ECPublicKeyParameters PublicKey { get; }
 
         /// <summary>
         /// Sign a block
