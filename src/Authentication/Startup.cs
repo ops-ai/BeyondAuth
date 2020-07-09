@@ -80,20 +80,7 @@ namespace Authentication
             services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
                 .AddDefaultTokenProviders();
 
-            IDocumentStore store = new DocumentStore
-            {
-                Urls = new[] { Configuration["Raven:Url"] },
-                Database = Configuration["Raven:Database"],
-                Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null
-            };
-            store.Conventions.CustomizeJsonSerializer += (JsonSerializer serializer) =>
-            {
-                serializer.Converters.Add(new ClaimConverter());
-                serializer.Converters.Add(new ClaimsPrincipalConverter());
-            };
-            store.Initialize();
-
-            services.AddMultiTenant<TenantSetting>().WithHostStrategy("__tenant__").WithStore<RavenDBMultitenantStore>(new ServiceLifetime(), store)
+            services.AddMultiTenant<TenantSetting>().WithHostStrategy("__tenant__").WithStore<RavenDBMultitenantStore>(new ServiceLifetime(), (sp) => new RavenDBMultitenantStore(sp.GetService<IDocumentStore>()))
                 .WithPerTenantOptions<AccountOptions>((options, tenantInfo) =>
                 {
                     options.AllowLocalLogin = tenantInfo.AccountOptions.AllowLocalLogin;
@@ -128,7 +115,19 @@ namespace Authentication
 
             services.AddSingleton((ctx) =>
             {
-                return store;
+                IDocumentStore store = new DocumentStore
+                {
+                    Urls = new[] { Configuration["Raven:Url"] },
+                    Database = Configuration["Raven:Database"],
+                    Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null
+                };
+                store.Conventions.CustomizeJsonSerializer += (JsonSerializer serializer) =>
+                {
+                    serializer.Converters.Add(new ClaimConverter());
+                    serializer.Converters.Add(new ClaimsPrincipalConverter());
+                };
+                
+                return store.Initialize();
             });
 
             var healthChecks = services.AddHealthChecks()
