@@ -20,6 +20,7 @@ using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -42,7 +43,10 @@ namespace Authentication
 
         public ILifetimeScope AutofacContainer { get; private set; }
 
-        // This method gets called by the runtime. Use this method to add services to the container.
+        /// <summary>
+        /// This method gets called by the runtime. Use this method to add services to the container.
+        /// </summary>
+        /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
             services.Configure<ForwardedHeadersOptions>(options =>
@@ -68,19 +72,18 @@ namespace Authentication
             {
                 options.UseCaseSensitivePaths = false;
             });
+            services.AddMemoryCache();
 
-            var dataProtection = services.AddDataProtection()
-                .SetApplicationName("auth.ops.ai");
+            var dataProtection = services.AddDataProtection().SetApplicationName("auth.ops.ai");
 
             if (!string.IsNullOrEmpty(Configuration["DataProtection:KeyIdentifier"]))
                 dataProtection
                     .ProtectKeysWithAzureKeyVault(Configuration["DataProtection:KeyIdentifier"], Configuration["DataProtection:ClientId"], Configuration["DataProtection:ClientSecret"])
                     .PersistKeysToAzureBlobStorage(new Uri(Configuration["DataProtection:StorageUri"]));
 
-            services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
-                .AddDefaultTokenProviders();
+            services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true).AddDefaultTokenProviders();
 
-            services.AddMultiTenant<TenantSetting>().WithHostStrategy("__tenant__").WithStore<RavenDBMultitenantStore>(new ServiceLifetime(), (sp) => new RavenDBMultitenantStore(sp.GetService<IDocumentStore>()))
+            services.AddMultiTenant<TenantSetting>().WithHostStrategy("__tenant__").WithStore(new ServiceLifetime(), (sp) => new RavenDBMultitenantStore(sp.GetService<IDocumentStore>(), sp.GetService<IMemoryCache>()))
                 .WithPerTenantOptions<AccountOptions>((options, tenantInfo) =>
                 {
                     options.AllowLocalLogin = tenantInfo.AccountOptions.AllowLocalLogin;
@@ -94,13 +97,21 @@ namespace Authentication
                 })
                 .WithPerTenantOptions<ConsentOptions>((options, tenantInfo) =>
                 {
-                    options = tenantInfo.ConsentOptions;
+                    options.EnableOfflineAccess = tenantInfo.ConsentOptions.EnableOfflineAccess;
+                    options.InvalidSelectionErrorMessage = tenantInfo.ConsentOptions.InvalidSelectionErrorMessage;
+                    options.MustChooseOneErrorMessage = tenantInfo.ConsentOptions.MustChooseOneErrorMessage;
+                    options.OfflineAccessDescription = tenantInfo.ConsentOptions.OfflineAccessDescription;
+                    options.OfflineAccessDisplayName = tenantInfo.ConsentOptions.OfflineAccessDisplayName;
                 })
                 .WithPerTenantOptions<AuthenticationOptions>((options, tenantInfo) =>
                 {
                     //options.DefaultChallengeScheme = ;
                 })
                 .WithPerTenantOptions<IdentityStoreOptions>((options, tenantInfo) =>
+                {
+                    options.DatabaseName = $"TenantIdentity-{tenantInfo.Identifier}";
+                })
+                .WithPerTenantOptions<UserStoreOptions>((options, tenantInfo) =>
                 {
                     options.DatabaseName = $"TenantIdentity-{tenantInfo.Identifier}";
                 })

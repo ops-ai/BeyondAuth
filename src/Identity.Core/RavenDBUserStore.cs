@@ -3,6 +3,7 @@ using IdentityServer.LdapExtension;
 using IdentityServer.LdapExtension.UserModel;
 using IdentityServer.LdapExtension.UserStore;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Raven.Client.Documents;
 using System;
 using System.Collections.Generic;
@@ -18,21 +19,23 @@ namespace Identity.Core
         private readonly IDocumentStore _documentStore;
         private readonly ILogger<RavenDBUserStore<TUser>> _logger;
         private readonly ILdapService<TUser> _authenticationService;
+        private readonly IOptions<UserStoreOptions> _userStoreOptions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RavenDBUserStore{TUser}"/> class.
         /// </summary>
         /// <param name="authenticationService">The Ldap authentication service.</param>
-        public RavenDBUserStore(ILogger<RavenDBUserStore<TUser>> logger, IDocumentStore documentStore, ILdapService<TUser> authenticationService)
+        public RavenDBUserStore(ILogger<RavenDBUserStore<TUser>> logger, IDocumentStore documentStore, ILdapService<TUser> authenticationService, IOptions<UserStoreOptions> userStoreOptions)
         {
             _documentStore = documentStore;
             _logger = logger;
             _authenticationService = authenticationService;
+            _userStoreOptions = userStoreOptions;
         }
 
         public IAppUser AutoProvisionUser(string provider, string userId, List<Claim> claims)
         {
-            using (var session = _documentStore.OpenSession())
+            using (var session = _documentStore.OpenSession(_userStoreOptions?.Value.DatabaseName))
             {
                 var filtered = new List<Claim>();
 
@@ -104,7 +107,7 @@ namespace Identity.Core
         /// <returns></returns>
         public IAppUser FindByExternalProvider(string provider, string userId)
         {
-            using (var session = _documentStore.OpenSession())
+            using (var session = _documentStore.OpenSession(_userStoreOptions?.Value.DatabaseName))
             {
                 return session.Query<TUser>().FirstOrDefault(t => t.ProviderName == provider && t.ProviderSubjectId == userId);
             }
@@ -118,7 +121,7 @@ namespace Identity.Core
         /// <returns>The application user.</returns>
         public IAppUser FindBySubjectId(string subjectId)
         {
-            using (var session = _documentStore.OpenSession())
+            using (var session = _documentStore.OpenSession(_userStoreOptions?.Value.DatabaseName))
             {
                 var user = session.Load<TUser>(subjectId);
                 if (user != null)
@@ -150,7 +153,7 @@ namespace Identity.Core
         /// </returns>
         public IAppUser FindByUsername(string username)
         {
-            using (var session = _documentStore.OpenSession())
+            using (var session = _documentStore.OpenSession(_userStoreOptions?.Value.DatabaseName))
             {
                 var user = session.Query<TUser>().FirstOrDefault(t => t.Username == username);
                 if (user != null)
@@ -233,7 +236,7 @@ namespace Identity.Core
 
         private void StoreOrUpdateUser(IAppUser user)
         {
-            using (var session = _documentStore.OpenSession())
+            using (var session = _documentStore.OpenSession(_userStoreOptions?.Value.DatabaseName))
             {
                 session.Store(user, user.SubjectId);
                 session.SaveChanges();
