@@ -1,10 +1,12 @@
 ﻿@using IdentityServer4.Extensions
+@using Finbuckle.MultiTenant
 @{
     string name = null;
     if (!true.Equals(ViewData["signed-out"]))
     {
         name = Context.User?.GetDisplayName();
     }
+    var tenantInfo = Context.GetMultiTenantContext<Authentication.Options.TenantSetting>()?.TenantInfo;
 }
 <!DOCTYPE html>
 <html lang="en">
@@ -31,7 +33,7 @@
                 </button>
                 <a href="~/">
                     <span class="navbar-brand">
-                        <img src="~/logo.png" class="icon-banner" alt="logo">
+                        <img src="@(tenantInfo.BrandingOptions?.Logo ?? "/logo.png")" class="icon-banner" alt="logo">
                     </span>
                 </a>
             </div>

@@ -1,6 +1,8 @@
 ﻿using Authentication.Options;
 using Finbuckle.MultiTenant;
+using Microsoft.Extensions.Caching.Memory;
 using Raven.Client.Documents;
+using System;
 using System.Threading.Tasks;
 
 namespace Authentication.Extensions
@@ -11,14 +13,17 @@ namespace Authentication.Extensions
     public class RavenDBMultitenantStore : IMultiTenantStore<TenantSetting>
     {
         private IDocumentStore _store;
+        private IMemoryCache _cache;
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="store"></param>
-        public RavenDBMultitenantStore(IDocumentStore store)
+        /// <param name="memoryCache"></param>
+        public RavenDBMultitenantStore(IDocumentStore store, IMemoryCache memoryCache)
         {
             _store = store;
+            _cache = memoryCache;
         }
 
         /// <summary>
@@ -49,10 +54,14 @@ namespace Authentication.Extensions
         /// <returns></returns>
         public async Task<TenantSetting> TryGetAsync(string id)
         {
-            using (var session = _store.OpenAsyncSession())
+            if (!_cache.TryGetValue($"TenantSettingId-{id}", out TenantSetting cachedTenant))
             {
-                return await session.LoadAsync<TenantSetting>(id);
+                using (var session = _store.OpenAsyncSession())
+                    cachedTenant = await session.LoadAsync<TenantSetting>(id);
+
+                _cache.Set($"TenantSettingId-{id}", cachedTenant, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(30)));
             }
+            return cachedTenant;
         }
 
         /// <summary>
@@ -62,13 +71,14 @@ namespace Authentication.Extensions
         /// <returns></returns>
         public async Task<TenantSetting> TryGetByIdentifierAsync(string identifier)
         {
-            using (var session = _store.OpenAsyncSession())
+            if (!_cache.TryGetValue($"TenantSetting-{identifier}", out TenantSetting cachedTenant))
             {
-                var tenant = await session.Query<TenantSetting>().FirstOrDefaultAsync(t => t.Identifier.Equals(identifier));
-                if (tenant == null)
-                    await TryAddAsync(new TenantSetting { Id = $"TenantSettings/{identifier}", Identifier = identifier, Name = identifier });
-                return tenant;
+                using (var session = _store.OpenAsyncSession())
+                    cachedTenant = await session.Query<TenantSetting>().FirstOrDefaultAsync(t => t.Identifier.Equals(identifier));
+
+                _cache.Set($"TenantSettingId-{identifier}", cachedTenant, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(30)));
             }
+            return cachedTenant;
         }
 
         /// <summary>
@@ -85,6 +95,10 @@ namespace Authentication.Extensions
                 {
                     session.Delete(tenant);
                     await session.SaveChangesAsync();
+
+                    _cache.Remove($"TenantSetting-{tenant.Identifier}");
+                    _cache.Remove($"TenantSetting-{tenant.Id}");
+                    
                     return true;
                 }
                 return false;
@@ -102,6 +116,9 @@ namespace Authentication.Extensions
             {
                 await session.StoreAsync(tenantInfo);
                 await session.SaveChangesAsync();
+
+                _cache.Remove($"TenantSetting-{tenantInfo.Identifier}");
+                _cache.Remove($"TenantSetting-{tenantInfo.Id}");
 
                 return true;
             }
