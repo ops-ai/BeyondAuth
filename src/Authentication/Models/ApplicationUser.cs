@@ -1,4 +1,5 @@
-﻿using Identity.Core.Extensions;
+﻿using Identity.Core;
+using Identity.Core.Extensions;
 using IdentityModel;
 using IdentityServer.LdapExtension.UserModel;
 using Novell.Directory.Ldap;
@@ -6,7 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Security.Claims;
 
-namespace Identity.Core
+namespace Authentication.Models
 {
     public class ApplicationUser : IAppUser
     {
@@ -125,14 +126,11 @@ namespace Identity.Core
             // Add claims based on the user groups
             // add the groups as claims -- be careful if the number of groups is too large
             if (true)
-            {
                 try
                 {
-                    var userRoles = ldapEntry.GetAttribute(OpenLdapAttributes.MemberOf.ToDescriptionString()).StringValues;
+                    var userRoles = ldapEntry.getAttribute(OpenLdapAttributes.MemberOf.ToDescriptionString()).StringValues;
                     while (userRoles.MoveNext())
-                    {
                         Claims.Add(new Claim(JwtClaimTypes.Role, userRoles.Current.ToString()));
-                    }
                     //var roles = userRoles.Current (x => new Claim(JwtClaimTypes.Role, x.Value));
                     //id.AddClaims(roles);
                     //Claims = this.Claims.Concat(new List<Claim>()).ToList();
@@ -141,7 +139,6 @@ namespace Identity.Core
                 {
                     // No roles exists it seems.
                 }
-            }
         }
 
         private Claim GetClaimFromLdapAttributes(LdapEntry user, string claim, OpenLdapAttributes ldapAttribute)
@@ -150,7 +147,7 @@ namespace Identity.Core
 
             try
             {
-                value = user.GetAttribute(ldapAttribute.ToDescriptionString()).StringValue;
+                value = user.getAttribute(ldapAttribute.ToDescriptionString()).StringValue;
                 return new Claim(claim, value);
             }
             catch (Exception)
@@ -176,8 +173,8 @@ namespace Identity.Core
         /// <param name="providerName">Specific provider such as Google, Facebook, etc.</param>
         public void SetBaseDetails(LdapEntry ldapEntry, string providerName)
         {
-            DisplayName = ldapEntry.GetAttribute(OpenLdapAttributes.DisplayName.ToDescriptionString()).StringValue;
-            Username = ldapEntry.GetAttribute(OpenLdapAttributes.UserName.ToDescriptionString()).StringValue;
+            DisplayName = ldapEntry.getAttribute(OpenLdapAttributes.DisplayName.ToDescriptionString()).StringValue;
+            Username = ldapEntry.getAttribute(OpenLdapAttributes.UserName.ToDescriptionString()).StringValue;
             ProviderName = providerName;
             SubjectId = Username; // Extra: We could use the uidNumber instead in a sha algo.
             ProviderSubjectId = Username;

@@ -56,34 +56,35 @@
 
 
   <ItemGroup>
-    <PackageReference Include="AspNetCore.HealthChecks.AzureKeyVault" Version="3.1.1" />
+    <PackageReference Include="AspNetCore.HealthChecks.AzureKeyVault" Version="3.2.0" />
     <PackageReference Include="AspNetCore.HealthChecks.OpenIdConnectServer" Version="3.1.1" />
     <PackageReference Include="AspNetCore.HealthChecks.RavenDB" Version="3.1.1" />
-    <PackageReference Include="AspNetCore.HealthChecks.UI" Version="3.1.1" />
-    <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="3.1.1" />
-    <PackageReference Include="Autofac" Version="5.2.0" />
-    <PackageReference Include="Autofac.Configuration" Version="5.1.0" />
-    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="6.0.0" />
+    <PackageReference Include="AspNetCore.HealthChecks.UI" Version="3.1.3" />
+    <PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="3.1.2" />
+    <PackageReference Include="Autofac" Version="6.0.0" />
+    <PackageReference Include="Autofac.Configuration" Version="6.0.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
+    <PackageReference Include="Azure.Identity" Version="1.2.3" />
     <PackageReference Include="CorrelationId" Version="3.0.0" />
-    <PackageReference Include="Finbuckle.MultiTenant" Version="6.0.0-preview5" />
-    <PackageReference Include="Finbuckle.MultiTenant.AspNetCore" Version="6.0.0-preview5" />
-    <PackageReference Include="IdentityServer.LdapExtension" Version="2.1.49" />
-    <PackageReference Include="IdentityServer4" Version="4.0.2" />
-    <PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.0.2" />
+    <PackageReference Include="Finbuckle.MultiTenant" Version="6.0.0" />
+    <PackageReference Include="Finbuckle.MultiTenant.AspNetCore" Version="6.0.0" />
+    <PackageReference Include="IdentityServer.LdapExtension" Version="2.1.52" />
+    <PackageReference Include="IdentityServer4" Version="4.1.1" />
+    <PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.1.1" />
     <PackageReference Include="JSNLog" Version="2.29.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="3.1.5" />
-    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="3.1.5" />
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection.AzureKeyVault" Version="3.1.5" />
-    <PackageReference Include="Microsoft.AspNetCore.DataProtection.AzureStorage" Version="3.1.5" />
-    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.5" />
-    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.8" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="3.1.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="3.1.9" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.AzureKeyVault" Version="3.1.9" />
+    <PackageReference Include="Microsoft.AspNetCore.DataProtection.AzureStorage" Version="3.1.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="3.1.9" />
+    <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.10" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Kubernetes.Tools.Targets" Version="1.1.0" />
     <PackageReference Include="NWebsec.AspNetCore.Middleware" Version="3.0.0" />
-    <PackageReference Include="RavenDB.Client" Version="4.2.103" />
+    <PackageReference Include="RavenDB.Client" Version="5.0.3" />
     <PackageReference Include="scientist" Version="2.0.0" />
     <PackageReference Include="StackExchange.Redis" Version="2.1.58" />
-    <PackageReference Include="Twilio" Version="5.45.0" />
-    <PackageReference Include="VaultSharp" Version="1.4.0.4" />
+    <PackageReference Include="Twilio" Version="5.49.0" />
+    <PackageReference Include="VaultSharp" Version="1.4.0.5" />
   </ItemGroup>
 
 

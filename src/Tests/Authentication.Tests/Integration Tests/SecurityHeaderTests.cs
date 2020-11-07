@@ -36,6 +36,7 @@ namespace Authentication.Tests.Integration_Tests
                         services.Remove(descriptor);
                     }
 
+                    services.AddOptions();
                     services.AddSingleton(GetDocumentStore());
                 });
                 builder.ConfigureTestServices(services =>
