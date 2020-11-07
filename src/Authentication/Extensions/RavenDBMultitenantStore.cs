@@ -3,6 +3,7 @@ using Finbuckle.MultiTenant;
 using Microsoft.Extensions.Caching.Memory;
 using Raven.Client.Documents;
 using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 namespace Authentication.Extensions
@@ -24,6 +25,12 @@ namespace Authentication.Extensions
         {
             _store = store;
             _cache = memoryCache;
+        }
+
+        public async Task<IEnumerable<TenantSetting>> GetAllAsync()
+        {
+            using (var session = _store.OpenAsyncSession())
+                return await session.Query<TenantSetting>().ToListAsync();
         }
 
         /// <summary>

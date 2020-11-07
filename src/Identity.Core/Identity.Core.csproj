@@ -5,12 +5,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="IdentityServer.LdapExtension" Version="2.1.49" />
-    <PackageReference Include="RavenDB.Identity" Version="7.0.1" />
+    <PackageReference Include="IdentityModel" Version="4.4.0" />
+    <PackageReference Include="Novell.Directory.Ldap.NETStandard2_0" Version="3.1.0" />
+    <PackageReference Include="RavenDB.Identity" Version="8.0.4" />
   </ItemGroup>
 
   <ItemGroup>
     <Folder Include="Exceptions\" />
+    <Folder Include="Extensions\" />
   </ItemGroup>
   
 </Project>

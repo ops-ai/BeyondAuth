@@ -1,4 +1,5 @@
-﻿using IdentityModel;
+﻿using Identity.Core;
+using IdentityModel;
 using IdentityServer.LdapExtension;
 using IdentityServer.LdapExtension.UserModel;
 using IdentityServer.LdapExtension.UserStore;
@@ -11,7 +12,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Security.Claims;
 
-namespace Identity.Core
+namespace Authentication.Stores
 {
     public class RavenDBUserStore<TUser> : ILdapUserStore
         where TUser : IAppUser, new()
@@ -40,23 +41,15 @@ namespace Identity.Core
                 var filtered = new List<Claim>();
 
                 foreach (var claim in claims)
-                {
                     // if the external system sends a display name - translate that to the standard OIDC name claim
                     if (claim.Type == ClaimTypes.Name)
-                    {
                         filtered.Add(new Claim(JwtClaimTypes.Name, claim.Value));
-                    }
                     // if the JWT handler has an outbound mapping to an OIDC claim use that
                     else if (JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap.ContainsKey(claim.Type))
-                    {
                         filtered.Add(new Claim(JwtSecurityTokenHandler.DefaultOutboundClaimTypeMap[claim.Type], claim.Value));
-                    }
                     // copy the claim as-is
                     else
-                    {
                         filtered.Add(claim);
-                    }
-                }
 
                 // if no display name was provided, try to construct by first and/or last name
                 if (!filtered.Any(x => x.Type == JwtClaimTypes.Name))
@@ -64,17 +57,11 @@ namespace Identity.Core
                     var first = filtered.FirstOrDefault(x => x.Type == JwtClaimTypes.GivenName)?.Value;
                     var last = filtered.FirstOrDefault(x => x.Type == JwtClaimTypes.FamilyName)?.Value;
                     if (first != null && last != null)
-                    {
                         filtered.Add(new Claim(JwtClaimTypes.Name, first + " " + last));
-                    }
                     else if (first != null)
-                    {
                         filtered.Add(new Claim(JwtClaimTypes.Name, first));
-                    }
                     else if (last != null)
-                    {
                         filtered.Add(new Claim(JwtClaimTypes.Name, last));
-                    }
                 }
 
                 // create a new unique subject id
@@ -108,9 +95,7 @@ namespace Identity.Core
         public IAppUser FindByExternalProvider(string provider, string userId)
         {
             using (var session = _documentStore.OpenSession(_userStoreOptions?.Value.DatabaseName))
-            {
                 return session.Query<TUser>().FirstOrDefault(t => t.ProviderName == provider && t.ProviderSubjectId == userId);
-            }
         }
 
         /// <summary>
@@ -162,9 +147,7 @@ namespace Identity.Core
                 // If nothing found in external, than we look in our current LDAP system. (We want to get always the latest details when we are on the LDAP).
                 var ldapUser = _authenticationService.FindUser(username);
                 if (ldapUser != null)
-                {
                     StoreOrUpdateUser(ldapUser);
-                }
 
                 // Not found at all
                 return ldapUser;

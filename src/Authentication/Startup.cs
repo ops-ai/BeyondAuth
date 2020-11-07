@@ -2,6 +2,8 @@ using Authentication.Extensions;
 using Authentication.Models.Account;
 using Authentication.Options;
 using Autofac;
+using Azure.Core;
+using Azure.Identity;
 using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
 using Identity.Core;
@@ -26,12 +28,19 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Rest;
 using Newtonsoft.Json;
 using Raven.Client.Documents;
 using System;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using Raven.Client.Json.Serialization;
+using Raven.Client.Json.Serialization.NewtonsoftJson;
+using Authentication.Models;
+using Authentication.Stores;
+using IdentityServer.LdapExtension;
+using IdentityServer.LdapExtension.UserStore;
 
 namespace Authentication
 {
@@ -49,6 +58,8 @@ namespace Authentication
         /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddOptions();
+
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardLimit = 1;
@@ -58,6 +69,7 @@ namespace Authentication
                         options.KnownProxies.Add(IPAddress.Parse(t));
                 });
             });
+            services.Configure<ExtensionConfig>(Configuration.GetSection("IdentityServerLdap"));
 
             services.AddCorrelationId();
 
@@ -132,12 +144,16 @@ namespace Authentication
                     Database = Configuration["Raven:Database"],
                     Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null
                 };
-                store.Conventions.CustomizeJsonSerializer += (JsonSerializer serializer) =>
+
+                var serializerConventions = new NewtonsoftJsonSerializationConventions();
+                serializerConventions.CustomizeJsonSerializer += (JsonSerializer serializer) =>
                 {
                     serializer.Converters.Add(new ClaimConverter());
                     serializer.Converters.Add(new ClaimsPrincipalConverter());
                 };
-                
+
+                store.Conventions.Serialization = serializerConventions;
+
                 return store.Initialize();
             });
 
@@ -146,7 +162,7 @@ namespace Authentication
                 .AddIdentityServer(new Uri(Configuration["BaseUrl"]), "openid-connect");
 
             if (!string.IsNullOrEmpty(Configuration["DataProtection:KeyIdentifier"]))
-                healthChecks.AddAzureKeyVault(options =>
+                healthChecks.AddAzureKeyVault(new Uri(Configuration["DataProtection:VaultUrl"]), new DefaultAzureCredential(), options =>
                 {
                     options.UseClientSecrets(Configuration["DataProtection:ClientId"], Configuration["DataProtection:ClientSecret"]);
                     options.UseKeyVaultUrl(Configuration["DataProtection:VaultUrl"]);
@@ -170,7 +186,17 @@ namespace Authentication
                 .AddClientStore<RavenDBClientStore>()
                 .AddResourceStore<RavenDBResourceStore>()
                 .AddCorsPolicyService<CorsPolicyService>()
-                .AddLdapUsers<ApplicationUser, RavenDBUserStore<ApplicationUser>>(Configuration.GetSection("IdentityServerLdap"));
+                /*.AddLdapUsers<ApplicationUser, RavenDBUserStore<ApplicationUser>>(Configuration.GetSection("IdentityServerLdap"))*/;
+
+            builder.Services.AddSingleton<ILdapService<ApplicationUser>, LdapService<ApplicationUser>>();
+
+            // For testing purpose we can use the in memory. In reality it's better to have
+            // your own implementation. An example with Redis exists in the repository
+            builder.Services.AddSingleton(typeof(RavenDBUserStore<ApplicationUser>));
+            builder.Services.AddSingleton(serviceProvider => (ILdapUserStore)serviceProvider.GetService(typeof(RavenDBUserStore<ApplicationUser>)));
+            builder.AddProfileService<LdapUserProfileService<ApplicationUser>>();
+            builder.AddResourceOwnerValidator<LdapUserResourceOwnerPasswordValidator<ApplicationUser>>();
+
 
             builder.AddMutualTlsSecretValidators();
             builder.AddDeveloperSigningCredential();
@@ -242,7 +268,7 @@ namespace Authentication
                 Predicate = _ => _.FailureStatus == HealthStatus.Unhealthy
             });
 
-            app.UseMultiTenant<TenantSetting>();
+            app.UseMultiTenant();
 
             app.UseEndpoints(endpoints =>
             {

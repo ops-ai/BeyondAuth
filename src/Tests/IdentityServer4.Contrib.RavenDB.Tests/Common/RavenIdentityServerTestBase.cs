@@ -1,6 +1,7 @@
 ﻿using IdentityServer4.Stores.Serialization;
 using Newtonsoft.Json;
 using Raven.Client.Documents;
+using Raven.Client.Json.Serialization.NewtonsoftJson;
 using Raven.TestDriver;
 
 namespace IdentityServer4.Contrib.RavenDB.Tests.Common
@@ -9,11 +10,14 @@ namespace IdentityServer4.Contrib.RavenDB.Tests.Common
     {
         protected override void PreInitialize(IDocumentStore documentStore)
         {
-            documentStore.Conventions.CustomizeJsonSerializer += (JsonSerializer serializer) =>
+            var serializerConventions = new NewtonsoftJsonSerializationConventions();
+            serializerConventions.CustomizeJsonSerializer += (JsonSerializer serializer) =>
             {
                 serializer.Converters.Add(new ClaimConverter());
                 serializer.Converters.Add(new ClaimsPrincipalConverter());
             };
+
+            documentStore.Conventions.Serialization = serializerConventions;
         }
     }
 }
