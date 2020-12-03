@@ -41,6 +41,7 @@ using Authentication.Models;
 using Authentication.Stores;
 using IdentityServer.LdapExtension;
 using IdentityServer.LdapExtension.UserStore;
+using IdentityServer4;
 
 namespace Authentication
 {
@@ -130,6 +131,17 @@ namespace Authentication
                 .WithPerTenantOptions<CookieAuthenticationOptions>((o, tenantInfo) =>
                 {
                     o.Cookie.Name += tenantInfo.Id;
+                })
+                .WithPerTenantOptions<Microsoft.AspNetCore.Authentication.Google.GoogleOptions>((o, tenantInfo) =>
+                {
+                    o.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+
+                    // register your IdentityServer with Google at https://console.developers.google.com
+                    // enable the Google+ API
+                    // set the redirect URI to http://localhost:5000/signin-google
+
+                    //o.ClientId = Configuration["ExternalIdps:Google:ClientId"];
+                    //o.ClientSecret = Configuration["ExternalIdps:Google:ClientSecret"];
                 });
 
             services.AddControllersWithViews();
@@ -209,17 +221,9 @@ namespace Authentication
                 }).AddCookie(options =>
                 {
                     options.Cookie.Name = "MyAppCookie.";
-                });
-            //.AddGoogle(options =>
-            //{
-            //    options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+                })
 
-            //    // register your IdentityServer with Google at https://console.developers.google.com
-            //    // enable the Google+ API
-            //    // set the redirect URI to http://localhost:5000/signin-google
-            //    options.ClientId = Configuration["ExternalIdps:Google:ClientId"];
-            //    options.ClientSecret = Configuration["ExternalIdps:Google:ClientSecret"];
-            //});
+            .AddGoogle();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
