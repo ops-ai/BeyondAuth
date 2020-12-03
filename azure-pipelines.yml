@@ -27,17 +27,17 @@ steps:
     feedsToUse: 'select'
     vstsFeed: 'a176869a-9c3b-49c9-a033-c415e60df8aa'
 
-- task: UseDotNet@2
-  inputs:
-    packageType: 'sdk'
-    version: '5.0.100'
-
 - task: GitVersion@5
   inputs:
     runtime: 'core'
     updateAssemblyInfo: true
     updateAssemblyInfoFilename: 'AssemblyInfo.cs'
     additionalArguments: '/output buildserver'
+
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '5.0.100'
 
 - task: SonarCloudPrepare@1
   inputs:
