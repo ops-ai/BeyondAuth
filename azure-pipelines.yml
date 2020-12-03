@@ -20,13 +20,6 @@ steps:
     versionSpec: 
     checkLatest: true
 
-- task: NuGetCommand@2
-  inputs:
-    command: 'restore'
-    restoreSolution: '$(solution)'
-    feedsToUse: 'select'
-    vstsFeed: 'a176869a-9c3b-49c9-a033-c415e60df8aa'
-
 - task: GitVersion@5
   inputs:
     runtime: 'core'
@@ -53,19 +46,26 @@ steps:
       sonar.coverageReportPaths=$(Agent.TempDirectory)\SonarQube.xml
       sonar.coverage.exclusions="**Tests*.cs"
 
-- task: dependency-check-build-task@5
-  inputs:
-    projectName: '$(Build.DefinitionName)'
-    scanPath: '$(build.artifactstagingdirectory)'
-    format: 'ALL'
-    additionalArguments: '--disableBundleAudit --disableRubygems --disableNodeJS --disablePyPkg --disablePyDist --out "$(Agent.BuildDirectory)"'
-  continueOnError: true
+#- task: dependency-check-build-task@5
+#  inputs:
+#    projectName: '$(Build.DefinitionName)'
+#    scanPath: '$(build.artifactstagingdirectory)'
+#    format: 'ALL'
+#    additionalArguments: '--disableBundleAudit --disableRubygems --disableNodeJS --disablePyPkg --disablePyDist --out "$(Agent.BuildDirectory)"'
+#  continueOnError: true
 
 - task: DotNetCoreCLI@2
   inputs:
     command: 'custom'
     custom: 'build-server'
     arguments: 'shutdown'
+
+- task: NuGetCommand@2
+  inputs:
+    command: 'restore'
+    restoreSolution: '$(solution)'
+    feedsToUse: 'select'
+    vstsFeed: 'a176869a-9c3b-49c9-a033-c415e60df8aa'
 
 - task: DotNetCoreCLI@2
   inputs:
