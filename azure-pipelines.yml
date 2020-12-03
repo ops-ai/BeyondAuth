@@ -16,6 +16,9 @@ variables:
 
 steps:
 - task: NuGetToolInstaller@1
+  inputs:
+    versionSpec: 
+    checkLatest: true
 
 - task: NuGetCommand@2
   inputs:
@@ -53,6 +56,10 @@ steps:
     additionalArguments: '--disableBundleAudit --disableRubygems --disableNodeJS --disablePyPkg --disablePyDist --out "$(Agent.BuildDirectory)"'
   continueOnError: true
   
+- task: UseDotNet@2
+  inputs:
+    packageType: 'sdk'
+    version: '5.0'
 - task: DotNetCoreCLI@2
   inputs:
     command: 'custom'
