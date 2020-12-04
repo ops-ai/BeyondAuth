@@ -76,7 +76,7 @@ steps:
   displayName: 'dotnet test'
   inputs:
     command: test
-    projects: '**\*test*.csproj'
+    projects: '$(solution)'
     arguments: '--no-restore --no-build --collect:"XPlat Code Coverage"'
 
 - task: Npm@1
