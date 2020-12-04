@@ -71,15 +71,14 @@ steps:
   inputs:
     command: 'build'
     projects: '$(solution)'
-    configuration: '$(buildConfiguration)'
+    arguments: '-c $(buildConfiguration)'
 
 - task: DotNetCoreCLI@2
   displayName: 'dotnet test'
   inputs:
     command: test
     projects: '$(solution)'
-    arguments: '--no-restore --no-build --collect:"XPlat Code Coverage"'
-    configuration: '$(buildConfiguration)'
+    arguments: '--no-restore -c $(buildConfiguration) --collect:"XPlat Code Coverage"'
 
 - task: Npm@1
   inputs:
