@@ -15,6 +15,7 @@ using Xunit.Abstractions;
 
 namespace IdentityServer4.Contrib.RavenDB.Tests
 {
+    [Collection("IdentityServer4 Tests")]
     public class RavenDBUserConsentStoreTests : RavenIdentityServerTestBase
     {
         protected readonly ILoggerFactory _loggerFactory;
