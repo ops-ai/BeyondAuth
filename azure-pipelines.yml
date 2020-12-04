@@ -79,6 +79,11 @@ steps:
     command: test
     projects: '$(solution)'
     arguments: '--no-restore --no-build -c $(buildConfiguration) --collect:"XPlat Code Coverage"'
+    
+- task: Npm@1
+  inputs:
+    command: 'install'
+    workingDir: 'src/BeyondAuth.Web/ClientApp'
 
 - task: Npm@1
   inputs:
