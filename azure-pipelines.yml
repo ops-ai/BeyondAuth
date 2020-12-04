@@ -78,7 +78,7 @@ steps:
   inputs:
     command: test
     projects: '$(solution)'
-    arguments: '--no-restore -c $(buildConfiguration) --noshadow --collect:"XPlat Code Coverage"'
+    arguments: '--no-restore -c $(buildConfiguration) --no-shadow --collect:"XPlat Code Coverage"'
 
 - task: Npm@1
   inputs:
