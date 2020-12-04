@@ -19,6 +19,7 @@ using Xunit.Abstractions;
 
 namespace IdentityServer4.Contrib.RavenDB.Tests
 {
+    [Collection("IdentityServer4 Tests")]
     public class RavenDBReferenceTokenStoreTests : RavenIdentityServerTestBase
     {
         protected readonly ILoggerFactory _loggerFactory;

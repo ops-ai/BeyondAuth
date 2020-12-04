@@ -1,4 +1,4 @@
 {
-  "parallelizeAssembly": false,
+  "parallelizeAssembly": true,
   "parallelizeTestCollections": false
 }

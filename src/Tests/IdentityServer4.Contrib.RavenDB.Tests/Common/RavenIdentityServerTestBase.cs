@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Raven.Client.Documents;
 using Raven.Client.Json.Serialization.NewtonsoftJson;
 using Raven.TestDriver;
+using System.Threading;
 
 namespace IdentityServer4.Contrib.RavenDB.Tests.Common
 {
