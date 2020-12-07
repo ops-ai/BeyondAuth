@@ -308,7 +308,7 @@ namespace Authentication
                 .AddFrameOptionsSameOrigin()
                 .AddXssProtectionBlock()
                 .AddContentTypeOptionsNoSniff()
-                .AddStrictTransportSecurityMaxAgeIncludeSubDomains(maxAgeInSeconds: 60 * 60 * 24 * 365) // maxage = one year in seconds
+                .AddStrictTransportSecurityMaxAgeIncludeSubDomainsAndPreload(maxAgeInSeconds: 60 * 60 * 24 * 365) // maxage = one year in seconds
                 .AddReferrerPolicyStrictOriginWhenCrossOrigin()
                 .RemoveServerHeader()
                 //.AddContentSecurityPolicy(builder =>
