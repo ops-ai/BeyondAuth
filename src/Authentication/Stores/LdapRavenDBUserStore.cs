@@ -14,19 +14,19 @@ using System.Security.Claims;
 
 namespace Authentication.Stores
 {
-    public class RavenDBUserStore<TUser> : ILdapUserStore
+    public class LdapRavenDBUserStore<TUser> : ILdapUserStore
         where TUser : IAppUser, new()
     {
         private readonly IDocumentStore _documentStore;
-        private readonly ILogger<RavenDBUserStore<TUser>> _logger;
+        private readonly ILogger<LdapRavenDBUserStore<TUser>> _logger;
         private readonly ILdapService<TUser> _authenticationService;
         private readonly IOptions<UserStoreOptions> _userStoreOptions;
 
         /// <summary>
-        /// Initializes a new instance of the <see cref="RavenDBUserStore{TUser}"/> class.
+        /// Initializes a new instance of the <see cref="LdapRavenDBUserStore{TUser}"/> class.
         /// </summary>
         /// <param name="authenticationService">The Ldap authentication service.</param>
-        public RavenDBUserStore(ILogger<RavenDBUserStore<TUser>> logger, IDocumentStore documentStore, ILdapService<TUser> authenticationService, IOptions<UserStoreOptions> userStoreOptions)
+        public LdapRavenDBUserStore(ILogger<LdapRavenDBUserStore<TUser>> logger, IDocumentStore documentStore, ILdapService<TUser> authenticationService, IOptions<UserStoreOptions> userStoreOptions)
         {
             _documentStore = documentStore;
             _logger = logger;

@@ -4,6 +4,7 @@
 
 using Authentication.Extensions;
 using Authentication.Filters;
+using Authentication.Models;
 using Authentication.Models.Account;
 using IdentityModel;
 using IdentityServer.LdapExtension.UserStore;
@@ -16,6 +17,7 @@ using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using System;
@@ -28,7 +30,7 @@ namespace Authentication.Controllers
     [AllowAnonymous]
     public class AccountController : Controller
     {
-        private readonly ILdapUserStore _userStore;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clientStore;
         private readonly IAuthenticationSchemeProvider _schemeProvider;
@@ -40,11 +42,11 @@ namespace Authentication.Controllers
             IClientStore clientStore,
             IAuthenticationSchemeProvider schemeProvider,
             IEventService events,
-            ILdapUserStore userStore,
+            UserManager<ApplicationUser> userManager,
             IOptions<AccountOptions> accountOptions)
         {
-            _userStore = userStore;
-
+            _userManager = userManager;
+            
             _interaction = interaction;
             _clientStore = clientStore;
             _schemeProvider = schemeProvider;
@@ -104,10 +106,11 @@ namespace Authentication.Controllers
             if (ModelState.IsValid)
             {
                 // validate username/password against in-memory store
-                var user = _userStore.ValidateCredentials(model.Email, model.Password);
-                if (user != null && user.IsActive)
+                var user = await _userManager.FindByNameAsync(model.Email);
+                
+                if (user != null && await _userManager.CheckPasswordAsync(user, model.Password) && !user.Disabled)
                 {
-                    await _events.RaiseAsync(new UserLoginSuccessEvent(user.Username, user.SubjectId, user.Username, clientId: context?.Client.ClientId));
+                    await _events.RaiseAsync(new UserLoginSuccessEvent(user.Email, user.Email, user.DisplayName, clientId: context?.Client.ClientId));
 
                     // only set explicit expiration here if user chooses "remember me". 
                     // otherwise we rely upon expiration configured in cookie middleware.
@@ -120,9 +123,9 @@ namespace Authentication.Controllers
                         };
 
                     // issue authentication cookie with subject ID and username
-                    var isuser = new IdentityServerUser(user.SubjectId)
+                    var isuser = new IdentityServerUser(user.Email)
                     {
-                        DisplayName = user.Username
+                        DisplayName = user.DisplayName
                     };
 
                     await HttpContext.SignInAsync(isuser, props);

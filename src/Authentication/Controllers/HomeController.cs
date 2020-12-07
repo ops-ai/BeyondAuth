@@ -36,6 +36,17 @@ namespace Authentication.Controllers
         public IActionResult Index() => Redirect(_configuration["DashboardUrl"]);
 
         /// <summary>
+        /// 404 Page not found
+        /// </summary>
+        /// <returns></returns>
+        [Route("404")]
+        public IActionResult PageNotFound()
+        {
+            Response.StatusCode = 404;
+            return View();
+        }
+
+        /// <summary>
         /// Shows the error page
         /// </summary>
         [AllowAnonymous]
