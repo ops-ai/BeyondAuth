@@ -2,12 +2,10 @@ using Authentication.Extensions;
 using Authentication.Models.Account;
 using Authentication.Options;
 using Autofac;
-using Azure.Core;
 using Azure.Identity;
 using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
 using Identity.Core;
-using IdentityServer.LdapExtension.Extensions;
 using IdentityServer4.Contrib.RavenDB.Options;
 using IdentityServer4.Contrib.RavenDB.Services;
 using IdentityServer4.Contrib.RavenDB.Stores;
@@ -28,20 +26,28 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Microsoft.Rest;
 using Newtonsoft.Json;
 using Raven.Client.Documents;
 using System;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
-using Raven.Client.Json.Serialization;
 using Raven.Client.Json.Serialization.NewtonsoftJson;
 using Authentication.Models;
-using Authentication.Stores;
-using IdentityServer.LdapExtension;
-using IdentityServer.LdapExtension.UserStore;
 using IdentityServer4;
+using IdentityServer4.AspNetIdentity;
+using System.Text;
+using System.Net.Http.Headers;
+using System.Net.Http;
+using Microsoft.AspNetCore.Rewrite;
+using CorrelationId;
+using Authentication.Infrastructure;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Authentication.Controllers;
+using Polly;
+using Raven.Identity;
+using Raven.DependencyInjection;
+using Microsoft.Extensions.Options;
 
 namespace Authentication
 {
@@ -70,9 +76,13 @@ namespace Authentication
                         options.KnownProxies.Add(IPAddress.Parse(t));
                 });
             });
-            services.Configure<ExtensionConfig>(Configuration.GetSection("IdentityServerLdap"));
 
-            services.AddCorrelationId();
+            NLog.GlobalDiagnosticsContext.Set("AzureLogStorageConnectionString", Configuration["Azure:LogStorageConnectionString"]);
+
+            services.AddDefaultCorrelationId(options =>
+            {
+                options.UpdateTraceIdentifier = true;
+            });
 
             services.AddAntiforgery(options =>
             {
@@ -93,8 +103,6 @@ namespace Authentication
                 dataProtection
                     .ProtectKeysWithAzureKeyVault(Configuration["DataProtection:KeyIdentifier"], Configuration["DataProtection:ClientId"], Configuration["DataProtection:ClientSecret"])
                     .PersistKeysToAzureBlobStorage(new Uri(Configuration["DataProtection:StorageUri"]));
-
-            services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true).AddDefaultTokenProviders();
 
             services.AddMultiTenant<TenantSetting>().WithHostStrategy("__tenant__").WithStore(new ServiceLifetime(), (sp) => new RavenDBMultitenantStore(sp.GetService<IDocumentStore>(), sp.GetService<IMemoryCache>()))
                 .WithPerTenantOptions<AccountOptions>((options, tenantInfo) =>
@@ -145,7 +153,10 @@ namespace Authentication
                 });
 
             services.AddControllersWithViews();
-            services.AddRazorPages();
+            var razorBuilder = services.AddRazorPages();
+#if DEBUG
+            razorBuilder.AddRazorRuntimeCompilation();
+#endif
             services.AddSameSiteCookiePolicy();
 
             services.AddSingleton((ctx) =>
@@ -169,6 +180,15 @@ namespace Authentication
                 return store.Initialize();
             });
 
+            services.ConfigureOptions<RavenOptionsSetup>();
+            services.AddScoped(sp => sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<UserStoreOptions>>()?.Value?.DatabaseName));
+
+            var identityBuilder = services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+                .AddDefaultTokenProviders();
+
+            identityBuilder.Services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
+            identityBuilder.Services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();
+
             var healthChecks = services.AddHealthChecks()
                 .AddRavenDB(setup => { setup.Urls = new[] { Configuration["Raven:Url"] }; setup.Database = Configuration["Raven:Database"]; setup.Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null; }, "ravendb")
                 .AddIdentityServer(new Uri(Configuration["BaseUrl"]), "openid-connect");
@@ -180,7 +200,24 @@ namespace Authentication
                     options.UseKeyVaultUrl(Configuration["DataProtection:VaultUrl"]);
                 });
 
-            //services.AddTransient<IRedirectUriValidator, DemoRedirectValidator>();
+            services.AddHttpClient("mailgun", config =>
+            {
+                config.BaseAddress = new Uri(Configuration["EmailSettings:ApiBaseUrl"]);
+                var authToken = Encoding.ASCII.GetBytes($"api:{Configuration["EmailSettings:SendingKey"]}");
+                config.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Basic", Convert.ToBase64String(authToken));
+            })
+                .ConfigurePrimaryHttpMessageHandler(() => { return new SocketsHttpHandler { UseCookies = false }; })
+                .AddTransientHttpErrorPolicy(p => p.WaitAndRetryAsync(20, retryAttempt => TimeSpan.FromMilliseconds(300 * retryAttempt)));
+
+            services.AddHttpClient("captcha", config =>
+            {
+                config.BaseAddress = new Uri("https://www.google.com/");
+            })
+                .ConfigurePrimaryHttpMessageHandler(() => { return new SocketsHttpHandler { UseCookies = false }; })
+                .AddTransientHttpErrorPolicy(p => p.WaitAndRetryAsync(20, retryAttempt => TimeSpan.FromMilliseconds(300 * retryAttempt)));
+
+
+            //services.AddTransient<IRedirectUriValidator, RedirectUriValidator>();
             //services.AddTransient<ICorsPolicyService, CorsPolicyService>();
 
             var builder = services.AddIdentityServer(options =>
@@ -198,17 +235,10 @@ namespace Authentication
                 .AddClientStore<RavenDBClientStore>()
                 .AddResourceStore<RavenDBResourceStore>()
                 .AddCorsPolicyService<CorsPolicyService>()
-                /*.AddLdapUsers<ApplicationUser, RavenDBUserStore<ApplicationUser>>(Configuration.GetSection("IdentityServerLdap"))*/;
-
-            builder.Services.AddSingleton<ILdapService<ApplicationUser>, LdapService<ApplicationUser>>();
-
-            // For testing purpose we can use the in memory. In reality it's better to have
-            // your own implementation. An example with Redis exists in the repository
-            builder.Services.AddSingleton(typeof(RavenDBUserStore<ApplicationUser>));
-            builder.Services.AddSingleton(serviceProvider => (ILdapUserStore)serviceProvider.GetService(typeof(RavenDBUserStore<ApplicationUser>)));
-            builder.AddProfileService<LdapUserProfileService<ApplicationUser>>();
-            builder.AddResourceOwnerValidator<LdapUserResourceOwnerPasswordValidator<ApplicationUser>>();
-
+                .AddAspNetIdentity<ApplicationUser>()
+                .AddResourceOwnerValidator<ResourceOwnerPasswordValidator<ApplicationUser>>()
+                .AddProfileService<ProfileService<ApplicationUser>>()
+                ;
 
             builder.AddMutualTlsSecretValidators();
             builder.AddDeveloperSigningCredential();
@@ -220,10 +250,27 @@ namespace Authentication
                     options.AllowedCertificateTypes = CertificateTypes.All;
                 }).AddCookie(options =>
                 {
-                    options.Cookie.Name = "MyAppCookie.";
+                    options.Cookie.Name = "BA.";
                 })
 
             .AddGoogle();
+
+            services.AddScoped<IViewRender, ViewRender>();
+            services.Configure<SmsOptions>(Configuration.GetSection("SMSSettings"));
+            services.Configure<EmailOptions>(Configuration.GetSection("EmailSettings"));
+            services.Configure<GoogleCaptchaOptions>(Configuration.GetSection("GoogleCaptcha"));
+
+            services.AddSingleton<ISmsSender, MessageSender>();
+            services.AddSingleton<IEmailSender, MessageSender>();
+            services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
+            services.AddTransient<IEmailService, EmailController>();
+
+            services.PostConfigure<CookieAuthenticationOptions>(IdentityConstants.ApplicationScheme, option =>
+            {
+                //option.Cookie.Name = "Hello";
+            });
+
+            services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -235,10 +282,18 @@ namespace Authentication
             }
             else
             {
-                app.UseExceptionHandler("/Home/Error");
+                app.UseExceptionHandler(new ExceptionHandlerOptions { ExceptionHandlingPath = "/home/error", AllowStatusCode404Response = false });
+                var options = new RewriteOptions()
+                    .AddRedirectToHttpsPermanent()
+                    .AddRedirectToNonWwwPermanent();
+                app.UseRewriter(options);
+
+                app.UseHttpsRedirection();
             }
-            app.UseCookiePolicy();
+
             app.UseHttpsRedirection();
+
+            app.UseResponseCaching();
 
             var jsnlogConfiguration = new JsnlogConfiguration();
             app.UseJSNLog(new LoggingAdapter(loggerFactory), jsnlogConfiguration);
@@ -248,12 +303,49 @@ namespace Authentication
             app.UseForwardedHeaders();
 
             app.UseCors(x => x.AllowAnyOrigin().WithHeaders("accept", "authorization", "content-type", "origin").AllowAnyMethod());
+            
+            var policyCollection = new HeaderPolicyCollection()
+                .AddFrameOptionsSameOrigin()
+                .AddXssProtectionBlock()
+                .AddContentTypeOptionsNoSniff()
+                .AddStrictTransportSecurityMaxAgeIncludeSubDomains(maxAgeInSeconds: 60 * 60 * 24 * 365) // maxage = one year in seconds
+                .AddReferrerPolicyStrictOriginWhenCrossOrigin()
+                .RemoveServerHeader()
+                //.AddContentSecurityPolicy(builder =>
+                //{
+                //    builder.AddObjectSrc().None();
+                //    builder.AddFormAction().Self();
+                //    builder.AddFrameAncestors().None();
+                //})
+                .AddFeaturePolicy(options =>
+                {
+                    options.AddAutoplay().Self();
+                    options.AddCamera().Self();
+                    options.AddFullscreen().Self();
+                    options.AddGeolocation().Self();
+                    options.AddMicrophone().Self();
+                    options.AddPictureInPicture().Self();
+                    options.AddSpeaker().Self();
+                    options.AddSyncXHR().Self();
+                })
+                .AddPermissionsPolicy(options =>
+                {
+                    options.AddAutoplay().Self();
+                    options.AddCamera().Self();
+                    options.AddFullscreen().Self();
+                    options.AddGeolocation().Self();
+                    options.AddMicrophone().Self();
+                    options.AddPictureInPicture().Self();
+                    options.AddSpeaker().Self();
+                    options.AddSyncXHR().Self();
+                });
+            app.UseSecurityHeaders(policyCollection);
 
-            app.UseXContentTypeOptions();
-            app.UseXDownloadOptions();
-            app.UseXfo(options => options.SameOrigin());
-            app.UseXXssProtection(options => options.EnabledWithBlockMode());
-            app.UseHsts(options => options.MaxAge(180).AllResponses().Preload().IncludeSubdomains());
+            app.Use(async (context, next) =>
+            {
+                context.Response.Headers.Add("Feature-Policy", "geolocation 'none';midi 'none';notifications 'none';push 'none';sync-xhr 'none';microphone 'none';camera 'none';magnetometer 'none';gyroscope 'none';speaker 'self';vibrate 'none';fullscreen 'self';payment 'none';");
+                await next.Invoke();
+            });
 
             app.UseRouting();
             app.UseAuthentication();
@@ -272,7 +364,15 @@ namespace Authentication
                 Predicate = _ => _.FailureStatus == HealthStatus.Unhealthy
             });
 
+            app.UseCookiePolicy(new CookiePolicyOptions
+            {
+                Secure = CookieSecurePolicy.Always,
+                MinimumSameSitePolicy = SameSiteMode.None
+            });
+
             app.UseMultiTenant();
+
+            app.UseCorrelationId();
 
             app.UseEndpoints(endpoints =>
             {
@@ -280,6 +380,7 @@ namespace Authentication
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
                 endpoints.MapRazorPages();
+                endpoints.MapFallbackToController("PageNotFound", "Home");
             });
         }
     }
