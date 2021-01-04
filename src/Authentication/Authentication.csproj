@@ -73,6 +73,7 @@
     <PackageReference Include="IdentityServer.LdapExtension" Version="2.1.52" />
     <PackageReference Include="IdentityServer4" Version="4.1.1" />
     <PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.1.1" />
+    <PackageReference Include="IdentityServer4.Contrib.RavenDB" Version="1.0.0" />
     <PackageReference Include="JSNLog" Version="2.30.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.15.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.NLogTarget" Version="2.16.0" />
@@ -100,7 +101,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Identity.Core\Identity.Core.csproj" />
-    <ProjectReference Include="..\IdentityServer4.Contrib.RavenDB\IdentityServer4.Contrib.RavenDB.csproj" />
   </ItemGroup>
 
 
