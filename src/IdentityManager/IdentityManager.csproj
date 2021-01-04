@@ -19,6 +19,7 @@
     <PackageReference Include="CorrelationId" Version="3.0.0" />
     <PackageReference Include="IdentityServer4" Version="4.1.1" />
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
+    <PackageReference Include="IdentityServer4.Contrib.RavenDB" Version="1.0.0" />
     <PackageReference Include="JsonSubTypes" Version="1.8.0" />
     <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="5.0.0" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.0" />
@@ -35,7 +36,6 @@
   <ItemGroup>
     <ProjectReference Include="..\Authorization Handlers\AuthorizationPolicyProvider\BeyondAuth.PolicyProvider.csproj" />
     <ProjectReference Include="..\Authorization Handlers\BeyondAuth.Acl\BeyondAuth.Acl.csproj" />
-    <ProjectReference Include="..\IdentityServer4.Contrib.RavenDB\IdentityServer4.Contrib.RavenDB.csproj" />
   </ItemGroup>
 
   <ItemGroup>
