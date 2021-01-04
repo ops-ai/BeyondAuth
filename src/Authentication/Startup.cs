@@ -196,8 +196,7 @@ namespace Authentication
             if (!string.IsNullOrEmpty(Configuration["DataProtection:KeyIdentifier"]))
                 healthChecks.AddAzureKeyVault(new Uri(Configuration["DataProtection:VaultUrl"]), new DefaultAzureCredential(), options =>
                 {
-                    options.UseClientSecrets(Configuration["DataProtection:ClientId"], Configuration["DataProtection:ClientSecret"]);
-                    options.UseKeyVaultUrl(Configuration["DataProtection:VaultUrl"]);
+                    //options.UseClientSecrets(Configuration["DataProtection:ClientId"], Configuration["DataProtection:ClientSecret"]);
                 });
 
             services.AddHttpClient("mailgun", config =>
