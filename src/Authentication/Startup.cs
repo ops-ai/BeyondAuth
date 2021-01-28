@@ -48,6 +48,14 @@ using Polly;
 using Raven.Identity;
 using Raven.DependencyInjection;
 using Microsoft.Extensions.Options;
+using Microsoft.AspNetCore.Authentication.Google;
+using Microsoft.AspNetCore.Authentication.OAuth;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using System.Text.Encodings.Web;
+using Microsoft.AspNetCore.Authentication.Facebook;
+using Microsoft.AspNetCore.Authentication.Twitter;
+using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 
 namespace Authentication
 {
@@ -104,6 +112,26 @@ namespace Authentication
                     .ProtectKeysWithAzureKeyVault(Configuration["DataProtection:KeyIdentifier"], Configuration["DataProtection:ClientId"], Configuration["DataProtection:ClientSecret"])
                     .PersistKeysToAzureBlobStorage(new Uri(Configuration["DataProtection:StorageUri"]));
 
+            services.AddAuthorization();
+
+            services.AddDistributedMemoryCache();
+            services.AddOidcStateDataFormatterCache();
+
+            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCertificate("Certificate", options =>
+                {
+                    // allows both self-signed and CA-based certs. Check the MTLS spec for details.
+                    options.AllowedCertificateTypes = CertificateTypes.All;
+                }).AddCookie(options =>
+                {
+                    options.Cookie.Name = "BA.";
+                })
+            .AddOpenIdConnect()
+            .AddGoogle()
+            .AddFacebook()
+            .AddTwitter()
+            .AddMicrosoftAccount();
+
             services.AddMultiTenant<TenantSetting>().WithHostStrategy("__tenant__").WithStore(new ServiceLifetime(), (sp) => new RavenDBMultitenantStore(sp.GetService<IDocumentStore>(), sp.GetService<IMemoryCache>()))
                 .WithPerTenantOptions<AccountOptions>((options, tenantInfo) =>
                 {
@@ -140,17 +168,104 @@ namespace Authentication
                 {
                     o.Cookie.Name += tenantInfo.Id;
                 })
-                .WithPerTenantOptions<Microsoft.AspNetCore.Authentication.Google.GoogleOptions>((o, tenantInfo) =>
+                .WithPerTenantOptions<GoogleOptions>((o, tenantInfo) =>
                 {
+                    if (!tenantInfo.ExternalIdps.Any(t => t.Name.Equals("Google") && t.Enabled))
+                        return;
+
                     o.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
 
                     // register your IdentityServer with Google at https://console.developers.google.com
                     // enable the Google+ API
-                    // set the redirect URI to http://localhost:5000/signin-google
+                    // set the redirect URI to https://localhost:5001/signin-google
 
-                    //o.ClientId = Configuration["ExternalIdps:Google:ClientId"];
-                    //o.ClientSecret = Configuration["ExternalIdps:Google:ClientSecret"];
-                });
+                    var googleSettings = tenantInfo.ExternalIdps.First(t => t.Name == "Google") as ExternalOidcIdentityProvider;
+
+                    o.ClientId = googleSettings.ClientId;
+                    o.ClientSecret = googleSettings.ClientSecret;
+
+                    o.AuthorizationEndpoint += "?prompt=consent"; // Hack so we always get a refresh token, it only comes on the first authorization response
+                    o.AccessType = "offline";
+                    o.SaveTokens = true;
+                    o.Events = new OAuthEvents()
+                    {
+                        OnRemoteFailure = HandleOnRemoteFailure
+                    };
+                    o.ClaimActions.MapJsonSubKey("urn:google:image", "image", "url");
+                    o.ClaimActions.Remove(ClaimTypes.GivenName);
+                })
+                .WithPerTenantOptions<FacebookOptions>((o, tenantInfo) =>
+                {
+                    if (!tenantInfo.ExternalIdps.Any(t => t.Name.Equals("Facebook") && t.Enabled))
+                        return;
+
+                    o.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+
+                    // You must first create an app with Facebook and add its ID and Secret to your user-secrets.
+                    // https://developers.facebook.com/apps/
+                    // https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#login
+
+                    var facebookSettings = tenantInfo.ExternalIdps.First(t => t.Name == "Facebook") as ExternalOidcIdentityProvider;
+
+                    o.AppId = facebookSettings.ClientId; //appid
+                    o.AppSecret = facebookSettings.ClientSecret; //appsecret
+                    o.Scope.Add("email");
+                    o.Fields.Add("name");
+                    o.Fields.Add("email");
+                    o.SaveTokens = true;
+                    o.Events = new OAuthEvents()
+                    {
+                        OnRemoteFailure = HandleOnRemoteFailure
+                    };
+                })
+                .WithPerTenantOptions<TwitterOptions>((o, tenantInfo) =>
+                {
+                    if (!tenantInfo.ExternalIdps.Any(t => t.Name.Equals("Twitter") && t.Enabled))
+                        return;
+
+                    o.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+
+                    // You must first create an app with Twitter and add its key and Secret to your user-secrets.
+                    // https://apps.twitter.com/
+                    // https://developer.twitter.com/en/docs/basics/authentication/api-reference/access_token
+
+                    var twitterSettings = tenantInfo.ExternalIdps.First(t => t.Name == "Twitter") as ExternalOidcIdentityProvider;
+
+                    o.ConsumerKey = twitterSettings.ClientId; //consumerkey
+                    o.ConsumerSecret = twitterSettings.ClientSecret; //consumersecret
+                    // http://stackoverflow.com/questions/22627083/can-we-get-email-id-from-twitter-oauth-api/32852370#32852370
+                    // http://stackoverflow.com/questions/36330675/get-users-email-from-twitter-api-for-external-login-authentication-asp-net-mvc?lq=1
+                    o.RetrieveUserDetails = true;
+                    o.SaveTokens = true;
+                    o.ClaimActions.MapJsonKey("urn:twitter:profilepicture", "profile_image_url", ClaimTypes.Uri);
+                    o.Events = new TwitterEvents()
+                    {
+                        OnRemoteFailure = HandleOnRemoteFailure
+                    };
+                })
+                .WithPerTenantOptions<MicrosoftAccountOptions>((o, tenantInfo) =>
+                {
+                    if (!tenantInfo.ExternalIdps.Any(t => t.Name.Equals("MicrosoftAccount") && t.Enabled))
+                        return;
+
+                    o.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+
+                    // You must first create an app with Microsoft Account and add its ID and Secret to your user-secrets.
+                    // https://azure.microsoft.com/en-us/documentation/articles/active-directory-v2-app-registration/
+                    // https://apps.dev.microsoft.com/
+
+                    var microsoftSettings = tenantInfo.ExternalIdps.First(t => t.Name == "MicrosoftAccount") as ExternalOidcIdentityProvider;
+
+                    o.ClientId = microsoftSettings.ClientId;
+                    o.ClientSecret = microsoftSettings.ClientSecret;
+                    o.SaveTokens = true;
+                    o.Scope.Add("offline_access");
+                    o.Events = new OAuthEvents()
+                    {
+                        OnRemoteFailure = HandleOnRemoteFailure
+                    };
+                })
+                .WithPerTenantAuthentication();
 
             services.AddControllersWithViews();
             var razorBuilder = services.AddRazorPages();
@@ -242,17 +357,11 @@ namespace Authentication
             builder.AddMutualTlsSecretValidators();
             builder.AddDeveloperSigningCredential();
 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCertificate("Certificate", options =>
-                {
-                    // allows both self-signed and CA-based certs. Check the MTLS spec for details.
-                    options.AllowedCertificateTypes = CertificateTypes.All;
-                }).AddCookie(options =>
-                {
-                    options.Cookie.Name = "BA.";
-                })
-
-            .AddGoogle();
+                //.AddGoogle(options =>
+            //{
+            //    options.ClientId = Configuration["ExternalIdps:Google:ClientId"];
+            //    options.ClientSecret = Configuration["ExternalIdps:Google:ClientSecret"];
+            //});
 
             services.AddScoped<IViewRender, ViewRender>();
             services.Configure<SmsOptions>(Configuration.GetSection("SMSSettings"));
@@ -340,16 +449,16 @@ namespace Authentication
                 });
             app.UseSecurityHeaders(policyCollection);
 
-            app.Use(async (context, next) =>
-            {
-                context.Response.Headers.Add("Feature-Policy", "geolocation 'none';midi 'none';notifications 'none';push 'none';sync-xhr 'none';microphone 'none';camera 'none';magnetometer 'none';gyroscope 'none';speaker 'self';vibrate 'none';fullscreen 'self';payment 'none';");
-                await next.Invoke();
-            });
+            //app.Use(async (context, next) =>
+            //{
+            //    context.Response.Headers.Add("Feature-Policy", "geolocation 'none';midi 'none';notifications 'none';push 'none';sync-xhr 'none';microphone 'none';camera 'none';magnetometer 'none';gyroscope 'none';speaker 'self';vibrate 'none';fullscreen 'self';payment 'none';");
+            //    await next.Invoke();
+            //});
 
             app.UseRouting();
+            app.UseMultiTenant();
             app.UseAuthentication();
             app.UseIdentityServer();
-
             app.UseAuthorization();
 
             app.UseHealthChecks(Configuration["HealthChecks:FullEndpoint"], new HealthCheckOptions()
@@ -369,8 +478,6 @@ namespace Authentication
                 MinimumSameSitePolicy = SameSiteMode.None
             });
 
-            app.UseMultiTenant();
-
             app.UseCorrelationId();
 
             app.UseEndpoints(endpoints =>
@@ -382,5 +489,31 @@ namespace Authentication
                 endpoints.MapFallbackToController("PageNotFound", "Home");
             });
         }
+
+        private async Task HandleOnRemoteFailure(RemoteFailureContext context)
+        {
+            context.Response.StatusCode = 500;
+            context.Response.ContentType = "text/html";
+            await context.Response.WriteAsync("<html><body>");
+            await context.Response.WriteAsync("A remote failure has occurred: <br>" +
+                context.Failure.Message.Split(Environment.NewLine).Select(s => HtmlEncoder.Default.Encode(s) + "<br>").Aggregate((s1, s2) => s1 + s2));
+
+            if (context.Properties != null)
+            {
+                await context.Response.WriteAsync("Properties:<br>");
+                foreach (var pair in context.Properties.Items)
+                {
+                    await context.Response.WriteAsync($"-{ HtmlEncoder.Default.Encode(pair.Key)}={ HtmlEncoder.Default.Encode(pair.Value)}<br>");
+                }
+            }
+
+            await context.Response.WriteAsync("<a href=\"/\">Home</a>");
+            await context.Response.WriteAsync("</body></html>");
+
+            // context.Response.Redirect("/error?FailureMessage=" + UrlEncoder.Default.Encode(context.Failure.Message));
+
+            context.HandleResponse();
+        }
+
     }
 }
