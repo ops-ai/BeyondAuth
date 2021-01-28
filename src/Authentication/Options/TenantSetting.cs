@@ -1,5 +1,6 @@
 ﻿using Authentication.Models.Account;
 using Finbuckle.MultiTenant;
+using System.Collections.Generic;
 
 namespace Authentication.Options
 {
@@ -40,5 +41,10 @@ namespace Authentication.Options
         /// Branding options
         /// </summary>
         public BrandingOptions BrandingOptions { get; set; }
+
+        /// <summary>
+        /// External login providers
+        /// </summary>
+        public IList<IExternalIdentityProvider> ExternalIdps = new List<IExternalIdentityProvider>();
     }
 }

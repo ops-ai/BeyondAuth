@@ -1,5 +1,6 @@
 using Authentication.Extensions;
 using Authentication.Filters;
+using Authentication.Models;
 using Authentication.Models.Account;
 using IdentityModel;
 using IdentityServer4;
@@ -10,6 +11,7 @@ using IdentityServer4.Test;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
@@ -26,7 +28,7 @@ namespace Authentication.Controllers
     [AllowAnonymous]
     public class ExternalController : Controller
     {
-        private readonly TestUserStore _users;
+        private readonly UserManager<ApplicationUser> _userManager;
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clientStore;
         private readonly ILogger<ExternalController> _logger;
@@ -38,11 +40,12 @@ namespace Authentication.Controllers
             IClientStore clientStore,
             IEventService events,
             ILogger<ExternalController> logger,
-            IOptions<AccountOptions> accountOptions)
+            IOptions<AccountOptions> accountOptions,
+            UserManager<ApplicationUser> userManager)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
-            _users = new TestUserStore(null);
+            _userManager = userManager;
 
             _interaction = interaction;
             _clientStore = clientStore;
@@ -108,13 +111,13 @@ namespace Authentication.Controllers
             }
 
             // lookup our user and external provider info
-            var (user, provider, providerUserId, claims) = FindUserFromExternalProvider(result);
+            var (user, provider, providerUserId, claims) = await FindUserFromExternalProvider(result);
             if (user == null)
             {
                 // this might be where you might initiate a custom workflow for user registration
                 // in this sample we don't show how that would be done, as our sample implementation
                 // simply auto-provisions new external user
-                user = AutoProvisionUser(provider, providerUserId, claims);
+                user = await AutoProvisionUser(provider, providerUserId, claims);
             }
 
             // this allows us to collect any additonal claims or properties
@@ -127,9 +130,9 @@ namespace Authentication.Controllers
             //ProcessLoginCallbackForSaml2p(result, additionalLocalClaims, localSignInProps);
 
             // issue authentication cookie for user
-            var isuser = new IdentityServerUser(user.SubjectId)
+            var isuser = new IdentityServerUser(user.Email)
             {
-                DisplayName = user.Username,
+                DisplayName = user.DisplayName,
                 IdentityProvider = provider,
                 AdditionalClaims = additionalLocalClaims
             };
@@ -144,7 +147,7 @@ namespace Authentication.Controllers
 
             // check if external login is in the context of an OIDC request
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
-            await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.SubjectId, user.Username, true, context?.Client.ClientId));
+            await _events.RaiseAsync(new UserLoginSuccessEvent(provider, providerUserId, user.Email, user.DisplayName, true, context?.Client.ClientId));
 
             if (context != null)
             {
@@ -206,7 +209,7 @@ namespace Authentication.Controllers
             }
         }
 
-        private (TestUser user, string provider, string providerUserId, IEnumerable<Claim> claims) FindUserFromExternalProvider(AuthenticateResult result)
+        private async Task<(ApplicationUser user, string provider, string providerUserId, IEnumerable<Claim> claims)> FindUserFromExternalProvider(AuthenticateResult result)
         {
             var externalUser = result.Principal;
 
@@ -225,14 +228,27 @@ namespace Authentication.Controllers
             var providerUserId = userIdClaim.Value;
 
             // find external user
-            var user = _users.FindByExternalProvider(provider, providerUserId);
+            var user = await _userManager.FindByLoginAsync(provider, providerUserId);
 
             return (user, provider, providerUserId, claims);
         }
 
-        private TestUser AutoProvisionUser(string provider, string providerUserId, IEnumerable<Claim> claims)
+        private async Task<ApplicationUser> AutoProvisionUser(string provider, string providerUserId, IEnumerable<Claim> claims)
         {
-            var user = _users.AutoProvisionUser(provider, providerUserId, claims.ToList());
+            var user = new ApplicationUser
+            {
+                UserName = providerUserId,
+                DisplayName = claims.FirstOrDefault(t => t.Type == ClaimTypes.Name)?.Value,
+                LastName = claims.FirstOrDefault(t => t.Type == ClaimTypes.Surname)?.Value,
+                Email = claims.FirstOrDefault(t => t.Type == ClaimTypes.Email)?.Value
+            };
+
+            user.Logins.Add(new UserLoginInfo(provider, providerUserId, provider));
+
+
+            await _userManager.CreateAsync(user); 
+            
+            //_users.AutoProvisionUser(provider, providerUserId, claims.ToList());
             return user;
         }
 
