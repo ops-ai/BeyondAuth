@@ -18,6 +18,7 @@
     "Authentication": {
       "commandName": "Project",
       "environmentVariables": {
+        "VaultUri": "https://opsaiauthdev.vault.azure.net/",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "https://localhost:5001"

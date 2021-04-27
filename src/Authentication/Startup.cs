@@ -56,6 +56,8 @@ using System.Text.Encodings.Web;
 using Microsoft.AspNetCore.Authentication.Facebook;
 using Microsoft.AspNetCore.Authentication.Twitter;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
+using Azure.Security.KeyVault.Certificates;
+using Azure.Security.KeyVault.Secrets;
 
 namespace Authentication
 {
@@ -73,6 +75,9 @@ namespace Authentication
         /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
+            var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")), credential: new DefaultAzureCredential());
+            var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
+            
             services.AddOptions();
 
             services.Configure<ForwardedHeadersOptions>(options =>
@@ -105,7 +110,7 @@ namespace Authentication
             });
             services.AddMemoryCache();
 
-            var dataProtection = services.AddDataProtection().SetApplicationName("auth.ops.ai");
+            var dataProtection = services.AddDataProtection().SetApplicationName(Configuration["DataProtection:AppName"]);
 
             if (!string.IsNullOrEmpty(Configuration["DataProtection:KeyIdentifier"]))
                 dataProtection
@@ -274,13 +279,16 @@ namespace Authentication
 #endif
             services.AddSameSiteCookiePolicy();
 
+            var ravenDbCertificateClient = certificateClient.GetCertificate("RavenDB");
+            var ravenDbCertificateSegments = ravenDbCertificateClient.Value.SecretId.Segments;
+            var ravenDbCertificateBytes = Convert.FromBase64String(secretClient.GetSecret(ravenDbCertificateSegments[2].Trim('/'), ravenDbCertificateSegments[3].TrimEnd('/')).Value.Value);
             services.AddSingleton((ctx) =>
             {
                 IDocumentStore store = new DocumentStore
                 {
                     Urls = new[] { Configuration["Raven:Url"] },
                     Database = Configuration["Raven:Database"],
-                    Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null
+                    Certificate = new X509Certificate2(ravenDbCertificateBytes)
                 };
 
                 var serializerConventions = new NewtonsoftJsonSerializationConventions();
@@ -330,7 +338,6 @@ namespace Authentication
                 .ConfigurePrimaryHttpMessageHandler(() => { return new SocketsHttpHandler { UseCookies = false }; })
                 .AddTransientHttpErrorPolicy(p => p.WaitAndRetryAsync(20, retryAttempt => TimeSpan.FromMilliseconds(300 * retryAttempt)));
 
-
             //services.AddTransient<IRedirectUriValidator, RedirectUriValidator>();
             //services.AddTransient<ICorsPolicyService, CorsPolicyService>();
 
@@ -356,12 +363,6 @@ namespace Authentication
 
             builder.AddMutualTlsSecretValidators();
             builder.AddDeveloperSigningCredential();
-
-                //.AddGoogle(options =>
-            //{
-            //    options.ClientId = Configuration["ExternalIdps:Google:ClientId"];
-            //    options.ClientSecret = Configuration["ExternalIdps:Google:ClientSecret"];
-            //});
 
             services.AddScoped<IViewRender, ViewRender>();
             services.Configure<SmsOptions>(Configuration.GetSection("SMSSettings"));
@@ -448,12 +449,6 @@ namespace Authentication
                     options.AddSyncXHR().Self();
                 });
             app.UseSecurityHeaders(policyCollection);
-
-            //app.Use(async (context, next) =>
-            //{
-            //    context.Response.Headers.Add("Feature-Policy", "geolocation 'none';midi 'none';notifications 'none';push 'none';sync-xhr 'none';microphone 'none';camera 'none';magnetometer 'none';gyroscope 'none';speaker 'self';vibrate 'none';fullscreen 'self';payment 'none';");
-            //    await next.Invoke();
-            //});
 
             app.UseRouting();
             app.UseMultiTenant();
