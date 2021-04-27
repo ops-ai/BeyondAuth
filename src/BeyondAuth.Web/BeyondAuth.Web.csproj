@@ -16,9 +16,20 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Autofac" Version="6.1.0" />
+    <PackageReference Include="Autofac.Configuration" Version="6.0.0" />
+    <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
+    <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.0.2" />
+    <PackageReference Include="Azure.Identity" Version="1.3.0" />
+    <PackageReference Include="Hangfire.Core" Version="1.7.19" />
     <PackageReference Include="JSNLog" Version="2.30.0" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.1" />
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.10" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="4.10.0" />
+    <PackageReference Include="RavenDB.Client" Version="5.1.2" />
+    <PackageReference Include="Stripe.net" Version="39.37.0" />
+    <PackageReference Include="Twilio" Version="5.52.1" />
+    <PackageReference Include="WinInsider.System.Net.Http.Formatting" Version="1.0.14" />
   </ItemGroup>
 
   <ItemGroup>
@@ -30,6 +41,7 @@
 
   <ItemGroup>
     <Folder Include="Controllers\" />
+    <Folder Include="Views\" />
   </ItemGroup>
 
   <Target Name="DebugEnsureNodeEnv" BeforeTargets="Build" Condition=" '$(Configuration)' == 'Debug' And !Exists('$(SpaRoot)node_modules') ">
