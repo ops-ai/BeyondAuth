@@ -76,9 +76,6 @@ namespace Authentication
         /// <param name="services"></param>
         public void ConfigureServices(IServiceCollection services)
         {
-            var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")), credential: new DefaultAzureCredential());
-            var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
-            
             services.AddOptions();
 
             services.Configure<ForwardedHeadersOptions>(options =>
@@ -286,6 +283,9 @@ namespace Authentication
 
             services.AddSingleton((ctx) =>
             {
+                var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")), credential: new DefaultAzureCredential());
+                var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
+
                 var ravenDbCertificateClient = certificateClient.GetCertificate("RavenDB");
                 var ravenDbCertificateSegments = ravenDbCertificateClient.Value.SecretId.Segments;
                 var ravenDbCertificateBytes = Convert.FromBase64String(secretClient.GetSecret(ravenDbCertificateSegments[2].Trim('/'), ravenDbCertificateSegments[3].TrimEnd('/')).Value.Value);
@@ -366,6 +366,9 @@ namespace Authentication
 
             try
             {
+                var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")), credential: new DefaultAzureCredential());
+                var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
+
                 var idpSigningCertificateClient = certificateClient.GetCertificate("IdentitySigning");
                 var idpSigningCertificateSegments = idpSigningCertificateClient.Value.SecretId.Segments;
                 var idpSigningCertificateBytes = Convert.FromBase64String(secretClient.GetSecret(idpSigningCertificateSegments[2].Trim('/'), idpSigningCertificateSegments[3].TrimEnd('/')).Value.Value);
