@@ -1,5 +1,4 @@
 ﻿using IdentityServer4.Models;
-using System;
 
 namespace IdentityManager.Domain
 {
@@ -10,7 +9,8 @@ namespace IdentityManager.Domain
     {
         /// <summary>
         /// Document identifier
+        /// Format: ClientSecrets/{clientId}/{id:guid}
         /// </summary>
-        public string Id => Guid.NewGuid().ToString();
+        public string Id { get; set; }
     }
 }

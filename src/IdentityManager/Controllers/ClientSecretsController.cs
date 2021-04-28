@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
 {
-    [Route("api/clients/{clientId}/secrets")]
+    [Route("{dataSourceId}/clients/{clientId}/secrets")]
     [ApiController]
     public class ClientSecretsController : ControllerBase
     {
@@ -30,30 +30,27 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Get secrets
         /// </summary>
-        /// <param name="sort">+/- field to sort by</param>
+        /// <param name="dataSourceId"></param>
+        /// <param name="clientId"></param>
+        /// <param name="sort"></param>
         /// <param name="range">Paging range [from-to]</param>
         /// <response code="206">Clients information</response>
         /// <response code="500">Server error getting clients</response>
-        [ProducesResponseType(typeof(IEnumerable<ClientModel>), (int)HttpStatusCode.PartialContent)]
+        [ProducesResponseType(typeof(IEnumerable<ClientSecretModel>), (int)HttpStatusCode.PartialContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get(string clientId, [FromQuery] string sort = "+clientName", [FromQuery] string range = "0-19")
+        public async Task<IActionResult> Get([FromRoute] string dataSourceId, [FromRoute] string clientId, string sort, [FromQuery] string range = "0-19")
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession())
+                using (var session = _documentStore.OpenAsyncSession(dataSourceId))
                 {
-                    var query = session.Query<ClientEntity>().AsQueryable();
-                    if (sort.StartsWith("-"))
-                        query = query.OrderByDescending(sort.Substring(1), Raven.Client.Documents.Session.OrderingType.String);
-                    else
-                        query = query.OrderBy(sort.Substring(1), Raven.Client.Documents.Session.OrderingType.String);
-
                     var from = int.Parse(range.Split('-')[0]);
                     var to = int.Parse(range.Split('-')[1]) + 1;
-
-                    return this.Partial(await query.Skip(from).Take(to - from).ToListAsync().ContinueWith(t => t.Result.Select(c => c.ToModel())));
+                    var query = session.Advanced.LoadStartingWithAsync<ClientSecretEntity>($"ClientSecrets/{clientId}/", null, from, to - from);
+                    
+                    return this.Partial(await query.ContinueWith(t => t.Result.Select(c => c.ToModel())));
                 }
             }
             catch (Exception ex)
@@ -64,27 +61,29 @@ namespace IdentityManager.Controllers
         }
 
         /// <summary>
-        /// Get a single client
+        /// Get a single client secret
         /// </summary>
+        /// <param name="dataSourceId"></param>
         /// <param name="clientId"></param>
+        /// <param name="id"></param>
         /// <response code="200">Client information</response>
         /// <response code="404">Client not found</response>
         /// <response code="500">Server error getting client</response>
-        [ProducesResponseType(typeof(ClientModel), (int)HttpStatusCode.OK)]
+        [ProducesResponseType(typeof(ClientSecretModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get(string clientId, string id)
+        public async Task<IActionResult> Get([FromRoute] string dataSourceId, [FromRoute] string clientId, [FromRoute] string id)
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession())
+                using (var session = _documentStore.OpenAsyncSession(dataSourceId))
                 {
-                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
-                    if (client == null)
-                        throw new KeyNotFoundException($"Client {clientId} was not found");
+                    var clientSecret = await session.LoadAsync<ClientSecretEntity>($"ClientSecrets/{clientId}/{id}");
+                    if (clientSecret == null)
+                        throw new KeyNotFoundException($"Client secret {clientId}/{id} was not found");
 
-                    return Ok(client.ToModel());
+                    return Ok(clientSecret.ToModel());
                 }
             }
             catch (KeyNotFoundException ex)
@@ -102,7 +101,9 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Create new client
         /// </summary>
-        /// <param name="client"></param>
+        /// <param name="dataSourceId"></param>
+        /// <param name="clientId"></param>
+        /// <param name="clientSecret"></param>
         /// <response code="204">Client created</response>
         /// <response code="400">Validation failed</response>
         /// <response code="500">Server error creating client</response>
@@ -110,24 +111,24 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPost]
-        public async Task<IActionResult> Post(string clientId, [FromBody] ClientSecretModel client)
+        public async Task<IActionResult> Post([FromRoute] string dataSourceId, [FromRoute] string clientId, [FromBody] ClientSecretModel clientSecret)
         {
             try
             {
-                if (client == null)
-                    throw new ArgumentException("client is required", nameof(client));
+                if (clientSecret == null)
+                    throw new ArgumentException("client is required", nameof(clientSecret));
 
                 if (string.IsNullOrEmpty(clientId))
                     throw new ArgumentException("clientId is required", nameof(clientId));
 
-                using (var session = _documentStore.OpenAsyncSession())
+                using (var session = _documentStore.OpenAsyncSession(dataSourceId))
                 {
                     _logger.LogDebug($"Creating client {clientId}");
 
                     if (await session.Advanced.ExistsAsync($"Clients/{clientId}"))
                         throw new ArgumentException("Client already exists");
 
-                    await session.StoreAsync(client.FromModel(), $"Clients/{clientId}");
+                    await session.StoreAsync(clientSecret.FromModel(clientId));
                     await session.SaveChangesAsync();
                 }
 
@@ -135,20 +136,23 @@ namespace IdentityManager.Controllers
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Validation error creating client");
+                _logger.LogWarning(ex, "Validation error creating client secret");
                 return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
             }
             catch (Exception ex)
             {
-                _logger.LogError(0, ex, "Error creating client");
+                _logger.LogError(0, ex, "Error creating client secret");
 
                 throw;
             }
         }
 
         /// <summary>
-        /// Update a client
+        /// Update a client secret
         /// </summary>
+        /// <param name="dataSourceId"></param>
+        /// <param name="clientId"></param>
+        /// <param name="id"></param>
         /// <param name="model"></param>
         /// <response code="204">Client updated</response>
         /// <response code="404">Client not found</response>
@@ -157,61 +161,19 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put([FromBody] ClientModel model)
+        public async Task<IActionResult> Put([FromRoute] string dataSourceId, [FromRoute] string clientId, [FromRoute] string id, [FromBody] ClientSecretModel model)
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession())
+                using (var session = _documentStore.OpenAsyncSession(dataSourceId))
                 {
-                    var client = await session.LoadAsync<ClientEntity>($"Clients/{model.ClientId}");
-                    if (client == null)
-                        throw new KeyNotFoundException($"Client {model.ClientId} was not found");
+                    var clientSecret = await session.LoadAsync<ClientSecretEntity>($"ClientSecrets/{clientId}/{id}");
+                    if (clientSecret == null)
+                        throw new KeyNotFoundException($"Client {clientId} was not found");
 
-                    client.AbsoluteRefreshTokenLifetime = model.AbsoluteRefreshTokenLifetime;
-                    client.AccessTokenLifetime = model.AccessTokenLifetime;
-                    client.AccessTokenType = model.AccessTokenType;
-                    client.AllowAccessTokensViaBrowser = model.AllowAccessTokensViaBrowser;
-                    client.AllowedCorsOrigins = model.AllowedCorsOrigins;
-                    client.AllowedGrantTypes = model.AllowedGrantTypes;
-                    client.AllowedScopes = model.AllowedScopes;
-                    client.AllowOfflineAccess = model.AllowOfflineAccess;
-                    client.AllowPlainTextPkce = model.AllowPlainTextPkce;
-                    client.AllowRememberConsent = model.AllowRememberConsent;
-                    client.AlwaysIncludeUserClaimsInIdToken = model.AlwaysIncludeUserClaimsInIdToken;
-                    client.AlwaysSendClientClaims = model.AlwaysSendClientClaims;
-                    client.AuthorizationCodeLifetime = model.AuthorizationCodeLifetime;
-                    client.BackChannelLogoutSessionRequired = model.BackChannelLogoutSessionRequired;
-                    client.BackChannelLogoutUri = model.BackChannelLogoutUri;
-                    client.Claims = model.Claims;
-                    client.ClientClaimsPrefix = model.ClientClaimsPrefix;
-                    client.ClientId = model.ClientId;
-                    client.ClientName = model.ClientName;
-                    client.ClientUri = model.ClientUri;
-                    client.ConsentLifetime = model.ConsentLifetime;
-                    client.Description = model.Description;
-                    client.DeviceCodeLifetime = model.DeviceCodeLifetime;
-                    client.Enabled = model.Enabled;
-                    client.EnableLocalLogin = model.EnableLocalLogin;
-                    client.FrontChannelLogoutSessionRequired = model.FrontChannelLogoutSessionRequired;
-                    client.FrontChannelLogoutUri = model.FrontChannelLogoutUri;
-                    client.IdentityProviderRestrictions = model.IdentityProviderRestrictions;
-                    client.IdentityTokenLifetime = model.IdentityTokenLifetime;
-                    client.IncludeJwtId = model.IncludeJwtId;
-                    client.LogoUri = model.LogoUri;
-                    client.PairWiseSubjectSalt = model.PairWiseSubjectSalt;
-                    client.PostLogoutRedirectUris = model.PostLogoutRedirectUris;
-                    client.Properties = model.Properties;
-                    client.ProtocolType = model.ProtocolType;
-                    client.RedirectUris = model.RedirectUris;
-                    client.RefreshTokenExpiration = model.RefreshTokenExpiration;
-                    client.RefreshTokenUsage = model.RefreshTokenUsage;
-                    client.RequireClientSecret = model.RequireClientSecret;
-                    client.RequireConsent = model.RequireConsent;
-                    client.RequirePkce = model.RequirePkce;
-                    client.SlidingRefreshTokenLifetime = model.SlidingRefreshTokenLifetime;
-                    client.UpdateAccessTokenClaimsOnRefresh = model.UpdateAccessTokenClaimsOnRefresh;
-                    client.UserCodeType = model.UserCodeType;
-                    client.UserSsoLifetime = model.UserSsoLifetime;
+                    clientSecret.Description = model.Description;
+                    clientSecret.Expiration = model.Expiration;
+                    clientSecret.Type = model.Type;
 
                     await session.SaveChangesAsync();
 
@@ -220,12 +182,12 @@ namespace IdentityManager.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Client not found");
+                _logger.LogWarning(ex, "Client secret not found");
                 return NotFound();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting client");
+                _logger.LogError(ex, "Error deleting client secret");
                 throw;
             }
         }
@@ -233,7 +195,9 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Update one or more properties on a client
         /// </summary>
+        /// <param name="dataSourceId"></param>
         /// <param name="clientId"></param>
+        /// <param name="id"></param>
         /// <param name="patch"></param>
         /// <remarks>This is the preferred way to modify a client</remarks>
         /// <response code="204">Client was updated</response>
@@ -245,19 +209,19 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), 404)]
         [ProducesResponseType(typeof(IDictionary<string, string>), 400)]
         [ProducesResponseType(typeof(void), 500)]
-        public async Task<IActionResult> Patch(string clientId, [FromBody] JsonPatchDocument<ClientModel> patch)
+        public async Task<IActionResult> Patch([FromRoute] string dataSourceId, [FromRoute] string clientId, [FromRoute] string id, [FromBody] JsonPatchDocument<ClientSecretModel> patch)
         {
             try
             {
-                var originalClientObj = await Get(clientId) as OkObjectResult;
-                var originalClient = (ClientModel)originalClientObj.Value;
+                var originalClientObj = await Get(dataSourceId, clientId, id) as OkObjectResult;
+                var originalClient = (ClientSecretModel)originalClientObj.Value;
 
                 patch.ApplyTo(originalClient);
-                return await Put(originalClient);
+                return await Put(dataSourceId, clientId, id, originalClient);
             }
             catch (JsonPatchException ex)
             {
-                _logger.LogError(ex, $"Invalid JsonPatch Operation:{ex.FailedOperation.OperationType} while attempting to update client {clientId}.");
+                _logger.LogError(ex, $"Invalid JsonPatch Operation:{ex.FailedOperation.OperationType} while attempting to update client secret {clientId}/{id}.");
 
                 return BadRequest(new Dictionary<string, string> { { "reason", ex.FailedOperation.op } });
             }
@@ -271,6 +235,8 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Delete a client
         /// </summary>
+        /// <param name="dataSourceId"></param>
+        /// <param name="id"></param>
         /// <param name="clientId"></param>
         /// <response code="201">Client deleted</response>
         /// <response code="404">Client not found</response>
@@ -279,17 +245,17 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete(int clientId)
+        public async Task<IActionResult> Delete([FromRoute] string dataSourceId, [FromRoute] int clientId, [FromRoute] string id)
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession())
+                using (var session = _documentStore.OpenAsyncSession(dataSourceId))
                 {
-                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
-                    if (client == null)
-                        throw new KeyNotFoundException($"Client {clientId} was not found");
+                    var clientsecret = await session.LoadAsync<ClientSecretEntity>($"ClientSecrets/{clientId}/{id}");
+                    if (clientsecret == null)
+                        throw new KeyNotFoundException($"Client secret {clientId}/{id} was not found");
 
-                    session.Delete(client);
+                    session.Delete(clientsecret);
                     await session.SaveChangesAsync();
 
                     return NoContent();
@@ -297,12 +263,12 @@ namespace IdentityManager.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Client not found");
+                _logger.LogWarning(ex, "Client secret not found");
                 throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting client");
+                _logger.LogError(ex, "Error deleting client secret");
                 throw;
             }
         }
