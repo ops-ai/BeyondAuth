@@ -2,10 +2,10 @@
 
 <div class="container login-container">
     <div class="row">
-        <div class="col-md-6 login-form-1">
+        @if (Model.VisibleExternalProviders.Any())
+        {
+            <div class="col-md-6 login-form-1">
 
-            @if (Model.VisibleExternalProviders.Any())
-            {
                 <h3>Connect with your social account</h3>
 
                 <div class="panel-body">
@@ -24,10 +24,11 @@
                         }
                     </ul>
                 </div>
-            }
-        </div>
-        <div class="col-md-6 login-form-2">
 
+            </div>
+        }
+
+        <div class="col-md-6 login-form-@(Model.VisibleExternalProviders.Any() ? "2" : "1")">
             @if (Model.EnableLocalLogin)
             {
                 <div class="login-logo">
