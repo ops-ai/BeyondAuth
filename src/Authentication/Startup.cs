@@ -58,6 +58,7 @@ using Microsoft.AspNetCore.Authentication.Twitter;
 using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Secrets;
+using Azure.Storage.Blobs;
 
 namespace Authentication
 {
@@ -113,9 +114,13 @@ namespace Authentication
             var dataProtection = services.AddDataProtection().SetApplicationName(Configuration["DataProtection:AppName"]);
 
             if (!string.IsNullOrEmpty(Configuration["DataProtection:KeyIdentifier"]))
+            {
+                var blobClient = new BlobClient(Configuration["DataProtection:StorageConnectionString"], Configuration["DataProtection:StorageContainer"], "keys.xml");
+
                 dataProtection
-                    .ProtectKeysWithAzureKeyVault(Configuration["DataProtection:KeyIdentifier"], Configuration["DataProtection:ClientId"], Configuration["DataProtection:ClientSecret"])
-                    .PersistKeysToAzureBlobStorage(new Uri(Configuration["DataProtection:StorageUri"]));
+                    .ProtectKeysWithAzureKeyVault(new Uri(Configuration["DataProtection:KeyIdentifier"]), new DefaultAzureCredential())
+                    .PersistKeysToAzureBlobStorage(blobClient);
+            }
 
             services.AddAuthorization();
 
@@ -279,14 +284,15 @@ namespace Authentication
 #endif
             services.AddSameSiteCookiePolicy();
 
-            var ravenDbCertificateClient = certificateClient.GetCertificate("RavenDB");
-            var ravenDbCertificateSegments = ravenDbCertificateClient.Value.SecretId.Segments;
-            var ravenDbCertificateBytes = Convert.FromBase64String(secretClient.GetSecret(ravenDbCertificateSegments[2].Trim('/'), ravenDbCertificateSegments[3].TrimEnd('/')).Value.Value);
             services.AddSingleton((ctx) =>
             {
+                var ravenDbCertificateClient = certificateClient.GetCertificate("RavenDB");
+                var ravenDbCertificateSegments = ravenDbCertificateClient.Value.SecretId.Segments;
+                var ravenDbCertificateBytes = Convert.FromBase64String(secretClient.GetSecret(ravenDbCertificateSegments[2].Trim('/'), ravenDbCertificateSegments[3].TrimEnd('/')).Value.Value);
+                
                 IDocumentStore store = new DocumentStore
                 {
-                    Urls = new[] { Configuration["Raven:Url"] },
+                    Urls = Configuration.GetSection("Raven:Urls").GetChildren().Select(t => t.Value).ToArray(),
                     Database = Configuration["Raven:Database"],
                     Certificate = new X509Certificate2(ravenDbCertificateBytes)
                 };
@@ -313,14 +319,13 @@ namespace Authentication
             identityBuilder.Services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();
 
             var healthChecks = services.AddHealthChecks()
-                .AddRavenDB(setup => { setup.Urls = new[] { Configuration["Raven:Url"] }; setup.Database = Configuration["Raven:Database"]; setup.Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null; }, "ravendb")
+                //.AddRavenDB(setup => { setup.Urls = Configuration.GetSection("Raven:Urls").GetChildren().Select(t => t.Value).ToArray(); setup.Database = Configuration["Raven:Database"]; setup.Certificate = new X509Certificate2(ravenDbCertificateBytes); }, "ravendb")
                 .AddIdentityServer(new Uri(Configuration["BaseUrl"]), "openid-connect");
 
-            if (!string.IsNullOrEmpty(Configuration["DataProtection:KeyIdentifier"]))
-                healthChecks.AddAzureKeyVault(new Uri(Configuration["DataProtection:VaultUrl"]), new DefaultAzureCredential(), options =>
-                {
-                    //options.UseClientSecrets(Configuration["DataProtection:ClientId"], Configuration["DataProtection:ClientSecret"]);
-                });
+            healthChecks.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential(), options =>
+            {
+                    
+            });
 
             services.AddHttpClient("mailgun", config =>
             {
@@ -351,18 +356,27 @@ namespace Authentication
                 options.MutualTls.Enabled = true;
                 options.MutualTls.ClientCertificateAuthenticationScheme = "Certificate";
             })
-                //.AddSigningCredential()
                 .AddPersistedGrantStore<RavenDBPersistedGrantStore>()
                 .AddClientStore<RavenDBClientStore>()
                 .AddResourceStore<RavenDBResourceStore>()
                 .AddCorsPolicyService<CorsPolicyService>()
                 .AddAspNetIdentity<ApplicationUser>()
                 .AddResourceOwnerValidator<ResourceOwnerPasswordValidator<ApplicationUser>>()
-                .AddProfileService<ProfileService<ApplicationUser>>()
-                ;
+                .AddProfileService<ProfileService<ApplicationUser>>();
+
+            try
+            {
+                var idpSigningCertificateClient = certificateClient.GetCertificate("IdentitySigning");
+                var idpSigningCertificateSegments = idpSigningCertificateClient.Value.SecretId.Segments;
+                var idpSigningCertificateBytes = Convert.FromBase64String(secretClient.GetSecret(idpSigningCertificateSegments[2].Trim('/'), idpSigningCertificateSegments[3].TrimEnd('/')).Value.Value);
+                builder.AddSigningCredential(new X509Certificate2(idpSigningCertificateBytes), "RS256");
+            }
+            catch
+            {
+                builder.AddDeveloperSigningCredential();
+            }
 
             builder.AddMutualTlsSecretValidators();
-            builder.AddDeveloperSigningCredential();
 
             services.AddScoped<IViewRender, ViewRender>();
             services.Configure<SmsOptions>(Configuration.GetSection("SMSSettings"));
