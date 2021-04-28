@@ -16,8 +16,8 @@ namespace BeyondAuth.Web
             Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((context, config) =>
                 {
-                    var keyVaultEndpoint = new Uri(Environment.GetEnvironmentVariable("VaultUri"));
-                    config.AddAzureKeyVault(keyVaultEndpoint, new DefaultAzureCredential());
+                    if (Environment.GetEnvironmentVariable("VaultUri") != null)
+                        config.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
                 })
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory())
                 .UseNLog()
