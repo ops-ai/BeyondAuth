@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
 {
-    [Route("clients")]
+    [Route("{dataSourceId}/clients")]
     [ApiController]
     public class ClientsController : ControllerBase
     {
@@ -38,7 +38,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string sort = "+clientName", [FromQuery] string range = "0-19")
+        public async Task<IActionResult> Get([FromRoute] string dataSourceId, [FromQuery] string sort = "+clientName", [FromQuery] string range = "0-19")
         {
             try
             {
@@ -74,7 +74,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet("{clientId}")]
-        public async Task<IActionResult> Get(string clientId)
+        public async Task<IActionResult> Get([FromRoute] string dataSourceId, [FromRoute]string clientId)
         {
             try
             {
@@ -110,7 +110,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] ClientModel client)
+        public async Task<IActionResult> Post([FromRoute] string dataSourceId, [FromBody] ClientModel client)
         {
             try
             {
@@ -157,7 +157,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPut("{clientId}")]
-        public async Task<IActionResult> Put([FromBody] ClientModel model)
+        public async Task<IActionResult> Put([FromRoute] string dataSourceId, [FromBody] ClientModel model)
         {
             try
             {
@@ -245,7 +245,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), 404)]
         [ProducesResponseType(typeof(IDictionary<string, string>), 400)]
         [ProducesResponseType(typeof(void), 500)]
-        public async Task<IActionResult> Patch(string clientId, [FromBody] JsonPatchDocument<ClientModel> patch)
+        public async Task<IActionResult> Patch([FromRoute] string dataSourceId, [FromRoute] string clientId, [FromBody] JsonPatchDocument<ClientModel> patch)
         {
             try
             {
@@ -253,7 +253,7 @@ namespace IdentityManager.Controllers
                 var originalClient = (ClientModel)originalClientObj.Value;
 
                 patch.ApplyTo(originalClient);
-                return await Put(originalClient);
+                return await Put(dataSourceId, originalClient);
             }
             catch (JsonPatchException ex)
             {
@@ -279,7 +279,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpDelete("{clientId}")]
-        public async Task<IActionResult> Delete(string clientId)
+        public async Task<IActionResult> Delete([FromRoute] string dataSourceId, string clientId)
         {
             try
             {

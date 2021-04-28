@@ -14,7 +14,7 @@ using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
 {
-    [Route("api-resources")]
+    [Route("{dataSourceId}/api-resources")]
     [ApiController]
     public class ApiResourcesController : ControllerBase
     {
@@ -31,6 +31,7 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Get Api Resources
         /// </summary>
+        /// <param name="dataSourceId">Datasource identifier</param>
         /// <param name="sort">+/- field to sort by</param>
         /// <param name="range">Paging range [from-to]</param>
         /// <response code="206">Api Resources</response>
@@ -39,11 +40,11 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string sort = "+name", [FromQuery] string range = "0-19")
+        public async Task<IActionResult> Get([FromRoute]string dataSourceId, [FromQuery] string sort = "+name", [FromQuery] string range = "0-19")
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession())
+                using (var session = _documentStore.OpenAsyncSession(dataSourceId))
                 {
                     var query = session.Query<ApiResourceEntity>().AsQueryable();
                     if (sort.StartsWith("-"))
@@ -67,6 +68,7 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Get a single API resource
         /// </summary>
+        /// <param name="dataSourceId">Datasource identifier</param>
         /// <param name="name"></param>
         /// <response code="200">Api Resource information</response>
         /// <response code="404">Api Resource not found</response>
@@ -75,11 +77,11 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet("{name}")]
-        public async Task<IActionResult> Get(int name)
+        public async Task<IActionResult> Get([FromRoute] string dataSourceId, int name)
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession())
+                using (var session = _documentStore.OpenAsyncSession(dataSourceId))
                 {
                     var resource = await session.LoadAsync<ApiResourceEntity>($"ApiResources/{name}");
                     if (resource == null)
@@ -103,6 +105,7 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Create new Api Resource
         /// </summary>
+        /// <param name="dataSourceId">Datasource identifier</param>
         /// <param name="resource"></param>
         /// <response code="204">Api Resource created</response>
         /// <response code="400">Validation failed</response>
@@ -111,7 +114,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] ApiResourceModel resource)
+        public async Task<IActionResult> Post([FromRoute] string dataSourceId, [FromBody] ApiResourceModel resource)
         {
             try
             {
@@ -121,7 +124,7 @@ namespace IdentityManager.Controllers
                 if (string.IsNullOrEmpty(resource.Name))
                     throw new ArgumentException("name is required", nameof(resource.Name));
 
-                using (var session = _documentStore.OpenAsyncSession())
+                using (var session = _documentStore.OpenAsyncSession(dataSourceId))
                 {
                     _logger.LogDebug($"Creating Api Resource {resource.Name}");
 
@@ -150,6 +153,7 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Update an Api Resource
         /// </summary>
+        /// <param name="dataSourceId">Datasource identifier</param>
         /// <param name="model"></param>
         /// <response code="204">Api Resource updated</response>
         /// <response code="404">Api Resource not found</response>
@@ -158,11 +162,11 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPut("{name}")]
-        public async Task<IActionResult> Put([FromBody] ApiResourceModel model)
+        public async Task<IActionResult> Put([FromRoute] string dataSourceId, [FromBody] ApiResourceModel model)
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession())
+                using (var session = _documentStore.OpenAsyncSession(dataSourceId))
                 {
                     var resource = await session.LoadAsync<ApiResourceEntity>($"ApiResources/{model.Name}");
                     if (resource == null)
@@ -196,6 +200,7 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Update one or more properties on an Api Resource
         /// </summary>
+        /// <param name="dataSourceId">Datasource identifier</param>
         /// <param name="name"></param>
         /// <param name="patch"></param>
         /// <remarks>This is the preferred way to modify an Api Resource</remarks>
@@ -203,12 +208,12 @@ namespace IdentityManager.Controllers
         /// <response code="400">Validation failed. Returns a list of fields and errors for each field</response>
         /// <response code="404">Api Resource was not found</response>
         /// <response code="500">Error updating Api Resource</response>
-        [HttpPatch("{naem}")]
+        [HttpPatch("{name}")]
         [ProducesResponseType(typeof(void), 204)]
         [ProducesResponseType(typeof(void), 404)]
         [ProducesResponseType(typeof(IDictionary<string, string>), 400)]
         [ProducesResponseType(typeof(void), 500)]
-        public async Task<IActionResult> Patch(string name, [FromBody] JsonPatchDocument<ApiResourceModel> patch)
+        public async Task<IActionResult> Patch([FromRoute] string dataSourceId, string name, [FromBody] JsonPatchDocument<ApiResourceModel> patch)
         {
             try
             {
@@ -216,7 +221,7 @@ namespace IdentityManager.Controllers
                 var originalResource = (ApiResourceModel)originalResourceObj.Value;
 
                 patch.ApplyTo(originalResource);
-                return await Put(originalResource);
+                return await Put(dataSourceId, originalResource);
             }
             catch (JsonPatchException ex)
             {
@@ -234,6 +239,7 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Delete an Api Resource
         /// </summary>
+        /// <param name="dataSourceId">Datasource identifier</param>
         /// <param name="name"></param>
         /// <response code="201">Api Resource deleted</response>
         /// <response code="404">Api Resource not found</response>
@@ -242,11 +248,11 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpDelete("{name}")]
-        public async Task<IActionResult> Delete(int name)
+        public async Task<IActionResult> Delete([FromRoute] string dataSourceId, string name)
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession())
+                using (var session = _documentStore.OpenAsyncSession(dataSourceId))
                 {
                     var resource = await session.LoadAsync<ApiResourceEntity>($"ApiResources/{name}");
                     if (resource == null)
