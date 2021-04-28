@@ -6,6 +6,8 @@ using Authentication.Extensions;
 using Authentication.Filters;
 using Authentication.Models;
 using Authentication.Models.Account;
+using Authentication.Options;
+using Finbuckle.MultiTenant;
 using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.Events;
@@ -36,6 +38,7 @@ namespace Authentication.Controllers
         private readonly IAuthenticationSchemeProvider _schemeProvider;
         private readonly IEventService _events;
         private readonly IOptions<AccountOptions> _accountOptions;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
         public AccountController(
             IIdentityServerInteractionService interaction,
@@ -43,7 +46,8 @@ namespace Authentication.Controllers
             IAuthenticationSchemeProvider schemeProvider,
             IEventService events,
             UserManager<ApplicationUser> userManager,
-            IOptions<AccountOptions> accountOptions)
+            IOptions<AccountOptions> accountOptions,
+            IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             
@@ -52,6 +56,7 @@ namespace Authentication.Controllers
             _schemeProvider = schemeProvider;
             _events = events;
             _accountOptions = accountOptions;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         /// <summary>
@@ -243,11 +248,10 @@ namespace Authentication.Controllers
             }
 
             var schemes = await _schemeProvider.GetAllSchemesAsync();
-
+            var tenantSettings = _httpContextAccessor.HttpContext.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
+            
             var providers = schemes
-                .Where(x => x.DisplayName != null ||
-                            x.Name.Equals(_accountOptions.Value.WindowsAuthenticationSchemeName, StringComparison.OrdinalIgnoreCase)
-                )
+                .Where(x => (x.DisplayName != null || x.Name.Equals(_accountOptions.Value.WindowsAuthenticationSchemeName, StringComparison.OrdinalIgnoreCase)) && tenantSettings.ExternalIdps.Any(s => s.Enabled && x.Name == s.Name))
                 .Select(x => new ExternalProvider
                 {
                     DisplayName = x.DisplayName ?? x.Name,
