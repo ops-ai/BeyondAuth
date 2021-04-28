@@ -11,6 +11,11 @@
         public string Logo { get; set; }
 
         /// <summary>
+        /// Logo
+        /// </summary>
+        public string Favicon { get; set; }
+
+        /// <summary>
         /// Theme
         /// </summary>
         public string Theme { get; set; }
