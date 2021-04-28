@@ -107,11 +107,4 @@
     <ProjectReference Include="..\Identity.Core\Identity.Core.csproj" />
   </ItemGroup>
 
-
-  <ItemGroup>
-    <None Update="AuthorizationServer.pfx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
-  </ItemGroup>
-
 </Project>
