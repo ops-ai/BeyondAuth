@@ -322,10 +322,11 @@ namespace Authentication
                 //.AddRavenDB(setup => { setup.Urls = Configuration.GetSection("Raven:Urls").GetChildren().Select(t => t.Value).ToArray(); setup.Database = Configuration["Raven:Database"]; setup.Certificate = new X509Certificate2(ravenDbCertificateBytes); }, "ravendb")
                 .AddIdentityServer(new Uri(Configuration["BaseUrl"]), "openid-connect");
 
-            healthChecks.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential(), options =>
-            {
+            if (Environment.GetEnvironmentVariable("VaultUri") != null)
+                healthChecks.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential(), options =>
+                {
                     
-            });
+                });
 
             services.AddHttpClient("mailgun", config =>
             {
