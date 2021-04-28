@@ -9,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
@@ -95,11 +96,11 @@ namespace Authentication.Infrastructure
                             TxtMessage = txtMessage,
                             HtmlMessage = htmlMessage,
                             Cc = cc,
-                            //UserId = _httpContextAccessor.HttpContext?.User.FindFirst("")?.Value,
+                            UserId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Email)?.Value,
                             RefId = mailGunResponse.Id
                         };
                         await session.StoreAsync(newEmail);
-                        session.Advanced.GetMetadataFor(newEmail)["@expires"] = DateTime.UtcNow.AddDays(7);
+                        session.Advanced.GetMetadataFor(newEmail)["@expires"] = DateTime.UtcNow.AddDays(30);
                         await session.SaveChangesAsync();
                     }
                 }
