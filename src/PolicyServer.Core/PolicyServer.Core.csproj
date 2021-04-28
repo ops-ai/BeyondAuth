@@ -6,8 +6,8 @@
 
   <ItemGroup>
     <PackageReference Include="JsonSubTypes" Version="1.8.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="5.0.1" />
-    <PackageReference Include="NJsonSchema" Version="10.3.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="5.0.5" />
+    <PackageReference Include="NJsonSchema" Version="10.4.1" />
   </ItemGroup>
 
 </Project>

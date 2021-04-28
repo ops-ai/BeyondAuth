@@ -10,16 +10,16 @@
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.10" />
     <PackageReference Include="NSwag.AspNetCore" Version="13.2.3" />
     <PackageReference Include="NSwag.Core" Version="13.2.3" />
-    <PackageReference Include="Autofac" Version="6.1.0" />
+    <PackageReference Include="Autofac" Version="6.2.0" />
     <PackageReference Include="Autofac.Configuration" Version="6.0.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
     <PackageReference Include="CorrelationId" Version="3.0.0" />
     <PackageReference Include="JsonSubTypes" Version="1.8.0" />
-    <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="5.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="5.0.5" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="5.0.0" />
-    <PackageReference Include="NJsonSchema" Version="10.3.2" />
-    <PackageReference Include="NSwag.AspNetCore" Version="13.9.4" />
-    <PackageReference Include="NSwag.Core" Version="13.9.4" />
+    <PackageReference Include="NJsonSchema" Version="10.4.1" />
+    <PackageReference Include="NSwag.AspNetCore" Version="13.10.9" />
+    <PackageReference Include="NSwag.Core" Version="13.10.9" />
     <PackageReference Include="NWebsec.AspNetCore.Middleware" Version="3.0.0" />
     <PackageReference Include="scientist" Version="2.0.0" />
   </ItemGroup>

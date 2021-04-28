@@ -16,11 +16,11 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.10.10" />
-    <PackageReference Include="Autofac" Version="6.1.0" />
+    <PackageReference Include="Autofac" Version="6.2.0" />
     <PackageReference Include="Autofac.Configuration" Version="6.0.0" />
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.1.0" />
     <PackageReference Include="scientist" Version="2.0.0" />
-    <PackageReference Include="VaultSharp" Version="1.6.0.2" />
+    <PackageReference Include="VaultSharp" Version="1.6.2.1" />
   </ItemGroup>
 
 </Project>
