@@ -76,11 +76,6 @@ namespace IdentityManager.Models
         public bool Disabled { get; set; } = false;
 
         /// <summary>
-        /// Account is locked
-        /// </summary>
-        public bool? Locked { get; set; }
-
-        /// <summary>
         /// Claims
         /// </summary>
         public Dictionary<string, string> Claims { get; set; } = new Dictionary<string, string>();

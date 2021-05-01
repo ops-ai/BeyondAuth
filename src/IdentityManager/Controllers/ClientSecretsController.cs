@@ -1,10 +1,13 @@
 ﻿using IdentityManager.Domain;
 using IdentityManager.Extensions;
 using IdentityManager.Models;
+using IdentityServer4.Contrib.RavenDB.Options;
+using IdentityServer4.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Raven.Client.Documents;
 using System;
 using System.Collections.Generic;
@@ -19,38 +22,42 @@ namespace IdentityManager.Controllers
     public class ClientSecretsController : ControllerBase
     {
         private readonly IDocumentStore _documentStore;
-        private readonly ILogger<ClientsController> _logger;
+        private readonly ILogger<ClientSecretsController> _logger;
+        private readonly IOptions<IdentityStoreOptions> _identityStoreOptions;
 
-        public ClientSecretsController(IDocumentStore documentStore, ILogger<ClientsController> logger)
+        public ClientSecretsController(IDocumentStore documentStore, ILogger<ClientSecretsController> logger, IOptions<IdentityStoreOptions> identityStoreOptions)
         {
             _documentStore = documentStore;
             _logger = logger;
+            _identityStoreOptions = identityStoreOptions;
         }
 
         /// <summary>
         /// Get secrets
         /// </summary>
-        /// <param name="dataSourceId"></param>
         /// <param name="clientId"></param>
         /// <param name="sort"></param>
         /// <param name="range">Paging range [from-to]</param>
         /// <response code="206">Clients information</response>
         /// <response code="500">Server error getting clients</response>
-        [ProducesResponseType(typeof(IEnumerable<ClientSecretModel>), (int)HttpStatusCode.PartialContent)]
+        [ProducesResponseType(typeof(IEnumerable<SecretModel>), (int)HttpStatusCode.PartialContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromRoute] string dataSourceId, [FromRoute] string clientId, string sort, [FromQuery] string range = "0-19")
+        public async Task<IActionResult> Get([FromRoute] string clientId, string sort, [FromQuery] string range = "0-19")
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession(dataSourceId))
+                using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var from = int.Parse(range.Split('-')[0]);
                     var to = int.Parse(range.Split('-')[1]) + 1;
-                    var query = session.Advanced.LoadStartingWithAsync<ClientSecretEntity>($"ClientSecrets/{clientId}/", null, from, to - from);
-                    
-                    return this.Partial(await query.ContinueWith(t => t.Result.Select(c => c.ToModel())));
+
+                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
+                    if (client == null)
+                        throw new KeyNotFoundException($"Client {clientId} was not found");
+
+                    return this.Partial(client.ClientSecrets.Take(to - from).Select(t => t.ToModel()));
                 }
             }
             catch (Exception ex)
@@ -63,55 +70,53 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Get a single client secret
         /// </summary>
-        /// <param name="dataSourceId"></param>
         /// <param name="clientId"></param>
         /// <param name="id"></param>
-        /// <response code="200">Client information</response>
-        /// <response code="404">Client not found</response>
-        /// <response code="500">Server error getting client</response>
-        [ProducesResponseType(typeof(ClientSecretModel), (int)HttpStatusCode.OK)]
+        /// <response code="200">Client secret information</response>
+        /// <response code="404">Client secret not found</response>
+        /// <response code="500">Server error getting client secret</response>
+        [ProducesResponseType(typeof(SecretModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get([FromRoute] string dataSourceId, [FromRoute] string clientId, [FromRoute] string id)
+        public async Task<IActionResult> Get([FromRoute] string clientId, [FromRoute] string id)
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession(dataSourceId))
+                using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var clientSecret = await session.LoadAsync<ClientSecretEntity>($"ClientSecrets/{clientId}/{id}");
-                    if (clientSecret == null)
+                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
+                    if (client == null || !client.ClientSecrets.Any(t => t.Value.Sha256().Equals(id)))
                         throw new KeyNotFoundException($"Client secret {clientId}/{id} was not found");
 
-                    return Ok(clientSecret.ToModel());
+                    return Ok(client.ClientSecrets.First(t => t.Value.Sha256().Equals(id)).ToModel());
                 }
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Client not found");
+                _logger.LogWarning(ex, "Client secret not found");
                 return NotFound();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting client");
+                _logger.LogError(ex, "Error getting client secret");
                 throw;
             }
         }
 
         /// <summary>
-        /// Create new client
+        /// Create new client secret
         /// </summary>
-        /// <param name="dataSourceId"></param>
         /// <param name="clientId"></param>
         /// <param name="clientSecret"></param>
-        /// <response code="204">Client created</response>
+        /// <response code="204">Client secret created</response>
         /// <response code="400">Validation failed</response>
-        /// <response code="500">Server error creating client</response>
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
+        /// <response code="500">Server error creating client secret</response>
+        [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPost]
-        public async Task<IActionResult> Post([FromRoute] string dataSourceId, [FromRoute] string clientId, [FromBody] ClientSecretModel clientSecret)
+        public async Task<IActionResult> Post([FromRoute] string clientId, [FromBody] SecretModel clientSecret)
         {
             try
             {
@@ -121,18 +126,23 @@ namespace IdentityManager.Controllers
                 if (string.IsNullOrEmpty(clientId))
                     throw new ArgumentException("clientId is required", nameof(clientId));
 
-                using (var session = _documentStore.OpenAsyncSession(dataSourceId))
+                using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     _logger.LogDebug($"Creating client {clientId}");
 
-                    if (await session.Advanced.ExistsAsync($"Clients/{clientId}"))
-                        throw new ArgumentException("Client already exists");
+                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
+                    if (client == null)
+                        throw new KeyNotFoundException($"Client {clientId} was not found");
 
-                    await session.StoreAsync(clientSecret.FromModel(clientId));
+                    var secret = clientSecret.FromModel();
+                    var newSecret = shortid.ShortId.Generate(new shortid.Configuration.GenerationOptions { Length = 32, UseNumbers = true, UseSpecialCharacters = true });
+                    secret.Value = newSecret.Sha256();
+                    client.ClientSecrets.Add(secret);
+
                     await session.SaveChangesAsync();
-                }
 
-                return NoContent();
+                    return Ok(newSecret);
+                }
             }
             catch (ArgumentException ex)
             {
@@ -150,30 +160,31 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Update a client secret
         /// </summary>
-        /// <param name="dataSourceId"></param>
         /// <param name="clientId"></param>
         /// <param name="id"></param>
         /// <param name="model"></param>
-        /// <response code="204">Client updated</response>
-        /// <response code="404">Client not found</response>
-        /// <response code="500">Server error updating client</response>
+        /// <response code="204">Client secret updated</response>
+        /// <response code="404">Client secret not found</response>
+        /// <response code="500">Server error updating client secret</response>
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put([FromRoute] string dataSourceId, [FromRoute] string clientId, [FromRoute] string id, [FromBody] ClientSecretModel model)
+        public async Task<IActionResult> Put([FromRoute] string clientId, [FromRoute] string id, [FromBody] SecretModel model)
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession(dataSourceId))
+                using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var clientSecret = await session.LoadAsync<ClientSecretEntity>($"ClientSecrets/{clientId}/{id}");
-                    if (clientSecret == null)
-                        throw new KeyNotFoundException($"Client {clientId} was not found");
+                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
+                    if (client == null || !client.ClientSecrets.Any(t => t.Value.Sha256().Equals(id)))
+                        throw new KeyNotFoundException($"Client secret {clientId}/{id} was not found");
 
-                    clientSecret.Description = model.Description;
-                    clientSecret.Expiration = model.Expiration;
-                    clientSecret.Type = model.Type;
+                    var secret = client.ClientSecrets.First(t => t.Value.Sha256().Equals(id));
+
+                    secret.Description = model.Description;
+                    secret.Expiration = model.Expiration;
+                    secret.Type = model.Type.ToString();
 
                     await session.SaveChangesAsync();
 
@@ -193,9 +204,8 @@ namespace IdentityManager.Controllers
         }
 
         /// <summary>
-        /// Update one or more properties on a client
+        /// Update one or more properties on a client secret
         /// </summary>
-        /// <param name="dataSourceId"></param>
         /// <param name="clientId"></param>
         /// <param name="id"></param>
         /// <param name="patch"></param>
@@ -209,15 +219,15 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), 404)]
         [ProducesResponseType(typeof(IDictionary<string, string>), 400)]
         [ProducesResponseType(typeof(void), 500)]
-        public async Task<IActionResult> Patch([FromRoute] string dataSourceId, [FromRoute] string clientId, [FromRoute] string id, [FromBody] JsonPatchDocument<ClientSecretModel> patch)
+        public async Task<IActionResult> Patch([FromRoute] string clientId, [FromRoute] string id, [FromBody] JsonPatchDocument<SecretModel> patch)
         {
             try
             {
-                var originalClientObj = await Get(dataSourceId, clientId, id) as OkObjectResult;
-                var originalClient = (ClientSecretModel)originalClientObj.Value;
+                var originalClientObj = await Get(clientId, id) as OkObjectResult;
+                var originalClient = (SecretModel)originalClientObj.Value;
 
                 patch.ApplyTo(originalClient);
-                return await Put(dataSourceId, clientId, id, originalClient);
+                return await Put(clientId, id, originalClient);
             }
             catch (JsonPatchException ex)
             {
@@ -233,29 +243,31 @@ namespace IdentityManager.Controllers
         }
 
         /// <summary>
-        /// Delete a client
+        /// Delete a client secret
         /// </summary>
-        /// <param name="dataSourceId"></param>
-        /// <param name="id"></param>
         /// <param name="clientId"></param>
-        /// <response code="201">Client deleted</response>
-        /// <response code="404">Client not found</response>
-        /// <response code="500">Server error deleting client</response>
+        /// <param name="id"></param>
+        /// <response code="201">Client secret deleted</response>
+        /// <response code="404">Client secret not found</response>
+        /// <response code="500">Server error deleting client secret</response>
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete([FromRoute] string dataSourceId, [FromRoute] int clientId, [FromRoute] string id)
+        public async Task<IActionResult> Delete([FromRoute] string clientId, [FromRoute] string id)
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession(dataSourceId))
+                using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var clientsecret = await session.LoadAsync<ClientSecretEntity>($"ClientSecrets/{clientId}/{id}");
-                    if (clientsecret == null)
+                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
+                    if (client == null || !client.ClientSecrets.Any(t => t.Value.Sha256().Equals(id)))
                         throw new KeyNotFoundException($"Client secret {clientId}/{id} was not found");
 
-                    session.Delete(clientsecret);
+                    var secret = client.ClientSecrets.First(t => t.Value.Sha256().Equals(id));
+                    if (!client.ClientSecrets.Remove(secret))
+                        throw new Exception("Failed to remove secret");
+
                     await session.SaveChangesAsync();
 
                     return NoContent();

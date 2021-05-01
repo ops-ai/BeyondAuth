@@ -1,33 +1,32 @@
-﻿using IdentityServer4.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace IdentityManager.Models
 {
     /// <summary>
-    /// Api Resource configuration
+    /// Api scope configuration
     /// </summary>
-    public class ApiResourceModel
+    public class ApiScopeModel
     {
         /// <summary>
-        /// The unique name of the resource.
+        /// The unique name of the scope
         /// </summary>
         [Required]
         public string Name { get; set; }
 
         /// <summary>
-        /// Indicates if this resource is enabled. Defaults to true.
+        /// Indicates if this scope is enabled. Defaults to true.
         /// </summary>
         public bool Enabled { get; set; } = true;
 
         /// <summary>
-        /// Display name of the resource.
+        /// Display name of the scope.
         /// </summary>
         [Required]
         public string DisplayName { get; set; }
 
         /// <summary>
-        /// Description of the resource.
+        /// Description of the scope.
         /// </summary>
         public string Description { get; set; }
 
@@ -37,15 +36,20 @@ namespace IdentityManager.Models
         public bool ShowInDiscoveryDocument { get; set; }
 
         /// <summary>
+        /// Identity resource is required
+        /// </summary>
+        public bool Required { get; set; }
+
+        /// <summary>
+        /// Emphasize
+        /// </summary>
+        public bool Emphasize { get; set; }
+
+        /// <summary>
         /// List of accociated user claims that should be included when this resource is
         /// requested.
         /// </summary>
         public ICollection<string> UserClaims { get; set; } = new List<string>();
-
-        /// <summary>
-        /// An API must have at least one scope. Each scope can have different settings.
-        /// </summary>
-        public ICollection<string> Scopes { get; set; } = new List<string>();
 
         /// <summary>
         /// Gets or sets the custom properties for the resource.

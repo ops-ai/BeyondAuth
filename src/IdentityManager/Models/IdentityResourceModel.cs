@@ -1,13 +1,12 @@
-﻿using IdentityServer4.Models;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
 namespace IdentityManager.Models
 {
     /// <summary>
-    /// Api Resource configuration
+    /// Identity Resource configuration
     /// </summary>
-    public class ApiResourceModel
+    public class IdentityResourceModel
     {
         /// <summary>
         /// The unique name of the resource.
@@ -37,15 +36,20 @@ namespace IdentityManager.Models
         public bool ShowInDiscoveryDocument { get; set; }
 
         /// <summary>
+        /// Identity resource is required
+        /// </summary>
+        public bool Required { get; set; }
+
+        /// <summary>
+        /// Emphasize
+        /// </summary>
+        public bool Emphasize { get; set; }
+
+        /// <summary>
         /// List of accociated user claims that should be included when this resource is
         /// requested.
         /// </summary>
         public ICollection<string> UserClaims { get; set; } = new List<string>();
-
-        /// <summary>
-        /// An API must have at least one scope. Each scope can have different settings.
-        /// </summary>
-        public ICollection<string> Scopes { get; set; } = new List<string>();
 
         /// <summary>
         /// Gets or sets the custom properties for the resource.
