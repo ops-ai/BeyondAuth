@@ -1,10 +1,12 @@
 ﻿using IdentityManager.Domain;
 using IdentityManager.Extensions;
 using IdentityManager.Models;
+using IdentityServer4.Contrib.RavenDB.Options;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Raven.Client.Documents;
 using System;
 using System.Collections.Generic;
@@ -20,11 +22,13 @@ namespace IdentityManager.Controllers
     {
         private readonly IDocumentStore _documentStore;
         private readonly ILogger<ClientsController> _logger;
+        private readonly IOptions<IdentityStoreOptions> _identityStoreOptions;
 
-        public ClientsController(IDocumentStore documentStore, ILogger<ClientsController> logger)
+        public ClientsController(IDocumentStore documentStore, ILogger<ClientsController> logger, IOptions<IdentityStoreOptions> identityStoreOptions)
         {
             _documentStore = documentStore;
             _logger = logger;
+            _identityStoreOptions = identityStoreOptions;
         }
 
         /// <summary>
@@ -38,11 +42,11 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromRoute] string dataSourceId, [FromQuery] string sort = "+clientName", [FromQuery] string range = "0-19")
+        public async Task<IActionResult> Get([FromQuery] string sort = "+clientName", [FromQuery] string range = "0-19")
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession())
+                using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var query = session.Query<ClientEntity>().AsQueryable();
                     if (sort.StartsWith("-"))
@@ -74,11 +78,11 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet("{clientId}")]
-        public async Task<IActionResult> Get([FromRoute] string dataSourceId, [FromRoute]string clientId)
+        public async Task<IActionResult> Get([FromRoute]string clientId)
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession())
+                using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
                     if (client == null)
@@ -110,7 +114,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPost]
-        public async Task<IActionResult> Post([FromRoute] string dataSourceId, [FromBody] ClientModel client)
+        public async Task<IActionResult> Post([FromBody] ClientModel client)
         {
             try
             {
@@ -120,7 +124,7 @@ namespace IdentityManager.Controllers
                 if (string.IsNullOrEmpty(client.ClientId))
                     throw new ArgumentException("clientId is required", nameof(client.ClientId));
 
-                using (var session = _documentStore.OpenAsyncSession())
+                using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     _logger.LogDebug($"Creating client {client.ClientId}");
 
@@ -157,11 +161,11 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPut("{clientId}")]
-        public async Task<IActionResult> Put([FromRoute] string dataSourceId, [FromBody] ClientModel model)
+        public async Task<IActionResult> Put([FromBody] ClientModel model)
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession())
+                using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var client = await session.LoadAsync<ClientEntity>($"Clients/{model.ClientId}");
                     if (client == null)
@@ -245,7 +249,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), 404)]
         [ProducesResponseType(typeof(IDictionary<string, string>), 400)]
         [ProducesResponseType(typeof(void), 500)]
-        public async Task<IActionResult> Patch([FromRoute] string dataSourceId, [FromRoute] string clientId, [FromBody] JsonPatchDocument<ClientModel> patch)
+        public async Task<IActionResult> Patch([FromRoute] string clientId, [FromBody] JsonPatchDocument<ClientModel> patch)
         {
             try
             {
@@ -253,7 +257,7 @@ namespace IdentityManager.Controllers
                 var originalClient = (ClientModel)originalClientObj.Value;
 
                 patch.ApplyTo(originalClient);
-                return await Put(dataSourceId, originalClient);
+                return await Put(originalClient);
             }
             catch (JsonPatchException ex)
             {
@@ -279,11 +283,11 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpDelete("{clientId}")]
-        public async Task<IActionResult> Delete([FromRoute] string dataSourceId, string clientId)
+        public async Task<IActionResult> Delete(string clientId)
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession())
+                using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
                     if (client == null)

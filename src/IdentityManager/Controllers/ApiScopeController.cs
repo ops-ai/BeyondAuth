@@ -16,15 +16,15 @@ using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
 {
-    [Route("{dataSourceId}/api-resources")]
+    [Route("{dataSourceId}/scopes")]
     [ApiController]
-    public class ApiResourcesController : ControllerBase
+    public class ApiScopesController : ControllerBase
     {
         private readonly IDocumentStore _documentStore;
-        private readonly ILogger<ApiResourcesController> _logger;
+        private readonly ILogger<ApiScopesController> _logger;
         private readonly IOptions<IdentityStoreOptions> _identityStoreOptions;
 
-        public ApiResourcesController(IDocumentStore documentStore, ILogger<ApiResourcesController> logger, IOptions<IdentityStoreOptions> identityStoreOptions)
+        public ApiScopesController(IDocumentStore documentStore, ILogger<ApiScopesController> logger, IOptions<IdentityStoreOptions> identityStoreOptions)
         {
             _documentStore = documentStore;
             _logger = logger;
@@ -32,13 +32,13 @@ namespace IdentityManager.Controllers
         }
 
         /// <summary>
-        /// Get Api Resources
+        /// Get Api Scopes
         /// </summary>
         /// <param name="sort">+/- field to sort by</param>
         /// <param name="range">Paging range [from-to]</param>
-        /// <response code="206">Api Resources</response>
-        /// <response code="500">Server error getting api resources</response>
-        [ProducesResponseType(typeof(IEnumerable<ApiResourceModel>), (int)HttpStatusCode.PartialContent)]
+        /// <response code="206">Api scopes</response>
+        /// <response code="500">Server error getting api scopes</response>
+        [ProducesResponseType(typeof(IEnumerable<ApiScopeModel>), (int)HttpStatusCode.PartialContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
@@ -48,7 +48,7 @@ namespace IdentityManager.Controllers
             {
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var query = session.Query<ApiResourceEntity>().AsQueryable();
+                    var query = session.Query<ApiScopeEntity>().AsQueryable();
                     if (sort.StartsWith("-"))
                         query = query.OrderByDescending(sort[1..], Raven.Client.Documents.Session.OrderingType.String);
                     else
@@ -62,19 +62,19 @@ namespace IdentityManager.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting Api Resources");
+                _logger.LogError(ex, "Error getting api scopes");
                 throw;
             }
         }
 
         /// <summary>
-        /// Get a single API resource
+        /// Get a single Api Scope
         /// </summary>
         /// <param name="name"></param>
-        /// <response code="200">Api Resource</response>
-        /// <response code="404">Api Resource not found</response>
-        /// <response code="500">Server error getting Api Resource</response>
-        [ProducesResponseType(typeof(ApiResourceModel), (int)HttpStatusCode.OK)]
+        /// <response code="200">Api Scope</response>
+        /// <response code="404">Api Scope not found</response>
+        /// <response code="500">Server error getting Api Scope</response>
+        [ProducesResponseType(typeof(ApiScopeModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet("{name}")]
@@ -84,98 +84,99 @@ namespace IdentityManager.Controllers
             {
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var resource = await session.LoadAsync<ApiResourceEntity>($"ApiResources/{name}");
-                    if (resource == null)
-                        throw new KeyNotFoundException($"Api Resource {name} was not found");
+                    var scope = await session.LoadAsync<ApiScopeEntity>($"Scopes/{name}");
+                    if (scope == null)
+                        throw new KeyNotFoundException($"Api Scope {name} was not found");
 
-                    return Ok(resource.ToModel());
+                    return Ok(scope.ToModel());
                 }
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Api Resource not found");
+                _logger.LogWarning(ex, "Api Scope not found");
                 return NotFound();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error getting Api Resource");
+                _logger.LogError(ex, "Error getting Api Scope");
                 throw;
             }
         }
 
         /// <summary>
-        /// Create new Api Resource
+        /// Create new Api Scope
         /// </summary>
-        /// <param name="resource"></param>
-        /// <response code="204">Api Resource created</response>
+        /// <param name="scope"></param>
+        /// <response code="201">Api Scope created</response>
         /// <response code="400">Validation failed</response>
-        /// <response code="500">Server error creating Api Resource</response>
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        /// <response code="500">Server error creating Api Scope</response>
+        [ProducesResponseType(typeof(ApiScopeModel), (int)HttpStatusCode.Created)]
+        [ProducesResponseType(typeof(Dictionary<string, string>), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] ApiResourceModel resource)
+        public async Task<ActionResult<ApiScopeModel>> Post([FromBody] ApiScopeModel scope)
         {
             try
             {
-                if (resource == null)
-                    throw new ArgumentException("resource is required", nameof(resource));
+                if (scope == null)
+                    throw new ArgumentException("scope is required", nameof(scope));
 
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    _logger.LogDebug($"Creating Api Resource {resource.Name}");
+                    _logger.LogDebug($"Creating Scope {scope.Name}");
 
-                    if (await session.Advanced.ExistsAsync($"ApiResources/{resource.Name}"))
-                        throw new ArgumentException("Api Resource already exists");
+                    if (await session.Advanced.ExistsAsync($"Scopes/{scope.Name}"))
+                        throw new ArgumentException("Api Scope already exists");
 
-                    await session.StoreAsync(resource.FromModel(), $"ApiResources/{resource.Name}");
+                    await session.StoreAsync(scope.FromModel(), $"Scopes/{scope.Name}");
                     await session.SaveChangesAsync();
                 }
 
-                return NoContent();
+                return CreatedAtRoute("Get", new { name = scope.Name }, scope);
             }
             catch (ArgumentException ex)
             {
-                _logger.LogWarning(ex, "Validation error creating Api Resource");
+                _logger.LogWarning(ex, "Validation error creating Api Scope");
                 return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
             }
             catch (Exception ex)
             {
-                _logger.LogError(0, ex, "Error creating Api Resource");
+                _logger.LogError(0, ex, "Error creating Api Scope");
 
                 throw;
             }
         }
 
         /// <summary>
-        /// Update an Api Resource
+        /// Update an Api Scope
         /// </summary>
         /// <param name="model"></param>
-        /// <response code="204">Api Resource updated</response>
-        /// <response code="404">Api Resource not found</response>
-        /// <response code="500">Server error updating Api Resource</response>
+        /// <response code="204">Api Scope updated</response>
+        /// <response code="404">Api Scope not found</response>
+        /// <response code="500">Server error updating Api Scope</response>
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPut("{name}")]
-        public async Task<IActionResult> Put([FromBody] ApiResourceModel model)
+        public async Task<IActionResult> Put([FromBody] ApiScopeModel model)
         {
             try
             {
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var resource = await session.LoadAsync<ApiResourceEntity>($"ApiResources/{model.Name}");
-                    if (resource == null)
-                        throw new KeyNotFoundException($"Resource {model.Name} was not found");
+                    var scope = await session.LoadAsync<ApiScopeEntity>($"Scopes/{model.Name}");
+                    if (scope == null)
+                        throw new KeyNotFoundException($"Scope {model.Name} was not found");
 
-                    resource.Description = model.Description;
-                    resource.DisplayName = model.DisplayName;
-                    resource.Enabled = model.Enabled;
-                    resource.Name = model.Name;
-                    resource.ShowInDiscoveryDocument = model.ShowInDiscoveryDocument;
-                    resource.Properties = model.Properties;
-                    resource.Scopes = model.Scopes;
-                    resource.UserClaims = model.UserClaims;
+                    scope.Description = model.Description;
+                    scope.DisplayName = model.DisplayName;
+                    scope.Enabled = model.Enabled;
+                    scope.Name = model.Name;
+                    scope.Properties = model.Properties;
+                    scope.ShowInDiscoveryDocument = model.ShowInDiscoveryDocument;
+                    scope.Required = model.Required;
+                    scope.Emphasize = model.Emphasize;
+                    scope.UserClaims = model.UserClaims;
 
                     await session.SaveChangesAsync();
 
@@ -184,61 +185,61 @@ namespace IdentityManager.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Api Resource not found");
+                _logger.LogWarning(ex, "Api Scope not found");
                 throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting Api Resource");
+                _logger.LogError(ex, "Error deleting Api Scope");
                 throw;
             }
         }
 
         /// <summary>
-        /// Update one or more properties on an Api Resource
+        /// Update one or more properties on an Api Scope
         /// </summary>
         /// <param name="name"></param>
         /// <param name="patch"></param>
-        /// <remarks>This is the preferred way to modify an Api Resource</remarks>
-        /// <response code="204">Api Resource was updated</response>
+        /// <remarks>This is the preferred way to modify an Api Scope</remarks>
+        /// <response code="204">Api Scope was updated</response>
         /// <response code="400">Validation failed. Returns a list of fields and errors for each field</response>
-        /// <response code="404">Api Resource was not found</response>
-        /// <response code="500">Error updating Api Resource</response>
+        /// <response code="404">Api Scope was not found</response>
+        /// <response code="500">Error updating Api Scope</response>
         [HttpPatch("{name}")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Patch(string name, [FromBody] JsonPatchDocument<ApiResourceModel> patch)
+        public async Task<IActionResult> Patch(string name, [FromBody] JsonPatchDocument<ApiScopeModel> patch)
         {
             try
             {
-                var originalResourceObj = await Get(name) as OkObjectResult;
-                var originalResource = (ApiResourceModel)originalResourceObj.Value;
+                var originalScopeObj = await Get(name) as OkObjectResult;
+                var originalScope = (ApiScopeModel)originalScopeObj.Value;
 
-                patch.ApplyTo(originalResource);
-                return await Put(originalResource);
+                patch.ApplyTo(originalScope);
+                return await Put(originalScope);
             }
             catch (JsonPatchException ex)
             {
-                _logger.LogError(ex, $"Invalid JsonPatch Operation:{ex.FailedOperation.OperationType} while attempting to update resource {name}.");
+                _logger.LogError(ex, $"Invalid JsonPatch Operation:{ex.FailedOperation.OperationType} while attempting to update scope {name}.");
 
                 return BadRequest(new Dictionary<string, string> { { "reason", ex.FailedOperation.op } });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"Error updating Api Resource");
+                _logger.LogError(ex, $"Error updating Api Scope");
                 return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
             }
         }
 
         /// <summary>
-        /// Delete an Api Resource
+        /// Delete an Api Scope
         /// </summary>
         /// <param name="name"></param>
-        /// <response code="201">Api Resource deleted</response>
-        /// <response code="404">Api Resource not found</response>
-        /// <response code="500">Server error deleting Api Resource</response>
+        /// <response code="201">Api Scope deleted</response>
+        /// <response code="404">Api Scope not found</response>
+        /// <response code="500">Server error deleting Api Scope</response>
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
@@ -249,11 +250,11 @@ namespace IdentityManager.Controllers
             {
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var resource = await session.LoadAsync<ApiResourceEntity>($"ApiResources/{name}");
-                    if (resource == null)
-                        throw new KeyNotFoundException($"Api Resource {name} was not found");
+                    var scope = await session.LoadAsync<ApiScopeEntity>($"Scopes/{name}");
+                    if (scope == null)
+                        throw new KeyNotFoundException($"Api Scope {name} was not found");
 
-                    session.Delete(resource);
+                    session.Delete(scope);
                     await session.SaveChangesAsync();
 
                     return NoContent();
@@ -261,12 +262,12 @@ namespace IdentityManager.Controllers
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogWarning(ex, "Api Resource not found");
+                _logger.LogWarning(ex, "Api Scope not found");
                 throw;
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting Api Resource");
+                _logger.LogError(ex, "Error deleting Api Scope");
                 throw;
             }
         }
