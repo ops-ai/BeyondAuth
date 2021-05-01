@@ -441,7 +441,7 @@ namespace Authentication
 
             app.UseForwardedHeaders();
 
-            app.UseCors(x => x.AllowAnyOrigin().WithHeaders("accept", "authorization", "content-type", "origin").AllowAnyMethod());
+            //app.UseCors(x => x.AllowAnyOrigin().WithHeaders("accept", "authorization", "content-type", "origin").AllowAnyMethod());
             
             var policyCollection = new HeaderPolicyCollection()
                 .AddFrameOptionsSameOrigin()
