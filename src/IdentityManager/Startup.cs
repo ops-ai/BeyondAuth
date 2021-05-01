@@ -166,13 +166,7 @@ namespace IdentityManager
                     document.ExtensionData.Add("x-tagGroups", new { name = "OAuth2 / OpenID Connect", tags = new [] { "ApiResources", "ApiResourceSecrets", "Clients", "ClientSecrets" } });
                     //document.ExtensionData.Add("x-tagGroups", new { name = "Users", tags = new [] { "Users" } });
 
-                    document.Tags.Add(new OpenApiTag { Name = "ApiResources", Description = "Api Resources" });
-                    document.Tags.Add(new OpenApiTag { Name = "ApiResourceSecrets", Description = "Api Resource Secrets" });
-                    document.Tags.Add(new OpenApiTag { Name = "Clients", Description = "OAuth2/OpenID Connect Clients" });
-                    document.Tags.Add(new OpenApiTag { Name = "ClientSecrets", Description = "Client Secrets" });
-                    document.Tags.Add(new OpenApiTag { Name = "ApiScopes", Description = "API Scopes" });
-                    document.Tags.Add(new OpenApiTag { Name = "IdentityResources", Description = "Identity Resources" });
-                    document.Tags.Add(new OpenApiTag { Name = "Users", Description = "Users" });
+                    document.Tags = document.Tags.OrderBy(t => t.Name).ToList();
 
                     document.Info.Contact = new OpenApiContact
                     {

@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NSwag.Annotations;
 using Raven.Client.Documents;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace IdentityManager.Controllers
 {
     [Route("{dataSourceId}/clients")]
     [ApiController]
+    [OpenApiTag("Clients", AddToDocument = true, DocumentationDescription = "OAuth2/OpenID Connect Clients")]
     public class ClientsController : ControllerBase
     {
         private readonly IDocumentStore _documentStore;

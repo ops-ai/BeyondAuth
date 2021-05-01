@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using NSwag.Annotations;
 using Raven.Client.Documents;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace PolicyServer.Controllers
 {
     [Route("{dataSourceId}/users")]
     [ApiController]
+    [OpenApiTag("Users", AddToDocument = true, DocumentationDescription = "Manage users")]
     public class UsersController : ControllerBase
     {
         private readonly UserManager<ApplicationUser> _userManager;

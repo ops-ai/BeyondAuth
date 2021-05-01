@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NSwag.Annotations;
 using Raven.Client.Documents;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace IdentityManager.Controllers
 {
     [Route("{dataSourceId}/identity-resources")]
     [ApiController]
+    [OpenApiTag("Identity Resources", AddToDocument = true, DocumentationDescription = "Oauth 2/OpenID Connect identity resources")]
     public class IdentityResourcesController : ControllerBase
     {
         private readonly IDocumentStore _documentStore;
