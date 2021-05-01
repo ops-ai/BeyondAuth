@@ -1,21 +1,38 @@
 using Autofac;
 using Autofac.Configuration;
+using Azure.Identity;
+using Azure.Security.KeyVault.Certificates;
+using Azure.Security.KeyVault.Secrets;
+using CorrelationId;
 using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
+using Identity.Core;
 using IdentityServer4.AccessTokenValidation;
+using IdentityServer4.Contrib.RavenDB.Options;
+using IdentityServer4.Models;
+using IdentityServer4.Stores.Serialization;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using NSwag;
 using NSwag.AspNetCore;
 using NSwag.Generation.Processors.Security;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Conventions;
+using Raven.Client.Json.Serialization.NewtonsoftJson;
+using Raven.DependencyInjection;
+using Raven.Identity;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -146,18 +163,22 @@ namespace IdentityManager
                     {
                         { "x-logo", new { url = "/logo.png", altText = "BeyondAuth" } }
                     };
-                    //document.ExtensionData.Add("x-tagGroups", new { name = "General", tags = new [] { "Discovery", "Tickets" }});
+                    document.ExtensionData.Add("x-tagGroups", new { name = "OAuth2 / OpenID Connect", tags = new [] { "ApiResources", "ApiResourceSecrets", "Clients", "ClientSecrets" } });
+                    //document.ExtensionData.Add("x-tagGroups", new { name = "Users", tags = new [] { "Users" } });
 
                     document.Tags.Add(new OpenApiTag { Name = "ApiResources", Description = "Api Resources" });
-                    document.Tags.Add(new OpenApiTag { Name = "Clients", Description = "Clients" });
-                    document.Tags.Add(new OpenApiTag { Name = "ClientsSecrets", Description = "Client Secrets" });
+                    document.Tags.Add(new OpenApiTag { Name = "ApiResourceSecrets", Description = "Api Resource Secrets" });
+                    document.Tags.Add(new OpenApiTag { Name = "Clients", Description = "OAuth2/OpenID Connect Clients" });
+                    document.Tags.Add(new OpenApiTag { Name = "ClientSecrets", Description = "Client Secrets" });
+                    document.Tags.Add(new OpenApiTag { Name = "ApiScopes", Description = "API Scopes" });
+                    document.Tags.Add(new OpenApiTag { Name = "IdentityResources", Description = "Identity Resources" });
                     document.Tags.Add(new OpenApiTag { Name = "Users", Description = "Users" });
 
                     document.Info.Contact = new OpenApiContact
                     {
-                        Name = "opsAI Support",
-                        Email = "support@ops.ai",
-                        Url = "https://support.ops.ai"
+                        Name = Configuration["Support:Name"],
+                        Email = Configuration["Support:Email"],
+                        Url = Configuration["Support:Link"]
                     };
                 };
 
@@ -166,13 +187,14 @@ namespace IdentityManager
                     Type = OpenApiSecuritySchemeType.OAuth2,
                     Description = "Auth",
                     Flow = OpenApiOAuth2Flow.AccessCode,
-                    OpenIdConnectUrl = $"{Configuration["Authentication:Authority"]}/.well-known/openid-configuration",
+                    OpenIdConnectUrl = new Uri(new Uri(Configuration["Authentication:Authority"]), ".well-known/openid-configuration").AbsoluteUri,
                     Flows = new OpenApiOAuthFlows
                     {
                         AuthorizationCode = new OpenApiOAuthFlow
                         {
-                            AuthorizationUrl = $"{Configuration["Authentication:Authority"]}/connect/authorize",
-                            TokenUrl = $"{Configuration["Authentication:Authority"]}/connect/token"
+                            AuthorizationUrl = new Uri(new Uri(Configuration["Authentication:Authority"]), "connect/authorize").AbsoluteUri,
+                            TokenUrl = new Uri(new Uri(Configuration["Authentication:Authority"]), "connect/token").AbsoluteUri,
+                            Scopes = new Dictionary<string, string> { { "openid", "openid" }, { Configuration["Authentication:ApiName"], Configuration["Authentication:ApiName"] } }
                         }
                     }
                 });
@@ -268,8 +290,9 @@ namespace IdentityManager
             {
                 options.OAuth2Client = new OAuth2ClientSettings
                 {
-                    ClientId = "swagger",
+                    ClientId = Configuration["Authentication:ClientId"],
                     AppName = "identitymanager",
+                    ClientSecret = Configuration["Authentication:ClientSecret"],
                     UsePkceWithAuthorizationCodeGrant = true,
                 };
             });
@@ -284,10 +307,12 @@ namespace IdentityManager
             {
                 Predicate = _ => _.FailureStatus == HealthStatus.Unhealthy
             });
+            
+            app.UseCorrelationId();
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapControllers();
+                endpoints.MapControllers().RequireAuthorization("ApiScope");
             });
         }
     }
