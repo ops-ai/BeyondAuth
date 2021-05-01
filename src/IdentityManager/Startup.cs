@@ -51,20 +51,58 @@ namespace IdentityManager
                     x.ApiSecret = Configuration["Authentication:ApiSecret"];
                     x.ApiName = Configuration["Authentication:ApiName"];
                     x.SupportedTokens = SupportedTokens.Both;
-                    x.RequireHttpsMetadata = true;
                     x.EnableCaching = true;
                     x.CacheDuration = TimeSpan.FromMinutes(1);
-                    x.NameClaimType = "sub";
                 });
 
-            services.AddCorrelationId();
-
-            services.AddSingleton((ctx) => new DocumentStore
+            services.AddSingleton((ctx) =>
             {
-                Urls = new[] { Configuration["Raven:Url"] },
-                Database = Configuration["Raven:Database"],
-                Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null
-            }.Initialize());
+                var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")), credential: new DefaultAzureCredential());
+                var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
+
+                var ravenDbCertificateClient = certificateClient.GetCertificate("RavenDB");
+                var ravenDbCertificateSegments = ravenDbCertificateClient.Value.SecretId.Segments;
+                var ravenDbCertificateBytes = Convert.FromBase64String(secretClient.GetSecret(ravenDbCertificateSegments[2].Trim('/'), ravenDbCertificateSegments[3].TrimEnd('/')).Value.Value);
+
+                IDocumentStore store = new DocumentStore
+                {
+                    Urls = Configuration.GetSection("Raven:Urls").GetChildren().Select(t => t.Value).ToArray(),
+                    Database = Configuration["Raven:Database"],
+                    Certificate = new X509Certificate2(ravenDbCertificateBytes),
+                    Conventions =
+                    {
+                        FindCollectionName = type =>
+                        {
+                            if (typeof(ApiResource).IsAssignableFrom(type))
+                                return "ApiResources";
+                            if (typeof(ApiScope).IsAssignableFrom(type))
+                                return "ApiScopes";
+                            if (typeof(Client).IsAssignableFrom(type))
+                                return "Clients";
+                            if (typeof(IdentityResource).IsAssignableFrom(type))
+                                return "IdentityResources";
+                            return DocumentConventions.DefaultGetCollectionName(type);
+                        }
+                    }
+                };
+
+                var serializerConventions = new NewtonsoftJsonSerializationConventions();
+                serializerConventions.CustomizeJsonSerializer += (JsonSerializer serializer) =>
+                {
+                    serializer.Converters.Add(new ClaimConverter());
+                    serializer.Converters.Add(new ClaimsPrincipalConverter());
+                };
+
+                store.Conventions.Serialization = serializerConventions;
+
+                return store.Initialize();
+            });
+
+            services.ConfigureOptions<RavenOptionsSetup>();
+            services.AddScoped(sp => sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<UserStoreOptions>>()?.Value?.DatabaseName));
+
+            services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
+            services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();
 
             services.AddHealthChecks()
                 .AddRavenDB(setup => { setup.Urls = new[] { Configuration["Raven:Url"] }; setup.Database = Configuration["Raven:Database"]; setup.Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null; }, "ravendb");
@@ -121,22 +159,23 @@ namespace IdentityManager
             });
 
             services.AddControllers();
+            services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
         }
 
-        /// <summary>
-        /// ConfigureContainer is where you can register things directly
-        /// with Autofac. This runs after ConfigureServices so the things
-        /// here will override registrations made in ConfigureServices.
-        /// </summary>
-        /// <param name="builder"></param>
-        public void ConfigureContainer(ContainerBuilder builder)
-        {
-            var module = new ConfigurationModule(Configuration);
-            builder.RegisterModule(module);
-        }
+        ///// <summary>
+        ///// ConfigureContainer is where you can register things directly
+        ///// with Autofac. This runs after ConfigureServices so the things
+        ///// here will override registrations made in ConfigureServices.
+        ///// </summary>
+        ///// <param name="builder"></param>
+        //public void ConfigureContainer(ContainerBuilder builder)
+        //{
+        //    var module = new ConfigurationModule(Configuration);
+        //    builder.RegisterModule(module);
+        //}
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
+        public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             if (env.IsDevelopment())
             {
@@ -148,6 +187,43 @@ namespace IdentityManager
             app.UseForwardedHeaders();
 
             app.UseCors(x => x.AllowAnyOrigin().WithHeaders("accept", "authorization", "content-type", "origin").AllowAnyMethod());
+
+            var policyCollection = new HeaderPolicyCollection()
+                .AddFrameOptionsSameOrigin()
+                .AddXssProtectionBlock()
+                .AddContentTypeOptionsNoSniff()
+                .AddStrictTransportSecurityMaxAgeIncludeSubDomainsAndPreload(maxAgeInSeconds: 60 * 60 * 24 * 365) // maxage = one year in seconds
+                .AddReferrerPolicyStrictOriginWhenCrossOrigin()
+                .RemoveServerHeader()
+                //.AddContentSecurityPolicy(builder =>
+                //{
+                //    builder.AddObjectSrc().None();
+                //    builder.AddFormAction().Self();
+                //    builder.AddFrameAncestors().None();
+                //})
+                .AddFeaturePolicy(options =>
+                {
+                    options.AddAutoplay().Self();
+                    options.AddCamera().Self();
+                    options.AddFullscreen().Self();
+                    options.AddGeolocation().Self();
+                    options.AddMicrophone().Self();
+                    options.AddPictureInPicture().Self();
+                    options.AddSpeaker().Self();
+                    options.AddSyncXHR().Self();
+                })
+                .AddPermissionsPolicy(options =>
+                {
+                    options.AddAutoplay().Self();
+                    options.AddCamera().Self();
+                    options.AddFullscreen().Self();
+                    options.AddGeolocation().Self();
+                    options.AddMicrophone().Self();
+                    options.AddPictureInPicture().Self();
+                    options.AddSpeaker().Self();
+                    options.AddSyncXHR().Self();
+                });
+            app.UseSecurityHeaders(policyCollection);
 
             app.UseXContentTypeOptions();
             app.UseXDownloadOptions();

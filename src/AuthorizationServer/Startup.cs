@@ -1,9 +1,13 @@
 ﻿using Autofac;
 using Autofac.Configuration;
+using Azure.Identity;
+using Azure.Security.KeyVault.Certificates;
+using Azure.Security.KeyVault.Secrets;
 using BeyondAuth.PolicyProvider;
 using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
 using IdentityServer4.AccessTokenValidation;
+using IdentityServer4.Stores.Serialization;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -19,6 +23,7 @@ using NSwag;
 using NSwag.AspNetCore;
 using NSwag.Generation.Processors.Security;
 using Raven.Client.Documents;
+using Raven.Client.Json.Serialization.NewtonsoftJson;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -40,6 +45,8 @@ namespace AuthorizationServer
         // For more information on how to configure your application, visit https://go.microsoft.com/fwlink/?LinkID=398940
         public void ConfigureServices(IServiceCollection services)
         {
+            services.AddOptions();
+
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardLimit = 1;
@@ -50,7 +57,13 @@ namespace AuthorizationServer
                 });
             });
 
-            services.AddCorrelationId();
+            NLog.GlobalDiagnosticsContext.Set("AzureLogStorageConnectionString", Configuration["Azure:LogStorageConnectionString"]);
+
+            services.AddDefaultCorrelationId(options =>
+            {
+                options.UpdateTraceIdentifier = true;
+            });
+            services.AddMemoryCache();
 
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
                 .AddIdentityServerAuthentication(x =>
@@ -65,12 +78,33 @@ namespace AuthorizationServer
                     x.NameClaimType = "sub";
                 });
 
-            services.AddSingleton((ctx) => new DocumentStore
+            services.AddSingleton((ctx) =>
             {
-                Urls = new[] { Configuration["Raven:Url"] },
-                Database = Configuration["Raven:Database"],
-                Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null
-            }.Initialize());
+                var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")), credential: new DefaultAzureCredential());
+                var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
+
+                var ravenDbCertificateClient = certificateClient.GetCertificate("RavenDB");
+                var ravenDbCertificateSegments = ravenDbCertificateClient.Value.SecretId.Segments;
+                var ravenDbCertificateBytes = Convert.FromBase64String(secretClient.GetSecret(ravenDbCertificateSegments[2].Trim('/'), ravenDbCertificateSegments[3].TrimEnd('/')).Value.Value);
+
+                IDocumentStore store = new DocumentStore
+                {
+                    Urls = Configuration.GetSection("Raven:Urls").GetChildren().Select(t => t.Value).ToArray(),
+                    Database = Configuration["Raven:Database"],
+                    Certificate = new X509Certificate2(ravenDbCertificateBytes)
+                };
+
+                var serializerConventions = new NewtonsoftJsonSerializationConventions();
+                serializerConventions.CustomizeJsonSerializer += (JsonSerializer serializer) =>
+                {
+                    serializer.Converters.Add(new ClaimConverter());
+                    serializer.Converters.Add(new ClaimsPrincipalConverter());
+                };
+
+                store.Conventions.Serialization = serializerConventions;
+
+                return store.Initialize();
+            });
 
             services.AddHealthChecks()
                 .AddRavenDB(setup => { setup.Urls = new[] { Configuration["Raven:Url"] }; setup.Database = Configuration["Raven:Database"]; setup.Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null; }, "ravendb");
@@ -80,8 +114,6 @@ namespace AuthorizationServer
             services.AddTransient<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
             services.AddTransient<IAuthorizationHandler, RemoteAuthorizationHandler>();
 
-            services.AddCorrelationId();
-            
             services.AddOpenApiDocument(config =>
             {
                 config.DocumentName = "v1";

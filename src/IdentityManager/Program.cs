@@ -21,7 +21,7 @@ namespace IdentityManager
                         config.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
                 })
                 .UseContentRoot(Directory.GetCurrentDirectory())
-                .UseServiceProviderFactory(new AutofacServiceProviderFactory())
+                //.UseServiceProviderFactory(new AutofacServiceProviderFactory())
                 .UseNLog()
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
