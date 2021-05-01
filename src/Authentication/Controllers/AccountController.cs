@@ -4,10 +4,9 @@
 
 using Authentication.Extensions;
 using Authentication.Filters;
-using Authentication.Models;
 using Authentication.Models.Account;
-using Authentication.Options;
 using Finbuckle.MultiTenant;
+using Identity.Core;
 using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.Events;
@@ -23,6 +22,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using Raven.Client.Documents;
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -119,18 +119,20 @@ namespace Authentication.Controllers
 
                     // only set explicit expiration here if user chooses "remember me". 
                     // otherwise we rely upon expiration configured in cookie middleware.
-                    AuthenticationProperties props = null;
-                    if (_accountOptions.Value.AllowRememberLogin && model.RememberLogin)
-                        props = new AuthenticationProperties
-                        {
-                            IsPersistent = true,
-                            ExpiresUtc = DateTimeOffset.UtcNow.Add(_accountOptions.Value.RememberMeLoginDuration)
-                        };
-
-                    // issue authentication cookie with subject ID and username
-                    var isuser = new IdentityServerUser(user.Email)
+                    var props = new AuthenticationProperties
                     {
-                        DisplayName = user.DisplayName
+                        IsPersistent = _accountOptions.Value.AllowRememberLogin && model.RememberLogin,
+                        ExpiresUtc = _accountOptions.Value.AllowRememberLogin && model.RememberLogin ? DateTimeOffset.UtcNow.Add(_accountOptions.Value.RememberMeLoginDuration) : null,
+                        RedirectUri = !string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl) ? model.ReturnUrl : "~/"
+                    };
+                    
+                    // issue authentication cookie with subject ID and username
+                    var isuser = new IdentityServerUser(user.Id)
+                    {
+                        DisplayName = user.DisplayName,
+                        IdentityProvider = null,
+                        AuthenticationMethods = new List<string> { "pwd" },
+                        AuthenticationTime = DateTime.UtcNow
                     };
 
                     await HttpContext.SignInAsync(isuser, props);
@@ -148,14 +150,7 @@ namespace Authentication.Controllers
                         return Redirect(model.ReturnUrl);
                     }
 
-                    // request for a local page
-                    if (Url.IsLocalUrl(model.ReturnUrl))
-                        return Redirect(model.ReturnUrl);
-                    else if (string.IsNullOrEmpty(model.ReturnUrl))
-                        return Redirect("~/");
-                    else
-                        // user might have clicked on a malicious link - should be logged
-                        throw new Exception("invalid return URL");
+                    return Redirect(props.RedirectUri);
                 }
 
                 await _events.RaiseAsync(new UserLoginFailureEvent(model.Email, "invalid credentials", clientId: context?.Client.ClientId));

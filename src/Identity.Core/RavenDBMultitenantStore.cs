@@ -1,5 +1,4 @@
-﻿using Authentication.Options;
-using Finbuckle.MultiTenant;
+﻿using Finbuckle.MultiTenant;
 using Microsoft.Extensions.Caching.Memory;
 using Raven.Client.Documents;
 using System;
@@ -7,7 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Authentication.Extensions
+namespace Identity.Core
 {
     /// <summary>
     /// RavenDB store for multitenant settings
@@ -117,7 +116,7 @@ namespace Authentication.Extensions
 
                     _cache.Remove($"TenantSetting-{tenant.Identifier}");
                     _cache.Remove($"TenantSetting-{tenant.Id.Split('/').Last()}");
-                    
+
                     return true;
                 }
                 return false;

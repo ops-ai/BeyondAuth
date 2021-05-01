@@ -1,8 +1,7 @@
-﻿using Authentication.Models.Account;
-using Finbuckle.MultiTenant;
+﻿using Finbuckle.MultiTenant;
 using System.Collections.Generic;
 
-namespace Authentication.Options
+namespace Identity.Core
 {
     public class TenantSetting : ITenantInfo
     {

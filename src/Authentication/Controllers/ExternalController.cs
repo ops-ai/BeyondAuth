@@ -1,7 +1,6 @@
 using Authentication.Extensions;
 using Authentication.Filters;
-using Authentication.Models;
-using Authentication.Models.Account;
+using Identity.Core;
 using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.Events;

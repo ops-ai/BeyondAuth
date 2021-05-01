@@ -1,4 +1,6 @@
-﻿namespace Authentication.Options
+﻿using Identity.Core;
+
+namespace Authentication.Options
 {
     /// <summary>
     /// 

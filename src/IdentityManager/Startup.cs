@@ -44,6 +44,33 @@ namespace IdentityManager
                 });
             });
 
+            NLog.GlobalDiagnosticsContext.Set("AzureLogStorageConnectionString", Configuration["Azure:LogStorageConnectionString"]);
+
+            services.AddDefaultCorrelationId(options =>
+            {
+                options.UpdateTraceIdentifier = true;
+            });
+            services.AddMemoryCache();
+
+            services.AddMultiTenant<TenantSetting>().WithRouteStrategy("dataSourceId").WithStore(new ServiceLifetime(), (sp) => new RavenDBMultitenantStore(sp.GetService<IDocumentStore>(), sp.GetService<IMemoryCache>()))
+                .WithPerTenantOptions<IdentityStoreOptions>((options, tenantInfo) =>
+                {
+                    options.DatabaseName = $"TenantIdentity-{tenantInfo.Identifier}";
+                })
+                .WithPerTenantOptions<UserStoreOptions>((options, tenantInfo) =>
+                {
+                    options.DatabaseName = $"TenantIdentity-{tenantInfo.Identifier}";
+                });
+
+            services.AddAuthorization(options =>
+            {
+                options.AddPolicy("ApiScope", policy =>
+                {
+                    policy.RequireAuthenticatedUser();
+                    policy.RequireClaim("scope", Configuration["Authentication:ApiName"]);
+                });
+            });
+
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
                 .AddIdentityServerAuthentication(x =>
                 {
@@ -232,7 +259,8 @@ namespace IdentityManager
             app.UseHsts(options => options.MaxAge(30).AllResponses());
 
             app.UseRouting();
-
+            app.UseMultiTenant();
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseOpenApi();
