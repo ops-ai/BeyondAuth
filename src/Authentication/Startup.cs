@@ -1,5 +1,4 @@
 using Authentication.Extensions;
-using Authentication.Models.Account;
 using Authentication.Options;
 using Autofac;
 using Azure.Identity;
@@ -33,7 +32,6 @@ using System.Linq;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using Raven.Client.Json.Serialization.NewtonsoftJson;
-using Authentication.Models;
 using IdentityServer4;
 using IdentityServer4.AspNetIdentity;
 using System.Text;
@@ -59,6 +57,8 @@ using Microsoft.AspNetCore.Authentication.MicrosoftAccount;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Secrets;
 using Azure.Storage.Blobs;
+using Raven.Client.Documents.Conventions;
+using IdentityServer4.Models;
 
 namespace Authentication
 {
@@ -294,7 +294,22 @@ namespace Authentication
                 {
                     Urls = Configuration.GetSection("Raven:Urls").GetChildren().Select(t => t.Value).ToArray(),
                     Database = Configuration["Raven:Database"],
-                    Certificate = new X509Certificate2(ravenDbCertificateBytes)
+                    Certificate = new X509Certificate2(ravenDbCertificateBytes),
+                    Conventions =
+                    {
+                        FindCollectionName = type =>
+                        {
+                            if (typeof(ApiResource).IsAssignableFrom(type))
+                                return "ApiResources";
+                            if (typeof(ApiScope).IsAssignableFrom(type))
+                                return "ApiScopes";
+                            if (typeof(Client).IsAssignableFrom(type))
+                                return "Clients";
+                            if (typeof(IdentityResource).IsAssignableFrom(type))
+                                return "IdentityResources";
+                            return DocumentConventions.DefaultGetCollectionName(type);
+                        }
+                    }
                 };
 
                 var serializerConventions = new NewtonsoftJsonSerializationConventions();
@@ -312,7 +327,7 @@ namespace Authentication
             services.ConfigureOptions<RavenOptionsSetup>();
             services.AddScoped(sp => sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<UserStoreOptions>>()?.Value?.DatabaseName));
 
-            var identityBuilder = services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => options.SignIn.RequireConfirmedAccount = true)
+            var identityBuilder = services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddDefaultTokenProviders();
 
             identityBuilder.Services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
@@ -345,7 +360,6 @@ namespace Authentication
                 .AddTransientHttpErrorPolicy(p => p.WaitAndRetryAsync(20, retryAttempt => TimeSpan.FromMilliseconds(300 * retryAttempt)));
 
             //services.AddTransient<IRedirectUriValidator, RedirectUriValidator>();
-            //services.AddTransient<ICorsPolicyService, CorsPolicyService>();
 
             var builder = services.AddIdentityServer(options =>
             {
@@ -414,8 +428,6 @@ namespace Authentication
                     .AddRedirectToHttpsPermanent()
                     .AddRedirectToNonWwwPermanent();
                 app.UseRewriter(options);
-
-                app.UseHttpsRedirection();
             }
 
             app.UseHttpsRedirection();
@@ -471,8 +483,8 @@ namespace Authentication
             app.UseRouting();
             app.UseMultiTenant();
             app.UseAuthentication();
-            app.UseIdentityServer();
             app.UseAuthorization();
+            app.UseIdentityServer();
 
             app.UseHealthChecks(Configuration["HealthChecks:FullEndpoint"], new HealthCheckOptions()
             {

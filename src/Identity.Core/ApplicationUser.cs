@@ -1,12 +1,14 @@
-﻿using System;
+﻿using IdentityModel;
+using Raven.Identity;
+using System;
 using System.Collections.Generic;
 
-namespace Authentication.Models
+namespace Identity.Core
 {
     /// <summary>
     /// Application user
     /// </summary>
-    public class ApplicationUser : Raven.Identity.IdentityUser
+    public class ApplicationUser : IdentityUser
     {
         /// <summary>
         /// First Name
@@ -56,7 +58,7 @@ namespace Authentication.Models
         /// <summary>
         /// Require the user to change their password the next time they log in
         /// </summary>
-        public bool? ChangePasswordOnNextLogin { get; set; } = false;
+        public bool ChangePasswordOnNextLogin { get; set; } = false;
 
         /// <summary>
         /// Password policy
@@ -77,5 +79,13 @@ namespace Authentication.Models
         /// TimeZone info for current user in IANA format. (e.g. America/Los_Angeles)
         /// </summary>
         public string ZoneInfo { get; set; }
+
+        [Newtonsoft.Json.JsonIgnore]
+        public override List<IdentityUserClaim> Claims => new List<IdentityUserClaim>()
+        {
+            new IdentityUserClaim { ClaimType = JwtClaimTypes.Subject, ClaimValue = Email },
+            new IdentityUserClaim { ClaimType = JwtClaimTypes.Name, ClaimValue = DisplayName }
+        };
+
     }
 }

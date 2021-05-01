@@ -6,7 +6,7 @@
     {
         name = Context.User?.GetDisplayName();
     }
-    var tenantInfo = Context.GetMultiTenantContext<Authentication.Options.TenantSetting>()?.TenantInfo;
+    var tenantInfo = Context.GetMultiTenantContext<Identity.Core.TenantSetting>()?.TenantInfo;
 }
 <!DOCTYPE html>
 <html lang="en">

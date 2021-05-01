@@ -1,4 +1,4 @@
-﻿namespace Authentication.Models.Account
+﻿namespace Identity.Core
 {
     /// <summary>
     /// 

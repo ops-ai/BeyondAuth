@@ -5,7 +5,7 @@
 using Authentication.Filters;
 using Authentication.Models.Consent;
 using Authentication.Models.Device;
-using Authentication.Options;
+using Identity.Core;
 using IdentityServer4.Configuration;
 using IdentityServer4.Events;
 using IdentityServer4.Extensions;
