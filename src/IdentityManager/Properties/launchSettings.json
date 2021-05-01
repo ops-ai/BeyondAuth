@@ -19,9 +19,9 @@
     },
     "IdentityManager": {
       "commandName": "Project",
-      "launchBrowser": false,
       "launchUrl": "weatherforecast",
       "environmentVariables": {
+        "VaultUri": "https://opsaiauthdev.vault.azure.net/",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "https://localhost:5006"
