@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NSwag.Annotations;
 using Raven.Client.Documents;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace IdentityManager.Controllers
 {
     [Route("{dataSourceId}/clients/{clientId}/secrets")]
     [ApiController]
+    [OpenApiTag("Client Secrets", AddToDocument = true, DocumentationDescription = "Secrets associated with Clients")]
     public class ClientSecretsController : ControllerBase
     {
         private readonly IDocumentStore _documentStore;

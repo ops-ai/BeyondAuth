@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NSwag.Annotations;
 using Raven.Client.Documents;
 using System;
 using System.Collections.Generic;
@@ -18,6 +19,7 @@ namespace IdentityManager.Controllers
 {
     [Route("{dataSourceId}/api-resources")]
     [ApiController]
+    [OpenApiTag("Api Resources", AddToDocument = true, DocumentationDescription = "APIs")]
     public class ApiResourcesController : ControllerBase
     {
         private readonly IDocumentStore _documentStore;
