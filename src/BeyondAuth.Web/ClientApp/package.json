@@ -45,7 +45,7 @@
     "angular-auth-oidc-client": "^10.0.15",
     "angular2-chartjs": "0.4.1",
     "bootstrap": "4.3.1",
-    "chart.js": "2.9.3",
+    "chart.js": "2.9.4",
     "classlist.js": "1.1.20150312",
     "core-js": "2.5.1",
     "echarts": "4.6.0",
