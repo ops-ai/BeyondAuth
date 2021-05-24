@@ -15,7 +15,7 @@ using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
-namespace PolicyServer.Controllers
+namespace IdentityManager.Controllers
 {
     [Route("{dataSourceId}/users")]
     [ApiController]
