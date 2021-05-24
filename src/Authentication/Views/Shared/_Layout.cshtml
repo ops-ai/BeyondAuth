@@ -13,10 +13,10 @@
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>BeyondAUTH</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>@(tenantInfo?.BrandingOptions?.PageTitle ?? "BeyondAUTH")</title>
     <link rel="icon" type="image/x-icon" href="@(tenantInfo?.BrandingOptions?.Favicon ?? "/favicon.ico")" />
-    <link rel="shortcut icon" type="image/x-icon" href="~/favicon.ico" />
+    <link rel="shortcut icon" type="image/x-icon" href="@(tenantInfo?.BrandingOptions?.Favicon ?? "/favicon.ico")" />
     <link rel="stylesheet" href="~/lib/bootstrap/css/bootstrap.css" />
     <link rel="stylesheet" href="~/css/site.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jsnlog/2.29.0/jsnlog.min.js" integrity="OhU/Pz9ORT8/Pyg9GD8wPz8/P05JP3U/XmQ/biA/P0ILPws/dz8/YGZpPz8vOj9CDQo=" crossorigin="anonymous"></script>
@@ -33,7 +33,7 @@
                 </button>
                 <a href="~/">
                     <span class="navbar-brand">
-                        <img src="@(tenantInfo?.BrandingOptions?.Logo ?? "/logo.png")" class="icon-banner" alt="logo">
+                        <img src="@(tenantInfo?.BrandingOptions?.Logo ?? "/logo.png")" class="icon-banner" alt="logo" style="max-width: 200px;">
                     </span>
                 </a>
             </div>

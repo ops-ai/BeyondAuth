@@ -12,6 +12,7 @@
   position: relative;
   top: -2px;
   display: inline;
+  max-width:200px;
 }
 .login-container {
   margin-top: 10%;

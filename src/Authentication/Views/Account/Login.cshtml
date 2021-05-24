@@ -31,9 +31,6 @@
         <div class="col-md-6 login-form-@(Model.VisibleExternalProviders.Any() ? "2" : "1")">
             @if (Model.EnableLocalLogin)
             {
-                <div class="login-logo">
-                    <img src="https://image.ibb.co/n7oTvU/logo_white.png" alt="" />
-                </div>
                 <h3>Sign in to your account</h3>
                 <form asp-route="Login">
                     <input type="hidden" asp-for="ReturnUrl" />
