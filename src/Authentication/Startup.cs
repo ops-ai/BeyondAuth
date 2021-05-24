@@ -172,7 +172,7 @@ namespace Authentication
                 {
                     options.DatabaseName = $"TenantIdentity-{tenantInfo.Identifier}";
                 })
-                .WithPerTenantOptions<UserStoreOptions>((options, tenantInfo) =>
+                .WithPerTenantOptions<RavenSettings>((options, tenantInfo) =>
                 {
                     options.DatabaseName = $"TenantIdentity-{tenantInfo.Identifier}";
                 })
@@ -330,7 +330,7 @@ namespace Authentication
             });
 
             services.ConfigureOptions<RavenOptionsSetup>();
-            services.AddScoped(sp => sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<UserStoreOptions>>()?.Value?.DatabaseName));
+            services.AddScoped(sp => sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<RavenSettings>>()?.Value?.DatabaseName));
 
             var identityBuilder = services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
                 .AddDefaultTokenProviders();
@@ -455,12 +455,18 @@ namespace Authentication
                 .AddStrictTransportSecurityMaxAgeIncludeSubDomainsAndPreload(maxAgeInSeconds: 60 * 60 * 24 * 365) // maxage = one year in seconds
                 .AddReferrerPolicyStrictOriginWhenCrossOrigin()
                 .RemoveServerHeader()
-                //.AddContentSecurityPolicy(builder =>
-                //{
-                //    builder.AddObjectSrc().None();
-                //    builder.AddFormAction().Self();
-                //    builder.AddFrameAncestors().None();
-                //})
+                .AddContentSecurityPolicy(builder =>
+                {
+                    builder.AddDefaultSrc().Self();
+                    builder.AddObjectSrc().None();
+                    builder.AddFrameAncestors().None();
+                    builder.AddFormAction().Self();
+                    builder.AddImgSrc().Self().From("opsai.blob.core.windows.net");
+                    builder.AddScriptSrc().Self().From("cdnjs.cloudflare.com").From("ajax.cloudflare.com").From("static.cloudflareinsights.com");
+                    builder.AddStyleSrc().Self().UnsafeInline();
+
+                    //default-src 'self'; object-src 'none'; frame-ancestors 'none'; sandbox allow-forms allow-same-origin allow-scripts; base-uri 'self';
+                })
                 .AddFeaturePolicy(options =>
                 {
                     options.AddAutoplay().Self();

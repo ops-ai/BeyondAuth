@@ -39,5 +39,10 @@
         /// Display text for support link
         /// </summary>
         public string SupportMessage { get; set; }
+
+        /// <summary>
+        /// Page title
+        /// </summary>
+        public string PageTitle { get; set; }
     }
 }

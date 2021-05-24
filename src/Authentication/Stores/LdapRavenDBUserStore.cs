@@ -6,6 +6,7 @@ using IdentityServer.LdapExtension.UserStore;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Raven.Client.Documents;
+using Raven.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -20,13 +21,13 @@ namespace Authentication.Stores
         private readonly IDocumentStore _documentStore;
         private readonly ILogger<LdapRavenDBUserStore<TUser>> _logger;
         private readonly ILdapService<TUser> _authenticationService;
-        private readonly IOptions<UserStoreOptions> _userStoreOptions;
+        private readonly IOptions<RavenSettings> _userStoreOptions;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="LdapRavenDBUserStore{TUser}"/> class.
         /// </summary>
         /// <param name="authenticationService">The Ldap authentication service.</param>
-        public LdapRavenDBUserStore(ILogger<LdapRavenDBUserStore<TUser>> logger, IDocumentStore documentStore, ILdapService<TUser> authenticationService, IOptions<UserStoreOptions> userStoreOptions)
+        public LdapRavenDBUserStore(ILogger<LdapRavenDBUserStore<TUser>> logger, IDocumentStore documentStore, ILdapService<TUser> authenticationService, IOptions<RavenSettings> userStoreOptions)
         {
             _documentStore = documentStore;
             _logger = logger;

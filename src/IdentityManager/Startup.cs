@@ -78,10 +78,13 @@ namespace IdentityManager
                 {
                     options.DatabaseName = $"TenantIdentity-{tenantInfo.Identifier}";
                 })
-                .WithPerTenantOptions<UserStoreOptions>((options, tenantInfo) =>
+                .WithPerTenantOptions<RavenSettings>((options, tenantInfo) =>
                 {
                     options.DatabaseName = $"TenantIdentity-{tenantInfo.Identifier}";
                 });
+
+            var identityBuilder = services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
+                .AddDefaultTokenProviders();
 
             services.AddAuthorization(options =>
             {
@@ -147,7 +150,7 @@ namespace IdentityManager
             });
 
             services.ConfigureOptions<RavenOptionsSetup>();
-            services.AddScoped(sp => sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<UserStoreOptions>>()?.Value?.DatabaseName));
+            services.AddScoped(sp => sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<RavenSettings>>()?.Value?.DatabaseName));
 
             services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
             services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();

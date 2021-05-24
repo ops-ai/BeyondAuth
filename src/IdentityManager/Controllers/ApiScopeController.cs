@@ -19,7 +19,7 @@ namespace IdentityManager.Controllers
 {
     [Route("{dataSourceId}/scopes")]
     [ApiController]
-    [OpenApiTag("Api Secrets", AddToDocument = true, DocumentationDescription = "OAuth2/OpenID Connect Scopes")]
+    [OpenApiTag("Api Scopes", AddToDocument = true, DocumentationDescription = "OAuth2/OpenID Connect Scopes")]
     public class ApiScopesController : ControllerBase
     {
         private readonly IDocumentStore _documentStore;
