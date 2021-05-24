@@ -15,6 +15,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
@@ -23,6 +24,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using NetTools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using NSwag;
@@ -54,10 +56,12 @@ namespace IdentityManager
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardLimit = 1;
-                Configuration["ProxyNodes"]?.Split(';').ToList().ForEach(t =>
+                options.ForwardedForHeaderName = Configuration["Proxy:HeaderName"];
+                options.ForwardedHeaders = ForwardedHeaders.All;
+                Configuration.GetSection("Proxy:Networks").Get<List<string>>().ForEach(ipNetwork =>
                 {
-                    if (!string.IsNullOrEmpty(t))
-                        options.KnownProxies.Add(IPAddress.Parse(t));
+                    if (IPAddressRange.TryParse(ipNetwork, out IPAddressRange range))
+                        options.KnownNetworks.Add(new IPNetwork(range.Begin, range.GetPrefixLength()));
                 });
             });
 

@@ -15,6 +15,8 @@ using System.Linq;
 using System.Net;
 using Autofac;
 using NSwag.AspNetCore;
+using Microsoft.AspNetCore.HttpOverrides;
+using NetTools;
 
 namespace Documentation
 {
@@ -33,10 +35,12 @@ namespace Documentation
             services.Configure<ForwardedHeadersOptions>(options =>
             {
                 options.ForwardLimit = 1;
-                Configuration["ProxyNodes"]?.Split(';').ToList().ForEach(t =>
+                options.ForwardedForHeaderName = Configuration["Proxy:HeaderName"];
+                options.ForwardedHeaders = ForwardedHeaders.All;
+                Configuration.GetSection("Proxy:Networks").Get<List<string>>().ForEach(ipNetwork =>
                 {
-                    if (!string.IsNullOrEmpty(t))
-                        options.KnownProxies.Add(IPAddress.Parse(t));
+                    if (IPAddressRange.TryParse(ipNetwork, out IPAddressRange range))
+                        options.KnownNetworks.Add(new IPNetwork(range.Begin, range.GetPrefixLength()));
                 });
             });
 
@@ -101,6 +105,8 @@ namespace Documentation
             {
                 app.UseDeveloperExceptionPage();
             }
+
+            app.UseForwardedHeaders();
 
             app.UseRouting();
 
