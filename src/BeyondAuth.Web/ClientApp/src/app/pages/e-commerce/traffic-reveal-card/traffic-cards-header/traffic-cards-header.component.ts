@@ -12,7 +12,7 @@ export class TrafficCardsHeaderComponent implements OnDestroy {
 
   @Output() periodChange = new EventEmitter<string>();
 
-  @Input() type = 'week';
+  @Input() type: string = 'week';
 
   types: string[] = ['week', 'month', 'year'];
   currentTheme: string;

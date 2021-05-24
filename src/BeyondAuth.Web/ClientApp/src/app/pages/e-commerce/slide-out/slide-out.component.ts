@@ -7,7 +7,7 @@ import { Component, Input } from '@angular/core';
 })
 export class SlideOutComponent {
 
-  @Input() showVisitorsStatistics = false;
+  @Input() showVisitorsStatistics: boolean = false;
 
   toggleStatistics() {
     this.showVisitorsStatistics = !this.showVisitorsStatistics;

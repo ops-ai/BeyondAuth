@@ -13,14 +13,13 @@
         "build": {
           "builder": "@angular-devkit/build-angular:browser",
           "options": {
-            "progress": false,
-            "rebaseRootRelativeCssUrls": true,
-            "extractCss": true,
+            "aot": true,
+            "preserveSymlinks": true,
             "outputPath": "dist",
             "index": "src/index.html",
             "main": "src/main.ts",
-            "polyfills": "src/polyfills.ts",
             "tsConfig": "src/tsconfig.app.json",
+            "polyfills": "src/polyfills.ts",
             "assets": [
               "src/assets",
               "src/favicon.ico",
@@ -54,25 +53,38 @@
               "node_modules/echarts/dist/echarts.min.js",
               "node_modules/echarts/dist/extension/bmap.min.js",
               "node_modules/chart.js/dist/Chart.min.js"
+            ],
+            "allowedCommonJsDependencies": [
+              "angular2-chartjs",
+              "echarts",
+              "lodash",
+              "zrender/lib/svg/svg",
+              "zrender/lib/vml/vml",
+              "style-loader!leaflet/dist/leaflet.css"
             ]
           },
           "configurations": {
             "production": {
-              "fileReplacements": [
+              "budgets": [
                 {
-                  "replace": "src/environments/environment.ts",
-                  "with": "src/environments/environment.prod.ts"
+                  "type": "anyComponentStyle",
+                  "maximumWarning": "6kb"
                 }
               ],
               "optimization": true,
               "outputHashing": "all",
               "sourceMap": false,
-              "extractCss": true,
               "namedChunks": false,
               "aot": true,
               "extractLicenses": true,
               "vendorChunk": false,
-              "buildOptimizer": true
+              "buildOptimizer": true,
+              "fileReplacements": [
+                {
+                  "replace": "src/environments/environment.ts",
+                  "with": "src/environments/environment.prod.ts"
+                }
+              ]
             }
           }
         },

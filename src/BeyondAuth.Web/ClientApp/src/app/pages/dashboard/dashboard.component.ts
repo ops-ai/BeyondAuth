@@ -1,4 +1,4 @@
-import {Component, OnDestroy, Inject } from '@angular/core';
+import {Component, OnDestroy, Inject} from '@angular/core';
 import { NbThemeService } from '@nebular/theme';
 import { takeWhile } from 'rxjs/operators' ;
 import { SolarData } from '../../@core/data/solar';

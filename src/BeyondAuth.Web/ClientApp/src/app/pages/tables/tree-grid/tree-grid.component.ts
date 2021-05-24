@@ -20,10 +20,6 @@ interface FSEntry {
   styleUrls: ['./tree-grid.component.scss'],
 })
 export class TreeGridComponent {
-
-  constructor(private dataSourceBuilder: NbTreeGridDataSourceBuilder<FSEntry>) {
-    this.dataSource = this.dataSourceBuilder.create(this.data);
-  }
   customColumn = 'name';
   defaultColumns = [ 'size', 'kind', 'items' ];
   allColumns = [ this.customColumn, ...this.defaultColumns ];
@@ -32,6 +28,22 @@ export class TreeGridComponent {
 
   sortColumn: string;
   sortDirection: NbSortDirection = NbSortDirection.NONE;
+
+  constructor(private dataSourceBuilder: NbTreeGridDataSourceBuilder<FSEntry>) {
+    this.dataSource = this.dataSourceBuilder.create(this.data);
+  }
+
+  updateSort(sortRequest: NbSortRequest): void {
+    this.sortColumn = sortRequest.column;
+    this.sortDirection = sortRequest.direction;
+  }
+
+  getSortDirection(column: string): NbSortDirection {
+    if (this.sortColumn === column) {
+      return this.sortDirection;
+    }
+    return NbSortDirection.NONE;
+  }
 
   private data: TreeNode<FSEntry>[] = [
     {
@@ -58,18 +70,6 @@ export class TreeGridComponent {
       ],
     },
   ];
-
-  updateSort(sortRequest: NbSortRequest): void {
-    this.sortColumn = sortRequest.column;
-    this.sortDirection = sortRequest.direction;
-  }
-
-  getSortDirection(column: string): NbSortDirection {
-    if (this.sortColumn === column) {
-      return this.sortDirection;
-    }
-    return NbSortDirection.NONE;
-  }
 
   getShowOn(index: number) {
     const minWithForMultipleColumns = 400;
