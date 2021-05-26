@@ -33,7 +33,12 @@ namespace Authentication.Controllers
         }
 
         [Authorize]
-        public IActionResult Index() => Redirect(_configuration["DashboardUrl"]);
+        public IActionResult Index()
+        {
+
+
+            return View();
+        }
 
         /// <summary>
         /// 404 Page not found
