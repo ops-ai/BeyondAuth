@@ -10,6 +10,7 @@ using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,11 +28,13 @@ namespace Authentication.Controllers
         private readonly IClientStore _clients;
         private readonly IResourceStore _resources;
         private readonly IEventService _events;
+        private readonly ILogger _logger;
 
         public GrantsController(IIdentityServerInteractionService interaction,
             IClientStore clients,
             IResourceStore resources,
-            IEventService events)
+            IEventService events,
+            ILogger<GrantsController> logger)
         {
             _interaction = interaction;
             _clients = clients;

@@ -33,6 +33,7 @@ namespace Authentication.Controllers
         private readonly ILogger<ExternalController> _logger;
         private readonly IEventService _events;
         private readonly IOptions<AccountOptions> _accountOptions;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
         public ExternalController(
             IIdentityServerInteractionService interaction,
@@ -40,7 +41,8 @@ namespace Authentication.Controllers
             IEventService events,
             ILogger<ExternalController> logger,
             IOptions<AccountOptions> accountOptions,
-            UserManager<ApplicationUser> userManager)
+            UserManager<ApplicationUser> userManager,
+            SignInManager<ApplicationUser> signInManager)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -51,6 +53,7 @@ namespace Authentication.Controllers
             _logger = logger;
             _events = events;
             _accountOptions = accountOptions;
+            _signInManager = signInManager;
         }
 
         /// <summary>
@@ -136,10 +139,10 @@ namespace Authentication.Controllers
                 AdditionalClaims = additionalLocalClaims
             };
 
-            await HttpContext.SignInAsync(isuser, localSignInProps);
+            await _signInManager.SignInAsync(user, localSignInProps, "external");
 
             // delete temporary cookie used during external authentication
-            await HttpContext.SignOutAsync(IdentityServer4.IdentityServerConstants.ExternalCookieAuthenticationScheme);
+            await HttpContext.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
 
             // retrieve return URL
             var returnUrl = result.Properties.Items["returnUrl"] ?? "~/";

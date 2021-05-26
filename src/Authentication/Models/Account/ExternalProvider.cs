@@ -8,5 +8,7 @@ namespace Authentication.Models.Account
     {
         public string DisplayName { get; set; }
         public string AuthenticationScheme { get; set; }
+
+        public string Icon { get; set; }
     }
 }

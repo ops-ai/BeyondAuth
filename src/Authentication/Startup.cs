@@ -461,7 +461,7 @@ namespace Authentication
                     builder.AddObjectSrc().None();
                     builder.AddFrameAncestors().None();
                     builder.AddFormAction().Self();
-                    builder.AddImgSrc().Self().From("opsai.blob.core.windows.net");
+                    builder.AddImgSrc().Self().Data().From("opsai.blob.core.windows.net");
                     builder.AddScriptSrc().Self().From("cdnjs.cloudflare.com").From("ajax.cloudflare.com").From("static.cloudflareinsights.com");
                     builder.AddStyleSrc().Self().UnsafeInline();
 
