@@ -2,6 +2,7 @@
 using IdentityManager.Extensions;
 using IdentityManager.Models;
 using IdentityServer4.Contrib.RavenDB.Options;
+using IdentityServer4.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.Mvc;
@@ -9,6 +10,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSwag.Annotations;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -126,6 +128,9 @@ namespace IdentityManager.Controllers
                 if (string.IsNullOrEmpty(client.ClientId))
                     throw new ArgumentException("clientId is required", nameof(client.ClientId));
 
+                if (!client.AllowedGrantTypes.All(t => t.In(new[] { GrantType.ClientCredentials, GrantType.Implicit, GrantType.Hybrid, GrantType.AuthorizationCode, GrantType.ResourceOwnerPassword, GrantType.DeviceFlow })))
+                    throw new ArgumentException("value in allowedGrantTypes is not supported", nameof(client.AllowedGrantTypes));
+
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     _logger.LogDebug($"Creating client {client.ClientId}");
@@ -172,6 +177,9 @@ namespace IdentityManager.Controllers
                     var client = await session.LoadAsync<ClientEntity>($"Clients/{model.ClientId}");
                     if (client == null)
                         throw new KeyNotFoundException($"Client {model.ClientId} was not found");
+
+                    if (!client.AllowedGrantTypes.All(t => t.In(new[] { GrantType.ClientCredentials, GrantType.Implicit, GrantType.Hybrid, GrantType.AuthorizationCode, GrantType.ResourceOwnerPassword, GrantType.DeviceFlow })))
+                        throw new ArgumentException("value in allowedGrantTypes is not supported", nameof(client.AllowedGrantTypes));
 
                     client.AbsoluteRefreshTokenLifetime = model.AbsoluteRefreshTokenLifetime;
                     client.AccessTokenLifetime = model.AccessTokenLifetime;

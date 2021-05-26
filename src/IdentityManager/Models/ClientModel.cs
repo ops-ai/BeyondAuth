@@ -1,5 +1,7 @@
 ﻿using IdentityServer4;
 using IdentityServer4.Models;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
 using System.Security.Claims;
 
@@ -105,7 +107,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// Allows settings claims for the client (will be included in the access token).
         /// </summary>
-        public ICollection<ClientClaim> Claims { get; set; }
+        public ICollection<ClientClaim> Claims { get; set; } = new List<ClientClaim>();
 
         /// <summary>
         /// Gets or sets a value indicating whether client claims should be always included
@@ -206,12 +208,12 @@ namespace IdentityManager.Models
         /// Hybrid, ResourceOwner, ClientCredentials).
         /// </summary>
         public ICollection<string> AllowedGrantTypes { get; set; }
-
+        
         /// <summary>
         /// Specifies whether a proof key is required for authorization code based token
         /// requests (defaults to false).
         /// </summary>
-        public bool RequirePkce { get; set; }
+        public bool RequirePkce { get; set; } = true;
 
         /// <summary>
         /// Specifies whether a proof key can be sent using plain method (not recommended
