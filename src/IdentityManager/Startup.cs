@@ -41,6 +41,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.Json.Serialization;
 
 namespace IdentityManager
 {
@@ -207,6 +208,9 @@ namespace IdentityManager
                 };
                 config.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
             });
+
+            services.AddMvc()
+            .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
             services.AddControllers();
             services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
