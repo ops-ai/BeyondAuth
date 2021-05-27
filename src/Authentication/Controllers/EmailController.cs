@@ -48,7 +48,7 @@ namespace Authentication.Controllers
         {
             var actionContext = GetActionContext();
 
-            var viewEngineResult = _viewEngine.FindView(actionContext, $"EmailTemplate/{viewName}", false);
+            var viewEngineResult = _viewEngine.FindView(actionContext, $"EmailTemplates/{viewName}", false);
 
             if (!viewEngineResult.Success)
                 throw new InvalidOperationException($"Couldn't find view '{viewName}");

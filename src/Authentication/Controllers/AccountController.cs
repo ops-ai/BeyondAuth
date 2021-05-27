@@ -4,7 +4,9 @@
 
 using Authentication.Extensions;
 using Authentication.Filters;
+using Authentication.Infrastructure;
 using Authentication.Models.Account;
+using Authentication.Models.Messages;
 using Finbuckle.MultiTenant;
 using Identity.Core;
 using IdentityModel;
@@ -45,6 +47,8 @@ namespace Authentication.Controllers
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger _logger;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IEmailService _emailService;
+        private readonly IEmailSender _emailSender;
 
         public AccountController(
             IAsyncDocumentSession dbSession, 
@@ -56,7 +60,9 @@ namespace Authentication.Controllers
             IOptions<AccountOptions> accountOptions,
             IHttpContextAccessor httpContextAccessor,
             ILogger<AccountController> logger,
-            SignInManager<ApplicationUser> signInManager) : base(dbSession)
+            SignInManager<ApplicationUser> signInManager,
+            IEmailService emailService,
+            IEmailSender emailSender) : base(dbSession)
         {
             _userManager = userManager;
             
@@ -68,12 +74,14 @@ namespace Authentication.Controllers
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _signInManager = signInManager;
+            _emailService = emailService;
+            _emailSender = emailSender;
         }
 
         /// <summary>
         /// Entry point into the login workflow
         /// </summary>
-        [HttpGet]
+        [HttpGet("login")]
         public async Task<IActionResult> Login(string returnUrl)
         {
             // build a model so we know what to show on the login page
@@ -89,7 +97,7 @@ namespace Authentication.Controllers
         /// <summary>
         /// Handle postback from username/password login
         /// </summary>
-        [HttpPost]
+        [HttpPost("login")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginInputModel model, string button)
         {
@@ -159,6 +167,7 @@ namespace Authentication.Controllers
                     //TODO: Handle locked out message propagation if allowed by tenant settings
                     //TODO: Handle local login not allowed for user signinResult.IsNotAllowed
                     //TODO: Handle signinResult.RequiresTwoFactor
+                    //TODO: Handle change password on next login
                 }
 
                 await _events.RaiseAsync(new UserLoginFailureEvent(model.Email, "invalid credentials", clientId: context?.Client.ClientId));
@@ -174,7 +183,7 @@ namespace Authentication.Controllers
         /// <summary>
         /// Show logout page
         /// </summary>
-        [HttpGet]
+        [HttpGet("logout")]
         public async Task<IActionResult> Logout(string logoutId)
         {
             // build a model so the logout page knows what to display
@@ -191,7 +200,7 @@ namespace Authentication.Controllers
         /// <summary>
         /// Handle logout page postback
         /// </summary>
-        [HttpPost]
+        [HttpPost("logout")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout(LogoutInputModel model)
         {
@@ -350,6 +359,88 @@ namespace Authentication.Controllers
             }
 
             return vm;
+        }
+
+        /// <summary>
+        /// Change password
+        /// </summary>
+        /// <param name="email"></param>
+        /// <param name="returnUrl"></param>
+        /// <returns></returns>
+        [HttpGet("change-password")]
+        public async Task<IActionResult> ChangePassword(string email, string returnUrl)
+        {
+            try
+            {
+                await Task.FromResult(0);
+                return View(new ChangePasswordViewModel { Email = email, ReturnUrl = returnUrl });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(500, ex, "Error displaying change password page");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Change password
+        /// </summary>
+        /// <param name="model"></param>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpPost("change-password")]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return View(model);
+
+                var user = await _userManager.FindByEmailAsync(model.Email);
+                if (user != null && user.ChangePasswordAllowed)
+                {
+                    var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+                    if (result.Succeeded)
+                    {
+                        await _signInManager.SignOutAsync();
+
+                        _logger.LogInformation(6, "User changed their password successfully.");
+
+                        var emailMessage = new ChangePasswordConfirmationEmailMessage
+                        {
+                            To = user.Email,
+                            FirstName = user.FirstName
+                        };
+
+                        var bodyHtml = await _emailService.RenderPartialViewToString("ChangePasswordConfirmation.html", emailMessage, null);
+                        var bodyTxt = await _emailService.RenderPartialViewToString("ChangePasswordConfirmation.txt", emailMessage, null);
+
+                        await _emailSender.SendEmailAsync(user.Email, "Password Changed Confirmation", bodyHtml, bodyTxt);
+
+                        return RedirectToAction(nameof(Login), "Account", new { passwordChanged = true, returnUrl = model.ReturnUrl });
+                    }
+
+                    AddErrors(result);
+                }
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(500, ex, "Error changing password");
+                throw;
+            }
+        }
+
+        private void AddErrors(IdentityResult result)
+        {
+            var rgx = new Regex("\\(Exception from HRESULT: 0x\\d+\\)");
+
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, rgx.Replace(error.Description, "").TrimEnd());
+            }
         }
     }
 }

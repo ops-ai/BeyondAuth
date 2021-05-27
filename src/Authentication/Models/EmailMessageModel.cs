@@ -1,13 +1,4 @@
-﻿using Identity.Core;
-using Identity.Core.Extensions;
-using IdentityModel;
-using IdentityServer.LdapExtension.UserModel;
-using Novell.Directory.Ldap;
-using System;
-using System.Collections.Generic;
-using System.Security.Claims;
-
-namespace Authentication.Models
+﻿namespace Authentication.Models
 {
     /// <summary>
     /// Base model for email message models

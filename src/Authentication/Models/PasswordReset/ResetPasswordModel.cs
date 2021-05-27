@@ -2,7 +2,7 @@
 
 namespace Authentication.Models.PasswordReset
 {
-    public class ResetPasswordViewModel
+    public class ResetPasswordModel
     {
         [Required]
         [EmailAddress]
