@@ -178,6 +178,7 @@ namespace Authentication
                 })
                 .WithPerTenantOptions<CookieAuthenticationOptions>((o, tenantInfo) =>
                 {
+                    o.LoginPath = "/login";
                     o.Cookie.Name += tenantInfo.Id;
                 })
                 .WithPerTenantOptions<GoogleOptions>((o, tenantInfo) =>

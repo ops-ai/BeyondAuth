@@ -38,5 +38,15 @@ namespace IdentityManager.Domain
         /// List of ACEs storing permissions for the secured entity
         /// </summary>
         public List<AceEntry> AceEntries { get; set; }
+
+        /// <summary>
+        /// Customer support email that should be displayed
+        /// </summary>
+        public string SupportEmail { get; set; }
+
+        /// <summary>
+        /// Customer support link that should be displayed
+        /// </summary>
+        public string SupportLink { get; set; }
     }
 }

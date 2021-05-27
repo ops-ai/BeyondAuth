@@ -89,9 +89,4 @@
     <ProjectReference Include="..\Identity.Core\Identity.Core.csproj" />
   </ItemGroup>
 
-
-  <ItemGroup>
-    <Folder Include="Views\ResetPassword\" />
-  </ItemGroup>
-
 </Project>

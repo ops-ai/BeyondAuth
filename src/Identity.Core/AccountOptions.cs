@@ -53,5 +53,15 @@ namespace Identity.Core
         /// Invalid credentials error message
         /// </summary>
         public string InvalidCredentialsErrorMessage { get; set; }
+
+        /// <summary>
+        /// Customer support email that should be displayed
+        /// </summary>
+        public string SupportEmail { get; set; }
+
+        /// <summary>
+        /// Customer support link that should be displayed
+        /// </summary>
+        public string SupportLink { get; set; }
     }
 }
