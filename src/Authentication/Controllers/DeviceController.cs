@@ -17,6 +17,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Raven.Client.Documents.Session;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -26,28 +27,23 @@ namespace Authentication.Controllers
 {
     [Authorize]
     [SecurityHeaders]
-    public class DeviceController : Controller
+    public class DeviceController : BaseController
     {
         private readonly IDeviceFlowInteractionService _interaction;
-        private readonly IClientStore _clientStore;
-        private readonly IResourceStore _resourceStore;
         private readonly IEventService _events;
         private readonly ILogger<DeviceController> _logger;
         private readonly IOptions<ConsentOptions> _consentOptions;
         private readonly IOptions<IdentityServerOptions> _options;
 
         public DeviceController(
+            IAsyncDocumentSession dbSession, 
             IDeviceFlowInteractionService interaction,
-            IClientStore clientStore,
-            IResourceStore resourceStore,
             IEventService eventService,
             ILogger<DeviceController> logger,
             IOptions<ConsentOptions> consentOptions,
-            IOptions<IdentityServerOptions> options)
+            IOptions<IdentityServerOptions> options) : base(dbSession)
         {
             _interaction = interaction;
-            _clientStore = clientStore;
-            _resourceStore = resourceStore;
             _events = eventService;
             _logger = logger;
             _consentOptions = consentOptions;

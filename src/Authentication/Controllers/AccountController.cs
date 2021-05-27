@@ -19,18 +19,22 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Session;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Authentication.Controllers
 {
     [SecurityHeaders]
     [AllowAnonymous]
-    public class AccountController : Controller
+    public class AccountController : BaseController
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IIdentityServerInteractionService _interaction;
@@ -39,15 +43,20 @@ namespace Authentication.Controllers
         private readonly IEventService _events;
         private readonly IOptions<AccountOptions> _accountOptions;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly ILogger _logger;
+        private readonly SignInManager<ApplicationUser> _signInManager;
 
         public AccountController(
+            IAsyncDocumentSession dbSession, 
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IAuthenticationSchemeProvider schemeProvider,
             IEventService events,
             UserManager<ApplicationUser> userManager,
             IOptions<AccountOptions> accountOptions,
-            IHttpContextAccessor httpContextAccessor)
+            IHttpContextAccessor httpContextAccessor,
+            ILogger<AccountController> logger,
+            SignInManager<ApplicationUser> signInManager) : base(dbSession)
         {
             _userManager = userManager;
             
@@ -57,6 +66,8 @@ namespace Authentication.Controllers
             _events = events;
             _accountOptions = accountOptions;
             _httpContextAccessor = httpContextAccessor;
+            _logger = logger;
+            _signInManager = signInManager;
         }
 
         /// <summary>
@@ -112,49 +123,46 @@ namespace Authentication.Controllers
             {
                 // validate username/password against in-memory store
                 var user = await _userManager.FindByNameAsync(model.Email);
-                
-                if (user != null && await _userManager.CheckPasswordAsync(user, model.Password) && !user.Disabled)
+                if (user != null && !user.Disabled)
                 {
-                    await _events.RaiseAsync(new UserLoginSuccessEvent(user.Email, user.Email, user.DisplayName, clientId: context?.Client.ClientId));
-
-                    // only set explicit expiration here if user chooses "remember me". 
-                    // otherwise we rely upon expiration configured in cookie middleware.
-                    var props = new AuthenticationProperties
+                    var signinResult = await _signInManager.CheckPasswordSignInAsync(user, model.Password, true);
+                    if (signinResult.Succeeded)
                     {
-                        IsPersistent = _accountOptions.Value.AllowRememberLogin && model.RememberLogin,
-                        ExpiresUtc = _accountOptions.Value.AllowRememberLogin && model.RememberLogin ? DateTimeOffset.UtcNow.Add(_accountOptions.Value.RememberMeLoginDuration) : null,
-                        RedirectUri = !string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl) ? model.ReturnUrl : "~/"
-                    };
-                    
-                    // issue authentication cookie with subject ID and username
-                    var isuser = new IdentityServerUser(user.Id)
-                    {
-                        DisplayName = user.DisplayName,
-                        IdentityProvider = null,
-                        AuthenticationMethods = new List<string> { "pwd" },
-                        AuthenticationTime = DateTime.UtcNow
-                    };
+                        await _events.RaiseAsync(new UserLoginSuccessEvent(user.Email, user.Email, user.DisplayName, clientId: context?.Client.ClientId));
 
-                    await HttpContext.SignInAsync(isuser, props);
-
-                    if (context != null)
-                    {
-                        if (context.IsNativeClient())
+                        // only set explicit expiration here if user chooses "remember me". 
+                        // otherwise we rely upon expiration configured in cookie middleware.
+                        var props = new AuthenticationProperties
                         {
-                            // The client is native, so this change in how to
-                            // return the response is for better UX for the end user.
-                            return this.LoadingPage("Redirect", model.ReturnUrl);
+                            IsPersistent = _accountOptions.Value.AllowRememberLogin && model.RememberLogin,
+                            ExpiresUtc = _accountOptions.Value.AllowRememberLogin && model.RememberLogin ? DateTimeOffset.UtcNow.Add(_accountOptions.Value.RememberMeLoginDuration) : null,
+                            RedirectUri = !string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl) ? model.ReturnUrl : "~/"
+                        };
+
+                        await _signInManager.SignInAsync(user, props, "pwd");
+
+                        if (context != null)
+                        {
+                            if (context.IsNativeClient())
+                            {
+                                // The client is native, so this change in how to
+                                // return the response is for better UX for the end user.
+                                return this.LoadingPage("Redirect", model.ReturnUrl);
+                            }
+
+                            // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
+                            return Redirect(model.ReturnUrl);
                         }
 
-                        // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
-                        return Redirect(model.ReturnUrl);
+                        return Redirect(props.RedirectUri);
                     }
-
-                    return Redirect(props.RedirectUri);
+                    //TODO: Handle locked out message propagation if allowed by tenant settings
+                    //TODO: Handle local login not allowed for user signinResult.IsNotAllowed
+                    //TODO: Handle signinResult.RequiresTwoFactor
                 }
 
                 await _events.RaiseAsync(new UserLoginFailureEvent(model.Email, "invalid credentials", clientId: context?.Client.ClientId));
-                ModelState.AddModelError(string.Empty, _accountOptions.Value.InvalidCredentialsErrorMessage);
+                ModelState.AddModelError(nameof(model.Password), _accountOptions.Value.InvalidCredentialsErrorMessage);
             }
 
             // something went wrong, show form with error
@@ -189,11 +197,11 @@ namespace Authentication.Controllers
         {
             // build a model so the logged out page knows what to display
             var vm = await BuildLoggedOutViewModelAsync(model.LogoutId);
-
-            if (User?.Identity.IsAuthenticated == true)
+            
+            if (_signInManager.IsSignedIn(User))
             {
                 // delete local authentication cookie
-                await HttpContext.SignOutAsync();
+                await _signInManager.SignOutAsync();
 
                 // raise the logout event
                 await _events.RaiseAsync(new UserLogoutSuccessEvent(User.GetSubjectId(), User.GetDisplayName()));

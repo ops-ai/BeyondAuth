@@ -16,6 +16,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Raven.Client.Documents.Session;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -27,7 +28,7 @@ namespace Authentication.Controllers
     /// </summary>
     [SecurityHeaders]
     [Authorize]
-    public class ConsentController : Controller
+    public class ConsentController : BaseController
     {
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clientStore;
@@ -37,12 +38,13 @@ namespace Authentication.Controllers
         private readonly IOptions<ConsentOptions> _consentOptions;
 
         public ConsentController(
+            IAsyncDocumentSession dbSession, 
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IResourceStore resourceStore,
             IEventService events,
             ILogger<ConsentController> logger,
-            IOptions<ConsentOptions> consentOptions)
+            IOptions<ConsentOptions> consentOptions) : base(dbSession)
         {
             _interaction = interaction;
             _clientStore = clientStore;

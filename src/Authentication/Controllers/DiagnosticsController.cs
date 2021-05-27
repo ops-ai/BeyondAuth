@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Raven.Client.Documents.Session;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
@@ -16,11 +17,11 @@ namespace Authentication.Controllers
 {
     [SecurityHeaders]
     [Authorize]
-    public class DiagnosticsController : Controller
+    public class DiagnosticsController : BaseController
     {
         private readonly ILogger _logger;
 
-        public DiagnosticsController(ILogger<DiagnosticsController> logger)
+        public DiagnosticsController(IAsyncDocumentSession dbSession, ILogger<DiagnosticsController> logger) : base(dbSession)
         {
             _logger = logger;
         }
