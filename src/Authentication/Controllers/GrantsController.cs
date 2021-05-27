@@ -11,6 +11,7 @@ using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Raven.Client.Documents.Session;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
@@ -22,7 +23,7 @@ namespace Authentication.Controllers
     /// </summary>
     [SecurityHeaders]
     [Authorize]
-    public class GrantsController : Controller
+    public class GrantsController : BaseController
     {
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IClientStore _clients;
@@ -30,11 +31,13 @@ namespace Authentication.Controllers
         private readonly IEventService _events;
         private readonly ILogger _logger;
 
-        public GrantsController(IIdentityServerInteractionService interaction,
+        public GrantsController(
+            IAsyncDocumentSession dbSession, 
+            IIdentityServerInteractionService interaction,
             IClientStore clients,
             IResourceStore resources,
             IEventService events,
-            ILogger<GrantsController> logger)
+            ILogger<GrantsController> logger) : base(dbSession)
         {
             _interaction = interaction;
             _clients = clients;

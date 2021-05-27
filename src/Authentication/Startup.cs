@@ -294,7 +294,7 @@ namespace Authentication
                 var ravenDbCertificateClient = certificateClient.GetCertificate("RavenDB");
                 var ravenDbCertificateSegments = ravenDbCertificateClient.Value.SecretId.Segments;
                 var ravenDbCertificateBytes = Convert.FromBase64String(secretClient.GetSecret(ravenDbCertificateSegments[2].Trim('/'), ravenDbCertificateSegments[3].TrimEnd('/')).Value.Value);
-                
+
                 IDocumentStore store = new DocumentStore
                 {
                     Urls = Configuration.GetSection("Raven:Urls").GetChildren().Select(t => t.Value).ToArray(),
@@ -332,7 +332,13 @@ namespace Authentication
             services.ConfigureOptions<RavenOptionsSetup>();
             services.AddScoped(sp => sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<RavenSettings>>()?.Value?.DatabaseName));
 
-            var identityBuilder = services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => options.SignIn.RequireConfirmedAccount = false)
+            var identityBuilder = services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options =>
+            {
+                options.SignIn.RequireConfirmedAccount = false;
+                options.Lockout.DefaultLockoutTimeSpan = new TimeSpan(0, 30, 0);
+                options.Lockout.MaxFailedAccessAttempts = 5;
+                options.User.RequireUniqueEmail = true;
+            })
                 .AddDefaultTokenProviders();
 
             identityBuilder.Services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
@@ -345,7 +351,7 @@ namespace Authentication
             if (Environment.GetEnvironmentVariable("VaultUri") != null)
                 healthChecks.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential(), options =>
                 {
-                    
+
                 });
 
             services.AddHttpClient("mailgun", config =>
@@ -447,7 +453,7 @@ namespace Authentication
             app.UseForwardedHeaders();
 
             //app.UseCors(x => x.AllowAnyOrigin().WithHeaders("accept", "authorization", "content-type", "origin").AllowAnyMethod());
-            
+
             var policyCollection = new HeaderPolicyCollection()
                 .AddFrameOptionsSameOrigin()
                 .AddXssProtectionBlock()

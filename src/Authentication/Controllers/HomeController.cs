@@ -11,20 +11,26 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Raven.Client.Documents.Session;
 using System.Reflection;
 using System.Threading.Tasks;
 
 namespace Authentication.Controllers
 {
     [SecurityHeaders]
-    public class HomeController : Controller
+    public class HomeController : BaseController
     {
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IWebHostEnvironment _environment;
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
 
-        public HomeController(IIdentityServerInteractionService interaction, IWebHostEnvironment environment, ILogger<HomeController> logger, IConfiguration configuration)
+        public HomeController(
+            IAsyncDocumentSession dbSession, 
+            IIdentityServerInteractionService interaction, 
+            IWebHostEnvironment environment, 
+            ILogger<HomeController> logger, 
+            IConfiguration configuration) : base(dbSession)
         {
             _interaction = interaction;
             _environment = environment;
