@@ -4,10 +4,6 @@ namespace Authentication.Models.Account
 {
     public class ChangePasswordViewModel
     {
-        [Display(Name = "Email")]
-        [EmailAddress]
-        public string Email { get; set; }
-
         [Required]
         [DataType(DataType.Password)]
         [Display(Name = "Current password")]

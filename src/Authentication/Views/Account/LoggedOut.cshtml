@@ -19,6 +19,14 @@
                     <span>@Model.ClientName</span> application.
                 </div>
             }
+            else
+            {
+                <fieldset>
+                    <div class="gap-2 row mt-5">
+                        <a asp-action="Login" asp-controller="Account" class="btn btn-primary btn-lg col">Login</a>
+                    </div>
+                </fieldset>
+            }
 
             @if (Model.SignOutIframeUrl != null)
             {

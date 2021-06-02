@@ -13,6 +13,8 @@ namespace Authentication.Models.Account
 
         public bool EnableLocalLogin { get; set; } = true;
 
+        public bool AllowPasswordReset { get; set; } = true;
+
         public IEnumerable<ExternalProvider> ExternalProviders { get; set; } = Enumerable.Empty<ExternalProvider>();
 
         public IEnumerable<ExternalProvider> VisibleExternalProviders => ExternalProviders.Where(x => !string.IsNullOrWhiteSpace(x.DisplayName));

@@ -63,5 +63,10 @@ namespace Identity.Core
         /// Customer support link that should be displayed
         /// </summary>
         public string SupportLink { get; set; }
+
+        /// <summary>
+        /// Default domain to be appended if only username is entered
+        /// </summary>
+        public string DefaultDomain { get; set; }
     }
 }

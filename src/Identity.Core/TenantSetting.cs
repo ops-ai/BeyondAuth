@@ -1,4 +1,5 @@
 ﻿using Finbuckle.MultiTenant;
+using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 
 namespace Identity.Core
@@ -20,6 +21,11 @@ namespace Identity.Core
         /// Consent behavior
         /// </summary>
         public ConsentOptions ConsentOptions { get; set; }
+
+        /// <summary>
+        /// Identity requirements
+        /// </summary>
+        public IdentityOptions IdentityOptions { get; set; }
 
         /// <summary>
         /// The value used to actually resolve a tenant and should have a syntax compatible for the app (i.e. no crazy symbols in a web app where the identifier will be part of the URL). 
