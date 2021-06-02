@@ -1,4 +1,5 @@
 ﻿using IdentityModel;
+using Newtonsoft.Json;
 using Raven.Identity;
 using System;
 using System.Collections.Generic;
@@ -76,16 +77,43 @@ namespace Identity.Core
         public bool Disabled { get; set; } = false;
 
         /// <summary>
+        /// Date the user was last updated
+        /// </summary>
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
         /// TimeZone info for current user in IANA format. (e.g. America/Los_Angeles)
         /// </summary>
         public string ZoneInfo { get; set; }
 
-        [Newtonsoft.Json.JsonIgnore]
-        public override List<IdentityUserClaim> Claims => new List<IdentityUserClaim>()
-        {
-            new IdentityUserClaim { ClaimType = JwtClaimTypes.Subject, ClaimValue = Email },
-            new IdentityUserClaim { ClaimType = JwtClaimTypes.Name, ClaimValue = DisplayName }
-        };
+        /// <summary>
+        /// User's locale
+        /// </summary>
+        public string Locale { get; set; }
 
+        [Newtonsoft.Json.JsonIgnore]
+        public override List<IdentityUserClaim> Claims
+        {
+            get
+            {
+                var claims = new List<IdentityUserClaim>()
+                {
+                    new IdentityUserClaim { ClaimType = JwtClaimTypes.Subject, ClaimValue = Email },
+                    new IdentityUserClaim { ClaimType = JwtClaimTypes.FamilyName, ClaimValue = LastName ?? "" },
+                    new IdentityUserClaim { ClaimType = JwtClaimTypes.GivenName, ClaimValue = FirstName ?? "" },
+                    new IdentityUserClaim { ClaimType = JwtClaimTypes.Name, ClaimValue = DisplayName ?? "" },
+                    new IdentityUserClaim { ClaimType = JwtClaimTypes.Email, ClaimValue = Email },
+                    new IdentityUserClaim { ClaimType = JwtClaimTypes.PhoneNumber, ClaimValue = PhoneNumber ?? "" },
+                    new IdentityUserClaim { ClaimType = JwtClaimTypes.Locale, ClaimValue = Locale ?? "" },
+                    new IdentityUserClaim { ClaimType = JwtClaimTypes.UpdatedAt, ClaimValue = JsonConvert.SerializeObject(UpdatedAt, new JsonSerializerSettings { DateFormatString = "yyyy-MM-ddTHH:mm:ss.fffZ" }) },
+                    new IdentityUserClaim { ClaimType = JwtClaimTypes.ZoneInfo, ClaimValue = ZoneInfo ?? "" }
+                };
+
+                foreach (var role in Roles)
+                    claims.Add(new IdentityUserClaim { ClaimType = JwtClaimTypes.Role, ClaimValue = role });
+
+                return claims;
+            }
+        }
     }
 }
