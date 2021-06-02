@@ -74,7 +74,7 @@ namespace Identity.Core
                     cachedTenant.Id = cachedTenant.Id.Split('/').Last();
                 }
 
-                _cache.Set($"TenantSettingId-{id}", cachedTenant, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(30)));
+                _cache.Set($"TenantSettingId-{id}", cachedTenant, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(1)));
             }
             return cachedTenant;
         }
@@ -94,7 +94,7 @@ namespace Identity.Core
                     cachedTenant.Id = cachedTenant.Id.Split('/').Last();
                 }
 
-                _cache.Set($"TenantSettingId-{identifier}", cachedTenant, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(30)));
+                _cache.Set($"TenantSettingId-{identifier}", cachedTenant, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(1)));
             }
             return cachedTenant;
         }
