@@ -149,11 +149,16 @@ namespace Authentication
                 {
                     options.AllowLocalLogin = tenantInfo.AccountOptions.AllowLocalLogin;
                     options.AllowRememberLogin = tenantInfo.AccountOptions.AllowRememberLogin;
+                    options.AllowPasswordReset = tenantInfo.AccountOptions.AllowPasswordReset;
                     options.AutomaticRedirectAfterSignOut = tenantInfo.AccountOptions.AutomaticRedirectAfterSignOut;
+                    options.DashboardUrl = tenantInfo.AccountOptions.DashboardUrl;
+                    options.DefaultDomain = tenantInfo.AccountOptions.DefaultDomain;
                     options.IncludeWindowsGroups = tenantInfo.AccountOptions.IncludeWindowsGroups;
                     options.InvalidCredentialsErrorMessage = tenantInfo.AccountOptions.InvalidCredentialsErrorMessage;
                     options.RememberMeLoginDuration = tenantInfo.AccountOptions.RememberMeLoginDuration;
                     options.ShowLogoutPrompt = tenantInfo.AccountOptions.ShowLogoutPrompt;
+                    options.SupportEmail = tenantInfo.AccountOptions.SupportEmail;
+                    options.SupportLink = tenantInfo.AccountOptions.SupportLink;
                     options.WindowsAuthenticationSchemeName = tenantInfo.AccountOptions.WindowsAuthenticationSchemeName;
                 })
                 .WithPerTenantOptions<ConsentOptions>((options, tenantInfo) =>
@@ -176,9 +181,17 @@ namespace Authentication
                 {
                     options.DatabaseName = $"TenantIdentity-{tenantInfo.Identifier}";
                 })
+                .WithPerTenantOptions<IdentityOptions>((options, tenantInfo) =>
+                {
+                    options.Password = tenantInfo.IdentityOptions.Password;
+                    options.Lockout = tenantInfo.IdentityOptions.Lockout;
+                    options.User = tenantInfo.IdentityOptions.User;
+                    options.SignIn = tenantInfo.IdentityOptions.SignIn;
+                })
                 .WithPerTenantOptions<CookieAuthenticationOptions>((o, tenantInfo) =>
                 {
                     o.LoginPath = "/login";
+                    o.LogoutPath = "/logout";
                     o.Cookie.Name += tenantInfo.Id;
                 })
                 .WithPerTenantOptions<GoogleOptions>((o, tenantInfo) =>
@@ -333,13 +346,7 @@ namespace Authentication
             services.ConfigureOptions<RavenOptionsSetup>();
             services.AddScoped(sp => sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<RavenSettings>>()?.Value?.DatabaseName));
 
-            var identityBuilder = services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options =>
-            {
-                options.SignIn.RequireConfirmedAccount = false;
-                options.Lockout.DefaultLockoutTimeSpan = new TimeSpan(0, 30, 0);
-                options.Lockout.MaxFailedAccessAttempts = 5;
-                options.User.RequireUniqueEmail = true;
-            })
+            var identityBuilder = services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => { })
                 .AddDefaultTokenProviders();
 
             identityBuilder.Services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
@@ -496,7 +503,6 @@ namespace Authentication
                     options.AddSpeaker().Self();
                     options.AddSyncXHR().Self();
                 });
-            app.UseSecurityHeaders(policyCollection);
 
             app.UseRouting();
             app.UseMultiTenant();
@@ -504,6 +510,7 @@ namespace Authentication
             app.UseAuthorization();
             app.UseIdentityServer();
 
+            app.UseSecurityHeaders(policyCollection);
             app.UseHealthChecks(Configuration["HealthChecks:FullEndpoint"], new HealthCheckOptions()
             {
                 Predicate = _ => true,

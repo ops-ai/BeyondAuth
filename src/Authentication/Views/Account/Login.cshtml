@@ -7,72 +7,74 @@
 
         @if (Model.EnableLocalLogin)
         {
-        <form asp-route="Login" class="col-lg-6 needs-validation" novalidate>
-            <input type="hidden" asp-for="ReturnUrl" />
-            <div class="form-floating mb-3 has-validation">
-                <input type="text" class="form-control form-control-lg" placeholder="" asp-for="Email" autofocus pattern=".+@@.+\..+" fieldsize="large" required />
-                <label asp-for="Email" class="">Email address</label>
-            </div>
-            <div class="form-floating">
-                <input type="password" class="form-control form-control-lg" placeholder="Your Password *" asp-for="Password" autocomplete="off" required />
-                <label asp-for="Password" class="form-label">Password</label>
-            </div>
-            @Html.ValidationMessageFor(m => m.Password)
-            <div class="position-relative mb-3 mt-3">
-
-
-                <a asp-action="ForgotPassword" asp-controller="PasswordReset" class="position-absolute top-0 end-0 link-dark text-decoration-none">Forget Password?</a>
-
-                @if (Model.AllowRememberLogin)
-                    {
-                <div class="form-check">
-                    <input class="form-check-input" type="checkbox" asp-for="RememberLogin">
-                    <label class="form-check-label" asp-for="RememberLogin">
-                        Remember Me
-                    </label>
+            <form asp-route="Login" class="col-lg-6 needs-validation" novalidate>
+                <input type="hidden" asp-for="ReturnUrl" />
+                <div class="form-floating mb-3 has-validation">
+                    <input type="text" class="form-control form-control-lg" placeholder="" asp-for="Email" autofocus fieldsize="large" required />@*pattern=".+@@.+\..+"*@
+                    <label asp-for="Email" class="">Username or Email address</label>
                 </div>
+                <div class="form-floating">
+                    <input type="password" class="form-control form-control-lg" placeholder="Your Password *" asp-for="Password" autocomplete="off" required />
+                    <label asp-for="Password" class="form-label">Password</label>
+                </div>
+                @Html.ValidationMessageFor(m => m.Password)
+                <div class="position-relative mb-3 mt-3">
+
+                    @if (Model.AllowPasswordReset)
+                    {
+                        <a asp-action="ForgotPassword" asp-controller="PasswordReset" class="position-absolute top-0 end-0 link-dark text-decoration-none">Forgot Password?</a>
                     }
-            </div>
-            <div class="d-grid gap-2">
-                <button class="btn btn-primary btn-lg" name="button" type="submit" value="login">Login</button>
-            </div>
-        </form>
+
+                    @if (Model.AllowRememberLogin)
+                    {
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" asp-for="RememberLogin">
+                            <label class="form-check-label" asp-for="RememberLogin">
+                                Remember Me
+                            </label>
+                        </div>
+                    }
+                </div>
+                <div class="d-grid gap-2">
+                    <button class="btn btn-primary btn-lg" name="button" type="submit" value="login">Login</button>
+                </div>
+            </form>
         }
         <div></div>
 
         @if (Model.VisibleExternalProviders.Any())
         {
-        <div class="col-lg-6 mt-3">
+            <div class="col-lg-6 mt-3">
 
-            <p class="sub-title text-center">or login using</p>
+                <p class="sub-title text-center">or login using</p>
 
-            <div class="panel-body">
-                <div class="text-center">
-                    @foreach (var provider in Model.VisibleExternalProviders)
+                <div class="panel-body">
+                    <div class="text-center">
+                        @foreach (var provider in Model.VisibleExternalProviders)
                         {
-                    <a class="btn btn-primary"
-                       asp-controller="External"
-                       asp-action="Challenge"
-                       asp-route-provider="@provider.AuthenticationScheme"
-                       asp-route-returnUrl="@Model.ReturnUrl">
-                        @provider.DisplayName
-                        @if (!string.IsNullOrEmpty(provider.Icon))
+                            <a class="btn btn-primary"
+                               asp-controller="External"
+                               asp-action="Challenge"
+                               asp-route-provider="@provider.AuthenticationScheme"
+                               asp-route-returnUrl="@Model.ReturnUrl">
+                                @provider.DisplayName
+                                @if (!string.IsNullOrEmpty(provider.Icon))
                                 {
-                        <img src="@provider.Icon" />
+                                    <img src="@provider.Icon" />
                                 }
-                    </a>
+                            </a>
                         }
+                    </div>
                 </div>
-            </div>
 
-        </div>
+            </div>
         }
         @if (!Model.EnableLocalLogin && !Model.VisibleExternalProviders.Any())
         {
-        <div class="alert alert-warning">
-            <strong>Invalid login request</strong>
-            There are no login schemes configured for this client.
-        </div>
+            <div class="alert alert-warning">
+                <strong>Invalid login request</strong>
+                There are no login schemes configured for this client.
+            </div>
         }
     </div>
 </div>

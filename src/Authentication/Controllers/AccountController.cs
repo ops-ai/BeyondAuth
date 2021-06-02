@@ -129,6 +129,9 @@ namespace Authentication.Controllers
 
             if (ModelState.IsValid)
             {
+                if (!model.Email.Contains("@") && !string.IsNullOrEmpty(_accountOptions.Value.DefaultDomain))
+                    model.Email += $"@{_accountOptions.Value.DefaultDomain}";
+
                 // validate username/password against in-memory store
                 var user = await _userManager.FindByNameAsync(model.Email);
                 if (user != null && !user.Disabled)
@@ -286,6 +289,7 @@ namespace Authentication.Controllers
             return new LoginViewModel
             {
                 AllowRememberLogin = _accountOptions.Value.AllowRememberLogin,
+                AllowPasswordReset = _accountOptions.Value.AllowPasswordReset,
                 EnableLocalLogin = allowLocal && _accountOptions.Value.AllowLocalLogin,
                 ReturnUrl = returnUrl,
                 Email = context?.LoginHint,
@@ -364,16 +368,16 @@ namespace Authentication.Controllers
         /// <summary>
         /// Change password
         /// </summary>
-        /// <param name="email"></param>
         /// <param name="returnUrl"></param>
         /// <returns></returns>
+        [Authorize]
         [HttpGet("change-password")]
-        public async Task<IActionResult> ChangePassword(string email, string returnUrl)
+        public async Task<IActionResult> ChangePassword(string returnUrl)
         {
             try
             {
                 await Task.FromResult(0);
-                return View(new ChangePasswordViewModel { Email = email, ReturnUrl = returnUrl });
+                return View(new ChangePasswordViewModel { ReturnUrl = returnUrl });
             }
             catch (Exception ex)
             {
@@ -387,7 +391,7 @@ namespace Authentication.Controllers
         /// </summary>
         /// <param name="model"></param>
         /// <returns></returns>
-        [AllowAnonymous]
+        [Authorize]
         [HttpPost("change-password")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
@@ -397,14 +401,13 @@ namespace Authentication.Controllers
                 if (!ModelState.IsValid)
                     return View(model);
 
-                var user = await _userManager.FindByEmailAsync(model.Email);
+                var sub = User.GetSubjectId();
+                var user = await _userManager.FindByIdAsync(sub);
                 if (user != null && user.ChangePasswordAllowed)
                 {
                     var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
                     if (result.Succeeded)
                     {
-                        await _signInManager.SignOutAsync();
-
                         _logger.LogInformation(6, "User changed their password successfully.");
 
                         var emailMessage = new ChangePasswordConfirmationEmailMessage
@@ -418,7 +421,7 @@ namespace Authentication.Controllers
 
                         await _emailSender.SendEmailAsync(user.Email, "Password Changed Confirmation", bodyHtml, bodyTxt);
 
-                        return RedirectToAction(nameof(Login), "Account", new { passwordChanged = true, returnUrl = model.ReturnUrl });
+                        return View("ChangePasswordConfirmation");
                     }
 
                     AddErrors(result);
@@ -439,7 +442,7 @@ namespace Authentication.Controllers
 
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError(string.Empty, rgx.Replace(error.Description, "").TrimEnd());
+                ModelState.AddModelError("OldPassword", rgx.Replace(error.Description, "").TrimEnd());
             }
         }
     }

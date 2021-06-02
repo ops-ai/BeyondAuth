@@ -73,7 +73,6 @@ namespace Authentication.Controllers
         /// <param name="email"></param>
         /// <returns></returns>
         [HttpGet]
-        [AllowAnonymous]
         [Route("forgot-password")]
         public IActionResult ForgotPassword(string returnUrl, string email)
         {
@@ -95,7 +94,6 @@ namespace Authentication.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
-        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         [Route("forgot-password")]
         public async Task<IActionResult> ForgotPassword(ForgotPasswordModel model)
@@ -160,7 +158,6 @@ namespace Authentication.Controllers
         /// </summary>
         /// <returns></returns>
         [HttpGet]
-        [AllowAnonymous]
         [Route("password-reset-sent")]
         public IActionResult ForgotPasswordConfirmation()
         {
@@ -183,7 +180,6 @@ namespace Authentication.Controllers
         /// <param name="returnUrl"></param>
         /// <returns></returns>
         [HttpGet]
-        [AllowAnonymous]
         [Route("reset-password")]
         public IActionResult ResetPassword(string code = null, string returnUrl = null)
         {
@@ -207,7 +203,6 @@ namespace Authentication.Controllers
         /// <param name="model"></param>
         /// <returns></returns>
         [HttpPost]
-        [AllowAnonymous]
         [ValidateAntiForgeryToken]
         [Route("reset-password")]
         public async Task<IActionResult> ResetPassword(ResetPasswordModel model)
@@ -251,7 +246,7 @@ namespace Authentication.Controllers
 
                 await _emailSender.SendEmailAsync(user.Email, "Password Reset Confirmation", bodyHtml, bodyTxt);
 
-                return RedirectToAction(nameof(ResetPasswordConfirmation), "Account", new { returnUrl = model.ReturnUrl });
+                return RedirectToAction(nameof(ResetPasswordConfirmation), "PasswordReset", new { returnUrl = model.ReturnUrl });
             }
             catch (Exception ex)
             {
@@ -269,7 +264,7 @@ namespace Authentication.Controllers
 
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError(string.Empty, rgx.Replace(error.Description, "").TrimEnd());
+                ModelState.AddModelError("Password", rgx.Replace(error.Description, "").TrimEnd());
             }
         }
 
@@ -279,7 +274,6 @@ namespace Authentication.Controllers
         /// <param name="returnUrl"></param>
         /// <returns></returns>
         [HttpGet]
-        [AllowAnonymous]
         [Route("reset-password-successful")]
         public IActionResult ResetPasswordConfirmation(string returnUrl)
         {

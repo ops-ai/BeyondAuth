@@ -9,7 +9,7 @@ namespace Authentication.Models.Account
     public class LoginInputModel
     {
         [Required]
-        [EmailAddress]
+        //[EmailAddress]
         public string Email { get; set; }
 
         [Required]
