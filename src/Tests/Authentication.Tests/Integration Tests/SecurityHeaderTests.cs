@@ -1,5 +1,6 @@
 ﻿using Authentication.Tests.Fakes;
 using Autofac;
+using Identity.Core;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -37,7 +38,18 @@ namespace Authentication.Tests.Integration_Tests
                     }
 
                     services.AddOptions();
-                    services.AddSingleton(GetDocumentStore());
+
+                    var store = GetDocumentStore();
+                    using (var session = store.OpenSession())
+                    {
+                        session.Store(new TenantSetting
+                        {
+                            Identifier = "localhost"
+                        });
+                        session.SaveChanges();
+                    }
+
+                    services.AddSingleton(store);
                 });
                 builder.ConfigureTestServices(services =>
                  {
