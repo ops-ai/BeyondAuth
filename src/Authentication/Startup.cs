@@ -63,6 +63,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using System.Collections.Generic;
 using NetTools;
 using BeyondAuth.PasswordValidators.Common;
+using BlackstarSolar.AspNetCore.Identity.PwnedPasswords;
 
 namespace Authentication
 {
@@ -352,6 +353,7 @@ namespace Authentication
                 .AddDefaultTokenProviders()
                 .AddPasswordValidator<EmailAsPasswordValidator<ApplicationUser>>()
                 .AddPasswordValidator<InvalidPhrasePasswordValidator<ApplicationUser>>()
+                .AddPwnedPasswordsValidator<ApplicationUser>(options => options.ApiKey = Configuration["HaveIBeenPwned:ApiKey"])
 
             identityBuilder.Services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
             identityBuilder.Services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();

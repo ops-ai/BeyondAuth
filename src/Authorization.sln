@@ -78,6 +78,12 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.Swim", "BeyondAu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondAuth.PasswordValidators.Common", "Password Validators\BeyondAuth.PasswordValidators.Common\BeyondAuth.PasswordValidators.Common.csproj", "{3EE2D96A-56C8-4391-B424-FCB76612D547}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Password Validators", "Password Validators", "{909B4F42-EC1D-4237-B5E2-7C31FB55A29E}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpPwned.NET", "Password Validators\SharpPwned.NET\SharpPwned.NET.csproj", "{A624F1F0-2A45-4A2C-A933-98FEF6346676}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlackstarSolar.AspNetCore.Identity.PwnedPasswords", "Password Validators\BlackstarSolar.AspNetCore.Identity.PwnedPasswords\BlackstarSolar.AspNetCore.Identity.PwnedPasswords.csproj", "{6904FA32-7393-49BE-BC5E-012479DD4464}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -187,6 +193,18 @@ Global
 		{1E991308-C786-44C6-B68F-062F5D0F3896}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1E991308-C786-44C6-B68F-062F5D0F3896}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1E991308-C786-44C6-B68F-062F5D0F3896}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3EE2D96A-56C8-4391-B424-FCB76612D547}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3EE2D96A-56C8-4391-B424-FCB76612D547}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3EE2D96A-56C8-4391-B424-FCB76612D547}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3EE2D96A-56C8-4391-B424-FCB76612D547}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A624F1F0-2A45-4A2C-A933-98FEF6346676}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A624F1F0-2A45-4A2C-A933-98FEF6346676}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A624F1F0-2A45-4A2C-A933-98FEF6346676}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A624F1F0-2A45-4A2C-A933-98FEF6346676}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6904FA32-7393-49BE-BC5E-012479DD4464}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6904FA32-7393-49BE-BC5E-012479DD4464}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6904FA32-7393-49BE-BC5E-012479DD4464}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6904FA32-7393-49BE-BC5E-012479DD4464}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -206,6 +224,8 @@ Global
 		{19FA5418-A0F5-4C41-8F50-ACB88A782286} = {84BCB7A7-6678-441F-B075-15D4A7E04ACB}
 		{AF62CB61-FA11-456C-B04D-5102E79B226C} = {F697BF7F-ED3E-4571-A176-AA937EE763FF}
 		{3EE2D96A-56C8-4391-B424-FCB76612D547} = {909B4F42-EC1D-4237-B5E2-7C31FB55A29E}
+		{A624F1F0-2A45-4A2C-A933-98FEF6346676} = {909B4F42-EC1D-4237-B5E2-7C31FB55A29E}
+		{6904FA32-7393-49BE-BC5E-012479DD4464} = {909B4F42-EC1D-4237-B5E2-7C31FB55A29E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
