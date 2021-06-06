@@ -442,7 +442,7 @@ namespace Authentication.Controllers
 
             foreach (var error in result.Errors)
             {
-                ModelState.AddModelError("OldPassword", rgx.Replace(error.Description, "").TrimEnd());
+                ModelState.AddModelError(error.Code == "PasswordMismatch" ? "OldPassword" : "NewPassword", rgx.Replace(error.Description, "").TrimEnd());
             }
         }
     }
