@@ -51,6 +51,7 @@
     <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Keys" Version="1.0.2" />
     <PackageReference Include="Azure.Identity" Version="1.3.0" />
     <PackageReference Include="BuildBundlerMinifier" Version="3.2.449" />
+    <PackageReference Include="CommonPasswordsValidator" Version="1.3.0" />
     <PackageReference Include="CorrelationId" Version="3.0.0" />
     <PackageReference Include="Finbuckle.MultiTenant" Version="6.2.0" />
     <PackageReference Include="Finbuckle.MultiTenant.AspNetCore" Version="6.2.0" />
@@ -87,6 +88,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Identity.Core\Identity.Core.csproj" />
+    <ProjectReference Include="..\Password Validators\BeyondAuth.PasswordValidators.Common\BeyondAuth.PasswordValidators.Common.csproj" />
   </ItemGroup>
 
 </Project>

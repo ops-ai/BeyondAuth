@@ -62,6 +62,7 @@ using IdentityServer4.Models;
 using Microsoft.AspNetCore.HttpOverrides;
 using System.Collections.Generic;
 using NetTools;
+using BeyondAuth.PasswordValidators.Common;
 
 namespace Authentication
 {
@@ -348,6 +349,9 @@ namespace Authentication
 
             var identityBuilder = services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => { })
                 .AddDefaultTokenProviders();
+                .AddDefaultTokenProviders()
+                .AddPasswordValidator<EmailAsPasswordValidator<ApplicationUser>>()
+                .AddPasswordValidator<InvalidPhrasePasswordValidator<ApplicationUser>>()
 
             identityBuilder.Services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
             identityBuilder.Services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();
