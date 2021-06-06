@@ -64,6 +64,7 @@ using System.Collections.Generic;
 using NetTools;
 using BeyondAuth.PasswordValidators.Common;
 using BlackstarSolar.AspNetCore.Identity.PwnedPasswords;
+using BeyondAuth.PasswordValidators.Topology;
 
 namespace Authentication
 {
@@ -189,6 +190,11 @@ namespace Authentication
                     options.Lockout = tenantInfo.IdentityOptions.Lockout;
                     options.User = tenantInfo.IdentityOptions.User;
                     options.SignIn = tenantInfo.IdentityOptions.SignIn;
+                })
+                .WithPerTenantOptions<PasswordTopologyValidatorOptions>((options, tenantInfo) =>
+                {
+                    options.RollingHistoryInMonths = 5;
+                    options.Threshold = 1000;
                 })
                 .WithPerTenantOptions<CookieAuthenticationOptions>((o, tenantInfo) =>
                 {
@@ -354,6 +360,7 @@ namespace Authentication
                 .AddPasswordValidator<InvalidPhrasePasswordValidator<ApplicationUser>>()
                 .AddPwnedPasswordsValidator<ApplicationUser>(options => options.ApiKey = Configuration["HaveIBeenPwned:ApiKey"])
                 .AddTop1000PasswordValidator<ApplicationUser>()
+                .AddPasswordValidator<PasswordTopologyValidator<ApplicationUser>>();
 
             identityBuilder.Services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
             identityBuilder.Services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();
@@ -430,6 +437,7 @@ namespace Authentication
             services.AddSingleton<IEmailSender, MessageSender>();
             services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
             services.AddTransient<IEmailService, EmailController>();
+            services.AddTransient<IPasswordTopologyProvider, PasswordTopologyProvider>();
 
             services.PostConfigure<CookieAuthenticationOptions>(IdentityConstants.ApplicationScheme, option =>
             {
