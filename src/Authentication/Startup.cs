@@ -349,11 +349,11 @@ namespace Authentication
             services.AddScoped(sp => sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<RavenSettings>>()?.Value?.DatabaseName));
 
             var identityBuilder = services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => { })
-                .AddDefaultTokenProviders();
                 .AddDefaultTokenProviders()
                 .AddPasswordValidator<EmailAsPasswordValidator<ApplicationUser>>()
                 .AddPasswordValidator<InvalidPhrasePasswordValidator<ApplicationUser>>()
                 .AddPwnedPasswordsValidator<ApplicationUser>(options => options.ApiKey = Configuration["HaveIBeenPwned:ApiKey"])
+                .AddTop1000PasswordValidator<ApplicationUser>()
 
             identityBuilder.Services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
             identityBuilder.Services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();
