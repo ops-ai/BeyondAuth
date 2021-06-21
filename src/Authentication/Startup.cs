@@ -65,6 +65,11 @@ using NetTools;
 using BeyondAuth.PasswordValidators.Common;
 using BlackstarSolar.AspNetCore.Identity.PwnedPasswords;
 using BeyondAuth.PasswordValidators.Topology;
+using OpenTelemetry.Trace;
+using OpenTelemetry.Resources;
+using IdentityServer4.Services;
+using System.Diagnostics;
+using OpenTelemetry;
 
 namespace Authentication
 {
@@ -444,7 +449,18 @@ namespace Authentication
                 //option.Cookie.Name = "Hello";
             });
 
-            services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
+            Activity.DefaultIdFormat = ActivityIdFormat.W3C;
+            Activity.ForceDefaultIdFormat = true;
+            services.AddOpenTelemetryTracing(
+                (builder) => builder
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("beyondauth-authentication"))
+                    .AddSource(nameof(IdentityServerEventSink))
+                    //.AddProcessor(new OpenTelemetryFilteredProcessor(new BatchActivityExportProcessor(new OpenTelemetryRavenDbExporter()), (act) => true)) //TODO: add filter
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    //.AddOtlpExporter(opt => opt.Endpoint = new Uri("grafana-agent:55680"))
+                    .AddConsoleExporter()
+                    );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

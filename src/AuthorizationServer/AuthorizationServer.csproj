@@ -21,9 +21,9 @@
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.1" />
     <PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Keys" Version="1.0.3" />
     <PackageReference Include="Azure.Identity" Version="1.4.0" />
-    <PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.1.0" />
+    <PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.2.0" />
     <PackageReference Include="CorrelationId" Version="3.0.0" />
-    <PackageReference Include="Grpc.AspNetCore" Version="2.37.0" />
+    <PackageReference Include="Grpc.AspNetCore" Version="2.38.0" />
     <PackageReference Include="Grpc.Tools" Version="2.38.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
@@ -38,6 +38,14 @@
     <PackageReference Include="NSwag.AspNetCore" Version="13.11.3" />
     <PackageReference Include="NSwag.Core" Version="13.11.3" />
     <PackageReference Include="NWebsec.AspNetCore.Middleware" Version="3.0.0" />
+    <PackageReference Include="OpenTelemetry" Version="1.1.0-beta4" />
+    <PackageReference Include="OpenTelemetry.Api" Version="1.1.0-beta4" />
+    <PackageReference Include="OpenTelemetry.Contrib.Instrumentation.Azure" Version="0.6.0-beta" />
+    <PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.1.0-beta4" />
+    <PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.1.0-beta4" />
+    <PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.0.0-rc5" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc5" />
+    <PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc5" />
     <PackageReference Include="RavenDB.Client" Version="5.1.8" />
     <PackageReference Include="scientist" Version="2.0.0" />
   </ItemGroup>

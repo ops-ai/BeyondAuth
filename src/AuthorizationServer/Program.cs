@@ -3,9 +3,11 @@ using Azure.Identity;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
+using Microsoft.Extensions.Logging;
 using NLog.Web;
 using System;
 using System.IO;
+using OpenTelemetry.Logs;
 
 namespace AuthorizationServer
 {
@@ -28,6 +30,23 @@ namespace AuthorizationServer
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                })
+                .ConfigureLogging((context, builder) =>
+                {
+                    builder.AddNLog("nlog.config").AddNLogWeb();
+                    builder.AddConsole();
+
+                    var useLogging = context.Configuration.GetValue<bool>("UseLogging");
+                    if (useLogging)
+                    {
+                        builder.AddOpenTelemetry(options =>
+                        {
+                            options.IncludeScopes = true;
+                            options.ParseStateValues = true;
+                            options.IncludeFormattedMessage = true;
+                            options.AddConsoleExporter();
+                        });
+                    }
                 });
     }
 }
