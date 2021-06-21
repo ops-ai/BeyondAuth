@@ -8,6 +8,8 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using NetTools;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using System.Collections.Generic;
 
 namespace BeyondAuth.Web
@@ -39,6 +41,15 @@ namespace BeyondAuth.Web
             {
                 configuration.RootPath = "ClientApp/dist";
             });
+
+            services.AddOpenTelemetryTracing(
+                (builder) => builder
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("beyondauth-saas"))
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    //.AddOtlpExporter(opt => opt.Endpoint = new Uri("grafana-agent:55680"))
+                    .AddConsoleExporter()
+                    );
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

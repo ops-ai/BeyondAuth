@@ -24,6 +24,8 @@ using Newtonsoft.Json.Serialization;
 using NSwag;
 using NSwag.AspNetCore;
 using NSwag.Generation.Processors.Security;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 using Raven.Client.Documents;
 using Raven.Client.Json.Serialization.NewtonsoftJson;
 using System;
@@ -166,6 +168,15 @@ namespace AuthorizationServer
 
             services.AddGrpc();
             services.AddControllers();
+
+            services.AddOpenTelemetryTracing(
+                (builder) => builder
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("beyondauth-authentication"))
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    //.AddOtlpExporter(opt => opt.Endpoint = new Uri("grafana-agent:55680"))
+                    .AddConsoleExporter()
+                    );
         }
 
         /// <summary>
