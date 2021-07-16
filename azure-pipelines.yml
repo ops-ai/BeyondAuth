@@ -30,7 +30,7 @@ steps:
 - task: UseDotNet@2
   inputs:
     packageType: 'sdk'
-    version: '5.0.302'
+    version: '5.0.301'
 
 - task: SonarCloudPrepare@1
   inputs:
