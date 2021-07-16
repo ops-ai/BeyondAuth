@@ -3,6 +3,9 @@ using Autofac.Configuration;
 using Azure.Identity;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Secrets;
+using BeyondAuth.PasswordValidators.Common;
+using BeyondAuth.PasswordValidators.Topology;
+using BlackstarSolar.AspNetCore.Identity.PwnedPasswords;
 using CorrelationId;
 using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
@@ -76,6 +79,16 @@ namespace IdentityManager
             });
             services.AddMemoryCache();
 
+            services.Configure<IdentityOptions>(options =>
+            {
+                // Default Lockout settings.
+                options.Password.RequireDigit = false;
+                options.Password.RequireLowercase = false;
+                options.Password.RequireUppercase = false;
+                options.Password.RequireNonAlphanumeric = false;
+                options.Password.RequiredLength = 4;
+            });
+
             services.AddMultiTenant<TenantSetting>().WithRouteStrategy("dataSourceId").WithStore(new ServiceLifetime(), (sp) => new RavenDBMultitenantStore(sp.GetService<IDocumentStore>(), sp.GetService<IMemoryCache>()))
                 .WithPerTenantOptions<IdentityStoreOptions>((options, tenantInfo) =>
                 {
@@ -84,10 +97,27 @@ namespace IdentityManager
                 .WithPerTenantOptions<RavenSettings>((options, tenantInfo) =>
                 {
                     options.DatabaseName = $"TenantIdentity-{tenantInfo.Identifier}";
+                })
+                .WithPerTenantOptions<IdentityOptions>((options, tenantInfo) =>
+                {
+                    options.Password = tenantInfo.IdentityOptions.Password;
+                    options.Lockout = tenantInfo.IdentityOptions.Lockout;
+                    options.User = tenantInfo.IdentityOptions.User;
+                    options.SignIn = tenantInfo.IdentityOptions.SignIn;
+                })
+                .WithPerTenantOptions<PasswordTopologyValidatorOptions>((options, tenantInfo) =>
+                {
+                    options.RollingHistoryInMonths = 5;
+                    options.Threshold = 1000;
                 });
 
-            var identityBuilder = services.AddIdentityCore<ApplicationUser>(options => options.SignIn.RequireConfirmedAccount = false)
-                .AddDefaultTokenProviders();
+            var identityBuilder = services.AddIdentityCore<ApplicationUser>()
+                .AddDefaultTokenProviders()
+                .AddPasswordValidator<EmailAsPasswordValidator<ApplicationUser>>()
+                .AddPasswordValidator<InvalidPhrasePasswordValidator<ApplicationUser>>()
+                .AddPwnedPasswordsValidator<ApplicationUser>(options => options.ApiKey = Configuration["HaveIBeenPwned:ApiKey"])
+                .AddTop1000PasswordValidator<ApplicationUser>()
+                .AddPasswordValidator<PasswordTopologyValidator<ApplicationUser>>();
 
             services.AddAuthorization(options =>
             {
@@ -157,6 +187,7 @@ namespace IdentityManager
 
             services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
             services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();
+            services.AddTransient<IPasswordTopologyProvider, PasswordTopologyProvider>();
 
             services.AddHealthChecks()
                 .AddRavenDB(setup => { setup.Urls = new[] { Configuration["Raven:Url"] }; setup.Database = Configuration["Raven:Database"]; setup.Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null; }, "ravendb");
