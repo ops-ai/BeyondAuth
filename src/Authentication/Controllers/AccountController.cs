@@ -29,6 +29,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -139,7 +140,7 @@ namespace Authentication.Controllers
                     var signinResult = await _signInManager.CheckPasswordSignInAsync(user, model.Password, true);
                     if (signinResult.Succeeded)
                     {
-                        await _events.RaiseAsync(new UserLoginSuccessEvent(user.Email, user.Email, user.DisplayName, clientId: context?.Client.ClientId));
+                        await _events.RaiseAsync(new UserLoginSuccessEvent(user.Email, user.Id, user.DisplayName, clientId: context?.Client.ClientId));
 
                         // only set explicit expiration here if user chooses "remember me". 
                         // otherwise we rely upon expiration configured in cookie middleware.
@@ -317,6 +318,7 @@ namespace Authentication.Controllers
             }
 
             var context = await _interaction.GetLogoutContextAsync(logoutId);
+            _logger.LogInformation("logoutContext: " + JsonSerializer.Serialize(context));
             if (context?.ShowSignoutPrompt == false)
             {
                 // it's safe to automatically sign-out
