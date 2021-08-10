@@ -107,7 +107,7 @@ namespace BeyondAuth.Web.Services
             }
             catch (Exception ex)
             {
-                _logger.LogCritical("Sending email failed", ex);
+                _logger.LogCritical(ex, "Sending email failed");
 
                 throw;
             }
@@ -119,7 +119,7 @@ namespace BeyondAuth.Web.Services
         /// <param name="number"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        public async Task SendSmsAsync(string number, string message)
+        public async Task<SmsSendStatus> SendSmsAsync(string number, string message)
         {
             try
             {
@@ -128,12 +128,56 @@ namespace BeyondAuth.Web.Services
 
                 TwilioClient.Init(accountSid, authToken);
 
-                await MessageResource.CreateAsync(new PhoneNumber(number), from: new PhoneNumber(_smsSettings.Value.SmsAccountFrom), body: message);
+                var response = await MessageResource.CreateAsync(new PhoneNumber(number), from: new PhoneNumber(_smsSettings.Value.SmsAccountFrom), body: message);
+
+                using (var session = _store.OpenAsyncSession())
+                {
+                    var newSms = new SentSms
+                    {
+                        Id = $"SentSms/{response.Sid}",
+                        From = response.From.ToString(),
+                        To = response.To,
+                        Message = message,
+                        Events = new List<SmsEvent> { new SmsEvent { CreatedOnUtc = DateTime.UtcNow, Id = "", Name = response.Status.ToString() } }
+                    };
+                    await session.StoreAsync(newSms);
+                    session.Advanced.GetMetadataFor(newSms)["@expires"] = DateTime.UtcNow.AddMonths(2);
+                    await session.SaveChangesAsync();
+                }
+
+                if (response.Status == MessageResource.StatusEnum.Accepted)
+                    return SmsSendStatus.Successful;
+                else if (response.Status == MessageResource.StatusEnum.Failed)
+                    return SmsSendStatus.Blocked;
+                else
+                    return SmsSendStatus.Failed;
             }
             catch (Exception ex)
             {
-                _logger.LogCritical("Sending SMS failed", ex);
+                _logger.LogCritical(ex, "Sending SMS failed");
+                return SmsSendStatus.Failed;
             }
+        }
+
+        /// <summary>
+        /// SMS send status
+        /// </summary>
+        public enum SmsSendStatus
+        {
+            /// <summary>
+            /// Message was accepted for delivery
+            /// </summary>
+            Successful,
+
+            /// <summary>
+            /// Message queueing failed
+            /// </summary>
+            Failed,
+
+            /// <summary>
+            /// Sending was blocked
+            /// </summary>
+            Blocked
         }
 
         private static string GetQueryString(Dictionary<string, string> nvc)

@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using static BeyondAuth.Web.Services.MessageSender;
 
 namespace BeyondAuth.Web.Services
 {
@@ -13,6 +14,6 @@ namespace BeyondAuth.Web.Services
         /// <param name="number"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        Task SendSmsAsync(string number, string message);
+        Task<SmsSendStatus> SendSmsAsync(string number, string message);
     }
 }
