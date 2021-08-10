@@ -28,13 +28,13 @@ namespace BeyondAuth.PolicyProvider
             if (policy == null)
             {
                 var policyServerClient = _httpClientFactory.CreateClient("PolicyServer");
-                var response = await policyServerClient.GetAsync($"policies/{policyName}");
+                var response = await policyServerClient.GetAsync($"policies/{policyName}").ConfigureAwait(false);
 
                 if (!response.IsSuccessStatusCode)
                     if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
                         throw new PolicyNotFoundException(policyName);
                     else
-                        throw new HttpRequestException($"Policy not found - {response.StatusCode}");
+                        throw new HttpRequestException($"Policy retrieval error - {response.StatusCode}");
 
                 var serverPolicy = JsonConvert.DeserializeObject<PolicyModel>(await response.Content.ReadAsStringAsync().ConfigureAwait(false));
 

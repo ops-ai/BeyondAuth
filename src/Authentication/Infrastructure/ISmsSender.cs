@@ -1,4 +1,5 @@
 ﻿using System.Threading.Tasks;
+using static Authentication.Infrastructure.MessageSender;
 
 namespace Authentication.Infrastructure
 {
@@ -13,6 +14,6 @@ namespace Authentication.Infrastructure
         /// <param name="number"></param>
         /// <param name="message"></param>
         /// <returns></returns>
-        Task SendSmsAsync(string number, string message);
+        Task<SmsSendStatus> SendSmsAsync(string number, string message);
     }
 }
