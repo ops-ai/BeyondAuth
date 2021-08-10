@@ -22,6 +22,8 @@
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.1" />
     <PackageReference Include="Azure.Identity" Version="1.4.1" />
     <PackageReference Include="Hangfire.Core" Version="1.7.24" />
+    <PackageReference Include="Imageflow.Server" Version="0.5.10" />
+    <PackageReference Include="Imageflow.Server.Storage.AzureBlob" Version="0.5.10" />
     <PackageReference Include="IPAddressRange" Version="4.2.0" />
     <PackageReference Include="JSNLog" Version="2.30.0" />
     <PackageReference Include="Microsoft.AspNetCore.SpaServices.Extensions" Version="5.0.8" />
