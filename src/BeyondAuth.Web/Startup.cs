@@ -1,3 +1,6 @@
+using Azure.Storage.Blobs;
+using Imageflow.Server;
+using Imageflow.Server.Storage.AzureBlob;
 using JSNLog;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -42,6 +45,8 @@ namespace BeyondAuth.Web
                 configuration.RootPath = "ClientApp/dist";
             });
 
+            services.AddImageflowAzureBlobService(new AzureBlobServiceOptions(Configuration["Azure:PhotoStorageConnectionString"], new BlobClientOptions()).MapPrefix("/photos", "beyondauth"));
+
             services.AddOpenTelemetryTracing(
                 (builder) => builder
                     .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("beyondauth-saas"))
@@ -79,6 +84,10 @@ namespace BeyondAuth.Web
             {
                 app.UseSpaStaticFiles();
             }
+
+            app.UseImageflow(new ImageflowMiddlewareOptions()
+                .SetMapWebRoot(true)
+                .SetMyOpenSourceProjectUrl("https://github.com/ops-ai/beyondauth"));
 
             app.UseRouting();
 
