@@ -87,7 +87,17 @@ namespace BeyondAuth.Web
 
             app.UseImageflow(new ImageflowMiddlewareOptions()
                 .SetMapWebRoot(true)
-                .SetMyOpenSourceProjectUrl("https://github.com/ops-ai/beyondauth"));
+                .SetLicenseKey(EnforceLicenseWith.RedDotWatermark, Configuration["Imazen:License"])
+                .SetDiagnosticsPageAccess(env.IsDevelopment() ? AccessDiagnosticsFrom.AnyHost : AccessDiagnosticsFrom.LocalHost)
+                .SetDiagnosticsPagePassword(Configuration["Imazen:DiagnosticsPassword"])
+                .SetDefaultCacheControlString("public, max-age=2592000")
+                .AddCommandDefault("webp.quality", "90")
+                .SetUsePresetsExclusively(true)
+                .AddPreset(new PresetOptions("large", PresetPriority.DefaultValues)
+                    .SetCommand("width", "1024")
+                    .SetCommand("height", "1024")
+                    .SetCommand("mode", "max"))
+                                );
 
             app.UseRouting();
 
