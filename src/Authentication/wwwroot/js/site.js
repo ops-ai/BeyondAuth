@@ -38,4 +38,19 @@
             $(this).addClass("is-valid");
         }
     });
+
+
+    self.addEventListener("load", () => {
+        function handleNetworkChange(event) {
+            console.log('network changed');
+            if (navigator.onLine) {
+                document.body.classList.remove("offline");
+            } else {
+                document.body.classList.add("offline");
+            }
+        }
+
+        window.addEventListener("online", handleNetworkChange);
+        window.addEventListener("offline", handleNetworkChange);
+    });
 })()

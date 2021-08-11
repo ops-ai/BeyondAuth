@@ -201,3 +201,6 @@
     top: 50vw;
   }
 }
+body.offline .app-offline {
+  display: block !important;
+}
