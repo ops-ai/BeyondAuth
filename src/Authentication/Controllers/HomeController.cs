@@ -58,6 +58,16 @@ namespace Authentication.Controllers
         }
 
         /// <summary>
+        /// Device offline
+        /// </summary>
+        /// <returns></returns>
+        [Route("offline")]
+        public IActionResult Offline()
+        {
+            return View();
+        }
+
+        /// <summary>
         /// Shows the error page
         /// </summary>
         [AllowAnonymous]
