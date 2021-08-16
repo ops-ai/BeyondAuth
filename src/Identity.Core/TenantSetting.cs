@@ -1,10 +1,12 @@
-﻿using Finbuckle.MultiTenant;
+﻿using BeyondAuth.Acl;
+using Finbuckle.MultiTenant;
 using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace Identity.Core
 {
-    public class TenantSetting : ITenantInfo
+    public class TenantSetting : ITenantInfo, ISecurableEntity
     {
         /// <summary>
         /// A unique id for a tenant in the app and should never change
@@ -51,5 +53,33 @@ namespace Identity.Core
         /// External login providers
         /// </summary>
         public IList<IExternalIdentityProvider> ExternalIdps = new List<IExternalIdentityProvider>();
+
+        /// <summary>
+        /// Parent
+        /// </summary>
+        public string ParentId { get; set; }
+
+        /// <summary>
+        /// Owner of client
+        /// </summary>
+        public string OwnerId { get; set; }
+
+        /// <summary>
+        /// Id of the nearest parent that contains the ACEs
+        /// </summary>
+        public string NearestSecurityHolderId { get; set; }
+
+        /// <summary>
+        /// Nesting level of inheritance
+        /// </summary>
+        public int Level { get; set; } = 0;
+
+        /// <summary>
+        /// List of ACEs storing permissions for the secured entity
+        /// </summary>
+        public List<AceEntry> AceEntries { get; set; }
+
+        [JsonIgnore]
+        public ISecurableEntity AclHolder { get; set; }
     }
 }

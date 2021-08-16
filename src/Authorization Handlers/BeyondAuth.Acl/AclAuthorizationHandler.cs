@@ -1,29 +1,34 @@
 ﻿using BeyondAuth.Acl;
+using System.Linq;
 using Microsoft.AspNetCore.Authorization;
 using System.Threading.Tasks;
 
 namespace BeyondAuth.PolicyProvider
 {
-    public class AclAuthorizationHandler : IAuthorizationHandler
+    public class AclAuthorizationHandler : AuthorizationHandler<AclAuthorizationRequirement, ISecurableEntity>
     {
         public AclAuthorizationHandler()
         {
 
         }
 
-        public async Task HandleAsync(AuthorizationHandlerContext context)
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="context"></param>
+        /// <param name="requirement"></param>
+        /// <param name="resource"></param>
+        /// <returns></returns>
+        protected override Task HandleRequirementAsync(AuthorizationHandlerContext context, AclAuthorizationRequirement requirement, ISecurableEntity resource)
         {
-            var entity = context.Resource as ISecurableEntity;
-            if (entity == null)
-                return;
-
-            if (true)
-                foreach (var req in context.PendingRequirements)
-                    context.Succeed(req);
-            else if (false)
+            if (context.User.Identity.Name == resource.AclHolder?.OwnerId)
+                context.Succeed(requirement);
+            else if (resource.AclHolder?.AceEntries.FirstOrDefault(t => t.Subject == context.User.Identity.Name)?.AllowBits % requirement.Bitmask == requirement.Bitmask)
+                context.Succeed(requirement);
+            else
                 context.Fail();
 
-            //TODO: Handle insufficient context
+            return Task.CompletedTask;
         }
     }
 }
