@@ -1,11 +1,16 @@
-﻿using Identity.Core;
+﻿using BeyondAuth.Acl;
+using Identity.Core;
 using IdentityManager.Models;
+using IdentityServer4.Contrib.RavenDB.Options;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using NSwag.Annotations;
 using Raven.Client.Documents;
 using System;
@@ -13,6 +18,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
@@ -24,16 +30,23 @@ namespace IdentityManager.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<UsersController> _logger;
+        private readonly IDocumentStore _store;
+        private readonly IAuthorizationService _authorizationService;
+        private readonly IOptions<IdentityStoreOptions> _identityStoreOptions;
 
-        public UsersController(UserManager<ApplicationUser> userManager, ILogger<UsersController> logger)
+        public UsersController(UserManager<ApplicationUser> userManager, ILogger<UsersController> logger, IDocumentStore store, IAuthorizationService authorizationService, IOptions<IdentityStoreOptions> identityStoreOptions)
         {
             _userManager = userManager;
             _logger = logger;
+            _store = store;
+            _authorizationService = authorizationService;
+            _identityStoreOptions = identityStoreOptions;
         }
 
         /// <summary>
         /// Find users
         /// </summary>
+        /// <param name="dataSourceId"></param>
         /// <param name="firstName">First Name</param>
         /// <param name="lastName">Last Name</param>
         /// <param name="displayName">Display Name</param>
@@ -43,6 +56,7 @@ namespace IdentityManager.Controllers
         /// <param name="lockedOnly">Show only locked accounts</param>
         /// <param name="sort">Field and direction to sort by. Format: ([+/-]FieldName) By default: +email (sort by email ascending)</param>
         /// <param name="range">Result range to return. Format: 0-19 (result index from - result index to)</param>
+        /// <param name="ct"></param>
         /// <response code="206">List of users matching criteria</response>
         /// <response code="400">Validation failed.</response>
         /// <response code="500">Server error</response>
@@ -50,9 +64,32 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(IList<UserModel>), (int)HttpStatusCode.PartialContent)]
         [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromQuery] string firstName, [FromQuery] string lastName, [FromQuery] string displayName, [FromQuery] string organization, [FromQuery] string email, [FromQuery] bool includeDisabled = false, [FromQuery] bool lockedOnly = false, [FromQuery] string sort = "+email", [FromQuery] string range = "0-19")
+        public async Task<IActionResult> Get([FromRoute] string dataSourceId, [FromQuery] string firstName, [FromQuery] string lastName, [FromQuery] string displayName, [FromQuery] string organization, [FromQuery] string email, [FromQuery] bool includeDisabled = false, [FromQuery] bool lockedOnly = false, [FromQuery] string sort = "+email", [FromQuery] string range = "0-19", CancellationToken ct = default)
         {
-            return Ok(await _userManager.Users.ToListAsync());
+            try
+            {
+                using (var session = _store.OpenAsyncSession())
+                {
+                    var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
+                    dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
+                    if (await _authorizationService.AuthorizeAsync(User, dataSource, AclPermissions.List).ContinueWith(s => s.Result.Succeeded))
+                        throw new UnauthorizedAccessException();
+                }
+
+                return Ok(await _userManager.Users.ToListAsync());
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access");
+
+                return Forbid();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(0, ex, "Error during GET user");
+
+                throw;
+            }
         }
 
         /// <summary>
@@ -71,7 +108,9 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Get a user
         /// </summary>
+        /// <param name="dataSourceId"></param>
         /// <param name="userId">User Unique ID or email</param>
+        /// <param name="ct"></param>
         /// <response code="200">User details</response>
         /// <response code="404">User was not found</response>
         /// <response code="500">Server error</response>
@@ -79,17 +118,31 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(UserModel), (int)HttpStatusCode.OK)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> GetUser(string userId)
+        public async Task<IActionResult> GetUser([FromRoute] string dataSourceId, [FromRoute] string userId, CancellationToken ct = default)
         {
             try
             {
-                return Ok(await RetrieveUser(userId));
+                using (var session = _store.OpenAsyncSession())
+                {
+                    var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
+                    dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
+                    if (await _authorizationService.AuthorizeAsync(User, dataSource, AclPermissions.List).ContinueWith(s => s.Result.Succeeded))
+                        throw new UnauthorizedAccessException();
+                }
+
+                return Ok(await RetrieveUser(dataSourceId, userId, ct));
             }
             catch (KeyNotFoundException ex)
             {
                 _logger.LogWarning(ex, "User not found");
 
                 return NotFound();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "Unauthorized access");
+
+                return Forbid();
             }
             catch (Exception ex)
             {
@@ -102,7 +155,9 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Create user
         /// </summary>
+        /// <param name="dataSourceId"></param>
         /// <param name="userInfo">The user's information</param>
+        /// <param name="ct"></param>
         /// <response code="200">User created</response>
         /// <response code="400">Validation failed</response>
         /// <response code="500">Server error</response>
@@ -111,10 +166,18 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.Forbidden)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Post([FromBody] UserCreateModel userInfo)
+        public async Task<IActionResult> Post([FromRoute] string dataSourceId, [FromBody] UserCreateModel userInfo, CancellationToken ct = default)
         {
             try
             {
+                using (var session = _store.OpenAsyncSession())
+                {
+                    var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
+                    dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
+                    if (await _authorizationService.AuthorizeAsync(User, dataSource, AclPermissions.List).ContinueWith(s => s.Result.Succeeded))
+                        throw new UnauthorizedAccessException();
+                }
+
                 var newUser = new ApplicationUser
                 {
                     UserName = userInfo.Email,
@@ -168,8 +231,10 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Replace all properties on a user with this data
         /// </summary>
+        /// <param name="dataSourceId"></param>
         /// <param name="userId"></param>
         /// <param name="userInfo"></param>
+        /// <param name="ct"></param>
         /// <response code="204">User was updated</response>
         /// <response code="400">Validation failed. Returns a list of fields and errors for each field</response>
         /// <response code="404">User was not found</response>
@@ -179,10 +244,18 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Put([FromRoute] string userId, [FromBody] UserUpdateModel userInfo)
+        public async Task<IActionResult> Put([FromRoute] string dataSourceId, [FromRoute] string userId, [FromBody] UserUpdateModel userInfo, CancellationToken ct = default)
         {
             try
             {
+                using (var session = _store.OpenAsyncSession())
+                {
+                    var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
+                    dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
+                    if (await _authorizationService.AuthorizeAsync(User, dataSource, AclPermissions.List).ContinueWith(s => s.Result.Succeeded))
+                        throw new UnauthorizedAccessException();
+                }
+
                 var user = await _userManager.FindByIdAsync(userId);
                 if (userInfo.Password != null)
                 {
@@ -228,7 +301,7 @@ namespace IdentityManager.Controllers
             }
         }
 
-        private async Task<UserModel> RetrieveUser([FromRoute] string userId)
+        private async Task<UserModel> RetrieveUser([FromRoute] string dataSourceId, [FromRoute] string userId, CancellationToken ct = default)
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
@@ -262,8 +335,10 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Update one or more properties on a user
         /// </summary>
+        /// <param name="dataSourceId"></param>
         /// <param name="userId"></param>
         /// <param name="patch"></param>
+        /// <param name="ct"></param>
         /// <remarks>This is the preferred way to modify a user</remarks>
         /// <response code="204">User was updated</response>
         /// <response code="400">Validation failed. Returns a list of fields and errors for each field</response>
@@ -274,11 +349,19 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Patch([FromRoute] string userId, [FromBody] JsonPatchDocument<UserUpdateModel> patch)
+        public async Task<IActionResult> Patch([FromRoute] string dataSourceId, [FromRoute] string userId, [FromBody] JsonPatchDocument<UserUpdateModel> patch, CancellationToken ct = default)
         {
             try
             {
-                var originalUser = await RetrieveUser(userId);
+                using (var session = _store.OpenAsyncSession())
+                {
+                    var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
+                    dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
+                    if (await _authorizationService.AuthorizeAsync(User, dataSource, AclPermissions.List).ContinueWith(s => s.Result.Succeeded))
+                        throw new UnauthorizedAccessException();
+                }
+
+                var originalUser = await RetrieveUser(dataSourceId, userId, ct);
                 _logger.LogInformation($"Get the user object for Patching user:{userId}");
 
                 if (originalUser == null)
@@ -301,7 +384,7 @@ namespace IdentityManager.Controllers
                 };
 
                 patch.ApplyTo(updatedUser);
-                return await Put(userId, updatedUser);
+                return await Put(dataSourceId, userId, updatedUser, ct);
             }
             catch (JsonPatchException ex)
             {

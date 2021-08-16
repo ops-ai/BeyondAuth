@@ -33,5 +33,10 @@ namespace BeyondAuth.Acl
         /// List of ACEs storing permissions for the secured entity
         /// </summary>
         public List<AceEntry> AceEntries { get; set; }
+
+        /// <summary>
+        /// Reference to Acess control list holder referenced by the NearestSecurityHolderId
+        /// </summary>
+        public ISecurableEntity AclHolder { get; set; }
     }
 }
