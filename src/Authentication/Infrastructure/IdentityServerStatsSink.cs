@@ -77,7 +77,8 @@ namespace Authentication.Infrastructure
                         session.TimeSeriesFor(userLoginSuccess.SubjectId, evt.Name).Append(evt.TimeStamp, 1, $"Clients/{userLoginSuccess.ClientId}");
                         break;
                     case UserLoginFailureEvent userLoginFailure:
-                        session.TimeSeriesFor($"Clients/{userLoginFailure.ClientId}", evt.Name).Append(evt.TimeStamp, 1);
+                        if (userLoginFailure.ClientId != null)
+                            session.TimeSeriesFor($"Clients/{userLoginFailure.ClientId}", evt.Name).Append(evt.TimeStamp, 1);
                         break;
                     case UserLogoutSuccessEvent userLogoutSuccess:
                         session.TimeSeriesFor(userLogoutSuccess.SubjectId, evt.Name).Append(evt.TimeStamp, 1);
