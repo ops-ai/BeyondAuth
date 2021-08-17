@@ -2,7 +2,7 @@
   "theme_color": "#42b5e8",
   "background_color": "#286db6",
   "display": "standalone",
-  "start_url": "https://localhost:5001",
+  "start_url": "/",
   "name": "BeyondAuth",
   "short_name": "BeyondAuth",
   "icons": [

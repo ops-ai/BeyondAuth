@@ -68,15 +68,16 @@ namespace IdentityManager.Controllers
         {
             try
             {
-                using (var session = _store.OpenAsyncSession())
+                using (var session = _store.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
+                    var dataSource = await session.Include<IdPSettings>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
                     dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
                     if (await _authorizationService.AuthorizeAsync(User, dataSource, AclPermissions.List).ContinueWith(s => s.Result.Succeeded))
                         throw new UnauthorizedAccessException();
                 }
 
-                return Ok(await _userManager.Users.ToListAsync());
+                //TODO: Add direct querying + filtering + permssion filtering
+                return Ok(await _userManager.Users.ToListAsync(ct));
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -122,7 +123,7 @@ namespace IdentityManager.Controllers
         {
             try
             {
-                using (var session = _store.OpenAsyncSession())
+                using (var session = _store.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
                     dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
@@ -170,7 +171,7 @@ namespace IdentityManager.Controllers
         {
             try
             {
-                using (var session = _store.OpenAsyncSession())
+                using (var session = _store.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
                     dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
@@ -248,7 +249,7 @@ namespace IdentityManager.Controllers
         {
             try
             {
-                using (var session = _store.OpenAsyncSession())
+                using (var session = _store.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
                     dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
@@ -353,7 +354,7 @@ namespace IdentityManager.Controllers
         {
             try
             {
-                using (var session = _store.OpenAsyncSession())
+                using (var session = _store.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
                     dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
