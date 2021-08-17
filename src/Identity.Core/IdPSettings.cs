@@ -1,21 +1,28 @@
-﻿using System.Collections.Generic;
+﻿using BeyondAuth.Acl;
+using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
-namespace BeyondAuth.Acl
+namespace Identity.Core
 {
-    public class SecurableEntity : ISecurableEntity
+    /// <summary>
+    /// 
+    /// </summary>
+    public class IdPSettings : ISecurableEntity
     {
         /// <summary>
-        /// Resource unique identifier
+        /// Document Id
         /// </summary>
         public string Id { get; set; }
 
+
+
         /// <summary>
-        /// Resource parent
+        /// Parent
         /// </summary>
         public string ParentId { get; set; }
 
         /// <summary>
-        /// Resource Owner
+        /// Owner of client
         /// </summary>
         public string OwnerId { get; set; }
 
@@ -27,11 +34,14 @@ namespace BeyondAuth.Acl
         /// <summary>
         /// Nesting level of inheritance
         /// </summary>
-        public int Level { get; set; }
+        public int Level { get; set; } = 0;
 
         /// <summary>
         /// List of ACEs storing permissions for the secured entity
         /// </summary>
         public List<AceEntry> AceEntries { get; set; }
+
+        [JsonIgnore]
+        public ISecurableEntity AclHolder { get; set; }
     }
 }

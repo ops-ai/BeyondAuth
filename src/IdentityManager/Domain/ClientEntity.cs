@@ -1,6 +1,7 @@
 ﻿using BeyondAuth.Acl;
 using IdentityServer4.Models;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace IdentityManager.Domain
 {
@@ -48,5 +49,8 @@ namespace IdentityManager.Domain
         /// Customer support link that should be displayed
         /// </summary>
         public string SupportLink { get; set; }
+
+        [JsonIgnore]
+        public ISecurableEntity AclHolder { get; set; }
     }
 }

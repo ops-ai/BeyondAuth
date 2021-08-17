@@ -1,6 +1,7 @@
 ﻿using BeyondAuth.Acl;
 using IdentityServer4.Models;
 using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace IdentityManager.Domain
 {
@@ -38,5 +39,8 @@ namespace IdentityManager.Domain
         /// List of ACEs storing permissions for the secured entity
         /// </summary>
         public List<AceEntry> AceEntries { get; set; }
+
+        [JsonIgnore]
+        public ISecurableEntity AclHolder { get; set; }
     }
 }

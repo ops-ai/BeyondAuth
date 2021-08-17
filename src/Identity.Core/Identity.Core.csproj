@@ -16,5 +16,9 @@
     <Folder Include="Exceptions\" />
     <Folder Include="Extensions\" />
   </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Authorization Handlers\BeyondAuth.Acl\BeyondAuth.Acl.csproj" />
+  </ItemGroup>
   
 </Project>
