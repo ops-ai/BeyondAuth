@@ -8,8 +8,15 @@
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
     <ApplicationInsightsResourceId>/subscriptions/f2ec421d-e80e-4a0e-a54f-4cdf75bcacee/resourcegroups/Authorization/providers/Microsoft.Insights/components/BeyondAuth-Authentication</ApplicationInsightsResourceId>
+    <ApplicationIcon />
+    <OutputType>Exe</OutputType>
+    <StartupObject />
   </PropertyGroup>
-
+  
+  <PropertyGroup>
+    <PublishWithAspNetCoreTargetManifest>false</PublishWithAspNetCoreTargetManifest>
+  </PropertyGroup>
+  
   <ItemGroup>
     <Content Remove="compilerconfig.json" />
   </ItemGroup>

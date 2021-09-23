@@ -5,6 +5,7 @@ using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Secrets;
 using BeyondAuth.PasswordValidators.Common;
 using BeyondAuth.PasswordValidators.Topology;
+using BeyondAuth.PolicyProvider;
 using BlackstarSolar.AspNetCore.Identity.PwnedPasswords;
 using CorrelationId;
 using CorrelationId.DependencyInjection;
@@ -109,7 +110,66 @@ namespace IdentityManager
                 {
                     options.RollingHistoryInMonths = 5;
                     options.Threshold = 1000;
-                });
+                })
+                .WithPerTenantOptions<IdentityServerAuthenticationOptions>((options, tenantInfo) =>
+                {
+                    options.Authority = $"https://{tenantInfo.Identifier}";
+                    options.ApiSecret = tenantInfo.IdpSettings.ApiSecret;
+                    options.ApiName = tenantInfo.IdpSettings.ApiName;
+                    options.SupportedTokens = SupportedTokens.Both;
+                    options.EnableCaching = true;
+                    //options.CacheDuration = TimeSpan.FromMinutes(1);
+                })
+                .WithPerTenantOptions<NSwag.Generation.AspNetCore.AspNetCoreOpenApiDocumentGeneratorSettings>((config, tenantInfo) =>
+                {
+                    config.DocumentName = "v1";
+                    config.PostProcess = document =>
+                    {
+                        document.Info.Version = "v1";
+                        document.Info.Title = "BeyondAuth Identity Manager";
+                        document.Info.Description = File.ReadAllText("readme.md");
+                        document.Info.ExtensionData = new Dictionary<string, object>
+                    {
+                        { "x-logo", new { url = "/logo.png", altText = "BeyondAuth" } }
+                    };
+                        document.ExtensionData.Add("x-tagGroups", new { name = "OAuth2 / OpenID Connect", tags = new[] { "ApiResources", "ApiResourceSecrets", "Clients", "ClientSecrets" } });
+                        //document.ExtensionData.Add("x-tagGroups", new { name = "Users", tags = new [] { "Users" } });
+
+                        document.Tags = document.Tags.OrderBy(t => t.Name).ToList();
+
+                        document.Info.Contact = new OpenApiContact
+                        {
+                            Name = Configuration["Support:Name"],
+                            Email = Configuration["Support:Email"],
+                            Url = Configuration["Support:Link"]
+                        };
+                    };
+
+                    config.AddSecurity("bearer", Enumerable.Empty<string>(), new OpenApiSecurityScheme
+                    {
+                        Type = OpenApiSecuritySchemeType.OAuth2,
+                        Description = "Auth",
+                        Flow = OpenApiOAuth2Flow.AccessCode,
+                        OpenIdConnectUrl = new Uri(new Uri(Configuration["Authentication:Authority"]), ".well-known/openid-configuration").AbsoluteUri,
+                        Flows = new OpenApiOAuthFlows
+                        {
+                            AuthorizationCode = new OpenApiOAuthFlow
+                            {
+                                AuthorizationUrl = new Uri(new Uri(Configuration["Authentication:Authority"]), "connect/authorize").AbsoluteUri,
+                                TokenUrl = new Uri(new Uri(Configuration["Authentication:Authority"]), "connect/token").AbsoluteUri,
+                                Scopes = new Dictionary<string, string> { { "openid", "openid" }, { Configuration["Authentication:ApiName"], Configuration["Authentication:ApiName"] } }
+                            }
+                        }
+                    });
+                    config.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("bearer"));
+
+                    config.SerializerSettings = new JsonSerializerSettings
+                    {
+                        ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                    };
+                    config.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+                })
+                .WithPerTenantAuthentication();
 
             var identityBuilder = services.AddIdentityCore<ApplicationUser>()
                 .AddDefaultTokenProviders()
@@ -129,15 +189,7 @@ namespace IdentityManager
             });
 
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
-                .AddIdentityServerAuthentication(x =>
-                {
-                    x.Authority = Configuration["Authentication:Authority"];
-                    x.ApiSecret = Configuration["Authentication:ApiSecret"];
-                    x.ApiName = Configuration["Authentication:ApiName"];
-                    x.SupportedTokens = SupportedTokens.Both;
-                    x.EnableCaching = true;
-                    x.CacheDuration = TimeSpan.FromMinutes(1);
-                });
+                .AddIdentityServerAuthentication();
 
             services.AddSingleton((ctx) =>
             {
@@ -188,58 +240,14 @@ namespace IdentityManager
             services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
             services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();
             services.AddTransient<IPasswordTopologyProvider, PasswordTopologyProvider>();
+            services.AddSingleton<IAuthorizationHandler, AclAuthorizationHandler>();
 
             services.AddHealthChecks()
                 .AddRavenDB(setup => { setup.Urls = new[] { Configuration["Raven:Url"] }; setup.Database = Configuration["Raven:Database"]; setup.Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null; }, "ravendb");
 
             services.AddOpenApiDocument(config =>
             {
-                config.DocumentName = "v1";
-                config.PostProcess = document =>
-                {
-                    document.Info.Version = "v1";
-                    document.Info.Title = "BeyondAuth Identity Manager";
-                    document.Info.Description = File.ReadAllText("readme.md");
-                    document.Info.ExtensionData = new Dictionary<string, object>
-                    {
-                        { "x-logo", new { url = "/logo.png", altText = "BeyondAuth" } }
-                    };
-                    document.ExtensionData.Add("x-tagGroups", new { name = "OAuth2 / OpenID Connect", tags = new [] { "ApiResources", "ApiResourceSecrets", "Clients", "ClientSecrets" } });
-                    //document.ExtensionData.Add("x-tagGroups", new { name = "Users", tags = new [] { "Users" } });
-
-                    document.Tags = document.Tags.OrderBy(t => t.Name).ToList();
-
-                    document.Info.Contact = new OpenApiContact
-                    {
-                        Name = Configuration["Support:Name"],
-                        Email = Configuration["Support:Email"],
-                        Url = Configuration["Support:Link"]
-                    };
-                };
-
-                config.AddSecurity("bearer", Enumerable.Empty<string>(), new OpenApiSecurityScheme
-                {
-                    Type = OpenApiSecuritySchemeType.OAuth2,
-                    Description = "Auth",
-                    Flow = OpenApiOAuth2Flow.AccessCode,
-                    OpenIdConnectUrl = new Uri(new Uri(Configuration["Authentication:Authority"]), ".well-known/openid-configuration").AbsoluteUri,
-                    Flows = new OpenApiOAuthFlows
-                    {
-                        AuthorizationCode = new OpenApiOAuthFlow
-                        {
-                            AuthorizationUrl = new Uri(new Uri(Configuration["Authentication:Authority"]), "connect/authorize").AbsoluteUri,
-                            TokenUrl = new Uri(new Uri(Configuration["Authentication:Authority"]), "connect/token").AbsoluteUri,
-                            Scopes = new Dictionary<string, string> { { "openid", "openid" }, { Configuration["Authentication:ApiName"], Configuration["Authentication:ApiName"] } }
-                        }
-                    }
-                });
-                config.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("bearer"));
-
-                config.SerializerSettings = new JsonSerializerSettings
-                {
-                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                };
-                config.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+                
             });
 
             services.AddMvc()
@@ -335,6 +343,7 @@ namespace IdentityManager
             app.UseOpenApi();
             app.UseSwaggerUi3(options =>
             {
+                options.EnableTryItOut = true;
                 options.OAuth2Client = new OAuth2ClientSettings
                 {
                     ClientId = Configuration["Authentication:ClientId"],

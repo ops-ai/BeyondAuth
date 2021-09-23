@@ -21,7 +21,8 @@ const precacheAssets = [
 
     'logo.svg',
     'favicon.ico',
-    'img/offline.png'
+    'img/offline.png',
+    'https://cdnjs.cloudflare.com/ajax/libs/jsnlog/2.30.0/jsnlog.min.js'
 ];
 
 // Install Event
@@ -51,6 +52,12 @@ self.addEventListener('fetch', function (event) {
         caches.match(event.request).then(cacheRes => {
             return cacheRes || fetch(event.request).then(response => {
                 return response;
+            }).catch(function () {
+
+                if (event.request.method === "GET" && event.request.destination === "document")
+                    return caches.match('offline'); // Fallback Page, When No Internet Connection
+
+                return null;
             });
         }).catch(function () {
 
