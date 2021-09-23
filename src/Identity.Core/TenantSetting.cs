@@ -81,5 +81,7 @@ namespace Identity.Core
 
         [JsonIgnore]
         public ISecurableEntity AclHolder { get; set; }
+
+        public IdpOptions IdpSettings { get; set; }
     }
 }
