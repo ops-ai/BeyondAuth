@@ -70,6 +70,11 @@ using OpenTelemetry.Resources;
 using IdentityServer4.Services;
 using System.Diagnostics;
 using OpenTelemetry;
+using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Raven.Client.Documents.Linq;
+using Microsoft.FeatureManagement;
+using Microsoft.FeatureManagement.FeatureFilters;
+using Identity.Core.Settings;
 
 namespace Authentication
 {
@@ -100,6 +105,22 @@ namespace Authentication
                         options.KnownNetworks.Add(new IPNetwork(range.Begin, range.GetPrefixLength()));
                 });
             });
+            //services.Configure<TogglySettings>(Configuration.GetSection("Toggly"));
+            //builder.Services.AddSingleton<IFeatureDefinitionProvider, TogglyFeatureProvider>();
+
+            services.AddHttpClient();
+            services.AddHttpClient("toggly", config =>
+            {
+                config.BaseAddress = new Uri(Configuration["Toggly:BaseUrl"]);
+            })
+                .ConfigurePrimaryHttpMessageHandler(() => { return new SocketsHttpHandler { UseCookies = false }; });
+
+            services.AddSingleton<ITargetingContextAccessor, HttpContextTargetingContextAccessor>();
+            services.AddFeatureManagement()
+                    .AddFeatureFilter<PercentageFilter>()
+                    .AddFeatureFilter<ContextualTargetingFilter>()
+                    .AddFeatureFilter<TargetingFilter>()
+                    .AddFeatureFilter<TimeWindowFilter>();
 
             NLog.GlobalDiagnosticsContext.Set("AzureLogStorageConnectionString", Configuration["Azure:LogStorageConnectionString"]);
 
@@ -137,20 +158,7 @@ namespace Authentication
             services.AddDistributedMemoryCache();
             services.AddOidcStateDataFormatterCache();
 
-            services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
-                .AddCertificate("Certificate", options =>
-                {
-                    // allows both self-signed and CA-based certs. Check the MTLS spec for details.
-                    options.AllowedCertificateTypes = CertificateTypes.All;
-                }).AddCookie(options =>
-                {
-                    options.Cookie.Name = "BA.";
-                })
-            .AddOpenIdConnect()
-            .AddGoogle()
-            .AddFacebook()
-            .AddTwitter()
-            .AddMicrosoftAccount();
+            var authenticationServices = services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
 
             services.AddMultiTenant<TenantSetting>().WithHostStrategy("__tenant__").WithStore(new ServiceLifetime(), (sp) => new RavenDBMultitenantStore(sp.GetService<IDocumentStore>(), sp.GetService<IMemoryCache>()))
                 .WithPerTenantOptions<AccountOptions>((options, tenantInfo) =>
@@ -195,6 +203,39 @@ namespace Authentication
                     options.Lockout = tenantInfo.IdentityOptions.Lockout;
                     options.User = tenantInfo.IdentityOptions.User;
                     options.SignIn = tenantInfo.IdentityOptions.SignIn;
+                })
+                .WithPerTenantOptions<EmailOptions>((options, tenantInfo) =>
+                {
+                    if (tenantInfo.EmailSettings.From != null)
+                        options.From = tenantInfo.EmailSettings.From;
+                    if (tenantInfo.EmailSettings.ReplyTo != null)
+                        options.ReplyTo = tenantInfo.EmailSettings.ReplyTo;
+                    if (tenantInfo.EmailSettings.DisplayName != null)
+                        options.DisplayName = tenantInfo.EmailSettings.DisplayName;
+                    if (tenantInfo.EmailSettings.SupportEmail != null)
+                        options.SupportEmail = tenantInfo.EmailSettings.SupportEmail;
+                    if (tenantInfo.EmailSettings.SendingKey != null)
+                        options.SendingKey = tenantInfo.EmailSettings.SendingKey;
+                    if (tenantInfo.EmailSettings.PrivateKey != null)
+                        options.PrivateKey = tenantInfo.EmailSettings.PrivateKey;
+                    if (tenantInfo.EmailSettings.ApiBaseUrl != null)
+                        options.ApiBaseUrl = tenantInfo.EmailSettings.ApiBaseUrl;
+                })
+                .WithPerTenantOptions<SmsOptions>((options, tenantInfo) =>
+                {
+                    if (tenantInfo.SmsSettings.SmsAccountFrom != null)
+                        options.SmsAccountFrom = tenantInfo.SmsSettings.SmsAccountFrom;
+                    if (tenantInfo.SmsSettings.SmsAccountIdentification != null)
+                        options.SmsAccountIdentification = tenantInfo.SmsSettings.SmsAccountIdentification;
+                    if (tenantInfo.SmsSettings.SmsAccountPassword != null)
+                        options.SmsAccountPassword = tenantInfo.SmsSettings.SmsAccountPassword;
+                })
+                .WithPerTenantOptions<GoogleCaptchaOptions>((options, tenantInfo) =>
+                {
+                    if (tenantInfo.GoogleCaptcha.Secret != null)
+                        options.Secret = tenantInfo.GoogleCaptcha.Secret;
+                    if (tenantInfo.GoogleCaptcha.SiteKey != null)
+                        options.SiteKey = tenantInfo.GoogleCaptcha.SiteKey;
                 })
                 .WithPerTenantOptions<PasswordTopologyValidatorOptions>((options, tenantInfo) =>
                 {
@@ -304,6 +345,32 @@ namespace Authentication
                         OnRemoteFailure = HandleOnRemoteFailure
                     };
                 })
+                .WithPerTenantOptions<OpenIdConnectOptions>((o, tenantInfo) =>
+                {
+                    if (!tenantInfo.ExternalIdps.Any(t => !t.Name.In("MicrosoftAccount", "Twitter", "Facebook", "Google") && t.Enabled))
+                    {
+                        o.ClientId = "test";
+                        o.ClientSecret = "test";
+                        return;
+                    }
+
+                    o.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+
+                    // You must first create an app with Microsoft Account and add its ID and Secret to your user-secrets.
+                    // https://azure.microsoft.com/en-us/documentation/articles/active-directory-v2-app-registration/
+                    // https://apps.dev.microsoft.com/
+
+                    var microsoftSettings = tenantInfo.ExternalIdps.First(t => t.Name == "MicrosoftAccount") as ExternalOidcIdentityProvider;
+
+                    o.ClientId = microsoftSettings.ClientId;
+                    o.ClientSecret = microsoftSettings.ClientSecret;
+                    o.SaveTokens = true;
+                    o.Scope.Add("offline_access");
+                    o.Events = new OpenIdConnectEvents()
+                    {
+                        OnRemoteFailure = HandleOnRemoteFailure
+                    };
+                })
                 .WithPerTenantAuthentication();
 
             services.AddControllersWithViews();
@@ -397,6 +464,20 @@ namespace Authentication
                 .AddTransientHttpErrorPolicy(p => p.WaitAndRetryAsync(20, retryAttempt => TimeSpan.FromMilliseconds(300 * retryAttempt)));
 
             //services.AddTransient<IRedirectUriValidator, RedirectUriValidator>();
+
+            authenticationServices.AddCertificate("Certificate", options =>
+             {
+                 // allows both self-signed and CA-based certs. Check the MTLS spec for details.
+                 options.AllowedCertificateTypes = CertificateTypes.All;
+             }).AddCookie(options =>
+             {
+                 options.Cookie.Name = "BA.";
+             });
+            //.AddOpenIdConnect()
+            //.AddGoogle();
+            //.AddFacebook()
+            //.AddTwitter()
+            //.AddMicrosoftAccount();
 
             var builder = services.AddIdentityServer(options =>
             {
