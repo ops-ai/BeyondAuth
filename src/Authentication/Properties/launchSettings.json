@@ -12,6 +12,7 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
+        "VaultUri": "https://opsaiauthdev.vault.azure.net/",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
