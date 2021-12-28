@@ -2,6 +2,7 @@
 using Authentication.Options;
 using Finbuckle.MultiTenant;
 using Identity.Core;
+using Identity.Core.Settings;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;

@@ -1,4 +1,4 @@
-﻿namespace Authentication.Options
+﻿namespace Identity.Core.Settings
 {
     /// <summary>
     /// Email sending options

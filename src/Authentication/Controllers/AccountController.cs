@@ -255,6 +255,7 @@ namespace Authentication.Controllers
                     EnableLocalLogin = local,
                     ReturnUrl = returnUrl,
                     Email = context?.LoginHint,
+                    SignupUrl = _accountOptions.Value.SignupUrl
                 };
 
                 if (!local)
@@ -294,7 +295,8 @@ namespace Authentication.Controllers
                 EnableLocalLogin = allowLocal && _accountOptions.Value.AllowLocalLogin,
                 ReturnUrl = returnUrl,
                 Email = context?.LoginHint,
-                ExternalProviders = providers.ToArray()
+                ExternalProviders = providers.ToArray(),
+                SignupUrl = _accountOptions.Value.SignupUrl
             };
         }
 

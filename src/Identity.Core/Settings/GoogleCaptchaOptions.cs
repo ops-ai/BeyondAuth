@@ -1,4 +1,4 @@
-﻿namespace Authentication.Options
+﻿namespace Identity.Core.Settings
 {
     /// <summary>
     /// Google captcha settings

@@ -15,6 +15,8 @@ namespace Authentication.Models.Account
 
         public bool AllowPasswordReset { get; set; } = true;
 
+        public string SignupUrl { get; set; }
+
         public IEnumerable<ExternalProvider> ExternalProviders { get; set; } = Enumerable.Empty<ExternalProvider>();
 
         public IEnumerable<ExternalProvider> VisibleExternalProviders => ExternalProviders.Where(x => !string.IsNullOrWhiteSpace(x.DisplayName));
