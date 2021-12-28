@@ -13,7 +13,7 @@ namespace BeyondAuth.PasswordValidators.Common
             {
                 return Task.FromResult(IdentityResult.Failed(new IdentityError
                 {
-                    Code = "UsernameAsPassword",
+                    Code = "PasswordUsernameAsPassword",
                     Description = "Password cannot be the same as the username"
                 }));
             }

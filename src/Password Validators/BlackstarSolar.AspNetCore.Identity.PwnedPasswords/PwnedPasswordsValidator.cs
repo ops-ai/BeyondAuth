@@ -31,7 +31,7 @@
                 return IdentityResult.Success;
             }
 
-            var result = IdentityResult.Failed(new IdentityError {Description = options.ErrorMessage});
+            var result = IdentityResult.Failed(new IdentityError {Description = options.ErrorMessage, Code = "PwnedPassword" });
             return result;
         }
     }

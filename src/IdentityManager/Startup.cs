@@ -82,6 +82,9 @@ namespace IdentityManager
 
             services.Configure<IdentityOptions>(options =>
             {
+                options.User.AllowedUserNameCharacters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789-._@+ ";
+                options.User.RequireUniqueEmail = true;
+
                 // Default Lockout settings.
                 options.Password.RequireDigit = false;
                 options.Password.RequireLowercase = false;
@@ -90,7 +93,10 @@ namespace IdentityManager
                 options.Password.RequiredLength = 4;
             });
 
-            services.AddMultiTenant<TenantSetting>().WithRouteStrategy("dataSourceId").WithStore(new ServiceLifetime(), (sp) => new RavenDBMultitenantStore(sp.GetService<IDocumentStore>(), sp.GetService<IMemoryCache>()))
+            services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
+                .AddIdentityServerAuthentication();
+
+            services.AddMultiTenant<TenantSetting>().WithBasePathStrategy().WithStore(new ServiceLifetime(), (sp) => new RavenDBMultitenantStore(sp.GetService<IDocumentStore>(), sp.GetService<IMemoryCache>()))
                 .WithPerTenantOptions<IdentityStoreOptions>((options, tenantInfo) =>
                 {
                     options.DatabaseName = $"TenantIdentity-{tenantInfo.Identifier}";
@@ -116,8 +122,10 @@ namespace IdentityManager
                     options.Authority = $"https://{tenantInfo.Identifier}";
                     options.ApiSecret = tenantInfo.IdpSettings.ApiSecret;
                     options.ApiName = tenantInfo.IdpSettings.ApiName;
+                    options.RequireHttpsMetadata = true;
                     options.SupportedTokens = SupportedTokens.Both;
                     options.EnableCaching = true;
+                    //options.Validate();
                     //options.CacheDuration = TimeSpan.FromMinutes(1);
                 })
                 .WithPerTenantOptions<NSwag.Generation.AspNetCore.AspNetCoreOpenApiDocumentGeneratorSettings>((config, tenantInfo) =>
@@ -150,14 +158,14 @@ namespace IdentityManager
                         Type = OpenApiSecuritySchemeType.OAuth2,
                         Description = "Auth",
                         Flow = OpenApiOAuth2Flow.AccessCode,
-                        OpenIdConnectUrl = new Uri(new Uri(Configuration["Authentication:Authority"]), ".well-known/openid-configuration").AbsoluteUri,
+                        OpenIdConnectUrl = new Uri(new Uri($"https://{tenantInfo.Identifier}"), ".well-known/openid-configuration").AbsoluteUri,
                         Flows = new OpenApiOAuthFlows
                         {
                             AuthorizationCode = new OpenApiOAuthFlow
                             {
-                                AuthorizationUrl = new Uri(new Uri(Configuration["Authentication:Authority"]), "connect/authorize").AbsoluteUri,
-                                TokenUrl = new Uri(new Uri(Configuration["Authentication:Authority"]), "connect/token").AbsoluteUri,
-                                Scopes = new Dictionary<string, string> { { "openid", "openid" }, { Configuration["Authentication:ApiName"], Configuration["Authentication:ApiName"] } }
+                                AuthorizationUrl = new Uri(new Uri($"https://{tenantInfo.Identifier}"), "connect/authorize").AbsoluteUri,
+                                TokenUrl = new Uri(new Uri($"https://{tenantInfo.Identifier}"), "connect/token").AbsoluteUri,
+                                Scopes = new Dictionary<string, string> { { "openid", "openid" }, { tenantInfo.IdpSettings.ApiName, tenantInfo.IdpSettings.ApiName } }
                             }
                         }
                     });
@@ -187,9 +195,6 @@ namespace IdentityManager
                     policy.RequireClaim("scope", Configuration["Authentication:ApiName"]);
                 });
             });
-
-            services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
-                .AddIdentityServerAuthentication();
 
             services.AddSingleton((ctx) =>
             {
