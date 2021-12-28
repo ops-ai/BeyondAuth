@@ -91,6 +91,9 @@ namespace Identity.Core
                 using (var session = _store.OpenAsyncSession())
                 {
                     cachedTenant = await session.Query<TenantSetting>().FirstOrDefaultAsync(t => t.Identifier.Equals(identifier));
+                    if (cachedTenant == null)
+                        return null;
+
                     cachedTenant.Id = cachedTenant.Id.Split('/').Last();
                 }
 

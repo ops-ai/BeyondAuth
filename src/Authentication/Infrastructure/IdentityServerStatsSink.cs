@@ -56,12 +56,14 @@ namespace Authentication.Infrastructure
                         session.TimeSeriesFor($"Clients/{clientAuthFailure.ClientId}", evt.Name).Append(evt.TimeStamp, 1);
                         break;
                     case TokenIssuedSuccessEvent tokenIssuedSuccess:
-                        session.TimeSeriesFor($"Clients/{tokenIssuedSuccess.ClientId}", evt.Name).Append(evt.TimeStamp, 1, tokenIssuedSuccess.SubjectId);
-                        session.TimeSeriesFor(tokenIssuedSuccess.SubjectId, evt.Name).Append(evt.TimeStamp, 1, $"Clients/{tokenIssuedSuccess.ClientId}");
+                        session.TimeSeriesFor($"Clients/{tokenIssuedSuccess.ClientId}", evt.Name).Append(evt.TimeStamp, 1, tokenIssuedSuccess.SubjectId ?? tokenIssuedSuccess.ClientId);
+                        if (tokenIssuedSuccess.SubjectId != null)
+                            session.TimeSeriesFor(tokenIssuedSuccess.SubjectId, evt.Name).Append(evt.TimeStamp, 1, $"Clients/{tokenIssuedSuccess.ClientId}");
                         break;
                     case TokenIssuedFailureEvent tokenIssuedFailure:
-                        session.TimeSeriesFor($"Clients/{tokenIssuedFailure.ClientId}", evt.Name).Append(evt.TimeStamp, 1, tokenIssuedFailure.SubjectId);
-                        session.TimeSeriesFor(tokenIssuedFailure.SubjectId, evt.Name).Append(evt.TimeStamp, 1, $"Clients/{tokenIssuedFailure.ClientId}");
+                        session.TimeSeriesFor($"Clients/{tokenIssuedFailure.ClientId}", evt.Name).Append(evt.TimeStamp, 1, tokenIssuedFailure.SubjectId ?? tokenIssuedFailure.ClientId);
+                        if (tokenIssuedFailure.SubjectId != null)
+                            session.TimeSeriesFor(tokenIssuedFailure.SubjectId, evt.Name).Append(evt.TimeStamp, 1, $"Clients/{tokenIssuedFailure.ClientId}");
                         break;
                     case TokenIntrospectionSuccessEvent tokenIntrospectionSuccess:
                         session.TimeSeriesFor($"ApiResources/{tokenIntrospectionSuccess.ApiName}", evt.Name).Append(evt.TimeStamp, 1);
@@ -73,7 +75,8 @@ namespace Authentication.Infrastructure
                         session.TimeSeriesFor($"Clients/{tokenRevokedSuccess.ClientId}", evt.Name).Append(evt.TimeStamp, 1);
                         break;
                     case UserLoginSuccessEvent userLoginSuccess:
-                        session.TimeSeriesFor($"Clients/{userLoginSuccess.ClientId}", evt.Name).Append(evt.TimeStamp, 1, userLoginSuccess.SubjectId);
+                        if (userLoginSuccess.ClientId != null)
+                            session.TimeSeriesFor($"Clients/{userLoginSuccess.ClientId}", evt.Name).Append(evt.TimeStamp, 1, userLoginSuccess.SubjectId);
                         session.TimeSeriesFor(userLoginSuccess.SubjectId, evt.Name).Append(evt.TimeStamp, 1, $"Clients/{userLoginSuccess.ClientId}");
                         break;
                     case UserLoginFailureEvent userLoginFailure:

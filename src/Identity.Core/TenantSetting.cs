@@ -1,5 +1,6 @@
 ﻿using BeyondAuth.Acl;
 using Finbuckle.MultiTenant;
+using Identity.Core.Settings;
 using Microsoft.AspNetCore.Identity;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
@@ -77,11 +78,17 @@ namespace Identity.Core
         /// <summary>
         /// List of ACEs storing permissions for the secured entity
         /// </summary>
-        public List<AceEntry> AceEntries { get; set; }
+        public List<AceEntry> AceEntries { get; set; } = new List<AceEntry>();
 
         [JsonIgnore]
         public ISecurableEntity AclHolder { get; set; }
 
-        public IdpOptions IdpSettings { get; set; }
+        public IdpOptions IdpSettings { get; set; } = new IdpOptions();
+
+        public EmailOptions EmailSettings { get; set; } = new EmailOptions();
+
+        public SmsOptions SmsSettings { get; set; } = new SmsOptions();
+
+        public GoogleCaptchaOptions GoogleCaptcha { get; set; } = new GoogleCaptchaOptions();
     }
 }
