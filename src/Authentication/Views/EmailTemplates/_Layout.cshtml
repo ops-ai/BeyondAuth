@@ -1,4 +1,10 @@
-﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+﻿@using Finbuckle.MultiTenant
+@{
+    var tenantInfo = Context.GetMultiTenantContext<Identity.Core.TenantSetting>()?.TenantInfo;
+    string primaryColor = tenantInfo?.BrandingOptions?.PrimaryColor ?? "@primaryColor";
+    string secondaryColor = tenantInfo?.BrandingOptions?.SecondaryColor ?? "@primaryColor";
+}
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-us">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -82,7 +88,7 @@
         }
 
         .h1 {
-            color: #177CAB;
+            color: @primaryColor;
         }
 
         .h2 {
@@ -98,7 +104,7 @@
         }
 
         h1, h2, h3, h4, h5, h6 {
-            color: #177CAB /*Contrast*/;
+            color: @primaryColor /*Contrast*/;
         }
 
         .invert, .invert p, .invert h1 {
@@ -106,11 +112,11 @@
         }
 
         a {
-            color: #177CAB;
+            color: @primaryColor;
         }
 
             a:link, a:visited, a:hover {
-                color: #177CAB;
+                color: @primaryColor;
             }
 
         .invert a {
@@ -180,15 +186,15 @@
         }
 
             h1 a, h2 a, h3 a, h4 a, h5 a, h6 a {
-                color: #177CAB;
+                color: @primaryColor;
             }
 
                 h1 a:active, h2 a:active, h3 a:active, h4 a:active, h5 a:active, h6 a:active {
-                    color: #177CAB !important;
+                    color: @primaryColor !important;
                 }
 
                 h1 a:visited, h2 a:visited, h3 a:visited, h4 a:visited, h5 a:visited, h6 a:visited {
-                    color: #177CAB !important;
+                    color: @primaryColor !important;
                 }
 
         .h1 {
@@ -217,7 +223,7 @@
         }
 
         .wrap.body-i {
-            background-color: #177CAB;
+            background-color: @primaryColor;
         }
 
         .wrap.footer {
@@ -317,7 +323,7 @@
         }
 
         .cta table.textbutton td {
-            background: #177CAB;
+            background: @primaryColor;
             border: 0;
             height: 36px;
             padding: 3px 16px 7px 16px;
@@ -461,7 +467,7 @@
                                         <table cellpadding="0" cellspacing="0" align="left" class="m-b">
                                             <tr>
                                                 <td width="350" valign="middle" align="left" class="m-1-2">
-                                                    <img src="https://account.beyondauth.io/logo.png" alt="" title="" width="350" height="39" border="0" style="max-width:350px;" />
+                                                    <img src="@(tenantInfo?.BrandingOptions?.Logo ?? "https://account.beyondauth.io/logo.png")" alt="" title="" border="0" style="max-width:350px;" />
                                                 </td>
                                             </tr>
                                         </table>
@@ -480,7 +486,7 @@
                         </td>
                     </tr>
                 </table>
-                <table width="600" cellpadding="0" cellspacing="0" class="wrap" bgcolor="#177CAB"><tr><td width="600" height="6" style="line-height:6px;font-size:6px;border-left:1px solid #177CAB">&nbsp;</td></tr></table>
+                <table width="600" cellpadding="0" cellspacing="0" class="wrap" bgcolor="@primaryColor"><tr><td width="600" height="6" style="line-height:6px;font-size:6px;border-left:1px solid @primaryColor">&nbsp;</td></tr></table>
                 <table width="600" cellpadding="0" cellspacing="0" class="wrap body"><tr><td class="bl br" width="600" height="24">&nbsp;</td></tr></table>
 
                 <!-- ☺ header block ends here -->
@@ -525,23 +531,7 @@
                                     <td width="24" class="padd">&nbsp;</td>
                                     <!-- CONTENT start -->
                                     <td width="552" valign="top" align="left">
-                                        @*<table cellpadding="0" cellspacing="0" align="left">
-                                                <tr>
-                                                    <td width="408" class="small m-b" align="left" valign="top">
-                                                        <div><span>This message was sent to @ViewData["EmailTo"]. If you don't want to receive these emails from  in the future, please <a href="https://account.beyondauth.io/unsubscribe/@ViewData["EmailType"]">unsubscribe</a></span></div>
-                                                    </td>
-                                                </tr>
-                                            </table>
-                                            <table cellpadding="0" cellspacing="0" align="right">
-                                                <tr>
-                                                    <td width="120" class="small social" align="right" valign="top">
-                                                        <div>
-                                                            <a href="https://twitter.com"><img src="img/twitter.png" alt="" title="" width="32" height="32" border="0" style="max-width:32px;max-height:32px;" /></a>
-                                                            <a href="https://facebook.com"><img src="img/facebook.png" alt="" title="" width="32" height="32" border="0" style="max-width:32px;max-height:32px;" /></a>
-                                                        </div>
-                                                    </td>
-                                                </tr>
-                                            </table>*@
+                                        
                                     </td>
                                     <!-- CONTENT end -->
                                     <td width="24" class="padd">&nbsp;</td>

@@ -1,4 +1,4 @@
-﻿namespace Authentication.Options
+﻿namespace Identity.Core.Settings
 {
     /// <summary>
     /// Settings for sending text messages

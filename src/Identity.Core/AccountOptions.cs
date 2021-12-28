@@ -68,5 +68,10 @@ namespace Identity.Core
         /// Default domain to be appended if only username is entered
         /// </summary>
         public string DefaultDomain { get; set; }
+
+        /// <summary>
+        /// Url to provide the user to sign up
+        /// </summary>
+        public string SignupUrl { get; set; }
     }
 }
