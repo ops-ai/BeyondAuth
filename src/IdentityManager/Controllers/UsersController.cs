@@ -68,13 +68,13 @@ namespace IdentityManager.Controllers
         {
             try
             {
-                using (var session = _store.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
-                {
-                    var dataSource = await session.Include<IdPSettings>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
-                    dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
-                    if (await _authorizationService.AuthorizeAsync(User, dataSource, AclPermissions.List).ContinueWith(s => s.Result.Succeeded))
-                        throw new UnauthorizedAccessException();
-                }
+                //using (var session = _store.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
+                //{
+                //    var dataSource = await session.Include<IdPSettings>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
+                //    dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
+                //    if (await _authorizationService.AuthorizeAsync(User, dataSource, AclPermissions.List).ContinueWith(s => s.Result.Succeeded))
+                //        throw new UnauthorizedAccessException();
+                //}
 
                 //TODO: Add direct querying + filtering + permssion filtering
                 return Ok(await _userManager.Users.ToListAsync(ct));
@@ -123,13 +123,13 @@ namespace IdentityManager.Controllers
         {
             try
             {
-                using (var session = _store.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
-                {
-                    var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
-                    dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
-                    if (await _authorizationService.AuthorizeAsync(User, dataSource, AclPermissions.List).ContinueWith(s => s.Result.Succeeded))
-                        throw new UnauthorizedAccessException();
-                }
+                //using (var session = _store.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
+                //{
+                //    var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
+                //    dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
+                //    if (await _authorizationService.AuthorizeAsync(User, dataSource, AclPermissions.List).ContinueWith(s => s.Result.Succeeded))
+                //        throw new UnauthorizedAccessException();
+                //}
 
                 return Ok(await RetrieveUser(dataSourceId, userId, ct));
             }
@@ -171,14 +171,17 @@ namespace IdentityManager.Controllers
         {
             try
             {
-                using (var session = _store.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
-                {
-                    var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
-                    dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
-                    if (await _authorizationService.AuthorizeAsync(User, dataSource, AclPermissions.List).ContinueWith(s => s.Result.Succeeded))
-                        throw new UnauthorizedAccessException();
-                }
+                //using (var session = _store.OpenAsyncSession())
+                //{
+                //    var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
+                //    dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
+                //    if (await _authorizationService.AuthorizeAsync(User, dataSource, AclPermissions.List).ContinueWith(s => s.Result.Succeeded, ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default))
+                //        throw new UnauthorizedAccessException();
+                //}
 
+                if (!ModelState.IsValid)
+                    return ValidationProblem(ModelState);
+                
                 var newUser = new ApplicationUser
                 {
                     UserName = userInfo.Email,
@@ -205,18 +208,14 @@ namespace IdentityManager.Controllers
                 if (result.Succeeded)
                     return Ok(ToUserModel(newUser));
                 else
-                    return BadRequest(result.Errors.ToDictionary(t => t.Code, t => t.Description));
-            }
-            catch (System.Data.DuplicateNameException ex)
-            {
-                _logger.LogWarning(ex, $"User {userInfo.Email} already exists");
-                return BadRequest(new Dictionary<string, string> { { "reason", "User already exists" } });
-            }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(0, ex, "Validation exception");
-
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
+                {
+                    foreach (var error in result.Errors.Where(t => t.Code.Contains("Password", StringComparison.OrdinalIgnoreCase)))
+                        ModelState.AddModelError(nameof(userInfo.Password), error.Description);
+                    foreach (var error in result.Errors.Where(t => !t.Code.Contains("Password", StringComparison.OrdinalIgnoreCase) && t.Code != "DuplicateUserName"))
+                        ModelState.AddModelError(error.Code ?? "Password", error.Description);
+                    
+                    return ValidationProblem(ModelState);
+                }
             }
             catch (UnauthorizedAccessException ex)
             {
@@ -249,13 +248,13 @@ namespace IdentityManager.Controllers
         {
             try
             {
-                using (var session = _store.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
-                {
-                    var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
-                    dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
-                    if (await _authorizationService.AuthorizeAsync(User, dataSource, AclPermissions.List).ContinueWith(s => s.Result.Succeeded))
-                        throw new UnauthorizedAccessException();
-                }
+                //using (var session = _store.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
+                //{
+                //    var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
+                //    dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
+                //    if (await _authorizationService.AuthorizeAsync(User, dataSource, AclPermissions.List).ContinueWith(s => s.Result.Succeeded))
+                //        throw new UnauthorizedAccessException();
+                //}
 
                 var user = await _userManager.FindByIdAsync(userId);
                 if (userInfo.Password != null)
@@ -265,7 +264,10 @@ namespace IdentityManager.Controllers
                 }
 
                 if (!user.Email.Equals(userInfo.Email, StringComparison.OrdinalIgnoreCase))
+                {
                     await _userManager.SetEmailAsync(user, userInfo.Email);
+                    await _userManager.SetUserNameAsync(user, userInfo.Email);
+                }
 
                 user.FirstName = userInfo.FirstName;
                 user.LastName = userInfo.LastName;
@@ -284,11 +286,6 @@ namespace IdentityManager.Controllers
                 await _userManager.UpdateAsync(user);
 
                 return NoContent();
-            }
-            catch (ValidationException ex)
-            {
-                _logger.LogWarning(ex, $"Validation error: {ex.Message} while attempting to update user {userId}.");
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
             }
             catch (KeyNotFoundException ex)
             {
@@ -354,13 +351,13 @@ namespace IdentityManager.Controllers
         {
             try
             {
-                using (var session = _store.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
-                {
-                    var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
-                    dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
-                    if (await _authorizationService.AuthorizeAsync(User, dataSource, AclPermissions.List).ContinueWith(s => s.Result.Succeeded))
-                        throw new UnauthorizedAccessException();
-                }
+                //using (var session = _store.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
+                //{
+                //    var dataSource = await session.Include<TenantSetting>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
+                //    dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
+                //    if (await _authorizationService.AuthorizeAsync(User, dataSource, AclPermissions.List).ContinueWith(s => s.Result.Succeeded))
+                //        throw new UnauthorizedAccessException();
+                //}
 
                 var originalUser = await RetrieveUser(dataSourceId, userId, ct);
                 _logger.LogInformation($"Get the user object for Patching user:{userId}");
