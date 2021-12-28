@@ -7,7 +7,7 @@ trigger:
 - develop
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'windows-2022'
 
 variables:
   solution: '**/*.sln'
@@ -19,18 +19,16 @@ steps:
   inputs:
     versionSpec: 
     checkLatest: true
-
-- task: GitVersion@5
+    
+- task: gitversion/setup@0
   inputs:
-    runtime: 'core'
+    versionSpec: '5.x'
+    
+- task: gitversion/execute@0
+  inputs:
     updateAssemblyInfo: true
-    updateAssemblyInfoFilename: 'AssemblyInfo.cs'
+    updateAssemblyInfoFilename: '$(Build.SourcesDirectory)\AssemblyInfo.cs'
     additionalArguments: '/output buildserver'
-
-- task: UseDotNet@2
-  inputs:
-    packageType: 'sdk'
-    version: '5.0.301'
 
 - task: SonarCloudPrepare@1
   inputs:
@@ -53,32 +51,20 @@ steps:
     format: 'ALL'
     additionalArguments: '--disableBundleAudit --disableRubygems --disableNodeJS --disablePyPkg --disablePyDist --out "$(Agent.BuildDirectory)"'
   continueOnError: true
-
+  
 - task: DotNetCoreCLI@2
-  inputs:
-    command: 'custom'
-    custom: 'build-server'
-    arguments: 'shutdown'
-
-- task: NuGetCommand@2
-  inputs:
-    command: 'restore'
-    restoreSolution: '$(solution)'
-    feedsToUse: 'select'
-    vstsFeed: 'a176869a-9c3b-49c9-a033-c415e60df8aa'
-
-- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
   inputs:
     command: 'build'
     projects: '$(solution)'
-    arguments: '-c $(buildConfiguration)'
-
+    configuration: $(buildConfiguration)
+    
 - task: DotNetCoreCLI@2
   displayName: 'dotnet test'
   inputs:
     command: test
     projects: '$(solution)'
-    arguments: '--no-restore --no-build -c $(buildConfiguration) --collect:"XPlat Code Coverage"'
+    arguments: '-c $(buildConfiguration) --collect:"XPlat Code Coverage"'
     
 - task: Npm@1
   inputs:
@@ -102,4 +88,18 @@ steps:
 - task: SonarCloudPublish@1
   inputs:
     pollingTimeoutSec: '300'
+    
+- task: DotNetCoreCLI@2
+  inputs:
+    command: publish
+    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    projects: '$(solution)'
+    publishWebProjects: true
+    modifyOutputPath: true
+    zipAfterPublish: true
 
+- task: PublishBuildArtifacts@1
+  inputs:
+    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+    ArtifactName: 'drop'
+    publishLocation: 'Container'
