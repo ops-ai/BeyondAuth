@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio Version 16
-VisualStudioVersion = 16.0.29519.87
+# Visual Studio Version 17
+VisualStudioVersion = 17.0.32014.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Blockchain", "Blockchain\Blockchain.csproj", "{7A3768A8-DDC8-4DD6-873E-D87DF0D2821A}"
 EndProject
@@ -13,6 +13,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".Solution Items", ".Solutio
 		..\.gitignore = ..\.gitignore
 		..\azure-pipelines.yml = ..\azure-pipelines.yml
 		..\GitVersion.yml = ..\GitVersion.yml
+		nlog.config = nlog.config
 		nuget.config = nuget.config
 		xunit.runner.json = xunit.runner.json
 	EndProjectSection
@@ -76,7 +77,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Documentation", "Documentat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.Swim", "BeyondAuth.Swim\BeyondAuth.Swim.csproj", "{8F00ED31-7EE0-4DB7-AD6F-27BA7E910674}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondAuth.PasswordValidators.Common", "Password Validators\BeyondAuth.PasswordValidators.Common\BeyondAuth.PasswordValidators.Common.csproj", "{3EE2D96A-56C8-4391-B424-FCB76612D547}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.PasswordValidators.Common", "Password Validators\BeyondAuth.PasswordValidators.Common\BeyondAuth.PasswordValidators.Common.csproj", "{3EE2D96A-56C8-4391-B424-FCB76612D547}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Password Validators", "Password Validators", "{909B4F42-EC1D-4237-B5E2-7C31FB55A29E}"
 EndProject
@@ -84,7 +85,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SharpPwned.NET", "Password 
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlackstarSolar.AspNetCore.Identity.PwnedPasswords", "Password Validators\BlackstarSolar.AspNetCore.Identity.PwnedPasswords\BlackstarSolar.AspNetCore.Identity.PwnedPasswords.csproj", "{6904FA32-7393-49BE-BC5E-012479DD4464}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondAuth.PasswordValidators.Topology", "Password Validators\BeyondAuth.PasswordValidators.Topology\BeyondAuth.PasswordValidators.Topology.csproj", "{19204E87-D442-4C0F-8CE3-0BA765BECD78}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.PasswordValidators.Topology", "Password Validators\BeyondAuth.PasswordValidators.Topology\BeyondAuth.PasswordValidators.Topology.csproj", "{19204E87-D442-4C0F-8CE3-0BA765BECD78}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -235,7 +236,7 @@ Global
 		{19204E87-D442-4C0F-8CE3-0BA765BECD78} = {909B4F42-EC1D-4237-B5E2-7C31FB55A29E}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
 		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
+		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
 	EndGlobalSection
 EndGlobal

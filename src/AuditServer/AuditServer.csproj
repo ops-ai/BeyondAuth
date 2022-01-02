@@ -63,4 +63,8 @@
     <Folder Include="Models\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Include="..\nlog.config" Link="nlog.config" />
+  </ItemGroup>
+
 </Project>

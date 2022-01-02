@@ -8,6 +8,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="..\nlog.config" Link="nlog.config" />
+  </ItemGroup>
+
+  <ItemGroup>
     <Protobuf Include="Protos\authorization.proto" GrpcServices="Server" />
   </ItemGroup>
 

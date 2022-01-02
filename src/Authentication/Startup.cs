@@ -122,7 +122,11 @@ namespace Authentication
                     .AddFeatureFilter<TargetingFilter>()
                     .AddFeatureFilter<TimeWindowFilter>();
 
-            NLog.GlobalDiagnosticsContext.Set("AzureLogStorageConnectionString", Configuration["Azure:LogStorageConnectionString"]);
+            NLog.GlobalDiagnosticsContext.Set("AzureLogStorageConnectionString", Configuration["LogStorage:AzureStorage"]);
+            NLog.GlobalDiagnosticsContext.Set("LokiConnectionString", Configuration["LogStorage:Loki:Url"]);
+            NLog.GlobalDiagnosticsContext.Set("LokiUsername", Configuration["LogStorage:Loki:Username"]);
+            NLog.GlobalDiagnosticsContext.Set("LokiPassword", Configuration["LogStorage:Loki:Password"]);
+            NLog.GlobalDiagnosticsContext.Set("AppName", Configuration["DataProtection:AppName"]);
 
             services.AddDefaultCorrelationId(options =>
             {

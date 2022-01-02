@@ -26,6 +26,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Include="..\nlog.config" Link="nlog.config" />
     <None Include="compilerconfig.json" />
     <None Include="Views\Shared\Error.cshtml" />
     <None Include="Views\Shared\_Layout.cshtml" />

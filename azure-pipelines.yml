@@ -27,7 +27,7 @@ steps:
 - task: gitversion/execute@0
   inputs:
     updateAssemblyInfo: true
-    updateAssemblyInfoFilename: '$(Build.SourcesDirectory)\AssemblyInfo.cs'
+    updateAssemblyInfoFilename: '$(Build.SourcesDirectory)\src\AssemblyInfo.cs'
     additionalArguments: '/output buildserver'
 
 - task: SonarCloudPrepare@1
