@@ -4,6 +4,9 @@
     <TargetFramework>net6.0</TargetFramework>
     <UserSecretsId>f1184571-37d6-44ca-b592-4e0c350dd77a</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
+	<ApplicationIcon />
+	<OutputType>Exe</OutputType>
+	<StartupObject />
   </PropertyGroup>
 
   <ItemGroup>

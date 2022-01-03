@@ -7,6 +7,9 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+	<ApplicationIcon />
+	<OutputType>Exe</OutputType>
+	<StartupObject />
   </PropertyGroup>
 
   <ItemGroup>
@@ -56,12 +59,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\PolicyServer.Core\PolicyServer.Core.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="AuthorizationServer.pfx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

@@ -5,6 +5,9 @@
     <UserSecretsId>bbbedb5f-82ed-49df-ac2f-b683b0f73cf8</UserSecretsId>
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+	<ApplicationIcon />
+	<OutputType>Exe</OutputType>
+	<StartupObject />
   </PropertyGroup>
 
   <ItemGroup>
@@ -62,12 +65,6 @@
     <ProjectReference Include="..\Authorization Handlers\AuthorizationPolicyProvider\BeyondAuth.PolicyProvider.csproj" />
     <ProjectReference Include="..\Authorization Handlers\BeyondAuth.Acl\BeyondAuth.Acl.csproj" />
     <ProjectReference Include="..\Authorization Handlers\BeyondAuth.RelatedDataValidation\BeyondAuth.RelatedDataValidation.csproj" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <None Update="AuthorizationServer.pfx">
-      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-    </None>
   </ItemGroup>
 
 </Project>

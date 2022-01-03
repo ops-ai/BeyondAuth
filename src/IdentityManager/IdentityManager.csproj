@@ -7,6 +7,9 @@
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
+	<ApplicationIcon />
+	<OutputType>Exe</OutputType>
+	<StartupObject />
   </PropertyGroup>
 
   <ItemGroup>
