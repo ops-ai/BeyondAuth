@@ -10,7 +10,7 @@ pool:
   vmImage: 'windows-2022'
 
 variables:
-  solution: '**/*.sln'
+  solution: 'src/Authorization.sln'
   buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
@@ -19,11 +19,11 @@ steps:
   inputs:
     versionSpec: 
     checkLatest: true
-    
+
 - task: gitversion/setup@0
   inputs:
     versionSpec: '5.x'
-    
+
 - task: gitversion/execute@0
   inputs:
     updateAssemblyInfo: true
@@ -45,7 +45,7 @@ steps:
       sonar.coverage.exclusions="**Tests*.cs"
 
 - task: DotNetCoreCLI@2
-  displayName: 'dotnet build'
+  displayName: 'dotnet restore'
   inputs:
     command: 'restore'
     projects: '$(solution)'
@@ -57,7 +57,7 @@ steps:
   inputs:
     command: 'build'
     projects: '$(solution)'
-    configuration: $(buildConfiguration)
+    arguments: '--no-restore -c $(buildConfiguration)'
 
 - task: dependency-check-build-task@5
   inputs:
@@ -72,8 +72,8 @@ steps:
   inputs:
     command: test
     projects: '$(solution)'
-    arguments: '-c $(buildConfiguration) --collect:"XPlat Code Coverage"'
-    
+    arguments: '--no-restore --no-build -c $(buildConfiguration) --collect:"XPlat Code Coverage"'
+
 - task: Npm@1
   inputs:
     command: 'install'
@@ -96,7 +96,7 @@ steps:
 - task: SonarCloudPublish@1
   inputs:
     pollingTimeoutSec: '300'
-    
+
 - task: DotNetCoreCLI@2
   inputs:
     command: publish
