@@ -44,6 +44,21 @@ steps:
       sonar.coverageReportPaths=$(Agent.TempDirectory)\SonarQube.xml
       sonar.coverage.exclusions="**Tests*.cs"
 
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+  inputs:
+    command: 'restore'
+    projects: '$(solution)'
+    feedsToUse: 'select'
+    vstsFeed: 'a176869a-9c3b-49c9-a033-c415e60df8aa'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+  inputs:
+    command: 'build'
+    projects: '$(solution)'
+    configuration: $(buildConfiguration)
+
 - task: dependency-check-build-task@5
   inputs:
     projectName: '$(Build.DefinitionName)'
@@ -51,14 +66,7 @@ steps:
     format: 'ALL'
     additionalArguments: '--disableBundleAudit --disableRubygems --disableNodeJS --disablePyPkg --disablePyDist --out "$(Agent.BuildDirectory)"'
   continueOnError: true
-  
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet build'
-  inputs:
-    command: 'build'
-    projects: '$(solution)'
-    configuration: $(buildConfiguration)
-    
+
 - task: DotNetCoreCLI@2
   displayName: 'dotnet test'
   inputs:
