@@ -55,7 +55,7 @@ steps:
 - task: DotNetCoreCLI@2
   inputs:
     command: publish
-    arguments: '--configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    arguments: '--no-restore --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
     projects: '$(solution)'
     publishWebProjects: true
     modifyOutputPath: true
