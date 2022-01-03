@@ -1,0 +1,98 @@
+# ASP.NET Core (.NET Framework)
+# Build and test ASP.NET Core projects targeting the full .NET Framework.
+# Add steps that publish symbols, save build artifacts, and more:
+# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+
+trigger:
+- develop
+
+pool:
+  vmImage: 'windows-2022'
+
+variables:
+  solution: 'src/Authorization.sln'
+  buildPlatform: 'Any CPU'
+  buildConfiguration: 'Release'
+
+steps:
+- task: NuGetToolInstaller@1
+  inputs:
+    versionSpec: 
+    checkLatest: true
+
+- task: gitversion/setup@0
+  inputs:
+    versionSpec: '5.x'
+
+- task: gitversion/execute@0
+  inputs:
+    updateAssemblyInfo: true
+    updateAssemblyInfoFilename: '$(Build.SourcesDirectory)\src\AssemblyInfo.cs'
+    additionalArguments: '/output buildserver'
+
+- task: SonarCloudPrepare@1
+  inputs:
+    SonarCloud: 'SonarCloud'
+    organization: 'ops-ai'
+    scannerMode: 'MSBuild'
+    projectKey: 'ops-ai_authorization'
+    projectName: 'BeyondAuth'
+    projectVersion: '0.1'
+    extraProperties: |
+      sonar.dependencyCheck.reportPath=$(Agent.BuildDirectory)\dependency-check-report.xml
+      sonar.dependencyCheck.htmlReportPath=$(Agent.BuildDirectory)\dependency-check-report.html
+      sonar.coverageReportPaths=$(Agent.TempDirectory)\SonarQube.xml
+      sonar.coverage.exclusions="**Tests*.cs"
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet restore'
+  inputs:
+    command: 'restore'
+    projects: '$(solution)'
+    feedsToUse: 'select'
+    vstsFeed: 'a176869a-9c3b-49c9-a033-c415e60df8aa'
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet build'
+  inputs:
+    command: 'build'
+    projects: '$(solution)'
+    arguments: '--no-restore -c $(buildConfiguration)'
+
+- task: dependency-check-build-task@5
+  inputs:
+    projectName: '$(Build.DefinitionName)'
+    scanPath: '$(build.artifactstagingdirectory)'
+    format: 'ALL'
+    additionalArguments: '--disableBundleAudit --disableRubygems --disableNodeJS --disablePyPkg --disablePyDist --out "$(Agent.BuildDirectory)"'
+  continueOnError: true
+
+- task: DotNetCoreCLI@2
+  displayName: 'dotnet test'
+  inputs:
+    command: test
+    projects: '$(solution)'
+    arguments: '--no-restore --no-build -c $(buildConfiguration) --collect:"XPlat Code Coverage"'
+
+- task: Npm@1
+  inputs:
+    command: 'install'
+    workingDir: 'src/BeyondAuth.Web/ClientApp'
+
+- task: Npm@1
+  inputs:
+    command: 'custom'
+    workingDir: 'src/BeyondAuth.Web/ClientApp'
+    customCommand: 'run "test:coverage"'
+
+- task: reportgenerator@4
+  inputs:
+    reports: '$(Agent.TempDirectory)\**\coverage.cobertura.xml;src\BeyondAuth.Web\ClientApp\coverage\cobertura-coverage.xml'
+    targetdir: '$(Agent.TempDirectory)\'
+    reporttypes: 'SonarQube'
+
+- task: SonarCloudAnalyze@1
+
+- task: SonarCloudPublish@1
+  inputs:
+    pollingTimeoutSec: '300'
