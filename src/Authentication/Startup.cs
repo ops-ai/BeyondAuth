@@ -564,7 +564,6 @@ namespace Authentication
             }
 
             app.UseForwardedHeaders();
-            app.UseHttpsRedirection();
 
             app.UseResponseCaching();
 
