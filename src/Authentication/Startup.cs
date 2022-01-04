@@ -96,15 +96,13 @@ namespace Authentication
 
             services.Configure<ForwardedHeadersOptions>(options =>
             {
-                options.ForwardLimit = 1;
-                options.ForwardedForHeaderName = Configuration["Proxy:HeaderName"];
-                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor;
-                Configuration.GetSection("Proxy:Networks").Get<List<string>>().ForEach(ipNetwork =>
-                {
-                    if (IPAddressRange.TryParse(ipNetwork, out IPAddressRange range))
-                        options.KnownNetworks.Add(new IPNetwork(range.Begin, range.GetPrefixLength()));
-                });
+                options.ForwardLimit = 2;
+                //options.ForwardedForHeaderName = Configuration["Proxy:HeaderName"];
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+                options.KnownNetworks.Clear();
+                options.KnownProxies.Clear();
             });
+            services.AddCertificateForwarding(options => options.CertificateHeader = "X-ARR-ClientCert");
             //services.Configure<TogglySettings>(Configuration.GetSection("Toggly"));
             //builder.Services.AddSingleton<IFeatureDefinitionProvider, TogglyFeatureProvider>();
 
@@ -564,6 +562,9 @@ namespace Authentication
             }
 
             app.UseForwardedHeaders();
+            app.UseHsts();
+            app.UseHttpsRedirection();
+            app.UseCertificateForwarding();
 
             app.UseResponseCaching();
 
