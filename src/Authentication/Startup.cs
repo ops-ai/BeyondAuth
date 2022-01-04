@@ -561,12 +561,9 @@ namespace Authentication
             else
             {
                 app.UseExceptionHandler(new ExceptionHandlerOptions { ExceptionHandlingPath = "/home/error", AllowStatusCode404Response = false });
-                var options = new RewriteOptions()
-                    .AddRedirectToHttpsPermanent()
-                    .AddRedirectToNonWwwPermanent();
-                app.UseRewriter(options);
             }
 
+            app.UseForwardedHeaders();
             app.UseHttpsRedirection();
 
             app.UseResponseCaching();
@@ -575,8 +572,6 @@ namespace Authentication
             app.UseJSNLog(new LoggingAdapter(loggerFactory), jsnlogConfiguration);
 
             app.UseStaticFiles();
-
-            app.UseForwardedHeaders();
 
             //app.UseCors(x => x.AllowAnyOrigin().WithHeaders("accept", "authorization", "content-type", "origin").AllowAnyMethod());
 
