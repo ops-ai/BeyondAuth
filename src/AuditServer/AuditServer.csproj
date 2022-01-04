@@ -25,6 +25,7 @@
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.2.0" />
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.1" />
     <PackageReference Include="Azure.Identity" Version="1.5.0" />
+    <PackageReference Include="CorentinAltepe.NLog.Loki" Version="1.1.0" />
     <PackageReference Include="CorrelationId" Version="3.0.1" />
     <PackageReference Include="FluentValidation" Version="10.3.6" />
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
@@ -61,7 +62,15 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\nlog.config" Link="nlog.config" />
+    <Content Include="..\nlog.config" Link="nlog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Program.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Compile>
   </ItemGroup>
 
 </Project>

@@ -13,10 +13,20 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <None Include="..\nlog.config" Link="nlog.config" />
+    <Compile Remove="Program.cs" />
   </ItemGroup>
 
   <ItemGroup>
+    <Content Include="..\nlog.config" Link="nlog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Program.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="CorentinAltepe.NLog.Loki" Version="1.1.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="6.0.1" />
     <PackageReference Include="AspNetCore.HealthChecks.RavenDB" Version="6.0.1" />
     <PackageReference Include="AspNetCore.HealthChecks.UI" Version="6.0.2" />

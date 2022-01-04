@@ -17,7 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <None Include="..\nlog.config" Link="nlog.config" />
+    <Content Include="..\nlog.config" Link="nlog.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
   </ItemGroup>
 
   <ItemGroup>
@@ -29,6 +31,7 @@
     <PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.2.0" />
     <PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.1" />
     <PackageReference Include="Azure.Identity" Version="1.5.0" />
+    <PackageReference Include="CorentinAltepe.NLog.Loki" Version="1.1.0" />
     <PackageReference Include="CorrelationId" Version="3.0.1" />
     <PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
     <PackageReference Include="IPAddressRange" Version="4.2.0" />
