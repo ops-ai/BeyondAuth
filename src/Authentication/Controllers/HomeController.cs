@@ -8,6 +8,7 @@ using Finbuckle.MultiTenant;
 using Identity.Core;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -152,11 +153,16 @@ namespace Authentication.Controllers
                 version = version.Substring(0, version.Length - 32);
             vm.Version = $"{version}-{_environment.EnvironmentName}";
 
+            var exceptionFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
+            if (exceptionFeature != null)
+                _logger.LogError(exceptionFeature.Error.Message);
+
             // retrieve error details from identityserver
             var message = await _interaction.GetErrorContextAsync(errorId);
             if (message != null)
             {
                 vm.Error = message;
+                _logger.LogError(message.Error);
 
                 if (!_environment.IsDevelopment())
                     message.ErrorDescription = null; // only show in development

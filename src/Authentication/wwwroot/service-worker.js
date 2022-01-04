@@ -13,6 +13,7 @@ const precacheAssets = [
     'lib/bootstrap/dist/js/bootstrap.min.js',
     'js/site.js',
     'js/offline.js',
+    'js/jsnlog.min.js',
 
     'offline',
 
@@ -21,8 +22,7 @@ const precacheAssets = [
 
     'logo.svg',
     'favicon.ico',
-    'img/offline.png',
-    'https://cdnjs.cloudflare.com/ajax/libs/jsnlog/2.30.0/jsnlog.min.js'
+    'img/offline.png'
 ];
 
 // Install Event
