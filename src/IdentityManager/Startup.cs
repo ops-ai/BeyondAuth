@@ -200,15 +200,15 @@ namespace IdentityManager
                 });
             });
 
+            var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")), credential: new DefaultAzureCredential());
+            var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
+
+            var ravenDbCertificateClient = certificateClient.GetCertificate("RavenDB");
+            var ravenDbCertificateSegments = ravenDbCertificateClient.Value.SecretId.Segments;
+            var ravenDbCertificateBytes = Convert.FromBase64String(secretClient.GetSecret(ravenDbCertificateSegments[2].Trim('/'), ravenDbCertificateSegments[3].TrimEnd('/')).Value.Value);
+
             services.AddSingleton((ctx) =>
             {
-                var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")), credential: new DefaultAzureCredential());
-                var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
-
-                var ravenDbCertificateClient = certificateClient.GetCertificate("RavenDB");
-                var ravenDbCertificateSegments = ravenDbCertificateClient.Value.SecretId.Segments;
-                var ravenDbCertificateBytes = Convert.FromBase64String(secretClient.GetSecret(ravenDbCertificateSegments[2].Trim('/'), ravenDbCertificateSegments[3].TrimEnd('/')).Value.Value);
-
                 IDocumentStore store = new DocumentStore
                 {
                     Urls = Configuration.GetSection("Raven:Urls").GetChildren().Select(t => t.Value).ToArray(),
@@ -252,7 +252,7 @@ namespace IdentityManager
             services.AddSingleton<IAuthorizationHandler, AclAuthorizationHandler>();
 
             services.AddHealthChecks()
-                .AddRavenDB(setup => { setup.Urls = new[] { Configuration["Raven:Url"] }; setup.Database = Configuration["Raven:Database"]; setup.Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null; }, "ravendb");
+                .AddRavenDB(setup => { setup.Urls = Configuration.GetValue<string[]>("Raven:Urls"); setup.Database = Configuration["Raven:Database"]; setup.Certificate = new X509Certificate2(ravenDbCertificateBytes); }, "ravendb");
 
             services.AddOpenApiDocument(config =>
             {
@@ -260,7 +260,7 @@ namespace IdentityManager
             });
 
             services.AddMvc()
-            .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+                .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
             services.AddControllers();
             services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
