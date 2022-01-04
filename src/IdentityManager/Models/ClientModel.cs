@@ -198,7 +198,7 @@ namespace IdentityManager.Models
         /// </summary>
         public ICollection<string> AllowedCorsOrigins { get; set; }
 
-        //// <summary>
+        /// <summary>
         /// Specifies whether a consent screen is required (defaults to <c>false</c>)
         /// </summary>
         public bool RequireConsent { get; set; }
