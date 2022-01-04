@@ -98,7 +98,7 @@ namespace Authentication
             {
                 options.ForwardLimit = 1;
                 options.ForwardedForHeaderName = Configuration["Proxy:HeaderName"];
-                options.ForwardedHeaders = ForwardedHeaders.All;
+                options.ForwardedHeaders = ForwardedHeaders.XForwardedFor;
                 Configuration.GetSection("Proxy:Networks").Get<List<string>>().ForEach(ipNetwork =>
                 {
                     if (IPAddressRange.TryParse(ipNetwork, out IPAddressRange range))
