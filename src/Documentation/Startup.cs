@@ -17,6 +17,9 @@ using Autofac;
 using NSwag.AspNetCore;
 using Microsoft.AspNetCore.HttpOverrides;
 using NetTools;
+using OpenTelemetry.Metrics;
+using OpenTelemetry.Resources;
+using OpenTelemetry.Trace;
 
 namespace Documentation
 {
@@ -102,6 +105,23 @@ namespace Documentation
             });
 
             services.AddControllers();
+
+            services.AddOpenTelemetryTracing(
+                (builder) => builder
+                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("beyondauth-docs"))
+                    .AddAspNetCoreInstrumentation()
+                    .AddHttpClientInstrumentation()
+                    //.AddOtlpExporter(opt => opt.Endpoint = new Uri("grafana-agent:55680"))
+                    .AddConsoleExporter()
+                    );
+
+            services.AddOpenTelemetryMetrics(builder =>
+            {
+                builder.AddAspNetCoreInstrumentation();
+                builder.AddHttpClientInstrumentation();
+
+                builder.AddPrometheusExporter();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -131,6 +151,7 @@ namespace Documentation
                     UsePkceWithAuthorizationCodeGrant = true,
                 };
             });
+            app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
             app.UseEndpoints(endpoints =>
             {

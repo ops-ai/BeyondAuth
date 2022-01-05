@@ -12,14 +12,14 @@
       "commandName": "IISExpress",
       "launchBrowser": true,
       "environmentVariables": {
-        "VaultUri": "https://opsaiauthdev.vault.azure.net/",
+        "VaultUri": "https://baaccountvault.vault.azure.net/",
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
     "Authentication": {
       "commandName": "Project",
       "environmentVariables": {
-        "VaultUri": "https://opsaiauthdev.vault.azure.net/",
+        "VaultUri": "https://baaccountvault.vault.azure.net/",
         "ASPNETCORE_ENVIRONMENT": "Development"
       },
       "applicationUrl": "https://localhost:5001"

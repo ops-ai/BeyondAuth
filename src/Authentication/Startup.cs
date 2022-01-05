@@ -75,6 +75,7 @@ using Raven.Client.Documents.Linq;
 using Microsoft.FeatureManagement;
 using Microsoft.FeatureManagement.FeatureFilters;
 using Identity.Core.Settings;
+using OpenTelemetry.Metrics;
 
 namespace Authentication
 {
@@ -474,6 +475,8 @@ namespace Authentication
              }).AddCookie(options =>
              {
                  options.Cookie.Name = "BA.";
+                 options.LoginPath = "/login";
+                 options.LogoutPath = "/logout";
              });
             //.AddOpenIdConnect()
             //.AddGoogle();
@@ -547,6 +550,14 @@ namespace Authentication
                     //.AddOtlpExporter(opt => opt.Endpoint = new Uri("grafana-agent:55680"))
                     .AddConsoleExporter()
                     );
+
+            services.AddOpenTelemetryMetrics(builder =>
+            {
+                builder.AddAspNetCoreInstrumentation();
+                builder.AddHttpClientInstrumentation();
+
+                builder.AddPrometheusExporter();
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -642,6 +653,7 @@ namespace Authentication
             });
 
             app.UseCorrelationId();
+            app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
             app.UseEndpoints(endpoints =>
             {

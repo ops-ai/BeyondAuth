@@ -17,6 +17,7 @@ using Newtonsoft.Json.Serialization;
 using NSwag;
 using NSwag.AspNetCore;
 using NSwag.Generation.Processors.Security;
+using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
 using Raven.Client.Documents;
@@ -138,6 +139,14 @@ namespace PolicyServer
                     //.AddOtlpExporter(opt => opt.Endpoint = new Uri("grafana-agent:55680"))
                     .AddConsoleExporter()
                     );
+
+            services.AddOpenTelemetryMetrics(builder =>
+            {
+                builder.AddAspNetCoreInstrumentation();
+                builder.AddHttpClientInstrumentation();
+
+                builder.AddPrometheusExporter();
+            });
         }
 
         /// <summary>
@@ -197,6 +206,7 @@ namespace PolicyServer
             {
                 Predicate = _ => _.FailureStatus == HealthStatus.Unhealthy
             });
+            app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
             app.UseEndpoints(endpoints =>
             {
