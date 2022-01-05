@@ -35,8 +35,11 @@ namespace Authentication.Controllers
                 {
                     //return NotFound();
                 }
-
                 var model = new DiagnosticsViewModel(await HttpContext.AuthenticateAsync());
+
+                model.Headers = Request.Headers;
+                model.RemoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress.ToString();
+
                 return View(model);
             }
             catch (Exception ex)

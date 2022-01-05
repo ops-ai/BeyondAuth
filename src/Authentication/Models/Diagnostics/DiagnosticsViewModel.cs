@@ -4,6 +4,7 @@
 
 using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
 using System.Collections.Generic;
 using System.Text;
@@ -27,6 +28,11 @@ namespace Authentication.Models.Diagnostics
         }
 
         public AuthenticateResult AuthenticateResult { get; }
+
         public IEnumerable<string> Clients { get; } = new List<string>();
+
+        public IHeaderDictionary Headers { get; set; }
+
+        public string RemoteIpAddress { get; set; }
     }
 }

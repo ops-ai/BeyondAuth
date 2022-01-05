@@ -33,6 +33,25 @@
                 </dl>
             </div>
         </div>
+        <div class="card mt-3">
+            <div class="card-header">
+                IP Details & Headers
+            </div>
+            <div class="card-body">
+                <dl>
+                    <dt>Remote IP</dt>
+                    <dd>@Model.RemoteIpAddress</dd>
+                    @foreach (var header in Model.Headers)
+                    {
+                        <dt>@header.Key</dt>
+                        foreach (var val in header.Value)
+                        {
+                            <dd>@val</dd>
+                        }
+                    }
+                </dl>
+            </div>
+        </div>
         @if (Model.Clients.Any())
         {
             <div class="card mt-3">

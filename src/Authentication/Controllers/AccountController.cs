@@ -83,7 +83,6 @@ namespace Authentication.Controllers
         /// Entry point into the login workflow
         /// </summary>
         [HttpGet("login")]
-        [HttpGet("account/login")]
         public async Task<IActionResult> Login(string returnUrl)
         {
             // build a model so we know what to show on the login page
@@ -100,7 +99,6 @@ namespace Authentication.Controllers
         /// Handle postback from username/password login
         /// </summary>
         [HttpPost("login")]
-        [HttpPost("account/login")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(LoginInputModel model, string button)
         {
@@ -190,7 +188,6 @@ namespace Authentication.Controllers
         /// Show logout page
         /// </summary>
         [HttpGet("logout")]
-        [HttpGet("account/logout")]
         public async Task<IActionResult> Logout(string logoutId)
         {
             // build a model so the logout page knows what to display
@@ -208,7 +205,6 @@ namespace Authentication.Controllers
         /// Handle logout page postback
         /// </summary>
         [HttpPost("logout")]
-        [HttpPost("account/logout")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Logout(LogoutInputModel model)
         {
