@@ -491,6 +491,9 @@ namespace Authentication
                 options.Events.RaiseFailureEvents = true;
                 options.Events.RaiseSuccessEvents = true;
 
+                options.UserInteraction.LoginUrl = "/login";
+                options.UserInteraction.LogoutUrl = "/logout";
+
                 options.MutualTls.Enabled = true;
                 options.MutualTls.ClientCertificateAuthenticationScheme = "Certificate";
             })
