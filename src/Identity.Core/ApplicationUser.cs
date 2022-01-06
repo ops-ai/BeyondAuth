@@ -91,6 +91,8 @@ namespace Identity.Core
         /// </summary>
         public string Locale { get; set; }
 
+        public string DefaultApp { get; set; }
+
         [Newtonsoft.Json.JsonIgnore]
         public override List<IdentityUserClaim> Claims
         {

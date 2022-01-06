@@ -6,11 +6,13 @@ using Authentication.Filters;
 using Authentication.Models;
 using Finbuckle.MultiTenant;
 using Identity.Core;
+using IdentityServer4.Extensions;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Hosting;
@@ -32,6 +34,7 @@ namespace Authentication.Controllers
         private readonly ILogger _logger;
         private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        private readonly UserManager<ApplicationUser> _userManager;
 
         public HomeController(
             IAsyncDocumentSession dbSession, 
@@ -39,19 +42,28 @@ namespace Authentication.Controllers
             IWebHostEnvironment environment, 
             ILogger<HomeController> logger, 
             IConfiguration configuration,
-            IHttpContextAccessor httpContextAccessor) : base(dbSession)
+            IHttpContextAccessor httpContextAccessor,
+            UserManager<ApplicationUser> userManager) : base(dbSession)
         {
             _interaction = interaction;
             _environment = environment;
             _logger = logger;
             _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
+            _userManager = userManager;
         }
 
         [Authorize]
-        public IActionResult Index()
+        public async Task<IActionResult> Index()
         {
+            var sub = User.GetSubjectId();
+            var user = await _userManager.FindByIdAsync(sub);
+            if (user.DefaultApp != null)
+                return Redirect(user.DefaultApp);
 
+            var tenantSettings = _httpContextAccessor.HttpContext.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
+            if (tenantSettings.AccountOptions.DashboardUrl != null)
+                return Redirect(tenantSettings.AccountOptions.DashboardUrl);
 
             return View();
         }

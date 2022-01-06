@@ -481,6 +481,8 @@ namespace Authentication
                  options.LoginPath = "/login";
                  options.LogoutPath = "/logout";
              });
+            authenticationServices.AddTwoFactorUserIdCookie();
+            authenticationServices.AddTwoFactorRememberMeCookie();
             //.AddOpenIdConnect()
             //.AddGoogle();
             //.AddFacebook()
