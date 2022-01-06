@@ -205,10 +205,13 @@ namespace Authentication
                 })
                 .WithPerTenantOptions<IdentityOptions>((options, tenantInfo) =>
                 {
-                    options.Password = tenantInfo.IdentityOptions.Password;
-                    options.Lockout = tenantInfo.IdentityOptions.Lockout;
-                    options.User = tenantInfo.IdentityOptions.User;
-                    options.SignIn = tenantInfo.IdentityOptions.SignIn;
+                    if (tenantInfo?.IdentityOptions != null)
+                    {
+                        options.Password = tenantInfo.IdentityOptions.Password;
+                        options.Lockout = tenantInfo.IdentityOptions.Lockout;
+                        options.User = tenantInfo.IdentityOptions.User;
+                        options.SignIn = tenantInfo.IdentityOptions.SignIn;
+                    }
                 })
                 .WithPerTenantOptions<EmailOptions>((options, tenantInfo) =>
                 {
@@ -481,8 +484,6 @@ namespace Authentication
                  options.LoginPath = "/login";
                  options.LogoutPath = "/logout";
              });
-            authenticationServices.AddTwoFactorUserIdCookie();
-            authenticationServices.AddTwoFactorRememberMeCookie();
             //.AddOpenIdConnect()
             //.AddGoogle();
             //.AddFacebook()

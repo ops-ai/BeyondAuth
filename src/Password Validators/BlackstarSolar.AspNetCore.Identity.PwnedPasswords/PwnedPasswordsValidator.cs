@@ -17,8 +17,8 @@
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
             
-            if (string.IsNullOrEmpty(options.Value.ApiKey))
-                throw new ArgumentNullException(nameof(options.Value.ApiKey));
+            //if (string.IsNullOrEmpty(options.Value.ApiKey))
+            //    throw new ArgumentNullException(nameof(options.Value.ApiKey));
 
             this.options = options.Value;
             client = new HaveIBeenPwnedRestClient(options.Value.ApiKey, options.Value.UserAgent);
