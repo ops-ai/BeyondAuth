@@ -121,7 +121,11 @@ namespace Authentication.Controllers
     background-color: {tenantSettings.BrandingOptions.PrimaryColor};
     border-color: {tenantSettings.BrandingOptions.PrimaryColor};
 }}
-.form-control:focus {{
+.btn-primary:focus, .btn-primary:hover {{
+    background-color: rgba({rgba.R},{rgba.G},{rgba.B},.75);
+    border-color: {tenantSettings.BrandingOptions.PrimaryColor};
+}}
+.form-control:focus, .form-control:hover {{
     border-color: {tenantSettings.BrandingOptions.PrimaryColor};
     box-shadow: 0 0 0 .25rem rgba({rgba.R},{rgba.G},{rgba.B},.25);
 }}

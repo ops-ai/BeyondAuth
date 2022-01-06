@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.FeatureManagement.Mvc;
 using Raven.Client.Documents.Session;
 using System;
 using System.Linq;
@@ -15,6 +16,7 @@ using System.Threading.Tasks;
 
 namespace Authentication.Controllers
 {
+    [FeatureGate(Constants.FeatureFlags.Diagnostics)]
     [SecurityHeaders]
     [Authorize]
     public class DiagnosticsController : BaseController

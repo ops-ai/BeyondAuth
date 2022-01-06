@@ -76,6 +76,8 @@ using Microsoft.FeatureManagement;
 using Microsoft.FeatureManagement.FeatureFilters;
 using Identity.Core.Settings;
 using OpenTelemetry.Metrics;
+using Toggly.FeatureManagement;
+using Toggly.FeatureManagement.Storage.RavenDB;
 
 namespace Authentication
 {
@@ -100,12 +102,13 @@ namespace Authentication
                 options.ForwardLimit = 2;
                 //options.ForwardedForHeaderName = Configuration["Proxy:HeaderName"];
                 options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-                options.KnownNetworks.Clear();
-                options.KnownProxies.Clear();
+                //options.KnownNetworks.Clear();
+                //options.KnownProxies.Clear();
             });
             services.AddCertificateForwarding(options => options.CertificateHeader = "X-ARR-ClientCert");
-            //services.Configure<TogglySettings>(Configuration.GetSection("Toggly"));
-            //builder.Services.AddSingleton<IFeatureDefinitionProvider, TogglyFeatureProvider>();
+            services.Configure<TogglySettings>(Configuration.GetSection("Toggly"));
+            services.AddSingleton<IFeatureDefinitionProvider, TogglyFeatureProvider>();
+            services.AddSingleton<IFeatureSnapshotProvider, RavenDBFeatureSnapshotProvider>();
 
             services.AddHttpClient();
             services.AddHttpClient("toggly", config =>
@@ -543,6 +546,7 @@ namespace Authentication
 
             Activity.DefaultIdFormat = ActivityIdFormat.W3C;
             Activity.ForceDefaultIdFormat = true;
+
             services.AddOpenTelemetryTracing(
                 (builder) => builder
                     .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("beyondauth-authentication"))
@@ -558,8 +562,7 @@ namespace Authentication
             {
                 builder.AddAspNetCoreInstrumentation();
                 builder.AddHttpClientInstrumentation();
-
-                builder.AddPrometheusExporter();
+                builder.AddPrometheusExporter(opt => opt.ScrapeResponseCacheDurationMilliseconds = 15000);
             });
         }
 

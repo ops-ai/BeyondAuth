@@ -285,7 +285,7 @@ namespace IdentityManager
                 builder.AddAspNetCoreInstrumentation();
                 builder.AddHttpClientInstrumentation();
 
-                builder.AddPrometheusExporter();
+                builder.AddPrometheusExporter(opt => opt.ScrapeResponseCacheDurationMilliseconds = 15000);
             });
         }
 
