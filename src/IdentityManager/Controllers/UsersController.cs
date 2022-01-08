@@ -197,7 +197,8 @@ namespace IdentityManager.Controllers
                     PasswordResetAllowed = userInfo.PasswordResetAllowed,
                     PasswordPolicy = userInfo.PasswordPolicy,
                     AccountExpiration = userInfo.AccountExpiration,
-                    ZoneInfo = userInfo.ZoneInfo
+                    ZoneInfo = userInfo.ZoneInfo,
+                    LockoutEnabled = userInfo.LockoutEnabled
                 };
 
                 foreach (var claim in userInfo.Claims.Select(t => new Raven.Identity.IdentityUserClaim { ClaimType = t.Key, ClaimValue = t.Value }))
@@ -279,9 +280,13 @@ namespace IdentityManager.Controllers
                 user.AccountExpiration = userInfo.AccountExpiration;
                 user.Disabled = userInfo.Disabled;
                 user.ZoneInfo = userInfo.ZoneInfo;
+                user.LockoutEnabled = userInfo.LockoutEnabled;
 
                 if (userInfo.ChangePasswordOnNextLogin.HasValue)
                     user.ChangePasswordOnNextLogin = userInfo.ChangePasswordOnNextLogin.Value;
+
+                if (user.LockoutEnd > DateTime.UtcNow && userInfo.Locked == false)
+                    user.LockoutEnd = null;
 
                 await _userManager.UpdateAsync(user);
 
@@ -327,7 +332,8 @@ namespace IdentityManager.Controllers
             PasswordPolicy = user.PasswordPolicy,
             PasswordResetAllowed = user.PasswordResetAllowed,
             PhoneNumbers = user.PhoneNumbers,
-            ZoneInfo = user.ZoneInfo
+            ZoneInfo = user.ZoneInfo,
+            LockoutEnabled = user.LockoutEnabled,
         };
 
         /// <summary>
@@ -378,7 +384,9 @@ namespace IdentityManager.Controllers
                     PasswordPolicy = originalUser.PasswordPolicy,
                     PasswordResetAllowed = originalUser.PasswordResetAllowed,
                     AccountExpiration = originalUser.AccountExpiration,
-                    ZoneInfo = originalUser.ZoneInfo
+                    ZoneInfo = originalUser.ZoneInfo,
+                    LockoutEnabled = originalUser.LockoutEnabled,
+                    Locked = originalUser.LockoutEnd > DateTime.UtcNow
                 };
 
                 patch.ApplyTo(updatedUser);

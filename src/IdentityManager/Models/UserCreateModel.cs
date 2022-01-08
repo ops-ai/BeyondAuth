@@ -84,5 +84,7 @@ namespace IdentityManager.Models
         /// TimeZone info for current user in IANA format. (e.g. America/Los_Angeles)
         /// </summary>
         public string ZoneInfo { get; set; }
+
+        public bool LockoutEnabled { get; set; }
     }
 }

@@ -107,5 +107,10 @@ namespace IdentityManager.Models
         /// TimeZone info for current user in IANA format. (e.g. America/Los_Angeles)
         /// </summary>
         public string ZoneInfo { get; set; }
+
+        /// <summary>
+        /// User can be locked out if repeatedly enters password incorrect
+        /// </summary>
+        public bool LockoutEnabled { get; set; }
     }
 }
