@@ -20,6 +20,9 @@ using NetTools;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Prometheus.SystemMetrics;
+using Prometheus.SystemMetrics.Collectors;
+using Prometheus;
 
 namespace Documentation
 {
@@ -119,9 +122,15 @@ namespace Documentation
             {
                 builder.AddAspNetCoreInstrumentation();
                 builder.AddHttpClientInstrumentation();
-
-                builder.AddPrometheusExporter(opt => opt.ScrapeResponseCacheDurationMilliseconds = 15000);
             });
+
+            services.AddSystemMetrics(registerDefaultCollectors: false);
+            services.AddSystemMetricCollector<WindowsMemoryCollector>();
+            services.AddSystemMetricCollector<LoadAverageCollector>();
+
+            services.AddPrometheusCounters();
+            services.AddPrometheusAspNetCoreMetrics();
+            services.AddPrometheusHttpClientMetrics();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -159,6 +168,7 @@ namespace Documentation
                 {
                     await context.Response.WriteAsync("Hello World!");
                 });
+                endpoints.MapMetrics();
             });
         }
     }

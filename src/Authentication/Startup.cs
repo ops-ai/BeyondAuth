@@ -78,6 +78,9 @@ using Identity.Core.Settings;
 using OpenTelemetry.Metrics;
 using Toggly.FeatureManagement;
 using Toggly.FeatureManagement.Storage.RavenDB;
+using Prometheus.SystemMetrics;
+using Prometheus.SystemMetrics.Collectors;
+using Prometheus;
 
 namespace Authentication
 {
@@ -565,8 +568,15 @@ namespace Authentication
             {
                 builder.AddAspNetCoreInstrumentation();
                 builder.AddHttpClientInstrumentation();
-                builder.AddPrometheusExporter(opt => opt.ScrapeResponseCacheDurationMilliseconds = 15000);
             });
+
+            services.AddSystemMetrics(registerDefaultCollectors: false);
+            services.AddSystemMetricCollector<WindowsMemoryCollector>();
+            services.AddSystemMetricCollector<LoadAverageCollector>();
+
+            services.AddPrometheusCounters();
+            services.AddPrometheusAspNetCoreMetrics();
+            services.AddPrometheusHttpClientMetrics();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -662,13 +672,13 @@ namespace Authentication
             });
 
             app.UseCorrelationId();
-            app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
+                endpoints.MapMetrics();
                 endpoints.MapRazorPages();
                 endpoints.MapFallbackToController("PageNotFound", "Home");
             });

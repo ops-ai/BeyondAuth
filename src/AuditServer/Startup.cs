@@ -21,6 +21,9 @@ using NSwag.Generation.Processors.Security;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Prometheus;
+using Prometheus.SystemMetrics;
+using Prometheus.SystemMetrics.Collectors;
 using Raven.Client.Documents;
 using System;
 using System.Collections.Generic;
@@ -147,9 +150,15 @@ namespace AuditServer
             {
                 builder.AddAspNetCoreInstrumentation();
                 builder.AddHttpClientInstrumentation();
-
-                builder.AddPrometheusExporter(opt => opt.ScrapeResponseCacheDurationMilliseconds = 15000);
             });
+
+            services.AddSystemMetrics(registerDefaultCollectors: false);
+            services.AddSystemMetricCollector<WindowsMemoryCollector>();
+            services.AddSystemMetricCollector<LoadAverageCollector>();
+
+            services.AddPrometheusCounters();
+            services.AddPrometheusAspNetCoreMetrics();
+            services.AddPrometheusHttpClientMetrics();
         }
 
         /// <summary>
@@ -209,11 +218,11 @@ namespace AuditServer
             {
                 Predicate = _ => _.FailureStatus == HealthStatus.Unhealthy
             });
-            app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
+                endpoints.MapMetrics();
             });
         }
     }

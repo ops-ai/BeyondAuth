@@ -37,6 +37,9 @@ using NSwag.Generation.Processors.Security;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Prometheus;
+using Prometheus.SystemMetrics;
+using Prometheus.SystemMetrics.Collectors;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Conventions;
 using Raven.Client.Json.Serialization.NewtonsoftJson;
@@ -284,9 +287,15 @@ namespace IdentityManager
             {
                 builder.AddAspNetCoreInstrumentation();
                 builder.AddHttpClientInstrumentation();
-
-                builder.AddPrometheusExporter(opt => opt.ScrapeResponseCacheDurationMilliseconds = 15000);
             });
+
+            services.AddSystemMetrics(registerDefaultCollectors: false);
+            services.AddSystemMetricCollector<WindowsMemoryCollector>();
+            services.AddSystemMetricCollector<LoadAverageCollector>();
+
+            services.AddPrometheusCounters();
+            services.AddPrometheusAspNetCoreMetrics();
+            services.AddPrometheusHttpClientMetrics();
         }
 
         ///// <summary>
@@ -388,11 +397,11 @@ namespace IdentityManager
             });
             
             app.UseCorrelationId();
-            app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers().RequireAuthorization("ApiScope");
+                endpoints.MapMetrics();
             });
         }
     }
