@@ -94,13 +94,13 @@ namespace PolicyServer
 
             services.AddSingleton((ctx) => new DocumentStore
             {
-                Urls = Configuration.GetValue<string[]>("Raven:Urls"),
+                Urls = Configuration.GetRequiredSection("Raven:Urls").Get<string[]>(),
                 Database = Configuration["Raven:Database"],
                 Certificate = ravenDBcert
             }.Initialize());
 
             services.AddHealthChecks()
-                .AddRavenDB(setup => { setup.Urls = Configuration.GetValue<string[]>("Raven:Urls"); setup.Database = Configuration["Raven:Database"]; setup.Certificate = ravenDBcert; }, "ravendb");
+                .AddRavenDB(setup => { setup.Urls = Configuration.GetRequiredSection("Raven:Urls").Get<string[]>(); setup.Database = Configuration["Raven:Database"]; setup.Certificate = ravenDBcert; }, "ravendb");
 
             services.AddOpenApiDocument(config =>
             {

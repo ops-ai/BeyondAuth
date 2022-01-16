@@ -108,7 +108,7 @@ namespace AuthorizationServer
             {
                 IDocumentStore store = new DocumentStore
                 {
-                    Urls = Configuration.GetValue<string[]>("Raven:Urls"),
+                    Urls = Configuration.GetRequiredSection("Raven:Urls").Get<string[]>(),
                     Database = Configuration["Raven:Database"],
                     Certificate = ravenDBcert
                 };
@@ -126,7 +126,7 @@ namespace AuthorizationServer
             });
 
             services.AddHealthChecks()
-                .AddRavenDB(setup => { setup.Urls = Configuration.GetValue<string[]>("Raven:Urls"); setup.Database = Configuration["Raven:Database"]; setup.Certificate = ravenDBcert; }, "ravendb");
+                .AddRavenDB(setup => { setup.Urls = Configuration.GetRequiredSection("Raven:Urls").Get<string[]>(); setup.Database = Configuration["Raven:Database"]; setup.Certificate = ravenDBcert; }, "ravendb");
 
             services.AddAuthorization();
             services.AddHttpContextAccessor();

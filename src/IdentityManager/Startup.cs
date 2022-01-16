@@ -220,7 +220,7 @@ namespace IdentityManager
             {
                 IDocumentStore store = new DocumentStore
                 {
-                    Urls = Configuration.GetValue<string[]>("Raven:Urls"),
+                    Urls = Configuration.GetRequiredSection("Raven:Urls").Get<string[]>(),
                     Database = Configuration["Raven:Database"],
                     Certificate = ravenDBcert,
                     Conventions =
@@ -261,7 +261,7 @@ namespace IdentityManager
             services.AddSingleton<IAuthorizationHandler, AclAuthorizationHandler>();
 
             services.AddHealthChecks()
-                .AddRavenDB(setup => { setup.Urls = Configuration.GetValue<string[]>("Raven:Urls"); setup.Database = Configuration["Raven:Database"]; setup.Certificate = ravenDBcert; }, "ravendb");
+                .AddRavenDB(setup => { setup.Urls = Configuration.GetRequiredSection("Raven:Urls").Get<string[]>(); setup.Database = Configuration["Raven:Database"]; setup.Certificate = ravenDBcert; }, "ravendb");
 
             services.AddOpenApiDocument(config =>
             {
