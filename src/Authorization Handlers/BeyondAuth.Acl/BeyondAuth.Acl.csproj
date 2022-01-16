@@ -3,6 +3,12 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+
+	  <RepositoryUrl>https://github.com/ops-ai/BeyondAuth</RepositoryUrl>
+	  <RepositoryType>git</RepositoryType>
+	  <PackageTags>beyondauth;identity;authentication</PackageTags>
+	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
+	  <PackageId>$(AssemblyName)</PackageId>
   </PropertyGroup>
 
   <ItemGroup>
@@ -10,6 +16,5 @@
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.13" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
-    <PackageReference Include="RavenDB.Client" Version="5.3.1" />
   </ItemGroup>
 </Project>

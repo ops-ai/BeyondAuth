@@ -220,7 +220,7 @@ namespace IdentityManager
             {
                 IDocumentStore store = new DocumentStore
                 {
-                    Urls = Configuration.GetSection("Raven:Urls").GetChildren().Select(t => t.Value).ToArray(),
+                    Urls = Configuration.GetValue<string[]>("Raven:Urls"),
                     Database = Configuration["Raven:Database"],
                     Certificate = ravenDBcert,
                     Conventions =

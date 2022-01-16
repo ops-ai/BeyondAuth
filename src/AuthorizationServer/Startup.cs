@@ -92,7 +92,8 @@ namespace AuthorizationServer
                     x.NameClaimType = "sub";
                 });
 
-            services.AddSingleton((ctx) =>
+            X509Certificate2 ravenDBcert = null;
+            if (Environment.GetEnvironmentVariable("VaultUri") != null)
             {
                 var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")), credential: new DefaultAzureCredential());
                 var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
@@ -100,12 +101,16 @@ namespace AuthorizationServer
                 var ravenDbCertificateClient = certificateClient.GetCertificate("RavenDB");
                 var ravenDbCertificateSegments = ravenDbCertificateClient.Value.SecretId.Segments;
                 var ravenDbCertificateBytes = Convert.FromBase64String(secretClient.GetSecret(ravenDbCertificateSegments[2].Trim('/'), ravenDbCertificateSegments[3].TrimEnd('/')).Value.Value);
+                ravenDBcert = new X509Certificate2(ravenDbCertificateBytes);
+            }
 
+            services.AddSingleton((ctx) =>
+            {
                 IDocumentStore store = new DocumentStore
                 {
-                    Urls = Configuration.GetSection("Raven:Urls").GetChildren().Select(t => t.Value).ToArray(),
+                    Urls = Configuration.GetValue<string[]>("Raven:Urls"),
                     Database = Configuration["Raven:Database"],
-                    Certificate = new X509Certificate2(ravenDbCertificateBytes)
+                    Certificate = ravenDBcert
                 };
 
                 var serializerConventions = new NewtonsoftJsonSerializationConventions();
@@ -121,7 +126,7 @@ namespace AuthorizationServer
             });
 
             services.AddHealthChecks()
-                .AddRavenDB(setup => { setup.Urls = new[] { Configuration["Raven:Url"] }; setup.Database = Configuration["Raven:Database"]; setup.Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null; }, "ravendb");
+                .AddRavenDB(setup => { setup.Urls = Configuration.GetValue<string[]>("Raven:Urls"); setup.Database = Configuration["Raven:Database"]; setup.Certificate = ravenDBcert; }, "ravendb");
 
             services.AddAuthorization();
             services.AddHttpContextAccessor();

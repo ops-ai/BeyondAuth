@@ -1,5 +1,8 @@
 using Autofac;
 using Autofac.Configuration;
+using Azure.Identity;
+using Azure.Security.KeyVault.Certificates;
+using Azure.Security.KeyVault.Secrets;
 using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
 using IdentityServer4.AccessTokenValidation;
@@ -77,15 +80,27 @@ namespace PolicyServer
 
             services.AddCorrelationId();
 
+            X509Certificate2 ravenDBcert = null;
+            if (Environment.GetEnvironmentVariable("VaultUri") != null)
+            {
+                var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")), credential: new DefaultAzureCredential());
+                var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
+
+                var ravenDbCertificateClient = certificateClient.GetCertificate("RavenDB");
+                var ravenDbCertificateSegments = ravenDbCertificateClient.Value.SecretId.Segments;
+                var ravenDbCertificateBytes = Convert.FromBase64String(secretClient.GetSecret(ravenDbCertificateSegments[2].Trim('/'), ravenDbCertificateSegments[3].TrimEnd('/')).Value.Value);
+                ravenDBcert = new X509Certificate2(ravenDbCertificateBytes);
+            }
+
             services.AddSingleton((ctx) => new DocumentStore
             {
-                Urls = new[] { Configuration["Raven:Url"] },
+                Urls = Configuration.GetValue<string[]>("Raven:Urls"),
                 Database = Configuration["Raven:Database"],
-                Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null
+                Certificate = ravenDBcert
             }.Initialize());
 
             services.AddHealthChecks()
-                .AddRavenDB(setup => { setup.Urls = new[] { Configuration["Raven:Url"] }; setup.Database = Configuration["Raven:Database"]; setup.Certificate = Configuration.GetSection("Raven:EncryptionEnabled").Get<bool>() ? new X509Certificate2(Configuration["Raven:CertFile"], Configuration["Raven:CertPassword"]) : null; }, "ravendb");
+                .AddRavenDB(setup => { setup.Urls = Configuration.GetValue<string[]>("Raven:Urls"); setup.Database = Configuration["Raven:Database"]; setup.Certificate = ravenDBcert; }, "ravendb");
 
             services.AddOpenApiDocument(config =>
             {
