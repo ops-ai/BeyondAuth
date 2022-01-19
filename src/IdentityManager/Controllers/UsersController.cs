@@ -77,7 +77,29 @@ namespace IdentityManager.Controllers
                 //}
 
                 //TODO: Add direct querying + filtering + permssion filtering
-                return Ok(await _userManager.Users.ToListAsync(ct));
+                return Ok(await _userManager.Users.Select(t => new UserModel
+                {
+                    AccountExpiration = t.AccountExpiration,
+                    ChangePasswordAllowed = t.ChangePasswordAllowed,
+                    ChangePasswordOnNextLogin = t.ChangePasswordOnNextLogin,
+                    Claims = t.Claims.ToDictionary(s => s.ClaimType, s => s.ClaimValue),
+                    Disabled = t.Disabled,
+                    DisplayName = t.DisplayName,
+                    Email = t.Email,
+                    FirstName = t.FirstName,
+                    Id = t.Id.Substring("ApplicationUsers/".Length + 1),
+                    LastLoggedIn = t.LastLoggedIn,
+                    LastName = t.LastName,
+                    Locked = t.LockoutEnabled && t.LockoutEnd != null && t.LockoutEnd > DateTime.UtcNow,
+                    LockoutEnabled = t.LockoutEnabled,
+                    LockoutEnd = t.LockoutEnd != null ? t.LockoutEnd.Value.DateTime : null,
+                    Organization = t.Organization,
+                    //PasswordExpiry = ,
+                    PasswordPolicy = t.PasswordPolicy,
+                    PasswordResetAllowed = t.PasswordResetAllowed,
+                    PhoneNumbers = t.PhoneNumbers,
+                    ZoneInfo = t.ZoneInfo
+                }).ToListAsync(ct));
             }
             catch (UnauthorizedAccessException ex)
             {

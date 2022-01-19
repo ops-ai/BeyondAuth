@@ -15,6 +15,7 @@ using IdentityServer4.AccessTokenValidation;
 using IdentityServer4.Contrib.RavenDB.Options;
 using IdentityServer4.Models;
 using IdentityServer4.Stores.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -28,6 +29,7 @@ using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
+using Microsoft.IdentityModel.Logging;
 using NetTools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -102,7 +104,7 @@ namespace IdentityManager
             });
 
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
-                .AddIdentityServerAuthentication();
+                .AddJwtBearer();
 
             services.AddMultiTenant<TenantSetting>().WithBasePathStrategy().WithStore(new ServiceLifetime(), (sp) => new RavenDBMultitenantStore(sp.GetService<IDocumentStore>(), sp.GetService<IMemoryCache>()))
                 .WithPerTenantOptions<IdentityStoreOptions>((options, tenantInfo) =>
@@ -125,14 +127,17 @@ namespace IdentityManager
                     options.RollingHistoryInMonths = 5;
                     options.Threshold = 1000;
                 })
-                .WithPerTenantOptions<IdentityServerAuthenticationOptions>((options, tenantInfo) =>
+                .WithPerTenantOptions<JwtBearerOptions>((options, tenantInfo) =>
                 {
                     options.Authority = $"https://{tenantInfo.Identifier}";
-                    options.ApiSecret = tenantInfo.IdpSettings.ApiSecret;
-                    options.ApiName = tenantInfo.IdpSettings.ApiName;
+                    options.TokenValidationParameters.ValidIssuers = new[] { $"https://{tenantInfo.Identifier}", Configuration["Authentication:Authority"] };
+                    options.Audience = tenantInfo.IdpSettings.ApiName;
+
+
+                    //options.ApiSecret = tenantInfo.IdpSettings.ApiSecret;
                     options.RequireHttpsMetadata = true;
-                    options.SupportedTokens = SupportedTokens.Both;
-                    options.EnableCaching = true;
+                    //options.SupportedTokens = SupportedTokens.Both;
+                    //options.EnableCaching = true;
                     //options.Validate();
                     //options.CacheDuration = TimeSpan.FromMinutes(1);
                 })
@@ -316,6 +321,7 @@ namespace IdentityManager
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                IdentityModelEventSource.ShowPII = true;
             }
 
             app.UseHttpsRedirection();
@@ -337,17 +343,6 @@ namespace IdentityManager
                 //    builder.AddFormAction().Self();
                 //    builder.AddFrameAncestors().None();
                 //})
-                .AddFeaturePolicy(options =>
-                {
-                    options.AddAutoplay().Self();
-                    options.AddCamera().Self();
-                    options.AddFullscreen().Self();
-                    options.AddGeolocation().Self();
-                    options.AddMicrophone().Self();
-                    options.AddPictureInPicture().Self();
-                    options.AddSpeaker().Self();
-                    options.AddSyncXHR().Self();
-                })
                 .AddPermissionsPolicy(options =>
                 {
                     options.AddAutoplay().Self();

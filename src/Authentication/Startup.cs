@@ -81,6 +81,7 @@ using Toggly.FeatureManagement.Storage.RavenDB;
 using Prometheus.SystemMetrics;
 using Prometheus.SystemMetrics.Collectors;
 using Prometheus;
+using Microsoft.IdentityModel.Logging;
 
 namespace Authentication
 {
@@ -590,6 +591,7 @@ namespace Authentication
             if (env.IsDevelopment())
             {
                 app.UseDeveloperExceptionPage();
+                IdentityModelEventSource.ShowPII = true;
             }
             else
             {
@@ -628,17 +630,6 @@ namespace Authentication
                     builder.AddStyleSrc().Self().UnsafeInline();
 
                     //default-src 'self'; object-src 'none'; frame-ancestors 'none'; sandbox allow-forms allow-same-origin allow-scripts; base-uri 'self';
-                })
-                .AddFeaturePolicy(options =>
-                {
-                    options.AddAutoplay().Self();
-                    options.AddCamera().Self();
-                    options.AddFullscreen().Self();
-                    options.AddGeolocation().Self();
-                    options.AddMicrophone().Self();
-                    options.AddPictureInPicture().Self();
-                    options.AddSpeaker().Self();
-                    options.AddSyncXHR().Self();
                 })
                 .AddPermissionsPolicy(options =>
                 {
