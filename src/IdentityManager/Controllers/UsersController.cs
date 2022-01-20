@@ -336,6 +336,8 @@ namespace IdentityManager.Controllers
         {
             var user = await _userManager.FindByIdAsync(userId);
             if (user == null)
+                user = await _userManager.FindByIdAsync($"ApplicationUsers/{userId}");
+            if (user == null)
                 return null;
 
             return ToUserModel(user);
