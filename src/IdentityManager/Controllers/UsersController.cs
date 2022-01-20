@@ -13,6 +13,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSwag.Annotations;
 using Raven.Client.Documents;
+using Raven.Client.Documents.Linq;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -77,7 +78,8 @@ namespace IdentityManager.Controllers
                 //}
 
                 //TODO: Add direct querying + filtering + permssion filtering
-                return Ok(await _userManager.Users.Select(t => new UserModel
+
+                var users = await ((IRavenQueryable<ApplicationUser>)_userManager.Users).Statistics(out var stats).Select(t => new UserModel
                 {
                     AccountExpiration = t.AccountExpiration,
                     ChangePasswordAllowed = t.ChangePasswordAllowed,
@@ -99,7 +101,11 @@ namespace IdentityManager.Controllers
                     PasswordResetAllowed = t.PasswordResetAllowed,
                     PhoneNumbers = t.PhoneNumbers,
                     ZoneInfo = t.ZoneInfo
-                }).ToListAsync(ct));
+                }).ToListAsync(ct);
+
+                Response.Headers.Add("X-Total-Count", stats.TotalResults.ToString());
+
+                return Ok(users);
             }
             catch (UnauthorizedAccessException ex)
             {
