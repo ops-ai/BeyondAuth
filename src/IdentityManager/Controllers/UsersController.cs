@@ -159,7 +159,11 @@ namespace IdentityManager.Controllers
                 //        throw new UnauthorizedAccessException();
                 //}
 
-                return Ok(await RetrieveUser(dataSourceId, userId, ct));
+                var user = await RetrieveUser(dataSourceId, userId, ct);
+                if (user == null)
+                    throw new KeyNotFoundException(userId);
+
+                return Ok(user);
             }
             catch (KeyNotFoundException ex)
             {
