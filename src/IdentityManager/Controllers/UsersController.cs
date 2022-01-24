@@ -89,7 +89,7 @@ namespace IdentityManager.Controllers
                     DisplayName = t.DisplayName,
                     Email = t.Email,
                     FirstName = t.FirstName,
-                    Id = t.Id.Substring("ApplicationUsers/".Length + 1),
+                    Id = t.Id.Substring("ApplicationUsers/".Length),
                     LastLoggedIn = t.LastLoggedIn,
                     LastName = t.LastName,
                     Locked = t.LockoutEnabled && t.LockoutEnd != null && t.LockoutEnd > DateTime.UtcNow,
