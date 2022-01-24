@@ -112,5 +112,40 @@ namespace IdentityManager.Models
         /// User can be locked out if repeatedly enters password incorrect
         /// </summary>
         public bool LockoutEnabled { get; set; }
+
+        /// <summary>
+        /// User's default language
+        /// </summary>
+        public string Locale { get; set; }
+
+        /// <summary>
+        /// The date when the user was created
+        /// </summary>
+        public DateTime? CreatedOnUtc { get; set; }
+
+        /// <summary>
+        /// Default redirect upon login unless authenticating into a specific app
+        /// </summary>
+        public string DefaultApp { get; set; }
+
+        /// <summary>
+        /// Last date account was updated
+        /// </summary>
+        public DateTime? UpdatedAt { get; set; }
+
+        /// <summary>
+        /// Email address was confirmed by the user
+        /// </summary>
+        public bool EmailConfirmed { get; set; }
+
+        /// <summary>
+        /// Number of invalid password attempts since last successful authentication
+        /// </summary>
+        public int AccessFailedCount { get; set; }
+
+        /// <summary>
+        /// Two-factor authentication enabled
+        /// </summary>
+        public bool TwoFactorEnabled { get; set; }
     }
 }

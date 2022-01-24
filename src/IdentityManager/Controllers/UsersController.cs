@@ -100,7 +100,14 @@ namespace IdentityManager.Controllers
                     PasswordPolicy = t.PasswordPolicy,
                     PasswordResetAllowed = t.PasswordResetAllowed,
                     PhoneNumbers = t.PhoneNumbers,
-                    ZoneInfo = t.ZoneInfo
+                    ZoneInfo = t.ZoneInfo,
+                    AccessFailedCount = t.AccessFailedCount,
+                    CreatedOnUtc = t.CreatedOnUtc,
+                    DefaultApp = t.DefaultApp,
+                    EmailConfirmed = t.EmailConfirmed,
+                    Locale = t.Locale,
+                    TwoFactorEnabled = t.TwoFactorEnabled,
+                    UpdatedAt = t.UpdatedAt
                 }).ToListAsync(ct);
 
                 Response.Headers.Add("X-Total-Count", stats.TotalResults.ToString());
@@ -368,6 +375,13 @@ namespace IdentityManager.Controllers
             PhoneNumbers = user.PhoneNumbers,
             ZoneInfo = user.ZoneInfo,
             LockoutEnabled = user.LockoutEnabled,
+            AccessFailedCount = user.AccessFailedCount,
+            CreatedOnUtc = user.CreatedOnUtc,
+            DefaultApp = user.DefaultApp,
+            EmailConfirmed = user.EmailConfirmed,
+            Locale = user.Locale,
+            TwoFactorEnabled = user.TwoFactorEnabled,
+            UpdatedAt = user.UpdatedAt
         };
 
         /// <summary>
