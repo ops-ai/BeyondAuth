@@ -56,7 +56,8 @@ namespace IdentityManager.Controllers
         /// <param name="includeDisabled">Include disabled accounts</param>
         /// <param name="lockedOnly">Show only locked accounts</param>
         /// <param name="sort">Field and direction to sort by. Format: ([+/-]FieldName) By default: +email (sort by email ascending)</param>
-        /// <param name="range">Result range to return. Format: 0-19 (result index from - result index to)</param>
+        /// <param name="skip">Result range to return. Format: 0-19 (result index from - result index to)</param>
+        /// <param name="take">Result range to return. Format: 0-19 (result index from - result index to)</param>
         /// <param name="ct"></param>
         /// <response code="206">List of users matching criteria</response>
         /// <response code="400">Validation failed.</response>
@@ -65,7 +66,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(IList<UserModel>), (int)HttpStatusCode.PartialContent)]
         [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] string dataSourceId, [FromQuery] string firstName, [FromQuery] string lastName, [FromQuery] string displayName, [FromQuery] string organization, [FromQuery] string email, [FromQuery] bool includeDisabled = false, [FromQuery] bool lockedOnly = false, [FromQuery] string sort = "+email", [FromQuery] string range = "0-19", CancellationToken ct = default)
+        public async Task<IActionResult> Get([FromRoute] string dataSourceId, [FromQuery] string firstName, [FromQuery] string lastName, [FromQuery] string displayName, [FromQuery] string organization, [FromQuery] string email, [FromQuery] bool includeDisabled = false, [FromQuery] bool lockedOnly = false, [FromQuery] string sort = "+email", [FromQuery] int skip = 0, [FromQuery] int take = 0, CancellationToken ct = default)
         {
             try
             {
@@ -79,7 +80,36 @@ namespace IdentityManager.Controllers
 
                 //TODO: Add direct querying + filtering + permssion filtering
 
-                var users = await ((IRavenQueryable<ApplicationUser>)_userManager.Users).Statistics(out var stats).Select(t => new UserModel
+                var query = ((IRavenQueryable<ApplicationUser>)_userManager.Users).Statistics(out var stats);
+                if (firstName != null)
+                    query = query.Where(t => t.FirstName.StartsWith(firstName));
+                if (lastName != null)
+                    query = query.Where(t => t.LastName.StartsWith(lastName));
+                if (displayName != null)
+                    query = query.Where(t => t.DisplayName.StartsWith(displayName));
+                if (organization != null)
+                    query = query.Where(t => t.Organization.StartsWith(organization));
+                if (email != null)
+                    query = query.Where(t => t.Email.StartsWith(email));
+                if (!includeDisabled)
+                    query = query.Where(t => !t.Disabled);
+                if (lockedOnly)
+                    query = query.Where(t => t.LockoutEnabled && t.LockoutEnd != null && t.LockoutEnd > DateTime.UtcNow);
+
+                query = sort switch
+                {
+                    "+email" => query.OrderBy(t => t.Email),
+                    "-email" => query.OrderByDescending(t => t.Email),
+                    "+firstName" => query.OrderBy(t => t.FirstName),
+                    "-firstName" => query.OrderByDescending(t => t.FirstName),
+                    "+lastName" => query.OrderBy(t => t.LastName),
+                    "-lastName" => query.OrderByDescending(t => t.LastName),
+                    "+organization" => query.OrderBy(t => t.Organization),
+                    "-organization" => query.OrderByDescending(t => t.Organization),
+                    _ => query.OrderBy(t => t.Email),
+                };
+
+                var users = await query.Skip(skip).Take(take).Select(t => new UserModel
                 {
                     AccountExpiration = t.AccountExpiration,
                     ChangePasswordAllowed = t.ChangePasswordAllowed,
