@@ -394,7 +394,7 @@ namespace IdentityManager.Controllers
             DisplayName = user.DisplayName,
             Email = user.Email,
             FirstName = user.FirstName,
-            Id = user.Id,
+            Id = user.Id.Split('/').Last(),
             LastLoggedIn = user.LastLoggedIn,
             LastName = user.LastName,
             Locked = user.LockoutEnabled && user.LockoutEnd > DateTime.UtcNow,
