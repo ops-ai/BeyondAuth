@@ -233,7 +233,7 @@ namespace IdentityManager.Controllers
         /// <response code="500">Server error</response>
         [HttpPost]
         [ProducesResponseType(typeof(UserModel), (int)HttpStatusCode.Created)]
-        [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.Forbidden)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Post([FromRoute] string dataSourceId, [FromBody] UserCreateModel userInfo, CancellationToken ct = default)
@@ -289,7 +289,7 @@ namespace IdentityManager.Controllers
             }
             catch (UnauthorizedAccessException ex)
             {
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
+                return Forbid();
             }
             catch (Exception ex)
             {
@@ -312,7 +312,7 @@ namespace IdentityManager.Controllers
         [HttpPut("{userId}")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Put([FromRoute] string dataSourceId, [FromRoute] string userId, [FromBody] UserUpdateModel userInfo, CancellationToken ct = default)
         {
@@ -429,7 +429,7 @@ namespace IdentityManager.Controllers
         [HttpPatch("{userId}")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Patch([FromRoute] string dataSourceId, [FromRoute] string userId, [FromBody] JsonPatchDocument<UserUpdateModel> patch, CancellationToken ct = default)
         {
@@ -474,9 +474,9 @@ namespace IdentityManager.Controllers
             {
                 _logger.LogError(ex, $"Invalid JsonPatch Operation:{ex.FailedOperation.OperationType} while attempting to update user {userId}.");
                 if (ex.FailedOperation.OperationType == OperationType.Test)
-                    return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
+                    return ValidationProblem(new ValidationProblemDetails { Detail = ex.Message });
                 else
-                    return BadRequest(new Dictionary<string, string> { { "reason", ex.FailedOperation.op } });
+                    return ValidationProblem(new ValidationProblemDetails { Detail = ex.FailedOperation.op });
             }
             catch (KeyNotFoundException ex)
             {
@@ -486,7 +486,7 @@ namespace IdentityManager.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An error occurred while attempting to update user {userId}.");
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
+                throw;
             }
         }
     }

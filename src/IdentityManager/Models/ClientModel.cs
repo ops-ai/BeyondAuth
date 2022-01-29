@@ -3,6 +3,7 @@ using IdentityServer4.Models;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Converters;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Security.Claims;
 
 namespace IdentityManager.Models
@@ -15,6 +16,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// Unique ID of the client
         /// </summary>
+        [Required]
         public string ClientId { get; set; }
 
         /// <summary>
@@ -25,7 +27,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// Gets or sets a value indicating whether [allow offline access]. Defaults to false.
         /// </summary>
-        public bool AllowOfflineAccess { get; set; }
+        public bool AllowOfflineAccess { get; set; } = false;
 
         /// <summary>
         /// Lifetime of identity token in seconds (defaults to 900 seconds / 15 minutes)
@@ -176,6 +178,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// Client display name (used for logging and consent screen)
         /// </summary>
+        [Required]
         public string ClientName { get; set; }
 
         /// <summary>
@@ -201,7 +204,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// Specifies whether a consent screen is required (defaults to <c>false</c>)
         /// </summary>
-        public bool RequireConsent { get; set; }
+        public bool RequireConsent { get; set; } = false;
 
         /// <summary>
         /// Specifies the allowed grant types (legal combinations of AuthorizationCode, Implicit,

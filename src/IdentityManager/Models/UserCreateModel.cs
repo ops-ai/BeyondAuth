@@ -85,6 +85,6 @@ namespace IdentityManager.Models
         /// </summary>
         public string ZoneInfo { get; set; }
 
-        public bool LockoutEnabled { get; set; }
+        public bool LockoutEnabled { get; set; } = true;
     }
 }

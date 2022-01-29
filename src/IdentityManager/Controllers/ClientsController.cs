@@ -115,13 +115,16 @@ namespace IdentityManager.Controllers
         /// <response code="400">Validation failed</response>
         /// <response code="500">Server error creating client</response>
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ClientModel client)
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return ValidationProblem(ModelState);
+
                 if (client == null)
                     throw new ArgumentException("client is required", nameof(client));
 
@@ -147,7 +150,7 @@ namespace IdentityManager.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogWarning(ex, "Validation error creating client");
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
+                return ValidationProblem(new ValidationProblemDetails { Detail = ex.Message });
             }
             catch (Exception ex)
             {
@@ -166,12 +169,16 @@ namespace IdentityManager.Controllers
         /// <response code="500">Server error updating client</response>
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPut("{clientId}")]
         public async Task<IActionResult> Put([FromBody] ClientModel model)
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return ValidationProblem(ModelState);
+
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var client = await session.LoadAsync<ClientEntity>($"Clients/{model.ClientId}");
@@ -255,10 +262,10 @@ namespace IdentityManager.Controllers
         /// <response code="404">Client was not found</response>
         /// <response code="500">Error updating client</response>
         [HttpPatch("{clientId}")]
-        [ProducesResponseType(typeof(void), 204)]
-        [ProducesResponseType(typeof(void), 404)]
-        [ProducesResponseType(typeof(IDictionary<string, string>), 400)]
-        [ProducesResponseType(typeof(void), 500)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Patch([FromRoute] string clientId, [FromBody] JsonPatchDocument<ClientModel> patch)
         {
             try
@@ -273,12 +280,12 @@ namespace IdentityManager.Controllers
             {
                 _logger.LogError(ex, $"Invalid JsonPatch Operation:{ex.FailedOperation.OperationType} while attempting to update client {clientId}.");
 
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.FailedOperation.op } });
+                return ValidationProblem(new ValidationProblemDetails { Detail = ex.FailedOperation.op });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error updating client");
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
+                throw;
             }
         }
 
@@ -312,7 +319,7 @@ namespace IdentityManager.Controllers
             catch (KeyNotFoundException ex)
             {
                 _logger.LogWarning(ex, "Client not found");
-                throw;
+                return NotFound();
             }
             catch (Exception ex)
             {

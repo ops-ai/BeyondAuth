@@ -113,13 +113,16 @@ namespace IdentityManager.Controllers
         /// <response code="400">Validation failed</response>
         /// <response code="500">Server error creating Api Scope</response>
         [ProducesResponseType(typeof(ApiScopeModel), (int)HttpStatusCode.Created)]
-        [ProducesResponseType(typeof(Dictionary<string, string>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPost]
         public async Task<ActionResult<ApiScopeModel>> Post([FromBody] ApiScopeModel scope)
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return ValidationProblem(ModelState);
+
                 if (scope == null)
                     throw new ArgumentException("scope is required", nameof(scope));
 
@@ -139,7 +142,7 @@ namespace IdentityManager.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogWarning(ex, "Validation error creating Api Scope");
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
+                return ValidationProblem(new ValidationProblemDetails { Detail = ex.Message });
             }
             catch (Exception ex)
             {
@@ -158,12 +161,16 @@ namespace IdentityManager.Controllers
         /// <response code="500">Server error updating Api Scope</response>
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPut("{name}")]
         public async Task<IActionResult> Put([FromBody] ApiScopeModel model)
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return ValidationProblem(ModelState);
+
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var scope = await session.LoadAsync<ApiScopeEntity>($"Scopes/{model.Name}");
@@ -188,7 +195,7 @@ namespace IdentityManager.Controllers
             catch (KeyNotFoundException ex)
             {
                 _logger.LogWarning(ex, "Api Scope not found");
-                throw;
+                return NotFound();
             }
             catch (Exception ex)
             {
@@ -210,7 +217,7 @@ namespace IdentityManager.Controllers
         [HttpPatch("{name}")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Patch(string name, [FromBody] JsonPatchDocument<ApiScopeModel> patch)
         {
@@ -226,12 +233,12 @@ namespace IdentityManager.Controllers
             {
                 _logger.LogError(ex, $"Invalid JsonPatch Operation:{ex.FailedOperation.OperationType} while attempting to update scope {name}.");
 
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.FailedOperation.op } });
+                return ValidationProblem(new ValidationProblemDetails { Detail = ex.FailedOperation.op });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error updating Api Scope");
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
+                throw;
             }
         }
 
@@ -265,7 +272,7 @@ namespace IdentityManager.Controllers
             catch (KeyNotFoundException ex)
             {
                 _logger.LogWarning(ex, "Api Scope not found");
-                throw;
+                return NotFound();
             }
             catch (Exception ex)
             {

@@ -113,13 +113,16 @@ namespace IdentityManager.Controllers
         /// <response code="400">Validation failed</response>
         /// <response code="500">Server error creating Api Resource</response>
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] ApiResourceModel resource)
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return ValidationProblem(ModelState);
+
                 if (resource == null)
                     throw new ArgumentException("resource is required", nameof(resource));
 
@@ -139,7 +142,7 @@ namespace IdentityManager.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogWarning(ex, "Validation error creating Api Resource");
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
+                return ValidationProblem(new ValidationProblemDetails { Detail = ex.Message });
             }
             catch (Exception ex)
             {
@@ -158,12 +161,16 @@ namespace IdentityManager.Controllers
         /// <response code="500">Server error updating Api Resource</response>
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPut("{name}")]
         public async Task<IActionResult> Put([FromBody] ApiResourceModel model)
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return ValidationProblem(ModelState);
+
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var resource = await session.LoadAsync<ApiResourceEntity>($"ApiResources/{model.Name}");
@@ -187,7 +194,7 @@ namespace IdentityManager.Controllers
             catch (KeyNotFoundException ex)
             {
                 _logger.LogWarning(ex, "Api Resource not found");
-                throw;
+                return NotFound();
             }
             catch (Exception ex)
             {
@@ -209,7 +216,7 @@ namespace IdentityManager.Controllers
         [HttpPatch("{name}")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Patch(string name, [FromBody] JsonPatchDocument<ApiResourceModel> patch)
         {
@@ -225,12 +232,12 @@ namespace IdentityManager.Controllers
             {
                 _logger.LogError(ex, $"Invalid JsonPatch Operation:{ex.FailedOperation.OperationType} while attempting to update resource {name}.");
 
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.FailedOperation.op } });
+                return ValidationProblem(new ValidationProblemDetails { Detail = ex.FailedOperation.op });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error updating Api Resource");
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
+                throw;
             }
         }
 
@@ -264,7 +271,7 @@ namespace IdentityManager.Controllers
             catch (KeyNotFoundException ex)
             {
                 _logger.LogWarning(ex, "Api Resource not found");
-                throw;
+                return NotFound();
             }
             catch (Exception ex)
             {

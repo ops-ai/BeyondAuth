@@ -33,17 +33,17 @@ namespace IdentityManager.Models
         /// <summary>
         /// Show in discovery document
         /// </summary>
-        public bool ShowInDiscoveryDocument { get; set; }
+        public bool ShowInDiscoveryDocument { get; set; } = false;
 
         /// <summary>
         /// Identity resource is required
         /// </summary>
-        public bool Required { get; set; }
+        public bool Required { get; set; } = false;
 
         /// <summary>
         /// Emphasize
         /// </summary>
-        public bool Emphasize { get; set; }
+        public bool Emphasize { get; set; } = false;
 
         /// <summary>
         /// List of accociated user claims that should be included when this resource is

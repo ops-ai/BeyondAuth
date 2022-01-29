@@ -115,13 +115,16 @@ namespace IdentityManager.Controllers
         /// <response code="400">Validation failed</response>
         /// <response code="500">Server error creating client secret</response>
         [ProducesResponseType(typeof(string), (int)HttpStatusCode.OK)]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPost]
         public async Task<IActionResult> Post([FromRoute] string clientId, [FromBody] SecretModel clientSecret)
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return ValidationProblem(ModelState);
+
                 if (clientSecret == null)
                     throw new ArgumentException("client is required", nameof(clientSecret));
 
@@ -170,12 +173,16 @@ namespace IdentityManager.Controllers
         /// <response code="500">Server error updating client secret</response>
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPut("{id}")]
         public async Task<IActionResult> Put([FromRoute] string clientId, [FromRoute] string id, [FromBody] SecretModel model)
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return ValidationProblem(ModelState);
+
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
@@ -217,10 +224,10 @@ namespace IdentityManager.Controllers
         /// <response code="404">Client was not found</response>
         /// <response code="500">Error updating client</response>
         [HttpPatch("{id}")]
-        [ProducesResponseType(typeof(void), 204)]
-        [ProducesResponseType(typeof(void), 404)]
-        [ProducesResponseType(typeof(IDictionary<string, string>), 400)]
-        [ProducesResponseType(typeof(void), 500)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Patch([FromRoute] string clientId, [FromRoute] string id, [FromBody] JsonPatchDocument<SecretModel> patch)
         {
             try
@@ -235,12 +242,12 @@ namespace IdentityManager.Controllers
             {
                 _logger.LogError(ex, $"Invalid JsonPatch Operation:{ex.FailedOperation.OperationType} while attempting to update client secret {clientId}/{id}.");
 
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.FailedOperation.op } });
+                return ValidationProblem(new ValidationProblemDetails { Detail = ex.FailedOperation.op });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error updating client");
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
+                throw;
             }
         }
 
@@ -278,7 +285,7 @@ namespace IdentityManager.Controllers
             catch (KeyNotFoundException ex)
             {
                 _logger.LogWarning(ex, "Client secret not found");
-                throw;
+                return NotFound();
             }
             catch (Exception ex)
             {

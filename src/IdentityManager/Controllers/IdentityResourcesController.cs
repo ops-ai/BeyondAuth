@@ -113,7 +113,7 @@ namespace IdentityManager.Controllers
         /// <response code="400">Validation failed</response>
         /// <response code="500">Server error creating Identity Resource</response>
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
-        [ProducesResponseType(typeof(void), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] IdentityResourceModel resource)
@@ -122,6 +122,9 @@ namespace IdentityManager.Controllers
             {
                 if (resource == null)
                     throw new ArgumentException("resource is required", nameof(resource));
+
+                if (!ModelState.IsValid)
+                    return ValidationProblem(ModelState);
 
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
@@ -158,12 +161,16 @@ namespace IdentityManager.Controllers
         /// <response code="500">Server error updating Identity Resource</response>
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPut("{name}")]
         public async Task<IActionResult> Put([FromBody] IdentityResourceModel model)
         {
             try
             {
+                if (!ModelState.IsValid)
+                    return ValidationProblem(ModelState);
+
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var resource = await session.LoadAsync<IdentityResourceEntity>($"IdentityResources/{model.Name}");
@@ -210,7 +217,7 @@ namespace IdentityManager.Controllers
         [HttpPatch("{name}")]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
-        [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
+        [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         public async Task<IActionResult> Patch(string name, [FromBody] JsonPatchDocument<IdentityResourceModel> patch)
         {
@@ -231,7 +238,7 @@ namespace IdentityManager.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"Error updating Identity Resource");
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
+                throw;
             }
         }
 
@@ -265,7 +272,7 @@ namespace IdentityManager.Controllers
             catch (KeyNotFoundException ex)
             {
                 _logger.LogWarning(ex, "Identity Resource not found");
-                throw;
+                return NotFound();
             }
             catch (Exception ex)
             {
