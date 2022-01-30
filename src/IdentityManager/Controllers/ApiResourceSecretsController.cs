@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
@@ -46,7 +47,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromRoute] string name, string sort, [FromQuery] string range = "0-19")
+        public async Task<IActionResult> Get([FromRoute] string name, string sort, [FromQuery] string range = "0-19", CancellationToken ct = default)
         {
             try
             {
@@ -55,7 +56,7 @@ namespace IdentityManager.Controllers
                     var from = int.Parse(range.Split('-')[0]);
                     var to = int.Parse(range.Split('-')[1]) + 1;
 
-                    var resource = await session.LoadAsync<ApiResourceEntity>($"ApiResources/{name}");
+                    var resource = await session.LoadAsync<ApiResourceEntity>($"ApiResources/{name}", ct);
                     if (resource == null)
                         throw new KeyNotFoundException($"Api Resource {name} was not found");
                     
@@ -81,13 +82,13 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get([FromRoute] string name, [FromRoute] string id)
+        public async Task<IActionResult> Get([FromRoute] string name, [FromRoute] string id, CancellationToken ct = default)
         {
             try
             {
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var resource = await session.LoadAsync<ApiResourceEntity>($"ApiResources/{name}");
+                    var resource = await session.LoadAsync<ApiResourceEntity>($"ApiResources/{name}", ct);
                     if (resource == null || !resource.ApiSecrets.Any(t => t.Value.Sha256().Equals(id)))
                         throw new KeyNotFoundException($"Secret {id} for Api Resource {name} was not found");
 
@@ -118,7 +119,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPost]
-        public async Task<IActionResult> Post([FromRoute] string name, [FromBody] SecretModel apiResourceSecret)
+        public async Task<IActionResult> Post([FromRoute] string name, [FromBody] SecretModel apiResourceSecret, CancellationToken ct = default)
         {
             try
             {
@@ -135,7 +136,7 @@ namespace IdentityManager.Controllers
                 {
                     _logger.LogDebug($"Creating api resource secret for resource {name}");
 
-                    var resource = await session.LoadAsync<ApiResourceEntity>($"ApiResources/{name}");
+                    var resource = await session.LoadAsync<ApiResourceEntity>($"ApiResources/{name}", ct);
                     if (resource == null)
                         throw new KeyNotFoundException($"Api Resource {name} was not found");
 
@@ -145,7 +146,7 @@ namespace IdentityManager.Controllers
 
                     resource.ApiSecrets.Add(secret);
 
-                    await session.SaveChangesAsync();
+                    await session.SaveChangesAsync(ct);
 
                     return Ok(newSecret);
                 }
@@ -177,7 +178,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put([FromRoute] string name, [FromRoute] string id, [FromBody] SecretModel model)
+        public async Task<IActionResult> Put([FromRoute] string name, [FromRoute] string id, [FromBody] SecretModel model, CancellationToken ct = default)
         {
             try
             {
@@ -186,7 +187,7 @@ namespace IdentityManager.Controllers
 
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var resource = await session.LoadAsync<ApiResourceEntity>($"ApiResources/{name}");
+                    var resource = await session.LoadAsync<ApiResourceEntity>($"ApiResources/{name}", ct);
                     if (resource == null || !resource.ApiSecrets.Any(t => t.Value.Sha256().Equals(id)))
                         throw new KeyNotFoundException($"Api Resource {name} was not found");
 
@@ -196,7 +197,7 @@ namespace IdentityManager.Controllers
                     secret.Expiration = model.Expiration;
                     secret.Type = model.Type.ToString();
 
-                    await session.SaveChangesAsync();
+                    await session.SaveChangesAsync(ct);
 
                     return NoContent();
                 }
@@ -229,15 +230,15 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Patch([FromRoute] string name, [FromRoute] string id, [FromBody] JsonPatchDocument<SecretModel> patch)
+        public async Task<IActionResult> Patch([FromRoute] string name, [FromRoute] string id, [FromBody] JsonPatchDocument<SecretModel> patch, CancellationToken ct = default)
         {
             try
             {
-                var originalSecretObj = await Get(name, id) as OkObjectResult;
-                var originalSecret = (SecretModel)originalSecretObj.Value;
+                var originalSecretObj = await Get(name, id, ct) as OkObjectResult;
+                var originalSecret = (SecretModel)originalSecretObj!.Value!;
 
                 patch.ApplyTo(originalSecret);
-                return await Put(name, id, originalSecret);
+                return await Put(name, id, originalSecret, ct);
             }
             catch (JsonPatchException ex)
             {
@@ -264,13 +265,13 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete([FromRoute] string name, [FromRoute] string id)
+        public async Task<IActionResult> Delete([FromRoute] string name, [FromRoute] string id, CancellationToken ct = default)
         {
             try
             {
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var resource = await session.LoadAsync<ApiResourceEntity>($"ApiResources/{name}");
+                    var resource = await session.LoadAsync<ApiResourceEntity>($"ApiResources/{name}", ct);
                     if (resource == null || !resource.ApiSecrets.Any(t => t.Value.Sha256().Equals(id)))
                         throw new KeyNotFoundException($"Api Resource {name} was not found");
 
@@ -278,7 +279,7 @@ namespace IdentityManager.Controllers
                     if (!resource.ApiSecrets.Remove(secret))
                         throw new Exception("Failed to remove secret");
 
-                    await session.SaveChangesAsync();
+                    await session.SaveChangesAsync(ct);
                 }
 
                 return NoContent();

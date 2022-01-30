@@ -119,7 +119,7 @@ namespace IdentityManager.Controllers
                     DisplayName = t.DisplayName,
                     Email = t.Email,
                     FirstName = t.FirstName,
-                    Id = t.Id.Substring("ApplicationUsers/".Length),
+                    Id = t.Id!.Substring("ApplicationUsers/".Length),
                     LastLoggedIn = t.LastLoggedIn,
                     LastName = t.LastName,
                     Locked = t.LockoutEnabled && t.LockoutEnd != null && t.LockoutEnd > DateTime.UtcNow,
@@ -196,7 +196,7 @@ namespace IdentityManager.Controllers
                 //        throw new UnauthorizedAccessException();
                 //}
 
-                var user = await RetrieveUser(dataSourceId, userId, ct);
+                var user = await RetrieveUser(userId, ct);
                 if (user == null)
                     throw new KeyNotFoundException(userId);
 
@@ -326,7 +326,21 @@ namespace IdentityManager.Controllers
                 //        throw new UnauthorizedAccessException();
                 //}
 
-                var user = await _userManager.FindByIdAsync(userId);
+                var user = await _userManager.FindByIdAsync($"ApplicationUsers/{userId}");
+                if (userInfo.Password != null)
+                {
+                    
+                    var passwordValidationResult = await ValidatePasswordAsync(user, userInfo.Password);
+                    if (!passwordValidationResult.Succeeded)
+                    {
+                        foreach (var error in passwordValidationResult.Errors)
+                            ModelState.AddModelError("Password", error.Description);
+                    }
+                }
+
+                if (!ModelState.IsValid)
+                    return ValidationProblem(ModelState);
+
                 if (userInfo.Password != null)
                 {
                     var code = await _userManager.GeneratePasswordResetTokenAsync(user);
@@ -373,11 +387,37 @@ namespace IdentityManager.Controllers
             }
         }
 
-        private async Task<UserModel> RetrieveUser([FromRoute] string dataSourceId, [FromRoute] string userId, CancellationToken ct = default)
+        /// <summary>
+        /// Should return <see cref="IdentityResult.Success"/> if validation is successful. This is
+        /// called before updating the password hash.
+        /// </summary>
+        /// <param name="user">The user.</param>
+        /// <param name="password">The password.</param>
+        /// <returns>A <see cref="IdentityResult"/> representing whether validation was successful.</returns>
+        protected async Task<IdentityResult> ValidatePasswordAsync(ApplicationUser user, string password)
         {
-            var user = await _userManager.FindByIdAsync(userId);
+            var errors = new List<IdentityError>();
+            foreach (var v in _userManager.PasswordValidators)
+            {
+                var result = await v.ValidateAsync(_userManager, user, password);
+                if (!result.Succeeded)
+                {
+                    errors.AddRange(result.Errors);
+                }
+            }
+            if (errors.Count > 0)
+            {
+                _logger.LogWarning(14, "User {userId} password validation failed: {errors}.", user.Id, string.Join(";", errors.Select(e => e.Code)));
+                return IdentityResult.Failed(errors.ToArray());
+            }
+            return IdentityResult.Success;
+        }
+
+        private async Task<UserModel?> RetrieveUser([FromRoute] string userId, CancellationToken ct = default)
+        {
+            var user = await _userManager.FindByIdAsync($"ApplicationUsers/{userId}");
             if (user == null)
-                user = await _userManager.FindByIdAsync($"ApplicationUsers/{userId}");
+                user = await _userManager.FindByEmailAsync(userId);
             if (user == null)
                 return null;
 
@@ -394,7 +434,7 @@ namespace IdentityManager.Controllers
             DisplayName = user.DisplayName,
             Email = user.Email,
             FirstName = user.FirstName,
-            Id = user.Id.Split('/').Last(),
+            Id = user.Id!.Split('/').Last(),
             LastLoggedIn = user.LastLoggedIn,
             LastName = user.LastName,
             Locked = user.LockoutEnabled && user.LockoutEnd > DateTime.UtcNow,
@@ -443,8 +483,10 @@ namespace IdentityManager.Controllers
                 //        throw new UnauthorizedAccessException();
                 //}
 
-                var originalUser = await RetrieveUser(dataSourceId, userId, ct);
+                var originalUser = await RetrieveUser(userId, ct);
                 _logger.LogInformation($"Get the user object for Patching user:{userId}");
+                if (originalUser == null)
+                    return NotFound();
 
                 if (originalUser == null)
                     throw new KeyNotFoundException($"User {userId} was not found");
@@ -458,6 +500,7 @@ namespace IdentityManager.Controllers
                     Email = originalUser.Email,
                     FirstName = originalUser.FirstName,
                     LastName = originalUser.LastName,
+                    DisplayName = originalUser.DisplayName,
                     Organization = originalUser.Organization,
                     PasswordPolicy = originalUser.PasswordPolicy,
                     PasswordResetAllowed = originalUser.PasswordResetAllowed,
@@ -477,11 +520,6 @@ namespace IdentityManager.Controllers
                     return ValidationProblem(new ValidationProblemDetails { Detail = ex.Message });
                 else
                     return ValidationProblem(new ValidationProblemDetails { Detail = ex.FailedOperation.op });
-            }
-            catch (KeyNotFoundException ex)
-            {
-                _logger.LogError(ex, $"User not found when attempting to update user {userId}.");
-                return NotFound();
             }
             catch (Exception ex)
             {

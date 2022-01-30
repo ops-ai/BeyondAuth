@@ -15,6 +15,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
@@ -46,7 +47,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string sort = "+clientName", [FromQuery] string range = "0-19")
+        public async Task<IActionResult> Get([FromQuery] string sort = "+clientName", [FromQuery] string range = "0-19", CancellationToken ct = default)
         {
             try
             {
@@ -54,14 +55,14 @@ namespace IdentityManager.Controllers
                 {
                     var query = session.Query<ClientEntity>().AsQueryable();
                     if (sort.StartsWith("-"))
-                        query = query.OrderByDescending(sort.Substring(1), Raven.Client.Documents.Session.OrderingType.String);
+                        query = query.OrderByDescending(sort[1..], Raven.Client.Documents.Session.OrderingType.String);
                     else
-                        query = query.OrderBy(sort.Substring(1), Raven.Client.Documents.Session.OrderingType.String);
+                        query = query.OrderBy(sort[1..], Raven.Client.Documents.Session.OrderingType.String);
 
                     var from = int.Parse(range.Split('-')[0]);
                     var to = int.Parse(range.Split('-')[1]) + 1;
 
-                    return this.Partial(await query.Skip(from).Take(to - from).ToListAsync().ContinueWith(t => t.Result.Select(c => c.ToModel())));
+                    return this.Partial(await query.Skip(from).Take(to - from).ToListAsync(ct).ContinueWith(t => t.Result.Select(c => c.ToModel()), ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
                 }
             }
             catch (Exception ex)
@@ -82,13 +83,13 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet("{clientId}")]
-        public async Task<IActionResult> Get([FromRoute]string clientId)
+        public async Task<IActionResult> Get([FromRoute]string clientId, CancellationToken ct = default)
         {
             try
             {
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
+                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}", ct);
                     if (client == null)
                         throw new KeyNotFoundException($"Client {clientId} was not found");
 
@@ -118,7 +119,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] ClientModel client)
+        public async Task<IActionResult> Post([FromBody] ClientModel client, CancellationToken ct = default)
         {
             try
             {
@@ -138,11 +139,11 @@ namespace IdentityManager.Controllers
                 {
                     _logger.LogDebug($"Creating client {client.ClientId}");
 
-                    if (await session.Advanced.ExistsAsync($"Clients/{client.ClientId}"))
+                    if (await session.Advanced.ExistsAsync($"Clients/{client.ClientId}", ct))
                         throw new ArgumentException("Client already exists");
 
-                    await session.StoreAsync(client.FromModel(), $"Clients/{client.ClientId}");
-                    await session.SaveChangesAsync();
+                    await session.StoreAsync(client.FromModel(), $"Clients/{client.ClientId}", ct);
+                    await session.SaveChangesAsync(ct);
                 }
 
                 return NoContent();
@@ -172,7 +173,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPut("{clientId}")]
-        public async Task<IActionResult> Put([FromBody] ClientModel model)
+        public async Task<IActionResult> Put([FromBody] ClientModel model, CancellationToken ct = default)
         {
             try
             {
@@ -181,7 +182,7 @@ namespace IdentityManager.Controllers
 
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var client = await session.LoadAsync<ClientEntity>($"Clients/{model.ClientId}");
+                    var client = await session.LoadAsync<ClientEntity>($"Clients/{model.ClientId}", ct);
                     if (client == null)
                         throw new KeyNotFoundException($"Client {model.ClientId} was not found");
 
@@ -234,7 +235,7 @@ namespace IdentityManager.Controllers
                     client.UserCodeType = model.UserCodeType;
                     client.UserSsoLifetime = model.UserSsoLifetime;
 
-                    await session.SaveChangesAsync();
+                    await session.SaveChangesAsync(ct);
 
                     return NoContent();
                 }
@@ -246,7 +247,7 @@ namespace IdentityManager.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error deleting client");
+                _logger.LogError(ex, "Error updating client");
                 throw;
             }
         }
@@ -266,15 +267,15 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Patch([FromRoute] string clientId, [FromBody] JsonPatchDocument<ClientModel> patch)
+        public async Task<IActionResult> Patch([FromRoute] string clientId, [FromBody] JsonPatchDocument<ClientModel> patch, CancellationToken ct = default)
         {
             try
             {
-                var originalClientObj = await Get(clientId) as OkObjectResult;
-                var originalClient = (ClientModel)originalClientObj.Value;
+                var originalClientObj = await Get(clientId, ct) as OkObjectResult;
+                var originalClient = (ClientModel)originalClientObj!.Value!;
 
                 patch.ApplyTo(originalClient);
-                return await Put(originalClient);
+                return await Put(originalClient, ct);
             }
             catch (JsonPatchException ex)
             {
@@ -300,18 +301,18 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpDelete("{clientId}")]
-        public async Task<IActionResult> Delete(string clientId)
+        public async Task<IActionResult> Delete(string clientId, CancellationToken ct = default)
         {
             try
             {
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
+                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}", ct);
                     if (client == null)
                         throw new KeyNotFoundException($"Client {clientId} was not found");
 
                     session.Delete(client);
-                    await session.SaveChangesAsync();
+                    await session.SaveChangesAsync(ct);
 
                     return NoContent();
                 }

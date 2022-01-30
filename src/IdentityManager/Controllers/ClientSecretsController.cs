@@ -14,6 +14,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Net;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
@@ -46,7 +47,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromRoute] string clientId, string sort, [FromQuery] string range = "0-19")
+        public async Task<IActionResult> Get([FromRoute] string clientId, string sort, [FromQuery] string range = "0-19", CancellationToken ct = default)
         {
             try
             {
@@ -55,7 +56,7 @@ namespace IdentityManager.Controllers
                     var from = int.Parse(range.Split('-')[0]);
                     var to = int.Parse(range.Split('-')[1]) + 1;
 
-                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
+                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}", ct);
                     if (client == null)
                         throw new KeyNotFoundException($"Client {clientId} was not found");
 
@@ -81,13 +82,13 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet("{id}")]
-        public async Task<IActionResult> Get([FromRoute] string clientId, [FromRoute] string id)
+        public async Task<IActionResult> Get([FromRoute] string clientId, [FromRoute] string id, CancellationToken ct = default)
         {
             try
             {
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
+                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}", ct);
                     if (client == null || !client.ClientSecrets.Any(t => t.Value.Sha256().Equals(id)))
                         throw new KeyNotFoundException($"Client secret {clientId}/{id} was not found");
 
@@ -118,7 +119,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPost]
-        public async Task<IActionResult> Post([FromRoute] string clientId, [FromBody] SecretModel clientSecret)
+        public async Task<IActionResult> Post([FromRoute] string clientId, [FromBody] SecretModel clientSecret, CancellationToken ct = default)
         {
             try
             {
@@ -135,7 +136,7 @@ namespace IdentityManager.Controllers
                 {
                     _logger.LogDebug($"Creating client {clientId}");
 
-                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
+                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}", ct);
                     if (client == null)
                         throw new KeyNotFoundException($"Client {clientId} was not found");
 
@@ -144,7 +145,7 @@ namespace IdentityManager.Controllers
                     secret.Value = newSecret.Sha256();
                     client.ClientSecrets.Add(secret);
 
-                    await session.SaveChangesAsync();
+                    await session.SaveChangesAsync(ct);
 
                     return Ok(newSecret);
                 }
@@ -176,7 +177,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPut("{id}")]
-        public async Task<IActionResult> Put([FromRoute] string clientId, [FromRoute] string id, [FromBody] SecretModel model)
+        public async Task<IActionResult> Put([FromRoute] string clientId, [FromRoute] string id, [FromBody] SecretModel model, CancellationToken ct = default)
         {
             try
             {
@@ -185,7 +186,7 @@ namespace IdentityManager.Controllers
 
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
+                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}", ct);
                     if (client == null || !client.ClientSecrets.Any(t => t.Value.Sha256().Equals(id)))
                         throw new KeyNotFoundException($"Client secret {clientId}/{id} was not found");
 
@@ -195,7 +196,7 @@ namespace IdentityManager.Controllers
                     secret.Expiration = model.Expiration;
                     secret.Type = model.Type.ToString();
 
-                    await session.SaveChangesAsync();
+                    await session.SaveChangesAsync(ct);
 
                     return NoContent();
                 }
@@ -228,15 +229,15 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Patch([FromRoute] string clientId, [FromRoute] string id, [FromBody] JsonPatchDocument<SecretModel> patch)
+        public async Task<IActionResult> Patch([FromRoute] string clientId, [FromRoute] string id, [FromBody] JsonPatchDocument<SecretModel> patch, CancellationToken ct = default)
         {
             try
             {
-                var originalClientObj = await Get(clientId, id) as OkObjectResult;
-                var originalClient = (SecretModel)originalClientObj.Value;
+                var originalClientObj = await Get(clientId, id, ct) as OkObjectResult;
+                var originalClient = (SecretModel)originalClientObj!.Value!;
 
                 patch.ApplyTo(originalClient);
-                return await Put(clientId, id, originalClient);
+                return await Put(clientId, id, originalClient, ct);
             }
             catch (JsonPatchException ex)
             {
@@ -263,13 +264,13 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpDelete("{id}")]
-        public async Task<IActionResult> Delete([FromRoute] string clientId, [FromRoute] string id)
+        public async Task<IActionResult> Delete([FromRoute] string clientId, [FromRoute] string id, CancellationToken ct = default)
         {
             try
             {
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}");
+                    var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}", ct);
                     if (client == null || !client.ClientSecrets.Any(t => t.Value.Sha256().Equals(id)))
                         throw new KeyNotFoundException($"Client secret {clientId}/{id} was not found");
 
@@ -277,7 +278,7 @@ namespace IdentityManager.Controllers
                     if (!client.ClientSecrets.Remove(secret))
                         throw new Exception("Failed to remove secret");
 
-                    await session.SaveChangesAsync();
+                    await session.SaveChangesAsync(ct);
 
                     return NoContent();
                 }

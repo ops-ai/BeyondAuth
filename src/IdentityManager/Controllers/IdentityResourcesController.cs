@@ -44,7 +44,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string sort = "+name", [FromQuery] string range = "0-19")
+        public async Task<IActionResult> Get([FromQuery] string sort = "+name", [FromQuery] string range = "0-19", CancellationToken ct = default)
         {
             try
             {
@@ -59,7 +59,7 @@ namespace IdentityManager.Controllers
                     var from = int.Parse(range.Split('-')[0]);
                     var to = int.Parse(range.Split('-')[1]) + 1;
 
-                    return this.Partial(await query.Skip(from).Take(to - from).ToListAsync().ContinueWith(t => t.Result.Select(c => c.ToModel())));
+                    return this.Partial(await query.Skip(from).Take(to - from).ToListAsync(ct).ContinueWith(t => t.Result.Select(c => c.ToModel()), ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
                 }
             }
             catch (Exception ex)
@@ -80,13 +80,13 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet("{name}")]
-        public async Task<IActionResult> Get(int name)
+        public async Task<IActionResult> GetOne(string name, CancellationToken ct = default)
         {
             try
             {
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var resource = await session.LoadAsync<IdentityResourceEntity>($"IdentityResources/{name}");
+                    var resource = await session.LoadAsync<IdentityResourceEntity>($"IdentityResources/{name}", ct);
                     if (resource == null)
                         throw new KeyNotFoundException($"Identity Resource {name} was not found");
 
@@ -116,7 +116,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] IdentityResourceModel resource)
+        public async Task<IActionResult> Post([FromBody] IdentityResourceModel resource, CancellationToken ct = default)
         {
             try
             {
@@ -130,11 +130,11 @@ namespace IdentityManager.Controllers
                 {
                     _logger.LogDebug($"Creating Identity Resource {resource.Name}");
 
-                    if (await session.Advanced.ExistsAsync($"IdentityResources/{resource.Name}"))
+                    if (await session.Advanced.ExistsAsync($"IdentityResources/{resource.Name}", ct))
                         throw new ArgumentException("Identity Resource already exists");
 
-                    await session.StoreAsync(resource.FromModel(), $"IdentityResources/{resource.Name}");
-                    await session.SaveChangesAsync();
+                    await session.StoreAsync(resource.FromModel(), $"IdentityResources/{resource.Name}", ct);
+                    await session.SaveChangesAsync(ct);
                 }
 
                 return NoContent();
@@ -164,7 +164,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPut("{name}")]
-        public async Task<IActionResult> Put([FromBody] IdentityResourceModel model)
+        public async Task<IActionResult> Put([FromBody] IdentityResourceModel model, CancellationToken ct = default)
         {
             try
             {
@@ -173,7 +173,7 @@ namespace IdentityManager.Controllers
 
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var resource = await session.LoadAsync<IdentityResourceEntity>($"IdentityResources/{model.Name}");
+                    var resource = await session.LoadAsync<IdentityResourceEntity>($"IdentityResources/{model.Name}", ct);
                     if (resource == null)
                         throw new KeyNotFoundException($"Resource {model.Name} was not found");
 
@@ -187,7 +187,7 @@ namespace IdentityManager.Controllers
                     resource.Emphasize = model.Emphasize;
                     resource.UserClaims = model.UserClaims;
 
-                    await session.SaveChangesAsync();
+                    await session.SaveChangesAsync(ct);
 
                     return NoContent();
                 }
@@ -219,15 +219,15 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Patch(string name, [FromBody] JsonPatchDocument<IdentityResourceModel> patch)
+        public async Task<IActionResult> Patch(string name, [FromBody] JsonPatchDocument<IdentityResourceModel> patch, CancellationToken ct = default)
         {
             try
             {
-                var originalResourceObj = await Get(name) as OkObjectResult;
-                var originalResource = (IdentityResourceModel)originalResourceObj.Value;
+                var originalResourceObj = await GetOne(name, ct) as OkObjectResult;
+                var originalResource = (IdentityResourceModel)originalResourceObj!.Value!;
 
                 patch.ApplyTo(originalResource);
-                return await Put(originalResource);
+                return await Put(originalResource, ct);
             }
             catch (JsonPatchException ex)
             {
@@ -253,18 +253,18 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpDelete("{name}")]
-        public async Task<IActionResult> Delete(string name)
+        public async Task<IActionResult> Delete(string name, CancellationToken ct = default)
         {
             try
             {
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var resource = await session.LoadAsync<IdentityResourceEntity>($"IdentityResources/{name}");
+                    var resource = await session.LoadAsync<IdentityResourceEntity>($"IdentityResources/{name}", ct);
                     if (resource == null)
                         throw new KeyNotFoundException($"Identity Resource {name} was not found");
 
                     session.Delete(resource);
-                    await session.SaveChangesAsync();
+                    await session.SaveChangesAsync(ct);
 
                     return NoContent();
                 }

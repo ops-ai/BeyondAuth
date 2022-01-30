@@ -1,5 +1,5 @@
 ﻿using BeyondAuth.Acl;
-using IdentityServer4.Models;
+using System;
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
@@ -8,12 +8,12 @@ namespace IdentityManager.Domain
     /// <summary>
     /// 
     /// </summary>
-    public class ClientEntity : Client, ISecurableEntity
+    public class Group : ISecurableEntity
     {
         /// <summary>
-        /// Document identifier
+        /// Group identifier
         /// </summary>
-        public string Id => $"Clients/{ClientId}";
+        public string Id => $"Groups/{Name}";
 
         /// <summary>
         /// Parent
@@ -21,7 +21,7 @@ namespace IdentityManager.Domain
         public string? ParentId { get; set; }
 
         /// <summary>
-        /// Owner of client
+        /// Owner of group
         /// </summary>
         public string? OwnerId { get; set; }
 
@@ -41,16 +41,36 @@ namespace IdentityManager.Domain
         public List<AceEntry>? AceEntries { get; set; }
 
         /// <summary>
-        /// Customer support email that should be displayed
+        /// Name
         /// </summary>
-        public string? SupportEmail { get; set; }
+        public string Name { get; set; }
 
         /// <summary>
-        /// Customer support link that should be displayed
+        /// Custom tags associated with the group. Can be anything
         /// </summary>
-        public string? SupportLink { get; set; }
+        public List<string> Tags { get; set; } = new List<string>();
+
+        /// <summary>
+        /// The date when the user was created
+        /// </summary>
+        public DateTime CreatedOnUtc { get; set; } = DateTime.UtcNow;
+
+        /// <summary>
+        /// Last date account was updated
+        /// </summary>
+        public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
         [JsonIgnore]
         public ISecurableEntity? AclHolder { get; set; }
+
+        /// <summary>
+        /// Dictionary of UserId / membership metadata
+        /// </summary>
+        public Dictionary<string, GroupMemberInfo> Members { get; set; } = new Dictionary<string, GroupMemberInfo>();
+    }
+
+    public class GroupMemberInfo
+    {
+        public DateTime CreatedOnUtc { get; set; } = DateTime.UtcNow;
     }
 }

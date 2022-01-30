@@ -30,6 +30,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// Email Address
         /// </summary>
+        [Required]
         [EmailAddress(ErrorMessage = "Not a valid email")]
         public string Email { get; set; }
 
@@ -63,7 +64,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// Password policy
         /// </summary>
-        public string PasswordPolicy { get; set; } = null;
+        public string? PasswordPolicy { get; set; } = null;
 
         /// <summary>
         /// Account expiration date
@@ -83,7 +84,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// TimeZone info for current user in IANA format. (e.g. America/Los_Angeles)
         /// </summary>
-        public string ZoneInfo { get; set; }
+        public string? ZoneInfo { get; set; }
 
         public bool LockoutEnabled { get; set; } = true;
     }

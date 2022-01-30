@@ -93,7 +93,9 @@ namespace Identity.Core
 
         public string DefaultApp { get; set; }
 
-        [Newtonsoft.Json.JsonIgnore]
+        public List<string> Groups { get; set; }
+
+        [JsonIgnore]
         public override List<IdentityUserClaim> Claims
         {
             get
