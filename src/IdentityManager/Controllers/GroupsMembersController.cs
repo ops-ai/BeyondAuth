@@ -1,4 +1,5 @@
-﻿using Identity.Core;
+﻿using Audit.Core;
+using Identity.Core;
 using IdentityManager.Domain;
 using IdentityManager.Extensions;
 using IdentityManager.Models;
@@ -109,13 +110,20 @@ namespace IdentityManager.Controllers
                         return NotFound();
 
                     var users = await session.LoadAsync<ApplicationUser>(model.Ids.Select(t => $"ApplicationUsers/{t}").Except(group.Members.Keys), ct);
-                    foreach (var user in users.Where(t => t.Value != null))
-                    {
-                        group.Members.Add(user.Value.Id, new GroupMemberInfo());
-                        user.Value.Groups.Add(group.Id);
-                    }
+                    var usersToAdd = users.Where(t => t.Value != null);
+                    if (!usersToAdd.Any())
+                        return NoContent();
 
-                    await session.SaveChangesAsync(ct);
+                    using (var audit = await AuditScope.CreateAsync("Group:AddMembers", () => group, new { group.Id, MemberIds = usersToAdd }))
+                    {
+                        foreach (var user in usersToAdd)
+                        {
+                            group.Members.Add(user.Value.Id!, new GroupMemberInfo());
+                            session.Advanced.Patch<ApplicationUser, string>(user.Value.Id, t => t.Groups, g => g.Add(group.Id));
+                        }
+
+                        await session.SaveChangesAsync(ct);
+                    }
                 }
 
                 return NoContent();
@@ -156,13 +164,20 @@ namespace IdentityManager.Controllers
                         return NotFound();
 
                     var users = await session.LoadAsync<ApplicationUser>(model.Ids.Select(t => $"ApplicationUsers/{t}").Intersect(group.Members.Keys), ct);
-                    foreach (var user in users.Where(t => t.Value != null))
-                    {
-                        group.Members.Remove(user.Value.Id);
-                        user.Value.Groups.Remove(group.Id);
-                    }
+                    var usersToRemove = users.Where(t => t.Value != null);
+                    if (!usersToRemove.Any())
+                        return NoContent();
 
-                    await session.SaveChangesAsync(ct);
+                    using (var audit = await AuditScope.CreateAsync("Group:AddMembers", () => group, new { group.Id, MemberIds = usersToRemove }))
+                    {
+                        foreach (var user in usersToRemove)
+                        {
+                            group.Members.Remove(user.Value.Id!);
+                            session.Advanced.Patch<ApplicationUser, string>(user.Value.Id, t => t.Groups, g => g.RemoveAll(t => t == group.Id));
+                        }
+
+                        await session.SaveChangesAsync(ct);
+                    }
 
                     return NoContent();
                 }

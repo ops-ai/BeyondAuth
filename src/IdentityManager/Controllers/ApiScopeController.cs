@@ -1,4 +1,5 @@
-﻿using IdentityManager.Domain;
+﻿using Audit.Core;
+using IdentityManager.Domain;
 using IdentityManager.Extensions;
 using IdentityManager.Models;
 using IdentityServer4.Contrib.RavenDB.Options;
@@ -134,8 +135,14 @@ namespace IdentityManager.Controllers
                     if (await session.Advanced.ExistsAsync($"Scopes/{scope.Name}", ct))
                         throw new ArgumentException("Api Scope already exists");
 
-                    await session.StoreAsync(scope.FromModel(), $"Scopes/{scope.Name}", ct);
-                    await session.SaveChangesAsync(ct);
+                    ApiScopeEntity? entity = null;
+                    using (var audit = await AuditScope.CreateAsync("ApiScope:Create", () => entity))
+                    {
+                        entity = scope.FromModel();
+                        await session.StoreAsync(entity, $"Scopes/{scope.Name}", ct);
+                        await session.SaveChangesAsync(ct);
+                        audit.SetCustomField("Id", entity.Id);
+                    }
                 }
 
                 return CreatedAtRoute("Get", new { name = scope.Name }, scope);
@@ -178,17 +185,20 @@ namespace IdentityManager.Controllers
                     if (scope == null)
                         throw new KeyNotFoundException($"Scope {model.Name} was not found");
 
-                    scope.Description = model.Description;
-                    scope.DisplayName = model.DisplayName;
-                    scope.Enabled = model.Enabled;
-                    scope.Name = model.Name;
-                    scope.Properties = model.Properties;
-                    scope.ShowInDiscoveryDocument = model.ShowInDiscoveryDocument;
-                    scope.Required = model.Required;
-                    scope.Emphasize = model.Emphasize;
-                    scope.UserClaims = model.UserClaims;
+                    using (var audit = await AuditScope.CreateAsync("ApiScope:Update", () => scope, new { scope.Id }))
+                    {
+                        scope.Description = model.Description;
+                        scope.DisplayName = model.DisplayName;
+                        scope.Enabled = model.Enabled;
+                        scope.Name = model.Name;
+                        scope.Properties = model.Properties;
+                        scope.ShowInDiscoveryDocument = model.ShowInDiscoveryDocument;
+                        scope.Required = model.Required;
+                        scope.Emphasize = model.Emphasize;
+                        scope.UserClaims = model.UserClaims;
 
-                    await session.SaveChangesAsync(ct);
+                        await session.SaveChangesAsync(ct);
+                    }
 
                     return NoContent();
                 }
@@ -264,8 +274,12 @@ namespace IdentityManager.Controllers
                     if (scope == null)
                         throw new KeyNotFoundException($"Api Scope {name} was not found");
 
-                    session.Delete(scope);
-                    await session.SaveChangesAsync(ct);
+                    using (var audit = await AuditScope.CreateAsync("ApiScope:Delete", () => scope, new { scope.Id }))
+                    {
+                        session.Delete(scope);
+                        await session.SaveChangesAsync(ct);
+                        scope = null;
+                    }
 
                     return NoContent();
                 }

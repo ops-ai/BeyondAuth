@@ -1,4 +1,5 @@
-﻿using IdentityManager.Domain;
+﻿using Audit.Core;
+using IdentityManager.Domain;
 using IdentityManager.Extensions;
 using IdentityManager.Models;
 using IdentityServer4.Contrib.RavenDB.Options;
@@ -133,8 +134,13 @@ namespace IdentityManager.Controllers
                     if (await session.Advanced.ExistsAsync($"IdentityResources/{resource.Name}", ct))
                         throw new ArgumentException("Identity Resource already exists");
 
-                    await session.StoreAsync(resource.FromModel(), $"IdentityResources/{resource.Name}", ct);
-                    await session.SaveChangesAsync(ct);
+                    IdentityResourceEntity? entity = null;
+                    using (var audit = await AuditScope.CreateAsync("IdentityResource:Create", () => entity, new { Id = $"IdentityResources/{resource.Name}" }))
+                    {
+                        entity = resource.FromModel();
+                        await session.StoreAsync(entity, $"IdentityResources/{resource.Name}", ct);
+                        await session.SaveChangesAsync(ct);
+                    }
                 }
 
                 return NoContent();
@@ -177,17 +183,20 @@ namespace IdentityManager.Controllers
                     if (resource == null)
                         throw new KeyNotFoundException($"Resource {model.Name} was not found");
 
-                    resource.Description = model.Description;
-                    resource.DisplayName = model.DisplayName;
-                    resource.Enabled = model.Enabled;
-                    resource.Name = model.Name;
-                    resource.Properties = model.Properties;
-                    resource.ShowInDiscoveryDocument = model.ShowInDiscoveryDocument;
-                    resource.Required = model.Required;
-                    resource.Emphasize = model.Emphasize;
-                    resource.UserClaims = model.UserClaims;
+                    using (var audit = await AuditScope.CreateAsync("IdentityResource:Update", () => resource, new { Id = resource.Id }))
+                    {
+                        resource.Description = model.Description;
+                        resource.DisplayName = model.DisplayName;
+                        resource.Enabled = model.Enabled;
+                        resource.Name = model.Name;
+                        resource.Properties = model.Properties;
+                        resource.ShowInDiscoveryDocument = model.ShowInDiscoveryDocument;
+                        resource.Required = model.Required;
+                        resource.Emphasize = model.Emphasize;
+                        resource.UserClaims = model.UserClaims;
 
-                    await session.SaveChangesAsync(ct);
+                        await session.SaveChangesAsync(ct);
+                    }
 
                     return NoContent();
                 }
@@ -263,8 +272,12 @@ namespace IdentityManager.Controllers
                     if (resource == null)
                         throw new KeyNotFoundException($"Identity Resource {name} was not found");
 
-                    session.Delete(resource);
-                    await session.SaveChangesAsync(ct);
+                    using (var audit = await AuditScope.CreateAsync("IdentityResource:Delete", () => resource, new { resource.Id }))
+                    {
+                        session.Delete(resource);
+                        await session.SaveChangesAsync(ct);
+                        resource = null;
+                    }
 
                     return NoContent();
                 }

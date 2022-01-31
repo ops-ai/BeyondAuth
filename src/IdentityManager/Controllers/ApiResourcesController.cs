@@ -1,4 +1,5 @@
-﻿using IdentityManager.Domain;
+﻿using Audit.Core;
+using IdentityManager.Domain;
 using IdentityManager.Extensions;
 using IdentityManager.Models;
 using IdentityServer4.Contrib.RavenDB.Options;
@@ -134,8 +135,14 @@ namespace IdentityManager.Controllers
                     if (await session.Advanced.ExistsAsync($"ApiResources/{resource.Name}", ct))
                         throw new ArgumentException("Api Resource already exists");
 
-                    await session.StoreAsync(resource.FromModel(), $"ApiResources/{resource.Name}", ct);
-                    await session.SaveChangesAsync(ct);
+                    ApiResourceEntity? entity = null;
+                    using (var audit = await AuditScope.CreateAsync("ApiResource:Create", () => entity))
+                    {
+                        entity = resource.FromModel();
+                        await session.StoreAsync(entity, $"ApiResources/{resource.Name}", ct);
+                        await session.SaveChangesAsync(ct);
+                        audit.SetCustomField("Id", entity.Id);
+                    }
                 }
 
                 return NoContent();
@@ -178,16 +185,19 @@ namespace IdentityManager.Controllers
                     if (resource == null)
                         throw new KeyNotFoundException($"Resource {model.Name} was not found");
 
-                    resource.Description = model.Description;
-                    resource.DisplayName = model.DisplayName;
-                    resource.Enabled = model.Enabled;
-                    resource.Name = model.Name;
-                    resource.ShowInDiscoveryDocument = model.ShowInDiscoveryDocument;
-                    resource.Properties = model.Properties;
-                    resource.Scopes = model.Scopes;
-                    resource.UserClaims = model.UserClaims;
+                    using (var audit = await AuditScope.CreateAsync("ApiResource:Update", () => resource, new { resource.Id }))
+                    {
+                        resource.Description = model.Description;
+                        resource.DisplayName = model.DisplayName;
+                        resource.Enabled = model.Enabled;
+                        resource.Name = model.Name;
+                        resource.ShowInDiscoveryDocument = model.ShowInDiscoveryDocument;
+                        resource.Properties = model.Properties;
+                        resource.Scopes = model.Scopes;
+                        resource.UserClaims = model.UserClaims;
 
-                    await session.SaveChangesAsync(ct);
+                        await session.SaveChangesAsync(ct);
+                    }
 
                     return NoContent();
                 }
@@ -263,8 +273,12 @@ namespace IdentityManager.Controllers
                     if (resource == null)
                         throw new KeyNotFoundException($"Api Resource {name} was not found");
 
-                    session.Delete(resource);
-                    await session.SaveChangesAsync(ct);
+                    using (var audit = await AuditScope.CreateAsync("ApiResource:Delete", () => resource, new { resource.Id }))
+                    {
+                        session.Delete(resource);
+                        await session.SaveChangesAsync(ct);
+                        resource = null;
+                    }
 
                     return NoContent();
                 }

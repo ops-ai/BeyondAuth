@@ -1,4 +1,6 @@
-﻿using IdentityManager.Domain;
+﻿using Audit.Core;
+using Identity.Core;
+using IdentityManager.Domain;
 using IdentityManager.Extensions;
 using IdentityManager.Models;
 using IdentityServer4.Contrib.RavenDB.Options;
@@ -120,7 +122,7 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Create new group
         /// </summary>
-        /// <param name="group"></param>
+        /// <param name="model"></param>
         /// <response code="204">Group created</response>
         /// <response code="400">Validation failed</response>
         /// <response code="500">Server error creating group</response>
@@ -128,33 +130,38 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(ValidationProblemDetails), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpPost]
-        public async Task<IActionResult> Post([FromBody] GroupModel group, CancellationToken ct = default)
+        public async Task<IActionResult> Post([FromBody] GroupModel model, CancellationToken ct = default)
         {
             try
             {
                 if (!ModelState.IsValid)
                     return ValidationProblem(ModelState);
 
-                if (group == null)
-                    throw new ArgumentException("group is required", nameof(group));
+                if (model == null)
+                    throw new ArgumentException("model is required", nameof(model));
 
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    _logger.LogDebug($"Creating group {group.Name}");
+                    _logger.LogDebug($"Creating group {model.Name}");
 
-                    if (await session.Advanced.ExistsAsync($"Groups/{group.Name}", ct))
+                    if (await session.Advanced.ExistsAsync($"Groups/{model.Name}", ct))
                         throw new ArgumentException("Group already exists");
 
-                    var dbGroup = new Group
+                    Group? group = null;
+                    using (var audit = await AuditScope.CreateAsync("Group:Create", () => group))
                     {
-                        Name = group.Name,
-                        Tags = group.Tags,
-                        OwnerId = User.FindFirstValue("sub"),
-                        UpdatedAt = DateTime.UtcNow
-                    };
+                        group = new Group
+                        {
+                            Name = model.Name,
+                            Tags = model.Tags,
+                            OwnerId = User.FindFirstValue("sub"),
+                            UpdatedAt = DateTime.UtcNow
+                        };
 
-                    await session.StoreAsync(dbGroup, ct);
-                    await session.SaveChangesAsync(ct);
+                        await session.StoreAsync(group, ct);
+                        await session.SaveChangesAsync(ct);
+                        audit.SetCustomField("Id", group.Id);
+                    }
                 }
 
                 return NoContent();
@@ -198,11 +205,14 @@ namespace IdentityManager.Controllers
                     if (group == null)
                         throw new KeyNotFoundException($"Group {name} was not found");
 
-                    group.Name = model.Name;
-                    group.UpdatedAt = DateTime.UtcNow;
-                    group.Tags = model.Tags;
-                    
-                    await session.SaveChangesAsync(ct);
+                    using (var audit = await AuditScope.CreateAsync("Group:Update", () => group, new { group.Id }))
+                    {
+                        group.Name = model.Name;
+                        group.UpdatedAt = DateTime.UtcNow;
+                        group.Tags = model.Tags;
+
+                        await session.SaveChangesAsync(ct);
+                    }
 
                     return NoContent();
                 }
@@ -278,8 +288,16 @@ namespace IdentityManager.Controllers
                     if (group == null)
                         throw new KeyNotFoundException($"Group {name} was not found");
 
-                    session.Delete(group);
-                    await session.SaveChangesAsync(ct);
+                    using (var audit = await AuditScope.CreateAsync("Group:Delete", () => group, new { group.Id, MemberIds = group.Members.Keys }))
+                    {
+                        foreach (var userId in group.Members.Keys)
+                            session.Advanced.Patch<ApplicationUser, string>(userId, t => t.Groups, g => g.RemoveAll(t => t == group.Id));
+
+                        session.Delete(group);
+
+                        await session.SaveChangesAsync(ct);
+                        group = null;
+                    }
 
                     return NoContent();
                 }

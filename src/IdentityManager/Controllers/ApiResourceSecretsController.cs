@@ -1,4 +1,5 @@
-﻿using IdentityManager.Domain;
+﻿using Audit.Core;
+using IdentityManager.Domain;
 using IdentityManager.Extensions;
 using IdentityManager.Models;
 using IdentityServer4.Contrib.RavenDB.Options;
@@ -140,13 +141,17 @@ namespace IdentityManager.Controllers
                     if (resource == null)
                         throw new KeyNotFoundException($"Api Resource {name} was not found");
 
-                    var secret = apiResourceSecret.FromModel();
                     var newSecret = shortid.ShortId.Generate(new shortid.Configuration.GenerationOptions { Length = 32, UseNumbers = true, UseSpecialCharacters = true });
-                    secret.Value = newSecret.Sha256();
+                    using (var audit = await AuditScope.CreateAsync("ApiResource:AddSecret", () => resource, new { resource.Id }))
+                    {
+                        var secret = apiResourceSecret.FromModel();
+                        secret.Value = newSecret.Sha256();
 
-                    resource.ApiSecrets.Add(secret);
+                        resource.ApiSecrets.Add(secret);
 
-                    await session.SaveChangesAsync(ct);
+                        await session.SaveChangesAsync(ct);
+                        audit.SetCustomField("SecretId", secret.Value);
+                    }
 
                     return Ok(newSecret);
                 }
@@ -192,12 +197,14 @@ namespace IdentityManager.Controllers
                         throw new KeyNotFoundException($"Api Resource {name} was not found");
 
                     var secret = resource.ApiSecrets.First(t => t.Value.Sha256().Equals(id));
+                    using (var audit = await AuditScope.CreateAsync("ApiResource:UpdateSecret", () => resource, new { resource.Id, secretId = secret.Value }))
+                    {
+                        secret.Description = model.Description;
+                        secret.Expiration = model.Expiration;
+                        secret.Type = model.Type.ToString();
 
-                    secret.Description = model.Description;
-                    secret.Expiration = model.Expiration;
-                    secret.Type = model.Type.ToString();
-
-                    await session.SaveChangesAsync(ct);
+                        await session.SaveChangesAsync(ct);
+                    }
 
                     return NoContent();
                 }
@@ -279,7 +286,10 @@ namespace IdentityManager.Controllers
                     if (!resource.ApiSecrets.Remove(secret))
                         throw new Exception("Failed to remove secret");
 
-                    await session.SaveChangesAsync(ct);
+                    using (var audit = await AuditScope.CreateAsync("ApiResource:DeleteSecret", () => resource, new { resource.Id, SecretId = secret.Value }))
+                    {
+                        await session.SaveChangesAsync(ct);
+                    }
                 }
 
                 return NoContent();

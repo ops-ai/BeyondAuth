@@ -1,3 +1,7 @@
+using Audit.Core;
+using Audit.NET.RavenDB;
+using Audit.NET.RavenDB.ConfigurationApi;
+using Audit.NET.RavenDB.Providers;
 using Autofac;
 using Autofac.Configuration;
 using Azure.Identity;
@@ -18,6 +22,7 @@ using IdentityServer4.Stores.Serialization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -62,6 +67,7 @@ namespace IdentityManager
         public Startup(IConfiguration configuration) => Configuration = configuration;
 
         public IConfiguration Configuration { get; }
+        private DocumentStore auditStoreDb;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -102,6 +108,8 @@ namespace IdentityManager
                 options.Password.RequireNonAlphanumeric = false;
                 options.Password.RequiredLength = 4;
             });
+
+            var dataProtection = services.AddDataProtection().SetApplicationName(Configuration["DataProtection:AppName"]);
 
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
                 .AddJwtBearer();
@@ -260,6 +268,20 @@ namespace IdentityManager
             services.ConfigureOptions<RavenOptionsSetup>();
             services.AddScoped(sp => sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<RavenSettings>>()?.Value?.DatabaseName));
 
+            auditStoreDb = new DocumentStore { Urls = Configuration.GetSection("Raven:Urls").Get<string[]>(), Certificate = ravenDBcert, Database = Configuration["Raven:DatabaseName"] };
+            var serializer = new NewtonsoftJsonSerializationConventions
+            {
+                JsonContractResolver = new AuditContractResolver()
+            };
+            serializer.CustomizeJsonSerializer += (JsonSerializer serializer) =>
+            {
+                serializer.DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate;
+                serializer.NullValueHandling = NullValueHandling.Ignore;
+            };
+            auditStoreDb.Conventions.Serialization = serializer;
+            
+            auditStoreDb.Initialize();
+
             services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
             services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();
             services.AddTransient<IPasswordTopologyProvider, PasswordTopologyProvider>();
@@ -327,6 +349,17 @@ namespace IdentityManager
             app.UseHttpsRedirection();
 
             app.UseForwardedHeaders();
+
+            var auditConfig = Audit.Core.Configuration.Setup().UseFactory(
+                () => 
+                new RavenDbDataProvider(auditStoreDb, app.ApplicationServices.GetRequiredService<IOptions<IdentityStoreOptions>>().Value.DatabaseName, storeDiffOnly: true));
+
+            Audit.Core.Configuration.AddCustomAction(ActionType.OnEventSaving, scope =>
+            {
+                var httpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
+                if (httpContextAccessor?.HttpContext?.User?.Identity?.Name != null)
+                    scope.SetCustomField("Username", httpContextAccessor.HttpContext?.User?.Identity?.Name);
+            });
 
             app.UseCors(x => x.AllowAnyOrigin().WithHeaders("accept", "authorization", "content-type", "origin").AllowAnyMethod());
 

@@ -1,4 +1,5 @@
-﻿using IdentityManager.Domain;
+﻿using Audit.Core;
+using IdentityManager.Domain;
 using IdentityManager.Extensions;
 using IdentityManager.Models;
 using IdentityServer4.Contrib.RavenDB.Options;
@@ -142,8 +143,13 @@ namespace IdentityManager.Controllers
                     if (await session.Advanced.ExistsAsync($"Clients/{client.ClientId}", ct))
                         throw new ArgumentException("Client already exists");
 
-                    await session.StoreAsync(client.FromModel(), $"Clients/{client.ClientId}", ct);
-                    await session.SaveChangesAsync(ct);
+                    ClientEntity? entity = null;
+                    using (var audit = await AuditScope.CreateAsync("Client:Create", () => entity, new { Id = $"Clients/{client.ClientId}" }))
+                    {
+                        entity = client.FromModel();
+                        await session.StoreAsync(entity, $"Clients/{client.ClientId}", ct);
+                        await session.SaveChangesAsync(ct);
+                    }
                 }
 
                 return NoContent();
@@ -189,53 +195,56 @@ namespace IdentityManager.Controllers
                     if (!client.AllowedGrantTypes.All(t => t.In(new[] { GrantType.ClientCredentials, GrantType.Implicit, GrantType.Hybrid, GrantType.AuthorizationCode, GrantType.ResourceOwnerPassword, GrantType.DeviceFlow })))
                         throw new ArgumentException("value in allowedGrantTypes is not supported", nameof(client.AllowedGrantTypes));
 
-                    client.AbsoluteRefreshTokenLifetime = model.AbsoluteRefreshTokenLifetime;
-                    client.AccessTokenLifetime = model.AccessTokenLifetime;
-                    client.AccessTokenType = model.AccessTokenType;
-                    client.AllowAccessTokensViaBrowser = model.AllowAccessTokensViaBrowser;
-                    client.AllowedCorsOrigins = model.AllowedCorsOrigins;
-                    client.AllowedGrantTypes = model.AllowedGrantTypes;
-                    client.AllowedScopes = model.AllowedScopes;
-                    client.AllowOfflineAccess = model.AllowOfflineAccess;
-                    client.AllowPlainTextPkce = model.AllowPlainTextPkce;
-                    client.AllowRememberConsent = model.AllowRememberConsent;
-                    client.AlwaysIncludeUserClaimsInIdToken = model.AlwaysIncludeUserClaimsInIdToken;
-                    client.AlwaysSendClientClaims = model.AlwaysSendClientClaims;
-                    client.AuthorizationCodeLifetime = model.AuthorizationCodeLifetime;
-                    client.BackChannelLogoutSessionRequired = model.BackChannelLogoutSessionRequired;
-                    client.BackChannelLogoutUri = model.BackChannelLogoutUri;
-                    client.Claims = model.Claims;
-                    client.ClientClaimsPrefix = model.ClientClaimsPrefix;
-                    client.ClientId = model.ClientId;
-                    client.ClientName = model.ClientName;
-                    client.ClientUri = model.ClientUri;
-                    client.ConsentLifetime = model.ConsentLifetime;
-                    client.Description = model.Description;
-                    client.DeviceCodeLifetime = model.DeviceCodeLifetime;
-                    client.Enabled = model.Enabled;
-                    client.EnableLocalLogin = model.EnableLocalLogin;
-                    client.FrontChannelLogoutSessionRequired = model.FrontChannelLogoutSessionRequired;
-                    client.FrontChannelLogoutUri = model.FrontChannelLogoutUri;
-                    client.IdentityProviderRestrictions = model.IdentityProviderRestrictions;
-                    client.IdentityTokenLifetime = model.IdentityTokenLifetime;
-                    client.IncludeJwtId = model.IncludeJwtId;
-                    client.LogoUri = model.LogoUri;
-                    client.PairWiseSubjectSalt = model.PairWiseSubjectSalt;
-                    client.PostLogoutRedirectUris = model.PostLogoutRedirectUris;
-                    client.Properties = model.Properties;
-                    client.ProtocolType = model.ProtocolType;
-                    client.RedirectUris = model.RedirectUris;
-                    client.RefreshTokenExpiration = model.RefreshTokenExpiration;
-                    client.RefreshTokenUsage = model.RefreshTokenUsage;
-                    client.RequireClientSecret = model.RequireClientSecret;
-                    client.RequireConsent = model.RequireConsent;
-                    client.RequirePkce = model.RequirePkce;
-                    client.SlidingRefreshTokenLifetime = model.SlidingRefreshTokenLifetime;
-                    client.UpdateAccessTokenClaimsOnRefresh = model.UpdateAccessTokenClaimsOnRefresh;
-                    client.UserCodeType = model.UserCodeType;
-                    client.UserSsoLifetime = model.UserSsoLifetime;
+                    using (var audit = await AuditScope.CreateAsync("Client:Update", () => client, new { client.Id }))
+                    {
+                        client.AbsoluteRefreshTokenLifetime = model.AbsoluteRefreshTokenLifetime;
+                        client.AccessTokenLifetime = model.AccessTokenLifetime;
+                        client.AccessTokenType = model.AccessTokenType;
+                        client.AllowAccessTokensViaBrowser = model.AllowAccessTokensViaBrowser;
+                        client.AllowedCorsOrigins = model.AllowedCorsOrigins;
+                        client.AllowedGrantTypes = model.AllowedGrantTypes;
+                        client.AllowedScopes = model.AllowedScopes;
+                        client.AllowOfflineAccess = model.AllowOfflineAccess;
+                        client.AllowPlainTextPkce = model.AllowPlainTextPkce;
+                        client.AllowRememberConsent = model.AllowRememberConsent;
+                        client.AlwaysIncludeUserClaimsInIdToken = model.AlwaysIncludeUserClaimsInIdToken;
+                        client.AlwaysSendClientClaims = model.AlwaysSendClientClaims;
+                        client.AuthorizationCodeLifetime = model.AuthorizationCodeLifetime;
+                        client.BackChannelLogoutSessionRequired = model.BackChannelLogoutSessionRequired;
+                        client.BackChannelLogoutUri = model.BackChannelLogoutUri;
+                        client.Claims = model.Claims;
+                        client.ClientClaimsPrefix = model.ClientClaimsPrefix;
+                        client.ClientId = model.ClientId;
+                        client.ClientName = model.ClientName;
+                        client.ClientUri = model.ClientUri;
+                        client.ConsentLifetime = model.ConsentLifetime;
+                        client.Description = model.Description;
+                        client.DeviceCodeLifetime = model.DeviceCodeLifetime;
+                        client.Enabled = model.Enabled;
+                        client.EnableLocalLogin = model.EnableLocalLogin;
+                        client.FrontChannelLogoutSessionRequired = model.FrontChannelLogoutSessionRequired;
+                        client.FrontChannelLogoutUri = model.FrontChannelLogoutUri;
+                        client.IdentityProviderRestrictions = model.IdentityProviderRestrictions;
+                        client.IdentityTokenLifetime = model.IdentityTokenLifetime;
+                        client.IncludeJwtId = model.IncludeJwtId;
+                        client.LogoUri = model.LogoUri;
+                        client.PairWiseSubjectSalt = model.PairWiseSubjectSalt;
+                        client.PostLogoutRedirectUris = model.PostLogoutRedirectUris;
+                        client.Properties = model.Properties;
+                        client.ProtocolType = model.ProtocolType;
+                        client.RedirectUris = model.RedirectUris;
+                        client.RefreshTokenExpiration = model.RefreshTokenExpiration;
+                        client.RefreshTokenUsage = model.RefreshTokenUsage;
+                        client.RequireClientSecret = model.RequireClientSecret;
+                        client.RequireConsent = model.RequireConsent;
+                        client.RequirePkce = model.RequirePkce;
+                        client.SlidingRefreshTokenLifetime = model.SlidingRefreshTokenLifetime;
+                        client.UpdateAccessTokenClaimsOnRefresh = model.UpdateAccessTokenClaimsOnRefresh;
+                        client.UserCodeType = model.UserCodeType;
+                        client.UserSsoLifetime = model.UserSsoLifetime;
 
-                    await session.SaveChangesAsync(ct);
+                        await session.SaveChangesAsync(ct);
+                    }
 
                     return NoContent();
                 }
@@ -311,8 +320,12 @@ namespace IdentityManager.Controllers
                     if (client == null)
                         throw new KeyNotFoundException($"Client {clientId} was not found");
 
-                    session.Delete(client);
-                    await session.SaveChangesAsync(ct);
+                    using (var audit = await AuditScope.CreateAsync("Client:Delete", () => client, new { client.Id }))
+                    {
+                        session.Delete(client);
+                        await session.SaveChangesAsync(ct);
+                        client = null;
+                    }
 
                     return NoContent();
                 }

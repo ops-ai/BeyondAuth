@@ -1,26 +1,19 @@
-﻿using BeyondAuth.Acl;
+﻿using Audit.Core;
 using Identity.Core;
 using IdentityManager.Models;
 using IdentityServer4.Contrib.RavenDB.Options;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Authorization.Infrastructure;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.JsonPatch.Operations;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSwag.Annotations;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Linq;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Linq;
+using Raven.Client.Documents.Session;
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
 {
@@ -31,15 +24,15 @@ namespace IdentityManager.Controllers
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ILogger<UsersController> _logger;
-        private readonly IDocumentStore _store;
+        private readonly IAsyncDocumentSession _session;
         private readonly IAuthorizationService _authorizationService;
         private readonly IOptions<IdentityStoreOptions> _identityStoreOptions;
 
-        public UsersController(UserManager<ApplicationUser> userManager, ILogger<UsersController> logger, IDocumentStore store, IAuthorizationService authorizationService, IOptions<IdentityStoreOptions> identityStoreOptions)
+        public UsersController(UserManager<ApplicationUser> userManager, ILogger<UsersController> logger, IAsyncDocumentSession session, IAuthorizationService authorizationService, IOptions<IdentityStoreOptions> identityStoreOptions)
         {
             _userManager = userManager;
             _logger = logger;
-            _store = store;
+            _session = session;
             _authorizationService = authorizationService;
             _identityStoreOptions = identityStoreOptions;
         }
@@ -66,7 +59,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(IList<UserModel>), (int)HttpStatusCode.PartialContent)]
         [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] string dataSourceId, [FromQuery] string firstName, [FromQuery] string lastName, [FromQuery] string displayName, [FromQuery] string organization, [FromQuery] string email, [FromQuery] bool includeDisabled = false, [FromQuery] bool lockedOnly = false, [FromQuery] string sort = "+email", [FromQuery] int skip = 0, [FromQuery] int take = 0, CancellationToken ct = default)
+        public async Task<IActionResult> Get([FromRoute] string dataSourceId, [FromQuery] string? firstName, [FromQuery] string? lastName, [FromQuery] string? displayName, [FromQuery] string? organization, [FromQuery] string? email, [FromQuery] bool includeDisabled = false, [FromQuery] bool lockedOnly = false, [FromQuery] string? sort = "+email", [FromQuery] int? skip = 0, [FromQuery] int? take = 0, CancellationToken ct = default)
         {
             try
             {
@@ -109,7 +102,7 @@ namespace IdentityManager.Controllers
                     _ => query.OrderBy(t => t.Email),
                 };
 
-                var users = await query.Skip(skip).Take(take).Select(t => new UserModel
+                var users = await query.Skip(skip!.Value).Take(take!.Value).Select(t => new UserModel
                 {
                     AccountExpiration = t.AccountExpiration,
                     ChangePasswordAllowed = t.ChangePasswordAllowed,
@@ -250,41 +243,47 @@ namespace IdentityManager.Controllers
 
                 if (!ModelState.IsValid)
                     return ValidationProblem(ModelState);
-                
-                var newUser = new ApplicationUser
+
+                ApplicationUser? newUser = null;
+                using (var audit = await AuditScope.CreateAsync("User:Create", () => newUser))
                 {
-                    UserName = userInfo.Email,
-                    ChangePasswordOnNextLogin = userInfo.ChangePasswordOnNextLogin ?? false,
-                    ChangePasswordAllowed = userInfo.ChangePasswordAllowed,
-                    CreatedOnUtc = DateTime.UtcNow,
-                    Disabled = userInfo.Disabled,
-                    DisplayName = userInfo.DisplayName,
-                    Email = userInfo.Email,
-                    FirstName = userInfo.FirstName,
-                    LastName = userInfo.LastName,
-                    Organization = userInfo.Organization,
-                    PasswordResetAllowed = userInfo.PasswordResetAllowed,
-                    PasswordPolicy = userInfo.PasswordPolicy,
-                    AccountExpiration = userInfo.AccountExpiration,
-                    ZoneInfo = userInfo.ZoneInfo,
-                    LockoutEnabled = userInfo.LockoutEnabled
-                };
+                    newUser = new ApplicationUser
+                    {
+                        UserName = userInfo.Email,
+                        ChangePasswordOnNextLogin = userInfo.ChangePasswordOnNextLogin ?? false,
+                        ChangePasswordAllowed = userInfo.ChangePasswordAllowed,
+                        CreatedOnUtc = DateTime.UtcNow,
+                        Disabled = userInfo.Disabled,
+                        DisplayName = userInfo.DisplayName,
+                        Email = userInfo.Email,
+                        FirstName = userInfo.FirstName,
+                        LastName = userInfo.LastName,
+                        Organization = userInfo.Organization,
+                        PasswordResetAllowed = userInfo.PasswordResetAllowed,
+                        PasswordPolicy = userInfo.PasswordPolicy,
+                        AccountExpiration = userInfo.AccountExpiration,
+                        ZoneInfo = userInfo.ZoneInfo,
+                        LockoutEnabled = userInfo.LockoutEnabled
+                    };
 
-                foreach (var claim in userInfo.Claims.Select(t => new Raven.Identity.IdentityUserClaim { ClaimType = t.Key, ClaimValue = t.Value }))
-                    newUser.Claims.Add(claim);
+                    foreach (var claim in userInfo.Claims.Select(t => new Raven.Identity.IdentityUserClaim { ClaimType = t.Key, ClaimValue = t.Value }))
+                        newUser.Claims.Add(claim);
 
-                var result = await _userManager.CreateAsync(newUser, userInfo.Password);
+                    var result = await _userManager.CreateAsync(newUser, userInfo.Password);
+                    await _session.SaveChangesAsync(ct);
+                    audit.SetCustomField("Id", newUser.Id);
 
-                if (result.Succeeded)
-                    return Ok(ToUserModel(newUser));
-                else
-                {
-                    foreach (var error in result.Errors.Where(t => t.Code.Contains("Password", StringComparison.OrdinalIgnoreCase)))
-                        ModelState.AddModelError(nameof(userInfo.Password), error.Description);
-                    foreach (var error in result.Errors.Where(t => !t.Code.Contains("Password", StringComparison.OrdinalIgnoreCase) && t.Code != "DuplicateUserName"))
-                        ModelState.AddModelError(error.Code ?? "Password", error.Description);
-                    
-                    return ValidationProblem(ModelState);
+                    if (result.Succeeded)
+                        return Ok(ToUserModel(newUser));
+                    else
+                    {
+                        foreach (var error in result.Errors.Where(t => t.Code.Contains("Password", StringComparison.OrdinalIgnoreCase)))
+                            ModelState.AddModelError(nameof(userInfo.Password), error.Description);
+                        foreach (var error in result.Errors.Where(t => !t.Code.Contains("Password", StringComparison.OrdinalIgnoreCase) && t.Code != "DuplicateUserName"))
+                            ModelState.AddModelError(error.Code ?? "Password", error.Description);
+
+                        return ValidationProblem(ModelState);
+                    }
                 }
             }
             catch (UnauthorizedAccessException ex)
@@ -327,51 +326,68 @@ namespace IdentityManager.Controllers
                 //}
 
                 var user = await _userManager.FindByIdAsync($"ApplicationUsers/{userId}");
-                if (userInfo.Password != null)
+                using (var audit = await AuditScope.CreateAsync("User:Update", () => user, new { user.Id }))
                 {
-                    
-                    var passwordValidationResult = await ValidatePasswordAsync(user, userInfo.Password);
-                    if (!passwordValidationResult.Succeeded)
+                    if (userInfo.Password != null)
                     {
-                        foreach (var error in passwordValidationResult.Errors)
-                            ModelState.AddModelError("Password", error.Description);
+
+                        var passwordValidationResult = await ValidatePasswordAsync(user, userInfo.Password);
+                        if (!passwordValidationResult.Succeeded)
+                        {
+                            foreach (var error in passwordValidationResult.Errors)
+                                ModelState.AddModelError("Password", error.Description);
+                        }
                     }
+
+                    if (!ModelState.IsValid)
+                        return ValidationProblem(ModelState);
+
+                    if (userInfo.Password != null)
+                    {
+                        var code = await _userManager.GeneratePasswordResetTokenAsync(user);
+                        var passwordUpdateResult = await _userManager.ResetPasswordAsync(user, code, userInfo.Password);
+                        if (passwordUpdateResult.Succeeded)
+                            audit.Comment("Password updated");
+                        else
+                            audit.Comment("Password update failed");
+                    }
+
+                    if (!user.Email.Equals(userInfo.Email, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var setEmailResult = await _userManager.SetEmailAsync(user, userInfo.Email);
+                        if (setEmailResult.Succeeded)
+                            audit.Comment("Email updated");
+                        else
+                            audit.Comment("Email update failed");
+
+                        var setUsernameResult = await _userManager.SetUserNameAsync(user, userInfo.Email);
+                        if (setUsernameResult.Succeeded)
+                            audit.Comment("Username updated");
+                        else
+                            audit.Comment("Username update failed");
+                    }
+
+                    user.FirstName = userInfo.FirstName;
+                    user.LastName = userInfo.LastName;
+                    user.DisplayName = userInfo.DisplayName;
+                    user.Organization = userInfo.Organization;
+                    user.PasswordResetAllowed = userInfo.PasswordResetAllowed;
+                    user.ChangePasswordAllowed = userInfo.ChangePasswordAllowed;
+                    user.PasswordPolicy = userInfo.PasswordPolicy;
+                    user.AccountExpiration = userInfo.AccountExpiration;
+                    user.Disabled = userInfo.Disabled;
+                    user.ZoneInfo = userInfo.ZoneInfo;
+                    user.LockoutEnabled = userInfo.LockoutEnabled;
+
+                    if (userInfo.ChangePasswordOnNextLogin.HasValue)
+                        user.ChangePasswordOnNextLogin = userInfo.ChangePasswordOnNextLogin.Value;
+
+                    if (user.LockoutEnd > DateTime.UtcNow && userInfo.Locked == false)
+                        user.LockoutEnd = null;
+
+                    await _userManager.UpdateAsync(user);
+                    await _session.SaveChangesAsync(ct);
                 }
-
-                if (!ModelState.IsValid)
-                    return ValidationProblem(ModelState);
-
-                if (userInfo.Password != null)
-                {
-                    var code = await _userManager.GeneratePasswordResetTokenAsync(user);
-                    await _userManager.ResetPasswordAsync(user, code, userInfo.Password);
-                }
-
-                if (!user.Email.Equals(userInfo.Email, StringComparison.OrdinalIgnoreCase))
-                {
-                    await _userManager.SetEmailAsync(user, userInfo.Email);
-                    await _userManager.SetUserNameAsync(user, userInfo.Email);
-                }
-
-                user.FirstName = userInfo.FirstName;
-                user.LastName = userInfo.LastName;
-                user.DisplayName = userInfo.DisplayName;
-                user.Organization = userInfo.Organization;
-                user.PasswordResetAllowed = userInfo.PasswordResetAllowed;
-                user.ChangePasswordAllowed = userInfo.ChangePasswordAllowed;
-                user.PasswordPolicy = userInfo.PasswordPolicy;
-                user.AccountExpiration = userInfo.AccountExpiration;
-                user.Disabled = userInfo.Disabled;
-                user.ZoneInfo = userInfo.ZoneInfo;
-                user.LockoutEnabled = userInfo.LockoutEnabled;
-
-                if (userInfo.ChangePasswordOnNextLogin.HasValue)
-                    user.ChangePasswordOnNextLogin = userInfo.ChangePasswordOnNextLogin.Value;
-
-                if (user.LockoutEnd > DateTime.UtcNow && userInfo.Locked == false)
-                    user.LockoutEnd = null;
-
-                await _userManager.UpdateAsync(user);
 
                 return NoContent();
             }
@@ -488,9 +504,6 @@ namespace IdentityManager.Controllers
                 if (originalUser == null)
                     return NotFound();
 
-                if (originalUser == null)
-                    throw new KeyNotFoundException($"User {userId} was not found");
-
                 var updatedUser = new UserUpdateModel
                 {
                     ChangePasswordAllowed = originalUser.ChangePasswordAllowed,
@@ -524,6 +537,46 @@ namespace IdentityManager.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, $"An error occurred while attempting to update user {userId}.");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Delete a User
+        /// </summary>
+        /// <param name="userId"></param>
+        /// <response code="201">User deleted</response>
+        /// <response code="404">User not found</response>
+        /// <response code="500">Server error deleting User</response>
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
+        [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
+        [HttpDelete("{userId}")]
+        public async Task<IActionResult> Delete(string userId, CancellationToken ct = default)
+        {
+            try
+            {
+                _logger.LogInformation($"Get the user object for deleting user:{userId}");
+                var user = await _userManager.FindByIdAsync($"ApplicationUsers/{userId}");
+                if (user == null)
+                    user = await _userManager.FindByEmailAsync(userId);
+
+                if (user == null)
+                    return NotFound();
+
+
+                using (var audit = await AuditScope.CreateAsync("User:Delete", () => user, new { user.Id }))
+                {
+                    await _userManager.DeleteAsync(user);
+                    await _session.SaveChangesAsync(ct);
+                    user = null;
+                }
+
+                return NoContent();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting User");
                 throw;
             }
         }

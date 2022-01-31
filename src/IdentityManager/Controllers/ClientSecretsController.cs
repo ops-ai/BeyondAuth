@@ -1,4 +1,5 @@
-﻿using IdentityManager.Domain;
+﻿using Audit.Core;
+using IdentityManager.Domain;
 using IdentityManager.Extensions;
 using IdentityManager.Models;
 using IdentityServer4.Contrib.RavenDB.Options;
@@ -140,12 +141,16 @@ namespace IdentityManager.Controllers
                     if (client == null)
                         throw new KeyNotFoundException($"Client {clientId} was not found");
 
-                    var secret = clientSecret.FromModel();
                     var newSecret = shortid.ShortId.Generate(new shortid.Configuration.GenerationOptions { Length = 32, UseNumbers = true, UseSpecialCharacters = true });
-                    secret.Value = newSecret.Sha256();
-                    client.ClientSecrets.Add(secret);
+                    using (var audit = await AuditScope.CreateAsync("Client:AddSecret", () => client, new { client.Id }))
+                    {
+                        var secret = clientSecret.FromModel();
+                        secret.Value = newSecret.Sha256();
+                        client.ClientSecrets.Add(secret);
 
-                    await session.SaveChangesAsync(ct);
+                        await session.SaveChangesAsync(ct);
+                        audit.SetCustomField("SecretId", secret.Value);
+                    }
 
                     return Ok(newSecret);
                 }
@@ -192,11 +197,14 @@ namespace IdentityManager.Controllers
 
                     var secret = client.ClientSecrets.First(t => t.Value.Sha256().Equals(id));
 
-                    secret.Description = model.Description;
-                    secret.Expiration = model.Expiration;
-                    secret.Type = model.Type.ToString();
+                    using (var audit = await AuditScope.CreateAsync("Client:UpdateSecret", () => client, new { client.Id, SecretId = secret.Value }))
+                    {
+                        secret.Description = model.Description;
+                        secret.Expiration = model.Expiration;
+                        secret.Type = model.Type.ToString();
 
-                    await session.SaveChangesAsync(ct);
+                        await session.SaveChangesAsync(ct);
+                    }
 
                     return NoContent();
                 }
@@ -277,8 +285,11 @@ namespace IdentityManager.Controllers
                     var secret = client.ClientSecrets.First(t => t.Value.Sha256().Equals(id));
                     if (!client.ClientSecrets.Remove(secret))
                         throw new Exception("Failed to remove secret");
-
-                    await session.SaveChangesAsync(ct);
+                    
+                    using (var audit = await AuditScope.CreateAsync("Client:RemoveSecret", () => client, new { client.Id, SecretId = secret.Value }))
+                    {
+                        await session.SaveChangesAsync(ct);
+                    }
 
                     return NoContent();
                 }
