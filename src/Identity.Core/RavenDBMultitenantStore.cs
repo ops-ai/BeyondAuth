@@ -97,7 +97,7 @@ namespace Identity.Core
                     cachedTenant.Id = cachedTenant.Id.Split('/').Last();
                 }
 
-                _cache.Set($"TenantSettingId-{identifier}", cachedTenant, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(1)));
+                _cache.Set($"TenantSetting-{identifier}", cachedTenant, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(1)));
             }
             return cachedTenant;
         }
