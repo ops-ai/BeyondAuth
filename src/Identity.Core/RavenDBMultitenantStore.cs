@@ -118,7 +118,7 @@ namespace Identity.Core
                     await session.SaveChangesAsync();
 
                     _cache.Remove($"TenantSetting-{tenant.Identifier}");
-                    _cache.Remove($"TenantSetting-{tenant.Id.Split('/').Last()}");
+                    _cache.Remove($"TenantSettingId-{tenant.Id.Split('/').Last()}");
 
                     return true;
                 }
@@ -139,7 +139,7 @@ namespace Identity.Core
                 await session.SaveChangesAsync();
 
                 _cache.Remove($"TenantSetting-{tenantInfo.Identifier}");
-                _cache.Remove($"TenantSetting-{tenantInfo.Id.Split('/').Last()}");
+                _cache.Remove($"TenantSettingId-{tenantInfo.Id.Split('/').Last()}");
 
                 return true;
             }
