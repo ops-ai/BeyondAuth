@@ -211,10 +211,20 @@ namespace Authentication
                 {
                     if (tenantInfo?.IdentityOptions != null)
                     {
-                        options.Password = tenantInfo.IdentityOptions.Password;
-                        options.Lockout = tenantInfo.IdentityOptions.Lockout;
-                        options.User = tenantInfo.IdentityOptions.User;
-                        options.SignIn = tenantInfo.IdentityOptions.SignIn;
+                        options.Password.RequireDigit = tenantInfo.IdentityOptions.Password.RequireDigit;
+                        options.Password.RequiredLength = tenantInfo.IdentityOptions.Password.RequiredLength;
+                        options.Password.RequiredUniqueChars = tenantInfo.IdentityOptions.Password.RequiredUniqueChars;
+                        options.Password.RequireLowercase = tenantInfo.IdentityOptions.Password.RequireLowercase;
+                        options.Password.RequireNonAlphanumeric = tenantInfo.IdentityOptions.Password.RequireNonAlphanumeric;
+                        options.Password.RequireUppercase = tenantInfo.IdentityOptions.Password.RequireUppercase;
+                        options.Lockout.DefaultLockoutTimeSpan = tenantInfo.IdentityOptions.Lockout.DefaultLockoutTimeSpan;
+                        options.Lockout.AllowedForNewUsers = tenantInfo.IdentityOptions.Lockout.AllowedForNewUsers;
+                        options.Lockout.MaxFailedAccessAttempts = tenantInfo.IdentityOptions.Lockout.MaxFailedAccessAttempts;
+                        options.User.AllowedUserNameCharacters = tenantInfo.IdentityOptions.User.AllowedUserNameCharacters;
+                        options.User.RequireUniqueEmail = tenantInfo.IdentityOptions.User.RequireUniqueEmail;
+                        options.SignIn.RequireConfirmedEmail = tenantInfo.IdentityOptions.SignIn.RequireConfirmedEmail;
+                        options.SignIn.RequireConfirmedPhoneNumber = tenantInfo.IdentityOptions.SignIn.RequireConfirmedPhoneNumber;
+                        options.SignIn.RequireConfirmedAccount = tenantInfo.IdentityOptions.SignIn.RequireConfirmedAccount;
                     }
                 })
                 .WithPerTenantOptions<EmailOptions>((options, tenantInfo) =>

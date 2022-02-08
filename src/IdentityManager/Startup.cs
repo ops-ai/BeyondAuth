@@ -30,6 +30,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
@@ -125,15 +126,29 @@ namespace IdentityManager
                 })
                 .WithPerTenantOptions<IdentityOptions>((options, tenantInfo) =>
                 {
-                    options.Password = tenantInfo.IdentityOptions.Password;
-                    options.Lockout = tenantInfo.IdentityOptions.Lockout;
-                    options.User = tenantInfo.IdentityOptions.User;
-                    options.SignIn = tenantInfo.IdentityOptions.SignIn;
+                    options.Password.RequireDigit = tenantInfo.IdentityOptions.Password.RequireDigit;
+                    options.Password.RequiredLength = tenantInfo.IdentityOptions.Password.RequiredLength;
+                    options.Password.RequiredUniqueChars = tenantInfo.IdentityOptions.Password.RequiredUniqueChars;
+                    options.Password.RequireLowercase = tenantInfo.IdentityOptions.Password.RequireLowercase;
+                    options.Password.RequireNonAlphanumeric = tenantInfo.IdentityOptions.Password.RequireNonAlphanumeric;
+                    options.Password.RequireUppercase = tenantInfo.IdentityOptions.Password.RequireUppercase;
+                    options.Lockout.DefaultLockoutTimeSpan = tenantInfo.IdentityOptions.Lockout.DefaultLockoutTimeSpan;
+                    options.Lockout.AllowedForNewUsers = tenantInfo.IdentityOptions.Lockout.AllowedForNewUsers;
+                    options.Lockout.MaxFailedAccessAttempts = tenantInfo.IdentityOptions.Lockout.MaxFailedAccessAttempts;
+                    options.User.AllowedUserNameCharacters = tenantInfo.IdentityOptions.User.AllowedUserNameCharacters;
+                    options.User.RequireUniqueEmail = tenantInfo.IdentityOptions.User.RequireUniqueEmail;
+                    options.SignIn.RequireConfirmedEmail = tenantInfo.IdentityOptions.SignIn.RequireConfirmedEmail;
+                    options.SignIn.RequireConfirmedPhoneNumber = tenantInfo.IdentityOptions.SignIn.RequireConfirmedPhoneNumber;
+                    options.SignIn.RequireConfirmedAccount = tenantInfo.IdentityOptions.SignIn.RequireConfirmedAccount;
                 })
                 .WithPerTenantOptions<PasswordTopologyValidatorOptions>((options, tenantInfo) =>
                 {
                     options.RollingHistoryInMonths = 5;
                     options.Threshold = 1000;
+                })
+                .WithPerTenantOptions<PwnedPasswordsValidatorOptions>((options, tenantInfo) =>
+                {
+                    options.ApiKey = Configuration["HaveIBeenPwned:ApiKey"];
                 })
                 .WithPerTenantOptions<JwtBearerOptions>((options, tenantInfo) =>
                 {
@@ -200,11 +215,22 @@ namespace IdentityManager
                 })
                 .WithPerTenantAuthentication();
 
+            //services.AddOptions().AddLogging();
+            //// Services used by identity
+            //services.TryAddScoped<IUserValidator<TUser>, UserValidator<TUser>>();
+            services.TryAddScoped<IPasswordValidator<ApplicationUser>, PasswordValidator<ApplicationUser>>();
+            //services.TryAddScoped<IPasswordHasher<TUser>, PasswordHasher<TUser>>();
+            //services.TryAddScoped<ILookupNormalizer, UpperInvariantLookupNormalizer>();
+            //// No interface for the error describer so we can add errors without rev'ing the interface
+            //services.TryAddScoped<IdentityErrorDescriber>();
+            //services.TryAddScoped<IUserClaimsPrincipalFactory<TUser>, UserClaimsPrincipalFactory<TUser>>();
+            //services.TryAddScoped<UserManager<TUser>>();
+
             var identityBuilder = services.AddIdentityCore<ApplicationUser>()
                 .AddDefaultTokenProviders()
                 .AddPasswordValidator<EmailAsPasswordValidator<ApplicationUser>>()
                 .AddPasswordValidator<InvalidPhrasePasswordValidator<ApplicationUser>>()
-                .AddPwnedPasswordsValidator<ApplicationUser>(options => options.ApiKey = Configuration["HaveIBeenPwned:ApiKey"])
+                .AddPwnedPasswordsValidator<ApplicationUser>()
                 .AddTop1000PasswordValidator<ApplicationUser>()
                 .AddPasswordValidator<PasswordTopologyValidator<ApplicationUser>>();
 
@@ -279,7 +305,7 @@ namespace IdentityManager
                 serializer.NullValueHandling = NullValueHandling.Ignore;
             };
             auditStoreDb.Conventions.Serialization = serializer;
-            
+
             auditStoreDb.Initialize();
 
             services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
@@ -292,7 +318,7 @@ namespace IdentityManager
 
             services.AddOpenApiDocument(config =>
             {
-                
+
             });
 
             services.AddMvc()
@@ -351,7 +377,7 @@ namespace IdentityManager
             app.UseForwardedHeaders();
 
             var auditConfig = Audit.Core.Configuration.Setup().UseFactory(
-                () => 
+                () =>
                 new RavenDbDataProvider(auditStoreDb, app.ApplicationServices.GetRequiredService<IOptions<IdentityStoreOptions>>().Value.DatabaseName, storeDiffOnly: true));
 
             Audit.Core.Configuration.AddCustomAction(ActionType.OnEventSaving, scope =>
@@ -423,7 +449,7 @@ namespace IdentityManager
             {
                 Predicate = _ => _.FailureStatus == HealthStatus.Unhealthy
             });
-            
+
             app.UseCorrelationId();
 
             app.UseEndpoints(endpoints =>
