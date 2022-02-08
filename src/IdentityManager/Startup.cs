@@ -305,7 +305,6 @@ namespace IdentityManager
                 serializer.NullValueHandling = NullValueHandling.Ignore;
             };
             auditStoreDb.Conventions.Serialization = serializer;
-
             auditStoreDb.Initialize();
 
             services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();

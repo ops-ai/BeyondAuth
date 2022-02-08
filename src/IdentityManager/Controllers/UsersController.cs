@@ -413,6 +413,13 @@ namespace IdentityManager.Controllers
         protected async Task<IdentityResult> ValidatePasswordAsync(ApplicationUser user, string password)
         {
             var errors = new List<IdentityError>();
+
+            //get password policies applicable to user
+
+            //try to validate against registered policies
+
+            //delegate validation for unresolved policies to auth server
+
             foreach (var v in _userManager.PasswordValidators)
             {
                 var result = await v.ValidateAsync(_userManager, user, password);
