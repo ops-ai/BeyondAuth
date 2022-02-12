@@ -158,7 +158,7 @@ namespace IdentityManager.Controllers
             catch (ArgumentException ex)
             {
                 _logger.LogWarning(ex, "Validation error creating client secret");
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
+                return ValidationProblem(new ValidationProblemDetails { Detail = ex.Message });
             }
             catch (Exception ex)
             {

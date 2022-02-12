@@ -82,6 +82,7 @@ using Prometheus.SystemMetrics;
 using Prometheus.SystemMetrics.Collectors;
 using Prometheus;
 using Microsoft.IdentityModel.Logging;
+using Authentication.Services;
 
 namespace Authentication
 {
@@ -593,6 +594,8 @@ namespace Authentication
             services.AddPrometheusCounters();
             services.AddPrometheusAspNetCoreMetrics();
             services.AddPrometheusHttpClientMetrics();
+
+            services.AddHostedService<PasswordResetService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

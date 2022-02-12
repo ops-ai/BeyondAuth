@@ -41,29 +41,27 @@ namespace IdentityManager.Controllers
         /// Get clients
         /// </summary>
         /// <param name="sort">+/- field to sort by</param>
-        /// <param name="range">Paging range [from-to]</param>
+        /// <param name="skip">Result range to return. Format: 0-19 (result index from - result index to)</param>
+        /// <param name="take">Result range to return. Format: 0-19 (result index from - result index to)</param>
         /// <response code="206">Clients information</response>
         /// <response code="500">Server error getting clients</response>
         [ProducesResponseType(typeof(IEnumerable<ClientModel>), (int)HttpStatusCode.PartialContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string sort = "+clientName", [FromQuery] string range = "0-19", CancellationToken ct = default)
+        public async Task<IActionResult> Get([FromQuery] string? sort = "+clientName", [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
         {
             try
             {
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var query = session.Query<ClientEntity>().AsQueryable();
-                    if (sort.StartsWith("-"))
+                    if (sort!.StartsWith("-"))
                         query = query.OrderByDescending(sort[1..], Raven.Client.Documents.Session.OrderingType.String);
                     else
                         query = query.OrderBy(sort[1..], Raven.Client.Documents.Session.OrderingType.String);
 
-                    var from = int.Parse(range.Split('-')[0]);
-                    var to = int.Parse(range.Split('-')[1]) + 1;
-
-                    return this.Partial(await query.Skip(from).Take(to - from).ToListAsync(ct).ContinueWith(t => t.Result.Select(c => c.ToModel()), ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
+                    return this.Partial(await query.Skip(skip??0).Take(take ?? 20).ToListAsync(ct).ContinueWith(t => t.Result.Select(c => c.ToModel()), ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
                 }
             }
             catch (Exception ex)

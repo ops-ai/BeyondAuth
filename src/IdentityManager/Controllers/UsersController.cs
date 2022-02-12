@@ -325,7 +325,13 @@ namespace IdentityManager.Controllers
                 //        throw new UnauthorizedAccessException();
                 //}
 
+
                 var user = await _userManager.FindByIdAsync($"ApplicationUsers/{userId}");
+                if (user == null)
+                    user = await _userManager.FindByEmailAsync(userId);
+                if (user == null)
+                    throw new KeyNotFoundException(userId);
+
                 using (var audit = await AuditScope.CreateAsync("User:Update", () => user, new { user.Id }))
                 {
                     if (userInfo.Password != null)
