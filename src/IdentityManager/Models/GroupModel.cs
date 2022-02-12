@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace IdentityManager.Models
 {
@@ -18,7 +16,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// Custom tags associated with the group. Can be anything
         /// </summary>
-        public List<string> Tags { get; set; }
+        public List<string> Tags { get; set; } = new List<string>();
 
         /// <summary>
         /// The date when the user was created
@@ -29,5 +27,7 @@ namespace IdentityManager.Models
         /// Last date account was updated
         /// </summary>
         public DateTime? UpdatedAt { get; set; }
+
+        public int MemberCount { get; set; }
     }
 }

@@ -47,7 +47,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string? name = null, [FromQuery] string? tag = null, [FromQuery] string sort = "+name", [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
+        public async Task<IActionResult> Get([FromQuery] string? name = null, [FromQuery] string? tag = null, [FromQuery] string? sort = "+name", [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
         {
             try
             {
@@ -68,7 +68,7 @@ namespace IdentityManager.Controllers
 
                     Response.Headers.Add("X-Total-Count", stats.TotalResults.ToString());
 
-                    return this.Partial(await query.Skip(skip??0).Take(take??20).ToListAsync(ct).ContinueWith(t => t.Result.Select(c => new GroupModel {  CreatedOnUtc = c.CreatedOnUtc, Name = c.Name, Tags = c.Tags, UpdatedAt = c.UpdatedAt }), ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
+                    return this.Partial(await query.Skip(skip??0).Take(take??20).ToListAsync(ct).ContinueWith(t => t.Result.Select(c => new GroupModel {  CreatedOnUtc = c.CreatedOnUtc, Name = c.Name, Tags = c.Tags, UpdatedAt = c.UpdatedAt, MemberCount = c.Members.Count() }), ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
                 }
             }
             catch (Exception ex)
@@ -99,7 +99,7 @@ namespace IdentityManager.Controllers
                     if (group == null)
                         throw new KeyNotFoundException($"Group {name} was not found");
 
-                    return Ok(new GroupModel { CreatedOnUtc = group.CreatedOnUtc, Name = group.Name, Tags = group.Tags, UpdatedAt = group.UpdatedAt });
+                    return Ok(new GroupModel { CreatedOnUtc = group.CreatedOnUtc, Name = group.Name, Tags = group.Tags, UpdatedAt = group.UpdatedAt, MemberCount = group.Members.Count() });
                 }
             }
             catch (KeyNotFoundException ex)

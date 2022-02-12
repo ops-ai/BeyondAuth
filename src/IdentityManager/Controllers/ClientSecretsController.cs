@@ -43,7 +43,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromRoute] string clientId, string sort, [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
+        public async Task<IActionResult> Get([FromRoute] string clientId, string? sort = "+description", [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
         {
             try
             {

@@ -41,7 +41,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string sort = "+name", [FromQuery] int? skip = 0, [FromQuery] int? take = 0, CancellationToken ct = default)
+        public async Task<IActionResult> Get([FromQuery] string? sort = "+name", [FromQuery] int? skip = 0, [FromQuery] int? take = 0, CancellationToken ct = default)
         {
             try
             {
