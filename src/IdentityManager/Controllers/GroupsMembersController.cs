@@ -4,22 +4,12 @@ using IdentityManager.Domain;
 using IdentityManager.Extensions;
 using IdentityManager.Models;
 using IdentityServer4.Contrib.RavenDB.Options;
-using IdentityServer4.Models;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSwag.Annotations;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Security.Claims;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
 {
@@ -44,7 +34,8 @@ namespace IdentityManager.Controllers
         /// </summary>
         /// <param name="name"></param>
         /// <param name="sort">+/- field to sort by</param>
-        /// <param name="range">Paging range [from-to]</param>
+        /// <param name="skip">Result range to return. Format: 0-19 (result index from - result index to)</param>
+        /// <param name="take">Result range to return. Format: 0-19 (result index from - result index to)</param>
         /// <param name="ct"></param>
         /// <response code="206">Groups information</response>
         /// <response code="500">Server error getting groups</response>
@@ -52,24 +43,29 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromRoute] string name, [FromQuery] string sort = "+email", [FromQuery] string range = "0-19", CancellationToken ct = default)
+        public async Task<IActionResult> Get([FromRoute] string name, [FromQuery] string sort = "+email", [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
         {
             try
             {
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var group = await session.LoadAsync<Group>($"Groups/{name}", ct);
-                    var query = session.Query<ApplicationUser>().Where(t => t.Groups.Contains(name)).AsQueryable();
-                    if (sort.StartsWith("-"))
-                        query = query.OrderByDescending(sort[1..], Raven.Client.Documents.Session.OrderingType.String);
-                    else
-                        query = query.OrderBy(sort[1..], Raven.Client.Documents.Session.OrderingType.String);
+                    var query = session.Query<ApplicationUser>().Where(t => t.Groups.Contains(name)).Statistics(out var stats).AsQueryable();
+                    query = sort switch
+                    {
+                        "+firstName" => query.OrderBy(t => t.FirstName),
+                        "-firstName" => query.OrderByDescending(t => t.FirstName),
+                        "+lastName" => query.OrderBy(t => t.LastName),
+                        "-lastName" => query.OrderByDescending(t => t.LastName),
+                        "+email" => query.OrderBy(t => t.Email),
+                        "-email" => query.OrderByDescending(t => t.Email),
+                        _ => query.OrderBy(t => t.FirstName),
+                    };
 
-                    var from = int.Parse(range.Split('-')[0]);
-                    var to = int.Parse(range.Split('-')[1]) + 1;
+                    Response.Headers.Add("X-Total-Count", stats.TotalResults.ToString());
 
-                    return this.Partial(await query.Skip(from).Take(to - from).ToListAsync(ct)
-                        .ContinueWith(t => t.Result.Select(c => new GroupMemberModel { CreatedOnUtc = group.Members[c.Id].CreatedOnUtc, DisplayName = c.DisplayName, FirstName = c.FirstName, LastName = c.LastName, Email = c.Email, Id = c.Id.Split('/').Last() }), ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
+                    return this.Partial(await query.Skip(skip??0).Take(take??20).ToListAsync(ct)
+                        .ContinueWith(t => t.Result.Select(c => new GroupMemberModel { CreatedOnUtc = group.Members[c.Id!].CreatedOnUtc, DisplayName = c.DisplayName, FirstName = c.FirstName, LastName = c.LastName, Email = c.Email, Id = c.Id!.Split('/').Last() }), ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
                 }
             }
             catch (Exception ex)

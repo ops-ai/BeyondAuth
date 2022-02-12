@@ -59,7 +59,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(IList<UserModel>), (int)HttpStatusCode.PartialContent)]
         [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] string dataSourceId, [FromQuery] string? firstName, [FromQuery] string? lastName, [FromQuery] string? displayName, [FromQuery] string? organization, [FromQuery] string? email, [FromQuery] bool includeDisabled = false, [FromQuery] bool lockedOnly = false, [FromQuery] string? sort = "+email", [FromQuery] int? skip = 0, [FromQuery] int? take = 0, CancellationToken ct = default)
+        public async Task<IActionResult> Get([FromRoute] string dataSourceId, [FromQuery] string? firstName, [FromQuery] string? lastName, [FromQuery] string? displayName, [FromQuery] string? organization, [FromQuery] string? email, [FromQuery] bool includeDisabled = false, [FromQuery] bool lockedOnly = false, [FromQuery] string? sort = "+email", [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
         {
             try
             {

@@ -6,15 +6,10 @@ using IdentityServer4.Contrib.RavenDB.Options;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSwag.Annotations;
 using Raven.Client.Documents;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
 {
@@ -38,29 +33,31 @@ namespace IdentityManager.Controllers
         /// Get Identity Resources
         /// </summary>
         /// <param name="sort">+/- field to sort by</param>
-        /// <param name="range">Paging range [from-to]</param>
+        /// <param name="skip">Result range to return. Format: 0-19 (result index from - result index to)</param>
+        /// <param name="take">Result range to return. Format: 0-19 (result index from - result index to)</param>
         /// <response code="206">Identity Resources</response>
         /// <response code="500">Server error getting identity resources</response>
         [ProducesResponseType(typeof(IEnumerable<IdentityResourceModel>), (int)HttpStatusCode.PartialContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string sort = "+name", [FromQuery] string range = "0-19", CancellationToken ct = default)
+        public async Task<IActionResult> Get([FromQuery] string sort = "+name", [FromQuery] int? skip = 0, [FromQuery] int? take = 0, CancellationToken ct = default)
         {
             try
             {
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var query = session.Query<IdentityResourceEntity>().AsQueryable();
-                    if (sort.StartsWith("-"))
-                        query = query.OrderByDescending(sort[1..], Raven.Client.Documents.Session.OrderingType.String);
-                    else
-                        query = query.OrderBy(sort[1..], Raven.Client.Documents.Session.OrderingType.String);
+                    var query = session.Query<IdentityResourceEntity>().Statistics(out var stats).AsQueryable();
+                    query = sort switch
+                    {
+                        "+name" => query.OrderBy(t => t.Name),
+                        "-name" => query.OrderByDescending(t => t.Name),
+                        _ => query.OrderBy(t => t.Name),
+                    };
 
-                    var from = int.Parse(range.Split('-')[0]);
-                    var to = int.Parse(range.Split('-')[1]) + 1;
+                    Response.Headers.Add("X-Total-Count", stats.TotalResults.ToString());
 
-                    return this.Partial(await query.Skip(from).Take(to - from).ToListAsync(ct).ContinueWith(t => t.Result.Select(c => c.ToModel()), ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
+                    return this.Partial(await query.Skip(skip??0).Take(take??20).ToListAsync(ct).ContinueWith(t => t.Result.Select(c => c.ToModel()), ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
                 }
             }
             catch (Exception ex)

@@ -7,17 +7,11 @@ using IdentityServer4.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSwag.Annotations;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Linq;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
 {
@@ -55,11 +49,17 @@ namespace IdentityManager.Controllers
             {
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var query = session.Query<ClientEntity>().AsQueryable();
-                    if (sort!.StartsWith("-"))
-                        query = query.OrderByDescending(sort[1..], Raven.Client.Documents.Session.OrderingType.String);
-                    else
-                        query = query.OrderBy(sort[1..], Raven.Client.Documents.Session.OrderingType.String);
+                    var query = session.Query<ClientEntity>().Statistics(out var stats).AsQueryable();
+                    query = sort switch
+                    {
+                        "+clientName" => query.OrderBy(t => t.ClientName),
+                        "-clientName" => query.OrderByDescending(t => t.ClientName),
+                        "+clientId" => query.OrderBy(t => t.ClientId),
+                        "-clientId" => query.OrderByDescending(t => t.ClientId),
+                        _ => query.OrderBy(t => t.ClientName),
+                    };
+
+                    Response.Headers.Add("X-Total-Count", stats.TotalResults.ToString());
 
                     return this.Partial(await query.Skip(skip??0).Take(take ?? 20).ToListAsync(ct).ContinueWith(t => t.Result.Select(c => c.ToModel()), ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
                 }

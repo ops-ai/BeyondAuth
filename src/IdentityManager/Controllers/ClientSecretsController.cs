@@ -7,16 +7,10 @@ using IdentityServer4.Models;
 using Microsoft.AspNetCore.JsonPatch;
 using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSwag.Annotations;
 using Raven.Client.Documents;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Net;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace IdentityManager.Controllers
 {
@@ -41,27 +35,35 @@ namespace IdentityManager.Controllers
         /// </summary>
         /// <param name="clientId"></param>
         /// <param name="sort"></param>
-        /// <param name="range">Paging range [from-to]</param>
+        /// <param name="skip">Result range to return. Format: 0-19 (result index from - result index to)</param>
+        /// <param name="take">Result range to return. Format: 0-19 (result index from - result index to)</param>
         /// <response code="206">Clients information</response>
         /// <response code="500">Server error getting clients</response>
         [ProducesResponseType(typeof(IEnumerable<SecretModel>), (int)HttpStatusCode.PartialContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromRoute] string clientId, string sort, [FromQuery] string range = "0-19", CancellationToken ct = default)
+        public async Task<IActionResult> Get([FromRoute] string clientId, string sort, [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
         {
             try
             {
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    var from = int.Parse(range.Split('-')[0]);
-                    var to = int.Parse(range.Split('-')[1]) + 1;
-
                     var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}", ct);
                     if (client == null)
                         throw new KeyNotFoundException($"Client {clientId} was not found");
 
-                    return this.Partial(client.ClientSecrets.Take(to - from).Select(t => t.ToModel()));
+                    var query = client.ClientSecrets.AsQueryable();
+                    query = sort switch
+                    {
+                        "+description" => query.OrderBy(t => t.Description),
+                        "-description" => query.OrderByDescending(t => t.Description),
+                        _ => query.OrderBy(t => t.Description)
+                    };
+
+                    Response.Headers.Add("X-Total-Count", query.Count().ToString());
+
+                    return this.Partial(query.Skip(skip??0).Take(take??20).Select(t => t.ToModel()));
                 }
             }
             catch (Exception ex)

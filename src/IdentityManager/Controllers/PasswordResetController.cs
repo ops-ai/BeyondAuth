@@ -1,13 +1,7 @@
 ﻿using Audit.Core;
 using Identity.Core;
-using IdentityManager.Domain;
-using IdentityManager.Extensions;
-using IdentityManager.Models;
 using IdentityServer4.Contrib.RavenDB.Options;
-using IdentityServer4.Models;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NSwag.Annotations;
