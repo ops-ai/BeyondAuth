@@ -87,6 +87,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BlackstarSolar.AspNetCore.I
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.PasswordValidators.Topology", "Password Validators\BeyondAuth.PasswordValidators.Topology\BeyondAuth.PasswordValidators.Topology.csproj", "{19204E87-D442-4C0F-8CE3-0BA765BECD78}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Policy Connectors", "Policy Connectors", "{574904F3-F9C4-4D89-AC33-9C9A2B590BD8}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureManagement.SecureFeatures", "Policy Connectors\FeatureManagement.SecureFeatures\FeatureManagement.SecureFeatures.csproj", "{AE2D3228-A98E-4383-BA5E-4198735A6B66}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -208,6 +212,10 @@ Global
 		{19204E87-D442-4C0F-8CE3-0BA765BECD78}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{19204E87-D442-4C0F-8CE3-0BA765BECD78}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{19204E87-D442-4C0F-8CE3-0BA765BECD78}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AE2D3228-A98E-4383-BA5E-4198735A6B66}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AE2D3228-A98E-4383-BA5E-4198735A6B66}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AE2D3228-A98E-4383-BA5E-4198735A6B66}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AE2D3228-A98E-4383-BA5E-4198735A6B66}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -9,7 +9,9 @@
 		<DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
 		<ApplicationIcon />
 		<OutputType>Exe</OutputType>
-		<StartupObject />
+		<StartupObject>PolicyServer.Program</StartupObject>
+		<ImplicitUsings>enable</ImplicitUsings>
+		<Nullable>enable</Nullable>
 	</PropertyGroup>
 
 	<ItemGroup>
@@ -33,9 +35,13 @@
 		<PackageReference Include="Azure.Identity" Version="1.5.0" />
 		<PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.2.0" />
 		<PackageReference Include="CorrelationId" Version="3.0.1" />
+		<PackageReference Include="Finbuckle.MultiTenant" Version="6.5.1" />
+		<PackageReference Include="Finbuckle.MultiTenant.AspNetCore" Version="6.5.1" />
 		<PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
+		<PackageReference Include="IdentityServer4.Contrib.RavenDB" Version="1.0.0" />
 		<PackageReference Include="IPAddressRange" Version="4.2.0" />
 		<PackageReference Include="JsonSubTypes" Version="1.8.0" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.2" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.14.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.0.64">
 			<PrivateAssets>all</PrivateAssets>
@@ -69,7 +75,12 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Identity.Core\Identity.Core.csproj" />
 		<ProjectReference Include="..\PolicyServer.Core\PolicyServer.Core.csproj" />
+	</ItemGroup>
+
+	<ItemGroup>
+	  <Folder Include="Models\" />
 	</ItemGroup>
 
 </Project>

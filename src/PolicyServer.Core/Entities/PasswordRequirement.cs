@@ -8,7 +8,7 @@ namespace PolicyServer.Core.Entities
     /// <summary>
     /// Authorization requirements base class
     /// </summary>
-    [JsonConverter(typeof(JsonInheritanceConverter), "name")]
+    [JsonConverter(typeof(JsonSubtypes), "name")]
     [JsonSubtypes.KnownSubType(typeof(ComplexityRequirement), "complexity")]
     [JsonSubtypes.KnownSubType(typeof(MinPasswordAgeRequirement), "min-age")]
     [JsonSubtypes.KnownSubType(typeof(MaxPasswordAgeRequirement), "max-age")]

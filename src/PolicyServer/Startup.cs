@@ -3,17 +3,19 @@ using Autofac.Configuration;
 using Azure.Identity;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Secrets;
+using CorrelationId;
 using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
+using Identity.Core;
 using IdentityServer4.AccessTokenValidation;
-using Microsoft.AspNetCore.Builder;
+using IdentityServer4.Contrib.RavenDB.Options;
+using IdentityServer4.Stores.Serialization;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Caching.Memory;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Hosting;
 using NetTools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -27,12 +29,11 @@ using Prometheus;
 using Prometheus.SystemMetrics;
 using Prometheus.SystemMetrics.Collectors;
 using Raven.Client.Documents;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
+using Raven.Client.Json.Serialization.NewtonsoftJson;
+using Raven.DependencyInjection;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography.X509Certificates;
+using System.Text.Json.Serialization;
 
 namespace PolicyServer
 {
@@ -65,26 +66,99 @@ namespace PolicyServer
             NLog.GlobalDiagnosticsContext.Set("LokiPassword", Configuration["LogStorage:Loki:Password"]);
             NLog.GlobalDiagnosticsContext.Set("AppName", Configuration["DataProtection:AppName"]);
 
+            services.AddDefaultCorrelationId(options =>
+            {
+                options.UpdateTraceIdentifier = true;
+            });
+            services.AddMemoryCache();
+
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
-                .AddIdentityServerAuthentication(x =>
+                .AddJwtBearer();
+
+            services.AddMultiTenant<TenantSetting>()
+                .WithDelegateStrategy(context =>
                 {
-                    x.Authority = Configuration["Authentication:Authority"];
-                    x.ApiSecret = Configuration["Authentication:ApiSecret"];
-                    x.ApiName = Configuration["Authentication:ApiName"];
-                    x.SupportedTokens = SupportedTokens.Both;
-                    x.RequireHttpsMetadata = true;
-                    x.EnableCaching = true;
-                    x.CacheDuration = TimeSpan.FromMinutes(1);
-                    x.NameClaimType = "sub";
-                });
+                    if (context is not HttpContext httpContext)
+                        throw new ArgumentException("{context} is not HttpContext", nameof(context));
 
-            services.AddCorrelationId();
+                    if (!System.Net.Http.Headers.AuthenticationHeaderValue.TryParse(httpContext.Request.Headers.Authorization, out var parsedValue))
+                        throw new ArgumentException("Invalid auth header");
 
-            X509Certificate2 ravenDBcert = null;
+                    return Task.FromResult(new JwtSecurityToken(parsedValue.Parameter).Issuer[8..]);
+
+                }).WithStore(new ServiceLifetime(), (sp) => new RavenDBMultitenantStore(sp.GetService<IDocumentStore>(), sp.GetService<IMemoryCache>()))
+                .WithPerTenantOptions<IdentityStoreOptions>((options, tenantInfo) =>
+                {
+                    options.DatabaseName = $"TenantIdentity-{tenantInfo.Identifier}";
+                })
+                .WithPerTenantOptions<RavenSettings>((options, tenantInfo) =>
+                {
+                    options.DatabaseName = $"TenantIdentity-{tenantInfo.Identifier}";
+                })
+                .WithPerTenantOptions<JwtBearerOptions>((options, tenantInfo) =>
+                {
+                    options.Authority = $"https://{tenantInfo.Identifier}";
+                    options.TokenValidationParameters.ValidIssuers = new[] { $"https://{tenantInfo.Identifier}" };
+                    options.Audience = tenantInfo.PolicyServerSettings.ApiName;
+
+                    //options.ApiSecret = tenantInfo.IdpSettings.ApiSecret;
+                    options.RequireHttpsMetadata = true;
+                    //options.SupportedTokens = SupportedTokens.Both;
+                    //options.EnableCaching = true;
+                    //options.Validate();
+                    //options.CacheDuration = TimeSpan.FromMinutes(1);
+                })
+                .WithPerTenantOptions<NSwag.Generation.AspNetCore.AspNetCoreOpenApiDocumentGeneratorSettings>((config, tenantInfo) =>
+                {
+                    config.DocumentName = "v1";
+                    config.PostProcess = document =>
+                    {
+                        document.Info.Version = "v1";
+                        document.Info.Title = "BeyondAuth Policy Server";
+                        document.Info.Description = File.ReadAllText("readme.md");
+                        document.Info.ExtensionData = new Dictionary<string, object>
+                    {
+                        { "x-logo", new { url = "/logo.png", altText = "BeyondAuth" } }
+                    };
+                        document.Info.Contact = new OpenApiContact
+                        {
+                            Name = Configuration["Support:Name"],
+                            Email = Configuration["Support:Email"],
+                            Url = Configuration["Support:Link"]
+                        };
+                    };
+
+                    config.AddSecurity("bearer", Enumerable.Empty<string>(), new OpenApiSecurityScheme
+                    {
+                        Type = OpenApiSecuritySchemeType.OAuth2,
+                        Description = "Auth",
+                        Flow = OpenApiOAuth2Flow.AccessCode,
+                        OpenIdConnectUrl = new Uri(new Uri($"https://{tenantInfo.Identifier}"), ".well-known/openid-configuration").AbsoluteUri,
+                        Flows = new OpenApiOAuthFlows
+                        {
+                            AuthorizationCode = new OpenApiOAuthFlow
+                            {
+                                AuthorizationUrl = new Uri(new Uri($"https://{tenantInfo.Identifier}"), "connect/authorize").AbsoluteUri,
+                                TokenUrl = new Uri(new Uri($"https://{tenantInfo.Identifier}"), "connect/token").AbsoluteUri,
+                                Scopes = new Dictionary<string, string> { { "openid", "openid" }, { tenantInfo.IdpSettings.ApiName, tenantInfo.IdpSettings.ApiName } }
+                            }
+                        }
+                    });
+                    config.OperationProcessors.Add(new AspNetCoreOperationSecurityScopeProcessor("bearer"));
+
+                    config.SerializerSettings = new JsonSerializerSettings
+                    {
+                        ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                    };
+                    config.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
+                })
+                .WithPerTenantAuthentication();
+
+            X509Certificate2? ravenDBcert = null;
             if (Environment.GetEnvironmentVariable("VaultUri") != null)
             {
-                var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")), credential: new DefaultAzureCredential());
-                var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
+                var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")!), credential: new DefaultAzureCredential());
+                var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")!), new DefaultAzureCredential());
 
                 var ravenDbCertificateClient = certificateClient.GetCertificate("RavenDB");
                 var ravenDbCertificateSegments = ravenDbCertificateClient.Value.SecretId.Segments;
@@ -92,12 +166,26 @@ namespace PolicyServer
                 ravenDBcert = new X509Certificate2(ravenDbCertificateBytes);
             }
 
-            services.AddSingleton((ctx) => new DocumentStore
+            services.AddSingleton((ctx) =>
             {
-                Urls = Configuration.GetSection("Raven:Urls").Get<string[]>(),
-                Database = Configuration["Raven:Database"],
-                Certificate = ravenDBcert
-            }.Initialize());
+                var store = new DocumentStore
+                {
+                    Urls = Configuration.GetSection("Raven:Urls").Get<string[]>(),
+                    Database = Configuration["Raven:Database"],
+                    Certificate = ravenDBcert
+                };
+
+                var serializerConventions = new NewtonsoftJsonSerializationConventions();
+                serializerConventions.CustomizeJsonSerializer += (JsonSerializer serializer) =>
+                {
+                    serializer.Converters.Add(new ClaimConverter());
+                    serializer.Converters.Add(new ClaimsPrincipalConverter());
+                };
+
+                store.Conventions.Serialization = serializerConventions;
+
+                return store.Initialize();
+            });
 
             services.AddHealthChecks()
                 .AddRavenDB(setup => { setup.Urls = Configuration.GetSection("Raven:Urls").Get<string[]>(); setup.Database = Configuration["Raven:Database"]; setup.Certificate = ravenDBcert; }, "ravendb");
@@ -147,7 +235,15 @@ namespace PolicyServer
                 config.SerializerSettings.Converters.Add(new Newtonsoft.Json.Converters.StringEnumConverter());
             });
 
-            services.AddControllers();
+            services.AddMvc()
+                .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
+            services.AddControllers().AddNewtonsoftJson();
+
+            services.AddAuthorization(options =>
+            {
+                options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+            });
 
             services.AddOpenTelemetryTracing(
                 (builder) => builder
@@ -189,12 +285,9 @@ namespace PolicyServer
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env)
         {
             if (env.IsDevelopment())
-            {
                 app.UseDeveloperExceptionPage();
-            }
 
             app.UseHttpsRedirection();
-
             app.UseForwardedHeaders();
 
             app.UseCors(x => x.AllowAnyOrigin().WithHeaders("accept", "authorization", "content-type", "origin").AllowAnyMethod());
@@ -204,9 +297,11 @@ namespace PolicyServer
             app.UseXfo(options => options.SameOrigin());
             app.UseXXssProtection(options => options.EnabledWithBlockMode());
             app.UseHsts(options => options.MaxAge(30).AllResponses());
+            app.UseCorrelationId();
 
             app.UseRouting();
-
+            app.UseMultiTenant();
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.UseOpenApi();
@@ -220,13 +315,13 @@ namespace PolicyServer
                 };
             });
 
-            app.UseHealthChecks(Configuration["HealthChecks:FullEndpoint"], new HealthCheckOptions()
+            app.UseHealthChecks(Configuration["HealthChecks:FullEndpoint"], new HealthCheckOptions
             {
                 Predicate = _ => true,
                 ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
             });
 
-            app.UseHealthChecks(Configuration["HealthChecks:SummaryEndpoint"], new HealthCheckOptions()
+            app.UseHealthChecks(Configuration["HealthChecks:SummaryEndpoint"], new HealthCheckOptions
             {
                 Predicate = _ => _.FailureStatus == HealthStatus.Unhealthy
             });

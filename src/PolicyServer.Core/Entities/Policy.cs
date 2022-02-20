@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System.Collections;
+using System.Collections.Generic;
 
 namespace PolicyServer.Core.Entities
 {
@@ -17,17 +18,17 @@ namespace PolicyServer.Core.Entities
         /// <summary>
         /// Policy name
         /// </summary>
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         /// <summary>
         /// Human/admin description of the policy
         /// </summary>
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         /// <summary>
         /// The resolution of this policy must be committed to the audit server
         /// </summary>
-        public bool AuditableEvent { get; set; }
+        public bool AuditableEvent { get; set; } = false;
 
         /// <summary>
         /// Authentication schemes it applies to
@@ -52,6 +53,6 @@ namespace PolicyServer.Core.Entities
         /// <summary>
         /// Criteria the protected resource must match for this policy to apply
         /// </summary>
-        public List<KeyValuePair<string, string>> Criteria { get; set; }
+        public Hashtable? Criteria { get; set; }
     }
 }

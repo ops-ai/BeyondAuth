@@ -85,6 +85,8 @@ namespace Identity.Core
 
         public IdpOptions IdpSettings { get; set; } = new IdpOptions();
 
+        public PolicyServerOptions PolicyServerSettings { get; set; } = new PolicyServerOptions();
+
         public EmailOptions EmailSettings { get; set; } = new EmailOptions();
 
         public SmsOptions SmsSettings { get; set; } = new SmsOptions();

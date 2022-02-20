@@ -8,7 +8,7 @@ namespace PolicyServer.Core.Entities
     /// <summary>
     /// Authorization requirements base class
     /// </summary>
-    [JsonConverter(typeof(JsonInheritanceConverter), "name")]
+    [JsonConverter(typeof(JsonSubtypes), "name")]
     [JsonSubtypes.KnownSubType(typeof(EncryptionRequirement), "encryption")]
     [JsonSubtypes.KnownSubType(typeof(GeographicRestrictionRequirement), "geographic-restriction")]
     [JsonSubtypes.KnownSubType(typeof(ReplicationRequirement), "replication")]
