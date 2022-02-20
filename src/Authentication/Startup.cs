@@ -29,7 +29,6 @@ using Newtonsoft.Json;
 using Raven.Client.Documents;
 using System;
 using System.Linq;
-using System.Net;
 using System.Security.Cryptography.X509Certificates;
 using Raven.Client.Json.Serialization.NewtonsoftJson;
 using IdentityServer4;
@@ -37,7 +36,6 @@ using IdentityServer4.AspNetIdentity;
 using System.Text;
 using System.Net.Http.Headers;
 using System.Net.Http;
-using Microsoft.AspNetCore.Rewrite;
 using CorrelationId;
 using Authentication.Infrastructure;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
@@ -61,7 +59,6 @@ using Raven.Client.Documents.Conventions;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.HttpOverrides;
 using System.Collections.Generic;
-using NetTools;
 using BeyondAuth.PasswordValidators.Common;
 using BlackstarSolar.AspNetCore.Identity.PwnedPasswords;
 using BeyondAuth.PasswordValidators.Topology;
@@ -69,7 +66,6 @@ using OpenTelemetry.Trace;
 using OpenTelemetry.Resources;
 using IdentityServer4.Services;
 using System.Diagnostics;
-using OpenTelemetry;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
 using Raven.Client.Documents.Linq;
 using Microsoft.FeatureManagement;
@@ -595,7 +591,8 @@ namespace Authentication
             services.AddPrometheusAspNetCoreMetrics();
             services.AddPrometheusHttpClientMetrics();
 
-            services.AddHostedService<PasswordResetService>();
+            if (Configuration.GetValue<bool>("FeatureManagement:PasswordResetService"))
+                services.AddHostedService<PasswordResetService>();
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.

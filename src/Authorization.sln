@@ -11,6 +11,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".Solution Items", ".Solutio
 	ProjectSection(SolutionItems) = preProject
 		..\.editorconfig = ..\.editorconfig
 		..\.gitignore = ..\.gitignore
+		AssemblyInfo.cs = AssemblyInfo.cs
 		..\azure-pipelines.analyze.yml = ..\azure-pipelines.analyze.yml
 		..\azure-pipelines.release.yml = ..\azure-pipelines.release.yml
 		..\GitVersion.yml = ..\GitVersion.yml
@@ -229,6 +230,7 @@ Global
 		{A624F1F0-2A45-4A2C-A933-98FEF6346676} = {909B4F42-EC1D-4237-B5E2-7C31FB55A29E}
 		{6904FA32-7393-49BE-BC5E-012479DD4464} = {909B4F42-EC1D-4237-B5E2-7C31FB55A29E}
 		{19204E87-D442-4C0F-8CE3-0BA765BECD78} = {909B4F42-EC1D-4237-B5E2-7C31FB55A29E}
+		{AE2D3228-A98E-4383-BA5E-4198735A6B66} = {574904F3-F9C4-4D89-AC33-9C9A2B590BD8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}

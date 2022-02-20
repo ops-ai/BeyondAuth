@@ -73,7 +73,7 @@ namespace Authentication.Services
         {
             using (var session = _store.OpenAsyncSession())
             {
-                //TODO: Subscribe to chnages on TenantSettings and start listening to chnages on new databases
+                //TODO: Subscribe to chnages on TenantSettings and start listening to chnages on new databases or use service bus
 
                 var tenantSettings = await session.Query<TenantSetting>().ToListAsync(stoppingToken);
                 foreach (var tenantSetting in tenantSettings)
