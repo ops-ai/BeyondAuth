@@ -6,7 +6,7 @@
 		<Nullable>enable</Nullable>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
-		<PackageProjectUrl>https://toggly.io</PackageProjectUrl>
+		<PackageProjectUrl>https://beyondauth.io</PackageProjectUrl>
 		<PackageIcon>favicon.png</PackageIcon>
 		<PackageReadmeFile>README.md</PackageReadmeFile>
 		<RepositoryUrl>https://github.com/ops-ai/BeyondAuth</RepositoryUrl>

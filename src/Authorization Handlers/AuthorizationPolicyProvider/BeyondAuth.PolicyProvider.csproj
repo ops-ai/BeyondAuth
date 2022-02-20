@@ -4,7 +4,21 @@
     <TargetFramework>netstandard2.1</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <Nullable>enable</Nullable>
+	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<PackageProjectUrl>https://beyondauth.io</PackageProjectUrl>
+	<PackageIcon>favicon.png</PackageIcon>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<RepositoryUrl>https://github.com/ops-ai/BeyondAuth</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<PackageTags>security policy provider;authorization policy service; authorization policy provider;auth policies;beyondauth</PackageTags>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="README.md" Pack="true" PackagePath="" />
+    <None Include="..\..\favicon.png" Pack="true" PackagePath="" Link="favicon.png" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.19.4" />

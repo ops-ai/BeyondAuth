@@ -1,0 +1,31 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net6.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<PackageProjectUrl>https://beyondauth.io</PackageProjectUrl>
+	<PackageIcon>favicon.png</PackageIcon>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<RepositoryUrl>https://github.com/ops-ai/BeyondAuth</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<PackageTags>beyondauth;beyondauth policy cache;</PackageTags>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+  </PropertyGroup>
+
+  <ItemGroup>
+	  <None Include="README.md" Pack="true" PackagePath="" />
+	  <None Include="..\..\favicon.png" Pack="true" PackagePath="" Link="favicon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="RavenDB.Client" Version="5.3.100" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\AuthorizationPolicyProvider\BeyondAuth.PolicyProvider.csproj" />
+  </ItemGroup>
+
+</Project>

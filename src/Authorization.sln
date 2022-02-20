@@ -91,6 +91,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Policy Connectors", "Policy
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureManagement.SecureFeatures", "Policy Connectors\FeatureManagement.SecureFeatures\FeatureManagement.SecureFeatures.csproj", "{AE2D3228-A98E-4383-BA5E-4198735A6B66}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondAuth.PolicyProvider.Storage.RavenDB", "Authorization Handlers\BeyondAuth.PolicyProvider.Storage.RavenDB\BeyondAuth.PolicyProvider.Storage.RavenDB.csproj", "{E038D21E-73D1-4C93-A90C-CE33E3677179}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -216,6 +218,10 @@ Global
 		{AE2D3228-A98E-4383-BA5E-4198735A6B66}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{AE2D3228-A98E-4383-BA5E-4198735A6B66}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{AE2D3228-A98E-4383-BA5E-4198735A6B66}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E038D21E-73D1-4C93-A90C-CE33E3677179}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E038D21E-73D1-4C93-A90C-CE33E3677179}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E038D21E-73D1-4C93-A90C-CE33E3677179}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E038D21E-73D1-4C93-A90C-CE33E3677179}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -239,6 +245,7 @@ Global
 		{6904FA32-7393-49BE-BC5E-012479DD4464} = {909B4F42-EC1D-4237-B5E2-7C31FB55A29E}
 		{19204E87-D442-4C0F-8CE3-0BA765BECD78} = {909B4F42-EC1D-4237-B5E2-7C31FB55A29E}
 		{AE2D3228-A98E-4383-BA5E-4198735A6B66} = {574904F3-F9C4-4D89-AC33-9C9A2B590BD8}
+		{E038D21E-73D1-4C93-A90C-CE33E3677179} = {84BCB7A7-6678-441F-B075-15D4A7E04ACB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
