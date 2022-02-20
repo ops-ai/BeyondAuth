@@ -12,7 +12,8 @@ namespace PolicyServer.Tests.Fakes
             context.HttpContext.User = new ClaimsPrincipal(new ClaimsIdentity(new List<Claim>
             {
                 new Claim(ClaimTypes.Name, "Test User"),
-                new Claim(ClaimTypes.Email, "test@test.com")
+                new Claim(ClaimTypes.Email, "test@test.com"),
+                new Claim("client_id", "test")
             }));
 
             await next();
