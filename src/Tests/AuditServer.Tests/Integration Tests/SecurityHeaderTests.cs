@@ -1,5 +1,6 @@
 ﻿using AuditServer.Tests.Fakes;
 using Autofac;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -9,6 +10,7 @@ using Moq;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using tsh.Xunit.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -27,13 +29,15 @@ namespace AuditServer.Tests.Integration_Tests
 
             _client = factory.WithWebHostBuilder(builder =>
             {
+                builder.ConfigureLogging(lb => lb.AddProvider(new XUnitLoggerProvider(output)));
                 builder.ConfigureServices(services =>
                 {
                     var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IHealthCheck));
                     if (descriptor != null)
-                    {
                         services.Remove(descriptor);
-                    }
+
+                    //services.SingleOrDefault(d => d.ServiceType == typeof(ILoggerFactory));
+                    //services.AddLogging();
                 });
                 builder.ConfigureTestServices(services =>
                  {

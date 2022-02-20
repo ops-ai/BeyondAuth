@@ -1,6 +1,7 @@
 ﻿using Authentication.Tests.Fakes;
 using Autofac;
 using Identity.Core;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -11,6 +12,7 @@ using Raven.TestDriver;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using tsh.Xunit.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -29,6 +31,7 @@ namespace Authentication.Tests.Integration_Tests
 
             _client = factory.WithWebHostBuilder(builder =>
             {
+                builder.ConfigureLogging(lb => lb.AddProvider(new XUnitLoggerProvider(output)));
                 builder.ConfigureServices(services =>
                 {
                     var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IHealthCheck));

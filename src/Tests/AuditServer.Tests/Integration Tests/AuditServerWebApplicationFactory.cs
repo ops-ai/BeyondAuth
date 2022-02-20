@@ -18,8 +18,7 @@ namespace AuditServer.Tests.Integration_Tests
                 {
                     logging.ClearProviders();
                     logging.SetMinimumLevel(LogLevel.Trace);
-                })
-                .UseNLog();
+                });
 
             base.ConfigureWebHost(builder);
         }

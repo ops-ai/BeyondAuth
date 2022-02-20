@@ -1,5 +1,6 @@
 ﻿using AuthorizationServer.Tests.Fakes;
 using Autofac;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.DependencyInjection;
@@ -10,6 +11,7 @@ using PolicyServer.Tests.Integration_Tests;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using tsh.Xunit.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -28,6 +30,7 @@ namespace AuthorizationServer.Tests.Integration_Tests
 
             _client = factory.WithWebHostBuilder(builder =>
             {
+                builder.ConfigureLogging(lb => lb.AddProvider(new XUnitLoggerProvider(output)));
                 builder.ConfigureServices(services =>
                 {
                     var descriptor = services.SingleOrDefault(d => d.ServiceType == typeof(IHealthCheck));

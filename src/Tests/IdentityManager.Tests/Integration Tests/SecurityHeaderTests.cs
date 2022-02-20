@@ -1,6 +1,7 @@
 ﻿using Autofac;
 using IdentityManager.Tests.DataManagement;
 using IdentityManager.Tests.Fakes;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.TestHost;
 using Microsoft.Extensions.Configuration;
@@ -14,6 +15,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using tsh.Xunit.Logging;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -40,6 +42,7 @@ namespace IdentityManager.Tests.Integration_Tests
 
             _client = factory.WithWebHostBuilder(builder =>
             {
+                builder.ConfigureLogging(lb => lb.AddProvider(new XUnitLoggerProvider(output)));
                 builder.ConfigureAppConfiguration((ctx, builder) => builder.AddInMemoryCollection(myConfiguration));
                 builder.ConfigureServices(services =>
                 {
