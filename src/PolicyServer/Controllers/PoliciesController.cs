@@ -1,64 +1,100 @@
-﻿using Microsoft.AspNetCore.Authorization;
+﻿using IdentityServer4.Contrib.RavenDB.Options;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
 using PolicyServer.Core.Entities;
-using PolicyServer.Models;
+using PolicyServer.Core.Models;
+using PolicyServer.Extensions;
 using Raven.Client.Documents;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 
 namespace PolicyServer.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    [Authorize]
+    [Route("policies")]
+    //[Authorize]
     public class PoliciesController : ControllerBase
     {
         private readonly IDocumentStore _documentStore;
         private readonly ILogger<PoliciesController> _logger;
+        private readonly IOptions<IdentityStoreOptions> _identityStoreOptions;
 
-        public PoliciesController(IDocumentStore documentStore, ILoggerFactory factory)
+        public PoliciesController(IDocumentStore documentStore, ILoggerFactory factory, IOptions<IdentityStoreOptions> identityStoreOptions)
         {
             _documentStore = documentStore;
             _logger = factory.CreateLogger<PoliciesController>();
+            _identityStoreOptions = identityStoreOptions;
         }
 
         /// <summary>
         /// Get all policies the app has access to
         /// </summary>
-        /// <returns></returns>
+        /// <param name="applicability">Type of policy: feature, account, authorization, password, routing, storage</param>
+        /// <param name="sort">+/- field to sort by</param>
+        /// <param name="skip">Number of records to skip</param>
+        /// <param name="take">Number of policies to return</param>
+        /// <param name="ct"></param>
         /// <response code="200">List of policies available to the application</response>
         /// <response code="500">Unexpected error occurred</response>
-        [ProducesResponseType(typeof(List<PolicyModel>), 200)]
+        [ProducesResponseType(typeof(IEnumerable<PolicyModel>), (int)HttpStatusCode.PartialContent)]
         [ProducesResponseType(500)]
-        [HttpGet]
-        public async Task<IActionResult> GetAllPolicies()
+        [HttpGet("")]
+        [HttpGet("{applicability}")]
+        public async Task<IActionResult> GetAllPolicies([FromRoute] string? applicability, [FromQuery] string? sort = "+name", [FromQuery] int? skip = 0, [FromQuery] int? take = 1024, CancellationToken ct = default)
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession())
+                using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var model = new List<PolicyModel>();
 
-                    List<Policy> policies;
                     var clientId = User.FindFirstValue("client_id");
-                    policies = await session.Query<Policy>().Where(t => t.ClientId.Equals(clientId)).Take(1024).ToListAsync();
 
-                    foreach (var policy in policies)
+                    var all = await session.Query<Policy>().ToListAsync(ct);
+
+                    var policyQuery = session.Query<Policy>().Statistics(out var stats).Where(t => t.ClientId.Equals(clientId));
+                    if (applicability != null)
                     {
-                        model.Add(new PolicyModel
+                        policyQuery = applicability switch
                         {
-                            AuthenticationSchemes = policy.AuthenticationSchemes,
-                            Description = policy.Description,
-                            Id = policy.Id,
-                            Name = policy.Name,
-                            Requirements = policy.Requirements
-                        });
+                            "feature" => policyQuery.Where(t => t.Applicability == PolicyApplicability.Feature),
+                            "account" => policyQuery.Where(t => t.Applicability == PolicyApplicability.Account),
+                            "authorization" => policyQuery.Where(t => t.Applicability == PolicyApplicability.Authorization),
+                            "password" => policyQuery.Where(t => t.Applicability == PolicyApplicability.Password),
+                            "routing" => policyQuery.Where(t => t.Applicability == PolicyApplicability.Routing),
+                            "storage" => policyQuery.Where(t => t.Applicability == PolicyApplicability.Storage),
+                            _ => throw new NotImplementedException(),
+                        };
                     }
-                    return Ok(model);
+                    policyQuery = sort switch
+                    {
+                        "+name" => policyQuery.OrderBy(t => t.Name),
+                        "-name" => policyQuery.OrderByDescending(t => t.Name),
+                        "+criteria" => policyQuery.OrderBy(t => t.Criteria),
+                        "-criteria" => policyQuery.OrderByDescending(t => t.Criteria),
+                        _ => policyQuery.OrderBy(t => t.Name),
+                    };
+
+                    Response.Headers.Add("X-Total-Count", stats.TotalResults.ToString());
+
+                    return this.Partial(await policyQuery.Skip(skip ?? 0).Take(take ?? 1024).ToListAsync(ct).ContinueWith(t => t.Result.Select(policy => new PolicyModel
+                    {
+                        Criteria = policy.Criteria,
+                        AuthenticationSchemes = policy.AuthenticationSchemes,
+                        Description = policy.Description,
+                        Id = policy.Id.Split('/').Last(),
+                        Name = policy.Name,
+                        Requirements = policy.Requirements,
+                        AuditableEvent = policy.AuditableEvent,
+                        Applicability = policy.Applicability,
+                        Matching = policy.Matching
+                    }), ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
                 }
             }
             catch (Exception e)
@@ -69,7 +105,7 @@ namespace PolicyServer.Controllers
         }
 
         /// <summary>
-        /// Get a policy by id
+        /// Get a policy by name
         /// </summary>
         /// <returns></returns>
         /// <response code="200">Returns the requested policy</response>
@@ -78,26 +114,41 @@ namespace PolicyServer.Controllers
         [ProducesResponseType(typeof(PolicyModel), 200)]
         [ProducesResponseType(404)]
         [ProducesResponseType(500)]
-        [HttpGet("{name}")]
-        public async Task<IActionResult> GetPolicy(string name)
+        [HttpGet("{applicability}/{name}")]
+        public async Task<IActionResult> GetPolicy([FromRoute] string applicability, [FromRoute] string name, CancellationToken ct = default)
         {
             try
             {
-                using (var session = _documentStore.OpenAsyncSession())
+                using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
                     var clientId = User.FindFirstValue("client_id");
-                    var policy = await session.Query<Policy>().FirstOrDefaultAsync(t => t.ClientId.Equals(clientId) && t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                    var policyQuery = session.Query<Policy>().Where(t => t.ClientId.Equals(clientId) && t.Name.Equals(name, StringComparison.OrdinalIgnoreCase));
+                    policyQuery = applicability switch
+                    {
+                        "feature" => policyQuery.Where(t => t.Applicability == PolicyApplicability.Feature),
+                        "account" => policyQuery.Where(t => t.Applicability == PolicyApplicability.Account),
+                        "authorization" => policyQuery.Where(t => t.Applicability == PolicyApplicability.Authorization),
+                        "password" => policyQuery.Where(t => t.Applicability == PolicyApplicability.Password),
+                        "routing" => policyQuery.Where(t => t.Applicability == PolicyApplicability.Routing),
+                        "storage" => policyQuery.Where(t => t.Applicability == PolicyApplicability.Storage),
+                        _ => policyQuery.Where(t => t.Applicability == PolicyApplicability.Authorization)
+                    };
 
+                    var policy = await policyQuery.FirstOrDefaultAsync(ct);
                     if (policy == null)
-                        throw new KeyNotFoundException($"Policy {name} was not found");
+                        throw new KeyNotFoundException($"Policy {applicability}/{name} was not found");
 
                     var model = new PolicyModel
                     {
+                        Criteria = policy.Criteria,
                         AuthenticationSchemes = policy.AuthenticationSchemes,
                         Description = policy.Description,
-                        Id = policy.Id,
+                        Id = policy.Id.Split('/').Last(),
                         Name = policy.Name,
-                        Requirements = policy.Requirements
+                        Requirements = policy.Requirements,
+                        AuditableEvent = policy.AuditableEvent,
+                        Applicability = policy.Applicability,
+                        Matching = policy.Matching
                     };
                     return Ok(model);
                 }
@@ -109,7 +160,7 @@ namespace PolicyServer.Controllers
             }
             catch (Exception e)
             {
-                _logger.LogError(e, "Failed to get policies");
+                _logger.LogError(e, "Failed to get policy");
                 throw;
             }
         }

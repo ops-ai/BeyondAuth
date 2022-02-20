@@ -2,6 +2,7 @@
 {
     public enum PolicyApplicability
     {
+        Feature,
         Authorization,
         Password,
         Account,

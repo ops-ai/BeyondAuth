@@ -1,7 +1,8 @@
 ﻿using PolicyServer.Core.Entities;
+using System.Collections;
 using System.Collections.Generic;
 
-namespace PolicyServer.Models
+namespace PolicyServer.Core.Models
 {
     /// <summary>
     /// Policy details
@@ -16,12 +17,17 @@ namespace PolicyServer.Models
         /// <summary>
         /// Policy name
         /// </summary>
-        public string Name { get; set; }
+        public string? Name { get; set; }
 
         /// <summary>
         /// Human/admin description of the policy
         /// </summary>
-        public string Description { get; set; }
+        public string? Description { get; set; }
+
+        /// <summary>
+        /// The resolution of this policy must be committed to the audit server
+        /// </summary>
+        public bool AuditableEvent { get; set; }
 
         /// <summary>
         /// Authentication schemes it applies to
@@ -34,8 +40,18 @@ namespace PolicyServer.Models
         public List<AuthorizationRequirement> Requirements { get; set; } = new List<AuthorizationRequirement>();
 
         /// <summary>
+        /// Type of policy. Ex: Named vs criteria-based
+        /// </summary>
+        public PolicyMatch Matching { get; set; }
+
+        /// <summary>
+        /// Infrastructure segment applicability of policy
+        /// </summary>
+        public PolicyApplicability Applicability { get; set; }
+
+        /// <summary>
         /// Criteria the protected resource must match for this policy to apply
         /// </summary>
-        public List<KeyValuePair<string, string>> Criteria { get; set; }
+        public Hashtable? Criteria { get; set; }
     }
 }
