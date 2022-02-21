@@ -1,4 +1,4 @@
-﻿namespace PolicyServer.Core.Entities.AuthorizationRequirements
+﻿namespace BeyondAuth.PolicyServer.Core.Entities.AuthorizationRequirements
 {
     /// <summary>
     /// Role membership requirement

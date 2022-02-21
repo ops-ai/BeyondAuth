@@ -6,7 +6,7 @@ EXPOSE 443
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
 COPY ["PolicyServer/PolicyServer.csproj", "PolicyServer/"]
-COPY ["PolicyServer.Core/PolicyServer.Core.csproj", "PolicyServer.Core/"]
+COPY ["BeyondAuth.PolicyServer.Core/BeyondAuth.PolicyServer.Core.csproj", "BeyondAuth.PolicyServer.Core/"]
 RUN dotnet restore "PolicyServer/PolicyServer.csproj"
 COPY . .
 WORKDIR "/src/PolicyServer"

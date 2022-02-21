@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using PolicyServer.Core.Models;
+using BeyondAuth.PolicyServer.Core.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -66,17 +66,17 @@ namespace BeyondAuth.PolicyProvider
 
                         if (snapshot != null)
                             foreach (var policy in snapshot)
-                                if (policy.Applicability == PolicyServer.Core.Entities.PolicyApplicability.Authorization && policy.Matching == PolicyServer.Core.Entities.PolicyMatch.Named)
+                                if (policy.Applicability == BeyondAuth.PolicyServer.Core.Entities.PolicyApplicability.Authorization && policy.Matching == BeyondAuth.PolicyServer.Core.Entities.PolicyMatch.Named)
                                 {
                                     var newPolicy = new AuthorizationPolicy(policy.Requirements, policy.AuthenticationSchemes);
                                     _namedAuthorizationPolicies.AddOrUpdate(policy.Name!, newPolicy, (name, def) => def = newPolicy);
                                 }
-                                else if (policy.Applicability == PolicyServer.Core.Entities.PolicyApplicability.Authorization)
+                                else if (policy.Applicability == BeyondAuth.PolicyServer.Core.Entities.PolicyApplicability.Authorization)
                                 {
                                     var newPolicy = new AuthorizationPolicy(policy.Requirements, policy.AuthenticationSchemes);
                                     _authorizationPolicies.AddOrUpdate(policy.Id, newPolicy, (name, def) => def = newPolicy);
                                 }
-                                else if (policy.Applicability == PolicyServer.Core.Entities.PolicyApplicability.Feature)
+                                else if (policy.Applicability == BeyondAuth.PolicyServer.Core.Entities.PolicyApplicability.Feature)
                                     _featurePolicies.AddOrUpdate(policy.Id, policy, (name, def) => def = policy);
                     }
                 }
@@ -114,17 +114,17 @@ namespace BeyondAuth.PolicyProvider
                         return;
 
                     foreach (var policy in newPolicies)
-                        if (policy.Applicability == PolicyServer.Core.Entities.PolicyApplicability.Authorization && policy.Matching == PolicyServer.Core.Entities.PolicyMatch.Named)
+                        if (policy.Applicability == BeyondAuth.PolicyServer.Core.Entities.PolicyApplicability.Authorization && policy.Matching == BeyondAuth.PolicyServer.Core.Entities.PolicyMatch.Named)
                         {
                             var newPolicy = new AuthorizationPolicy(policy.Requirements, policy.AuthenticationSchemes);
                             _namedAuthorizationPolicies.AddOrUpdate(policy.Name!, newPolicy, (name, def) => def = newPolicy);
                         }
-                        else if (policy.Applicability == PolicyServer.Core.Entities.PolicyApplicability.Authorization)
+                        else if (policy.Applicability == BeyondAuth.PolicyServer.Core.Entities.PolicyApplicability.Authorization)
                         {
                             var newPolicy = new AuthorizationPolicy(policy.Requirements, policy.AuthenticationSchemes);
                             _authorizationPolicies.AddOrUpdate(policy.Id, newPolicy, (name, def) => def = newPolicy);
                         }
-                        else if (policy.Applicability == PolicyServer.Core.Entities.PolicyApplicability.Feature)
+                        else if (policy.Applicability == BeyondAuth.PolicyServer.Core.Entities.PolicyApplicability.Feature)
                             _featurePolicies.AddOrUpdate(policy.Id, policy, (name, def) => def = policy);
 
                     if (_snapshotProvider != null)

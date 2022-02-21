@@ -47,7 +47,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Authorization Handlers", "A
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.PolicyProvider", "Authorization Handlers\AuthorizationPolicyProvider\BeyondAuth.PolicyProvider.csproj", "{321484F9-D797-4334-8079-92145751C83A}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "PolicyServer.Core", "PolicyServer.Core\PolicyServer.Core.csproj", "{1CC84BD3-5297-471C-BEE7-41432E61817A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.PolicyServer.Core", "PolicyServer.Core\BeyondAuth.PolicyServer.Core.csproj", "{1CC84BD3-5297-471C-BEE7-41432E61817A}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuditServer", "AuditServer\AuditServer.csproj", "{64408365-EC62-4AF4-BF01-758BBD22093C}"
 EndProject
@@ -91,7 +91,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Policy Connectors", "Policy
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureManagement.SecureFeatures", "Policy Connectors\FeatureManagement.SecureFeatures\FeatureManagement.SecureFeatures.csproj", "{AE2D3228-A98E-4383-BA5E-4198735A6B66}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondAuth.PolicyProvider.Storage.RavenDB", "Authorization Handlers\BeyondAuth.PolicyProvider.Storage.RavenDB\BeyondAuth.PolicyProvider.Storage.RavenDB.csproj", "{E038D21E-73D1-4C93-A90C-CE33E3677179}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.PolicyProvider.Storage.RavenDB", "Authorization Handlers\BeyondAuth.PolicyProvider.Storage.RavenDB\BeyondAuth.PolicyProvider.Storage.RavenDB.csproj", "{E038D21E-73D1-4C93-A90C-CE33E3677179}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -248,7 +248,7 @@ Global
 		{E038D21E-73D1-4C93-A90C-CE33E3677179} = {84BCB7A7-6678-441F-B075-15D4A7E04ACB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
 		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
+		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
 	EndGlobalSection
 EndGlobal

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace PolicyServer.Core.Entities.AuthorizationRequirements
+namespace BeyondAuth.PolicyServer.Core.Entities.AuthorizationRequirements
 {
     /// <summary>
     /// Certain fields must contain specific values

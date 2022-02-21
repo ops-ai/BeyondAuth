@@ -2,9 +2,9 @@
 using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
 using NJsonSchema.Converters;
-using PolicyServer.Core.Entities.AuthorizationRequirements;
+using BeyondAuth.PolicyServer.Core.Entities.AuthorizationRequirements;
 
-namespace PolicyServer.Core.Entities
+namespace BeyondAuth.PolicyServer.Core.Entities
 {
     /// <summary>
     /// Authorization requirements base class

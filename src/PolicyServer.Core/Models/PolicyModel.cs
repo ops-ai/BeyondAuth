@@ -1,8 +1,8 @@
-﻿using PolicyServer.Core.Entities;
+﻿using BeyondAuth.PolicyServer.Core.Entities;
 using System.Collections;
 using System.Collections.Generic;
 
-namespace PolicyServer.Core.Models
+namespace BeyondAuth.PolicyServer.Core.Models
 {
     /// <summary>
     /// Policy details

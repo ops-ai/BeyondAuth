@@ -1,4 +1,4 @@
-﻿namespace PolicyServer.Core.Entities.StorageRequirements
+﻿namespace BeyondAuth.PolicyServer.Core.Entities.StorageRequirements
 {
     /// <summary>
     /// Data must be encrypted at rest

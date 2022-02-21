@@ -1,7 +1,7 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 
-namespace PolicyServer.Core.Entities
+namespace BeyondAuth.PolicyServer.Core.Entities
 {
     public class Policy
     {

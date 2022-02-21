@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using PolicyServer.Core.Models;
+using BeyondAuth.PolicyServer.Core.Models;
 using System.Net.Http;
 using System.Threading.Tasks;
 

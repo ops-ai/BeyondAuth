@@ -2,7 +2,7 @@
 using Grpc.Net.Client;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
-using PolicyServer.Core.Entities;
+using BeyondAuth.PolicyServer.Core.Entities;
 using System;
 using System.Linq;
 using System.Threading.Tasks;

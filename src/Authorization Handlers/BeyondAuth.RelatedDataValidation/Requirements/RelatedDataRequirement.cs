@@ -1,4 +1,4 @@
-﻿using PolicyServer.Core.Entities;
+﻿using BeyondAuth.PolicyServer.Core.Entities;
 
 namespace BeyondAuth.RelatedDataValidation.Requirements
 {

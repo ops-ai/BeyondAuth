@@ -1,9 +1,9 @@
 ﻿using JsonSubTypes;
 using Newtonsoft.Json;
 using NJsonSchema.Converters;
-using PolicyServer.Core.Entities.RoutingRequirements;
+using BeyondAuth.PolicyServer.Core.Entities.RoutingRequirements;
 
-namespace PolicyServer.Core.Entities
+namespace BeyondAuth.PolicyServer.Core.Entities
 {
     /// <summary>
     /// Authorization requirements base class

@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace PolicyServer.Core.Entities.StorageRequirements
+namespace BeyondAuth.PolicyServer.Core.Entities.StorageRequirements
 {
     /// <summary>
     /// Data must be stored only in one of the allowed zones

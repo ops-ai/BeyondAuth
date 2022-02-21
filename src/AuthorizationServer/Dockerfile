@@ -9,7 +9,7 @@ FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
 WORKDIR /src
 COPY ["AuthorizationServer/AuthorizationServer.csproj", "AuthorizationServer/"]
 COPY ["Authorization Handlers/AuthorizationPolicyProvider/BeyondAuth.PolicyProvider.csproj", "Authorization Handlers/AuthorizationPolicyProvider/"]
-COPY ["PolicyServer.Core/PolicyServer.Core.csproj", "PolicyServer.Core/"]
+COPY ["BeyondAuth.PolicyServer.Core/BeyondAuth.PolicyServer.Core.csproj", "BeyondAuth.PolicyServer.Core/"]
 RUN dotnet restore "AuthorizationServer/AuthorizationServer.csproj"
 COPY . .
 WORKDIR "/src/AuthorizationServer"

@@ -1,4 +1,4 @@
-﻿namespace PolicyServer.Core.Entities
+﻿namespace BeyondAuth.PolicyServer.Core.Entities
 {
     public enum PolicyApplicability
     {

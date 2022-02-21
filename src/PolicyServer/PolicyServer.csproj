@@ -76,7 +76,7 @@
 
 	<ItemGroup>
 		<ProjectReference Include="..\Identity.Core\Identity.Core.csproj" />
-		<ProjectReference Include="..\PolicyServer.Core\PolicyServer.Core.csproj" />
+		<ProjectReference Include="..\PolicyServer.Core\BeyondAuth.PolicyServer.Core.csproj" />
 	</ItemGroup>
 
 	<ItemGroup>

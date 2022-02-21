@@ -1,4 +1,4 @@
-﻿namespace PolicyServer.Core.Entities.PasswordRequirements
+﻿namespace BeyondAuth.PolicyServer.Core.Entities.PasswordRequirements
 {
     /// <summary>
     /// Dictionary lookup requirement

@@ -1,4 +1,4 @@
-﻿namespace PolicyServer.Core.Entities.StorageRequirements
+﻿namespace BeyondAuth.PolicyServer.Core.Entities.StorageRequirements
 {
     /// <summary>
     /// Replication requirement
