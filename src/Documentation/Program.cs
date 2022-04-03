@@ -8,6 +8,7 @@ using NLog.Web;
 using System;
 using System.IO;
 using OpenTelemetry.Logs;
+using Azure.Core;
 
 namespace Documentation
 {
@@ -20,7 +21,12 @@ namespace Documentation
                 .ConfigureAppConfiguration((context, config) =>
                 {
                     if (Environment.GetEnvironmentVariable("VaultUri") != null)
-                        config.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
+                    {
+                        var keyVaultEndpoint = new Uri(Environment.GetEnvironmentVariable("VaultUri")!);
+                        TokenCredential clientCredential = Environment.GetEnvironmentVariable("ClientId") != null ? new ClientSecretCredential(Environment.GetEnvironmentVariable("TenantId"), Environment.GetEnvironmentVariable("ClientId"), Environment.GetEnvironmentVariable("ClientSecret")) : null;
+
+                        config.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")), clientCredential ?? new DefaultAzureCredential());
+                    }
                 })
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory())

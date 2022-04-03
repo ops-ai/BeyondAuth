@@ -8,6 +8,7 @@ using NLog.Web;
 using System;
 using System.IO;
 using OpenTelemetry.Logs;
+using Azure.Core;
 
 namespace AuditServer
 {
@@ -15,12 +16,22 @@ namespace AuditServer
     {
         public static void Main(string[] args) => CreateHostBuilder(args).Build().Run();
 
+        /// <summary>
+        /// 
+        /// </summary>
+        /// <param name="args"></param>
+        /// <returns></returns>
         public static IHostBuilder CreateHostBuilder(string[] args) =>
             Host.CreateDefaultBuilder(args)
                 .ConfigureAppConfiguration((context, config) =>
                 {
                     if (Environment.GetEnvironmentVariable("VaultUri") != null)
-                        config.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
+                    {
+                        var keyVaultEndpoint = new Uri(Environment.GetEnvironmentVariable("VaultUri")!);
+                        TokenCredential clientCredential = Environment.GetEnvironmentVariable("ClientId") != null ? new ClientSecretCredential(Environment.GetEnvironmentVariable("TenantId"), Environment.GetEnvironmentVariable("ClientId"), Environment.GetEnvironmentVariable("ClientSecret")) : null;
+
+                        config.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")), clientCredential ?? new DefaultAzureCredential());
+                    }
                 })
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseServiceProviderFactory(new AutofacServiceProviderFactory())
