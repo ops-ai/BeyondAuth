@@ -79,6 +79,8 @@ using Prometheus.SystemMetrics.Collectors;
 using Prometheus;
 using Microsoft.IdentityModel.Logging;
 using Authentication.Services;
+using Azure.Security.KeyVault.Keys;
+using Azure.Core;
 
 namespace Authentication
 {
@@ -151,13 +153,15 @@ namespace Authentication
 
             var dataProtection = services.AddDataProtection().SetApplicationName(Configuration["DataProtection:AppName"]);
 
-            if (!string.IsNullOrEmpty(Configuration["DataProtection:KeyIdentifier"]))
+            if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VaultUri")))
             {
+                TokenCredential clientCredential = Environment.GetEnvironmentVariable("ClientId") != null ? new ClientSecretCredential(Environment.GetEnvironmentVariable("TenantId"), Environment.GetEnvironmentVariable("ClientId"), Environment.GetEnvironmentVariable("ClientSecret")) : null;
+                var keyClient = new KeyClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")!), clientCredential ?? new DefaultAzureCredential());
                 var blobClient = new BlobClient(Configuration["DataProtection:StorageConnectionString"], Configuration["DataProtection:StorageContainer"], "keys.xml");
 
                 dataProtection
-                    .ProtectKeysWithAzureKeyVault(new Uri(Configuration["DataProtection:KeyIdentifier"]), new DefaultAzureCredential())
-                    .PersistKeysToAzureBlobStorage(blobClient);
+                    .ProtectKeysWithAzureKeyVault(keyClient.GetKey("DataProtection").Value.Id, clientCredential ?? new DefaultAzureCredential())
+                    .PersistKeysToAzureBlobStorage(new Uri(Configuration["DataProtection:StorageUri"]));
             }
 
             services.AddAuthorization();
