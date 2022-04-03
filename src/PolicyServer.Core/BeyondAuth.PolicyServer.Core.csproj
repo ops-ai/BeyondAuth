@@ -1,14 +1,28 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <Nullable>enable</Nullable>
+	<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+	<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+	<PackageProjectUrl>https://beyondauth.io</PackageProjectUrl>
+	<PackageIcon>favicon.png</PackageIcon>
+	<PackageReadmeFile>README.md</PackageReadmeFile>
+	<RepositoryUrl>https://github.com/ops-ai/BeyondAuth</RepositoryUrl>
+	<RepositoryType>git</RepositoryType>
+	<PackageTags>beyondauth;beyondauth policy;</PackageTags>
+	<PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
 
   <ItemGroup>
+	  <None Include="README.md" Pack="true" PackagePath="" />
+	  <None Include="..\favicon.png" Pack="true" PackagePath="" Link="favicon.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="JsonSubTypes" Version="1.8.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="6.0.2" />
-    <PackageReference Include="NJsonSchema" Version="10.6.9" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="6.0.3" />
+    <PackageReference Include="NJsonSchema" Version="10.6.10" />
     <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0" />
   </ItemGroup>
 
