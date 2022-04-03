@@ -147,5 +147,17 @@ namespace IdentityManager.Models
         /// Two-factor authentication enabled
         /// </summary>
         public bool TwoFactorEnabled { get; set; }
+
+        /// <summary>
+        /// Phone number
+        /// </summary>
+        public string? PhoneNumber { get; set; }
+
+        /// <summary>
+        /// Phone number has been confirmed by the user
+        /// </summary>
+        public bool PhoneNumberConfirmed { get; set; }
+
+        public string? SecurityStamp { get; set; }
     }
 }

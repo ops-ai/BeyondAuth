@@ -84,7 +84,7 @@ namespace PolicyServer
                     if (!System.Net.Http.Headers.AuthenticationHeaderValue.TryParse(httpContext.Request.Headers.Authorization, out var parsedValue))
                         throw new ArgumentException("Invalid auth header");
 
-                    return Task.FromResult(new JwtSecurityToken(parsedValue.Parameter).Issuer[8..]);
+                    return Task.FromResult(new JwtSecurityToken(parsedValue.Parameter)?.Issuer[8..]);
 
                 }).WithStore(new ServiceLifetime(), (sp) => new RavenDBMultitenantStore(sp.GetService<IDocumentStore>(), sp.GetService<IMemoryCache>()))
                 .WithPerTenantOptions<IdentityStoreOptions>((options, tenantInfo) =>
@@ -117,9 +117,9 @@ namespace PolicyServer
                         document.Info.Title = "BeyondAuth Policy Server";
                         document.Info.Description = File.ReadAllText("readme.md");
                         document.Info.ExtensionData = new Dictionary<string, object>
-                    {
-                        { "x-logo", new { url = "/logo.png", altText = "BeyondAuth" } }
-                    };
+                        {
+                            { "x-logo", new { url = "/logo.png", altText = "BeyondAuth" } }
+                        };
                         document.Info.Contact = new OpenApiContact
                         {
                             Name = Configuration["Support:Name"],

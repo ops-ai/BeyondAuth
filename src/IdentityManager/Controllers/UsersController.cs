@@ -1,4 +1,5 @@
 ﻿using Audit.Core;
+using Cryptography;
 using Identity.Core;
 using IdentityManager.Models;
 using IdentityServer4.Contrib.RavenDB.Options;
@@ -263,7 +264,10 @@ namespace IdentityManager.Controllers
                         PasswordPolicy = userInfo.PasswordPolicy,
                         AccountExpiration = userInfo.AccountExpiration,
                         ZoneInfo = userInfo.ZoneInfo,
-                        LockoutEnabled = userInfo.LockoutEnabled
+                        LockoutEnabled = userInfo.LockoutEnabled,
+                        EmailConfirmed = userInfo.EmailConfirmed,
+                        PhoneNumber = userInfo.PhoneNumber,
+                        PhoneNumberConfirmed = userInfo.PhoneNumberConfirmed
                     };
 
                     foreach (var claim in userInfo.Claims.Select(t => new Raven.Identity.IdentityUserClaim { ClaimType = t.Key, ClaimValue = t.Value }))
@@ -384,6 +388,9 @@ namespace IdentityManager.Controllers
                     user.Disabled = userInfo.Disabled;
                     user.ZoneInfo = userInfo.ZoneInfo;
                     user.LockoutEnabled = userInfo.LockoutEnabled;
+                    user.EmailConfirmed = userInfo.EmailConfirmed;
+                    user.PhoneNumber = userInfo.PhoneNumber;
+                    user.PhoneNumberConfirmed = userInfo.PhoneNumberConfirmed;
 
                     if (userInfo.ChangePasswordOnNextLogin.HasValue)
                         user.ChangePasswordOnNextLogin = userInfo.ChangePasswordOnNextLogin.Value;
@@ -480,7 +487,10 @@ namespace IdentityManager.Controllers
             EmailConfirmed = user.EmailConfirmed,
             Locale = user.Locale,
             TwoFactorEnabled = user.TwoFactorEnabled,
-            UpdatedAt = user.UpdatedAt
+            UpdatedAt = user.UpdatedAt,
+            PhoneNumber = user.PhoneNumber,
+            PhoneNumberConfirmed = user.PhoneNumberConfirmed,
+            SecurityStamp = Hashing.GetStringSha256Hash(user.SecurityStamp)
         };
 
         /// <summary>
@@ -533,7 +543,10 @@ namespace IdentityManager.Controllers
                     AccountExpiration = originalUser.AccountExpiration,
                     ZoneInfo = originalUser.ZoneInfo,
                     LockoutEnabled = originalUser.LockoutEnabled,
-                    Locked = originalUser.LockoutEnd > DateTime.UtcNow
+                    Locked = originalUser.LockoutEnd > DateTime.UtcNow,
+                    PhoneNumber = originalUser.PhoneNumber,
+                    PhoneNumberConfirmed = originalUser.PhoneNumberConfirmed,
+                    EmailConfirmed = originalUser.EmailConfirmed
                 };
 
                 patch.ApplyTo(updatedUser);
@@ -541,7 +554,7 @@ namespace IdentityManager.Controllers
             }
             catch (JsonPatchException ex)
             {
-                _logger.LogError(ex, $"Invalid JsonPatch Operation:{ex.FailedOperation.OperationType} while attempting to update user {userId}.");
+                _logger.LogError(ex, "Invalid JsonPatch Operation:{opType} while attempting to update user {userId}.", ex.FailedOperation.OperationType, userId);
                 if (ex.FailedOperation.OperationType == OperationType.Test)
                     return ValidationProblem(new ValidationProblemDetails { Detail = ex.Message });
                 else
@@ -549,7 +562,7 @@ namespace IdentityManager.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An error occurred while attempting to update user {userId}.");
+                _logger.LogError(ex, "An error occurred while attempting to update user {userId}.", userId);
                 throw;
             }
         }
@@ -569,14 +582,13 @@ namespace IdentityManager.Controllers
         {
             try
             {
-                _logger.LogInformation($"Get the user object for deleting user:{userId}");
+                _logger.LogInformation("Get the user object for deleting user:{userId}", userId);
                 var user = await _userManager.FindByIdAsync($"ApplicationUsers/{userId}");
                 if (user == null)
                     user = await _userManager.FindByEmailAsync(userId);
 
                 if (user == null)
                     return NotFound();
-
 
                 using (var audit = await AuditScope.CreateAsync("User:Delete", () => user, new { user.Id }))
                 {

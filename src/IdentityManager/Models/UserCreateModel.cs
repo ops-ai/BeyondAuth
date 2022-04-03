@@ -86,6 +86,24 @@ namespace IdentityManager.Models
         /// </summary>
         public string? ZoneInfo { get; set; }
 
+        /// <summary>
+        /// User can be locked out
+        /// </summary>
         public bool LockoutEnabled { get; set; } = true;
+
+        /// <summary>
+        /// Email has been confirmed by user
+        /// </summary>
+        public bool EmailConfirmed { get; set; } = false;
+
+        /// <summary>
+        /// Phone number
+        /// </summary>
+        public string PhoneNumber { get; set; }
+
+        /// <summary>
+        /// Phone number has been confirmed by user
+        /// </summary>
+        public bool PhoneNumberConfirmed { get; set; } = false;
     }
 }
