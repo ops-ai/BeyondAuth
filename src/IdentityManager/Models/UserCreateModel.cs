@@ -99,7 +99,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// Phone number
         /// </summary>
-        public string PhoneNumber { get; set; }
+        public string? PhoneNumber { get; set; }
 
         /// <summary>
         /// Phone number has been confirmed by user

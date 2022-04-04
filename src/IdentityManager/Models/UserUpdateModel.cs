@@ -37,8 +37,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// Password
         /// </summary>
-        [Required]
-        public string Password { get; set; }
+        public string? Password { get; set; }
 
         /// <summary>
         /// Organization
@@ -49,17 +48,17 @@ namespace IdentityManager.Models
         /// <summary>
         /// Allow user to reset his own password
         /// </summary>
-        public bool PasswordResetAllowed { get; set; } = true;
+        public bool? PasswordResetAllowed { get; set; }
 
         /// <summary>
         /// Allow user to reset his own password
         /// </summary>
-        public bool ChangePasswordAllowed { get; set; } = true;
+        public bool? ChangePasswordAllowed { get; set; }
 
         /// <summary>
         /// Require the user to change their password the next time they log in
         /// </summary>
-        public bool? ChangePasswordOnNextLogin { get; set; } = false;
+        public bool? ChangePasswordOnNextLogin { get; set; }
 
         /// <summary>
         /// Password policy
@@ -74,7 +73,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// Account is disabled
         /// </summary>
-        public bool Disabled { get; set; } = false;
+        public bool? Disabled { get; set; }
 
         /// <summary>
         /// Claims
@@ -94,17 +93,17 @@ namespace IdentityManager.Models
         /// <summary>
         /// User can be locked out
         /// </summary>
-        public bool LockoutEnabled { get; set; } = true;
+        public bool? LockoutEnabled { get; set; }
 
         /// <summary>
         /// Email has been confirmed by user
         /// </summary>
-        public bool EmailConfirmed { get; set; }
+        public bool? EmailConfirmed { get; set; }
 
         /// <summary>
         /// Phone number has been confirmed by user
         /// </summary>
-        public bool PhoneNumberConfirmed { get; set; }
+        public bool? PhoneNumberConfirmed { get; set; }
 
         /// <summary>
         /// Phone number

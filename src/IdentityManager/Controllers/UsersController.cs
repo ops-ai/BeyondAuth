@@ -340,12 +340,14 @@ namespace IdentityManager.Controllers
                 {
                     if (userInfo.Password != null)
                     {
-
                         var passwordValidationResult = await ValidatePasswordAsync(user, userInfo.Password);
                         if (!passwordValidationResult.Succeeded)
                         {
                             foreach (var error in passwordValidationResult.Errors)
+                            {
                                 ModelState.AddModelError("Password", error.Description);
+                                audit.Comment(error.Description);
+                            }
                         }
                     }
 
@@ -359,8 +361,15 @@ namespace IdentityManager.Controllers
                         if (passwordUpdateResult.Succeeded)
                             audit.Comment("Password updated");
                         else
+                        {
                             audit.Comment("Password update failed");
+                            foreach (var error in passwordUpdateResult.Errors)
+                                ModelState.AddModelError("Password", error.Description);
+                        }
                     }
+
+                    if (!ModelState.IsValid)
+                        return ValidationProblem(ModelState);
 
                     if (!user.Email.Equals(userInfo.Email, StringComparison.OrdinalIgnoreCase))
                     {
@@ -368,30 +377,58 @@ namespace IdentityManager.Controllers
                         if (setEmailResult.Succeeded)
                             audit.Comment("Email updated");
                         else
+                        {
                             audit.Comment("Email update failed");
+                            foreach (var error in setEmailResult.Errors)
+                                ModelState.AddModelError("Password", error.Description);
+                        }
 
                         var setUsernameResult = await _userManager.SetUserNameAsync(user, userInfo.Email);
                         if (setUsernameResult.Succeeded)
                             audit.Comment("Username updated");
                         else
+                        {
                             audit.Comment("Username update failed");
+                            foreach (var error in setUsernameResult.Errors)
+                                ModelState.AddModelError("Password", error.Description);
+                        }
+
+                        if (!userInfo.EmailConfirmed.HasValue)
+                            user.EmailConfirmed = false;
                     }
+
+                    if (!ModelState.IsValid)
+                        return ValidationProblem(ModelState);
 
                     user.FirstName = userInfo.FirstName;
                     user.LastName = userInfo.LastName;
                     user.DisplayName = userInfo.DisplayName;
                     user.Organization = userInfo.Organization;
-                    user.PasswordResetAllowed = userInfo.PasswordResetAllowed;
-                    user.ChangePasswordAllowed = userInfo.ChangePasswordAllowed;
+                    if (userInfo.PasswordResetAllowed.HasValue)
+                        user.PasswordResetAllowed = userInfo.PasswordResetAllowed.Value;
+                    if (userInfo.ChangePasswordAllowed.HasValue)
+                        user.ChangePasswordAllowed = userInfo.ChangePasswordAllowed.Value;
                     user.PasswordPolicy = userInfo.PasswordPolicy;
                     user.AccountExpiration = userInfo.AccountExpiration;
-                    user.Disabled = userInfo.Disabled;
+                    if (userInfo.Disabled.HasValue)
+                        user.Disabled = userInfo.Disabled.Value;
                     user.ZoneInfo = userInfo.ZoneInfo;
-                    user.LockoutEnabled = userInfo.LockoutEnabled;
-                    user.EmailConfirmed = userInfo.EmailConfirmed;
-                    user.PhoneNumber = userInfo.PhoneNumber;
-                    user.PhoneNumberConfirmed = userInfo.PhoneNumberConfirmed;
+                    if (userInfo.LockoutEnabled.HasValue)
+                        user.LockoutEnabled = userInfo.LockoutEnabled.Value;
+                    if (userInfo.EmailConfirmed.HasValue)
+                        user.EmailConfirmed = userInfo.EmailConfirmed.Value;
 
+                    if (userInfo.PhoneNumberConfirmed.HasValue)
+                        user.PhoneNumberConfirmed = userInfo.PhoneNumberConfirmed.Value;
+
+                    if (user.PhoneNumber != userInfo.PhoneNumber)
+                    {
+                        user.PhoneNumber = userInfo.PhoneNumber;
+
+                        if (!userInfo.PhoneNumberConfirmed.HasValue)
+                            user.PhoneNumberConfirmed = false;
+                    }
+                    
                     if (userInfo.ChangePasswordOnNextLogin.HasValue)
                         user.ChangePasswordOnNextLogin = userInfo.ChangePasswordOnNextLogin.Value;
 
