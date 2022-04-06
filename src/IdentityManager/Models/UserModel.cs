@@ -101,7 +101,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// Optional one-time access token to auto-login
         /// </summary>
-        public string Otac { get; set; }
+        public string? Otac { get; set; }
 
         /// <summary>
         /// TimeZone info for current user in IANA format. (e.g. America/Los_Angeles)

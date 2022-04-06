@@ -52,7 +52,7 @@ namespace Authentication.Controllers
         private readonly IEmailSender _emailSender;
 
         public AccountController(
-            IAsyncDocumentSession dbSession, 
+            IAsyncDocumentSession dbSession,
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IAuthenticationSchemeProvider schemeProvider,
@@ -66,7 +66,7 @@ namespace Authentication.Controllers
             IEmailSender emailSender) : base(dbSession)
         {
             _userManager = userManager;
-            
+
             _interaction = interaction;
             _clientStore = clientStore;
             _schemeProvider = schemeProvider;
@@ -83,10 +83,49 @@ namespace Authentication.Controllers
         /// Entry point into the login workflow
         /// </summary>
         [HttpGet("login")]
-        public async Task<IActionResult> Login(string returnUrl)
+        public async Task<IActionResult> Login(string returnUrl, [FromServices] IOtacManager otacManager)
         {
+            var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
+            if (context.AcrValues.Any(t => t.StartsWith("otac:", StringComparison.OrdinalIgnoreCase)))
+            {
+                //try to auto log the user in
+                var otac = context.AcrValues.First(t => t.StartsWith("otac:", StringComparison.OrdinalIgnoreCase)).Split(':').Last();
+
+                var (status, user) = await otacManager.ValidateOtacAsync(otac); //this is a destructive operation
+                if (status.Succeeded && user != null && !user.Disabled)
+                {
+                    await _events.RaiseAsync(new UserLoginSuccessEvent(user.Email, user.Id, user.DisplayName, clientId: context?.Client.ClientId));
+
+                    // only set explicit expiration here if user chooses "remember me". 
+                    // otherwise we rely upon expiration configured in cookie middleware.
+                    var props = new AuthenticationProperties
+                    {
+                        IsPersistent = false,
+                        ExpiresUtc = null,
+                        RedirectUri = !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl) ? returnUrl : "~/"
+                    };
+
+                    await _signInManager.SignInAsync(user, props, "otac");
+
+                    if (context != null)
+                    {
+                        if (context.IsNativeClient())
+                        {
+                            // The client is native, so this change in how to
+                            // return the response is for better UX for the end user.
+                            return this.LoadingPage("Redirect", returnUrl);
+                        }
+
+                        // we can trust model.ReturnUrl since GetAuthorizationContextAsync returned non-null
+                        return Redirect(returnUrl);
+                    }
+
+                    return Redirect(props.RedirectUri);
+                }
+            }
+
             // build a model so we know what to show on the login page
-            var vm = await BuildLoginViewModelAsync(returnUrl);
+            var vm = await BuildLoginViewModelAsync(returnUrl, context);
 
             if (vm.IsExternalLoginOnly)
                 // we only have one option for logging in and it's an external provider
@@ -130,7 +169,7 @@ namespace Authentication.Controllers
 
             if (ModelState.IsValid)
             {
-                if (!model.Email.Contains("@") && !string.IsNullOrEmpty(_accountOptions.Value.DefaultDomain))
+                if (!model.Email.Contains('@') && !string.IsNullOrEmpty(_accountOptions.Value.DefaultDomain))
                     model.Email += $"@{_accountOptions.Value.DefaultDomain}";
 
                 // validate username/password against in-memory store
@@ -179,7 +218,7 @@ namespace Authentication.Controllers
             }
 
             // something went wrong, show form with error
-            var vm = await BuildLoginViewModelAsync(model);
+            var vm = await BuildLoginViewModelAsync(model, context);
             return View(vm);
         }
 
@@ -210,7 +249,7 @@ namespace Authentication.Controllers
         {
             // build a model so the logged out page knows what to display
             var vm = await BuildLoggedOutViewModelAsync(model.LogoutId);
-            
+
             if (_signInManager.IsSignedIn(User))
             {
                 // delete local authentication cookie
@@ -242,12 +281,12 @@ namespace Authentication.Controllers
         /*****************************************/
         /* helper APIs for the AccountController */
         /*****************************************/
-        private async Task<LoginViewModel> BuildLoginViewModelAsync(string returnUrl)
+        private async Task<LoginViewModel> BuildLoginViewModelAsync(string returnUrl, AuthorizationRequest? context)
         {
-            var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
             if (context?.IdP != null && await _schemeProvider.GetSchemeAsync(context.IdP) != null)
             {
                 var local = context.IdP == IdentityServerConstants.LocalIdentityProvider;
+
 
                 // this is meant to short circuit the UI and only trigger the one external IdP
                 var vm = new LoginViewModel
@@ -266,7 +305,7 @@ namespace Authentication.Controllers
 
             var schemes = await _schemeProvider.GetAllSchemesAsync();
             var tenantSettings = _httpContextAccessor.HttpContext.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
-            
+
             var providers = schemes
                 .Where(x => (x.DisplayName != null || x.Name.Equals(_accountOptions.Value.WindowsAuthenticationSchemeName, StringComparison.OrdinalIgnoreCase)) && tenantSettings.ExternalIdps.Any(s => s.Enabled && x.Name == s.Name))
                 .Select(x => new ExternalProvider
@@ -300,9 +339,9 @@ namespace Authentication.Controllers
             };
         }
 
-        private async Task<LoginViewModel> BuildLoginViewModelAsync(LoginInputModel model)
+        private async Task<LoginViewModel> BuildLoginViewModelAsync(LoginInputModel model, AuthorizationRequest? context)
         {
-            var vm = await BuildLoginViewModelAsync(model.ReturnUrl);
+            var vm = await BuildLoginViewModelAsync(model.ReturnUrl, context);
             vm.Email = model.Email;
             vm.RememberLogin = model.RememberLogin;
             return vm;

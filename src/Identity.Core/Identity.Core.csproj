@@ -9,6 +9,7 @@
 	<PackageTags>beyondauth;identity;authentication</PackageTags>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
 	<PackageId>BeyondAuth.$(AssemblyName)</PackageId>
+	<Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>
@@ -27,6 +28,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Authorization Handlers\BeyondAuth.Acl\BeyondAuth.Acl.csproj" />
+    <ProjectReference Include="..\Cryptography\Cryptography.csproj" />
   </ItemGroup>
   
 </Project>

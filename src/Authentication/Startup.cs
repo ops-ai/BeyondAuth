@@ -561,6 +561,7 @@ namespace Authentication
             services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
             services.AddTransient<IEmailService, EmailController>();
             services.AddTransient<IPasswordTopologyProvider, PasswordTopologyProvider>();
+            services.AddTransient<IOtacManager, OtacManager>();
 
             services.PostConfigure<CookieAuthenticationOptions>(IdentityConstants.ApplicationScheme, option =>
             {

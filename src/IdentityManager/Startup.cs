@@ -298,6 +298,7 @@ namespace IdentityManager
             services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();
             services.AddTransient<IPasswordTopologyProvider, PasswordTopologyProvider>();
             services.AddSingleton<IAuthorizationHandler, AclAuthorizationHandler>();
+            services.AddTransient<IOtacManager, OtacManager>();
 
             services.AddHealthChecks()
                 .AddRavenDB(setup => { setup.Urls = Configuration.GetSection("Raven:Urls").Get<string[]>(); setup.Database = Configuration["Raven:Database"]; setup.Certificate = ravenDBcert; }, "ravendb");

@@ -28,14 +28,16 @@ namespace IdentityManager.Controllers
         private readonly IAsyncDocumentSession _session;
         private readonly IAuthorizationService _authorizationService;
         private readonly IOptions<IdentityStoreOptions> _identityStoreOptions;
+        private readonly IOtacManager _otacManager;
 
-        public UsersController(UserManager<ApplicationUser> userManager, ILogger<UsersController> logger, IAsyncDocumentSession session, IAuthorizationService authorizationService, IOptions<IdentityStoreOptions> identityStoreOptions)
+        public UsersController(UserManager<ApplicationUser> userManager, ILogger<UsersController> logger, IAsyncDocumentSession session, IAuthorizationService authorizationService, IOptions<IdentityStoreOptions> identityStoreOptions, IOtacManager otacManager)
         {
             _userManager = userManager;
             _logger = logger;
             _session = session;
             _authorizationService = authorizationService;
             _identityStoreOptions = identityStoreOptions;
+            _otacManager = otacManager;
         }
 
         /// <summary>
@@ -278,7 +280,15 @@ namespace IdentityManager.Controllers
                     audit.SetCustomField("Id", newUser.Id);
 
                     if (result.Succeeded)
-                        return Ok(ToUserModel(newUser));
+                    {
+                        var createdUser = ToUserModel(newUser);
+                        if (userInfo.GenerateOtac.HasValue && userInfo.GenerateOtac.Value)
+                        {
+                            //code is valid for 1 minute and can only be used once
+                            createdUser.Otac = await _otacManager.GenerateOtacAsync(newUser, ct);
+                        }
+                        return Ok(createdUser);
+                    }
                     else
                     {
                         foreach (var error in result.Errors.Where(t => t.Code.Contains("Password", StringComparison.OrdinalIgnoreCase)))
@@ -436,20 +446,28 @@ namespace IdentityManager.Controllers
                         user.LockoutEnd = null;
 
                     await _userManager.UpdateAsync(user);
-                    await _session.SaveChangesAsync(ct);
+                    try
+                    {
+                        await _session.SaveChangesAsync(ct);
+                    }
+                    catch (Exception)
+                    {
+                        audit.Discard();
+                        throw;
+                    }
                 }
 
                 return NoContent();
             }
             catch (KeyNotFoundException ex)
             {
-                _logger.LogError(ex, $"User not found when attempting to update user {userId}.");
+                _logger.LogError(ex, "User not found when attempting to update user {userId}.", userId);
                 return NotFound();
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, $"An error occurred while attempting to update user {userId}.");
-                return BadRequest(new Dictionary<string, string> { { "reason", ex.Message } });
+                _logger.LogError(ex, "An error occurred while attempting to update user {userId}.", userId);
+                return Problem(ex.Message);
             }
         }
 

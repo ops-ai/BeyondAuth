@@ -105,5 +105,10 @@ namespace IdentityManager.Models
         /// Phone number has been confirmed by user
         /// </summary>
         public bool PhoneNumberConfirmed { get; set; } = false;
+
+        /// <summary>
+        /// Generate an one-time access code to auto-login the user
+        /// </summary>
+        public bool? GenerateOtac { get; set; }
     }
 }
