@@ -281,18 +281,21 @@ namespace IdentityManager
             services.ConfigureOptions<RavenOptionsSetup>();
             services.AddScoped(sp => sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<RavenSettings>>()?.Value?.DatabaseName));
 
-            auditStoreDb = new DocumentStore { Urls = Configuration.GetSection("Raven:Urls").Get<string[]>(), Certificate = ravenDBcert, Database = Configuration["Raven:DatabaseName"] };
-            var serializer = new NewtonsoftJsonSerializationConventions
+            if (ravenDBcert != null)
             {
-                JsonContractResolver = new AuditContractResolver()
-            };
-            serializer.CustomizeJsonSerializer += (JsonSerializer serializer) =>
-            {
-                serializer.DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate;
-                serializer.NullValueHandling = NullValueHandling.Ignore;
-            };
-            auditStoreDb.Conventions.Serialization = serializer;
-            auditStoreDb.Initialize();
+                auditStoreDb = new DocumentStore { Urls = Configuration.GetSection("Raven:Urls").Get<string[]>(), Certificate = ravenDBcert, Database = Configuration["Raven:DatabaseName"] };
+                var serializer = new NewtonsoftJsonSerializationConventions
+                {
+                    JsonContractResolver = new AuditContractResolver()
+                };
+                serializer.CustomizeJsonSerializer += (JsonSerializer serializer) =>
+                {
+                    serializer.DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate;
+                    serializer.NullValueHandling = NullValueHandling.Ignore;
+                };
+                auditStoreDb.Conventions.Serialization = serializer;
+                auditStoreDb.Initialize();
+            }
 
             services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
             services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();
@@ -359,16 +362,19 @@ namespace IdentityManager
             app.UseHttpsRedirection();
             app.UseForwardedHeaders();
 
-            var auditConfig = Audit.Core.Configuration.Setup().UseFactory(
-                () =>
-                new RavenDbDataProvider(auditStoreDb, app.ApplicationServices.GetRequiredService<IOptions<IdentityStoreOptions>>().Value.DatabaseName, storeDiffOnly: true));
-
-            Audit.Core.Configuration.AddCustomAction(ActionType.OnEventSaving, scope =>
+            if (auditStoreDb != null)
             {
-                var httpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
-                if (httpContextAccessor?.HttpContext?.User?.Identity?.Name != null)
-                    scope.SetCustomField("Username", httpContextAccessor.HttpContext?.User?.Identity?.Name);
-            });
+                var auditConfig = Audit.Core.Configuration.Setup().UseFactory(
+                    () =>
+                    new RavenDbDataProvider(auditStoreDb, app.ApplicationServices.GetRequiredService<IOptions<IdentityStoreOptions>>().Value.DatabaseName, storeDiffOnly: true));
+
+                Audit.Core.Configuration.AddCustomAction(ActionType.OnEventSaving, scope =>
+                {
+                    var httpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
+                    if (httpContextAccessor?.HttpContext?.User?.Identity?.Name != null)
+                        scope.SetCustomField("Username", httpContextAccessor.HttpContext?.User?.Identity?.Name);
+                });
+            }
 
             app.UseCors(x => x.AllowAnyOrigin().WithHeaders("accept", "authorization", "content-type", "origin").AllowAnyMethod());
 

@@ -53,7 +53,7 @@ namespace Blockchain.Tests
         [Fact(DisplayName = "Queue with invalid storage location should throw")]
         public void TestInvalidStorage()
         {
-            Assert.Throws<InvalidOperationException>(() => new PersistentTransactionPool("x:\\ff", 1000));
+            Assert.Throws<DirectoryNotFoundException>(() => new PersistentTransactionPool("x:\\ff", 1000));
             Assert.Throws<ArgumentException>(() => new PersistentTransactionPool("", 1000));
             using (var pool = new PersistentTransactionPool(null, 1000))
                 Assert.NotNull(pool);
