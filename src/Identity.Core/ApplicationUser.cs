@@ -64,7 +64,7 @@ namespace Identity.Core
         /// <summary>
         /// Password policy
         /// </summary>
-        public string PasswordPolicy { get; set; } = null;
+        public string? PasswordPolicy { get; set; } = null;
 
         /// <summary>
         /// Account expiration date
@@ -84,16 +84,16 @@ namespace Identity.Core
         /// <summary>
         /// TimeZone info for current user in IANA format. (e.g. America/Los_Angeles)
         /// </summary>
-        public string ZoneInfo { get; set; }
+        public string? ZoneInfo { get; set; }
 
         /// <summary>
         /// User's locale
         /// </summary>
-        public string Locale { get; set; }
+        public string? Locale { get; set; }
 
-        public string DefaultApp { get; set; }
+        public string? DefaultApp { get; set; }
 
-        public List<string> Groups { get; set; }
+        public List<string> Groups { get; set; } = new List<string>();
 
         [JsonIgnore]
         public override List<IdentityUserClaim> Claims

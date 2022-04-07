@@ -603,15 +603,8 @@ namespace Authentication
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-                IdentityModelEventSource.ShowPII = true;
-            }
-            else
-            {
-                app.UseExceptionHandler(new ExceptionHandlerOptions { ExceptionHandlingPath = "/home/error", AllowStatusCode404Response = false });
-            }
+            IdentityModelEventSource.ShowPII = true;
+            app.UseExceptionHandler(new ExceptionHandlerOptions { ExceptionHandlingPath = "/error", AllowStatusCode404Response = false });
 
             app.UseForwardedHeaders();
             app.UseHsts();

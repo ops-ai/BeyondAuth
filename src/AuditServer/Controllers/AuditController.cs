@@ -1,11 +1,8 @@
 ﻿using Blockchain;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Raven.Client.Documents;
-using System;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace AuditServer.Controllers
 {
@@ -28,21 +25,13 @@ namespace AuditServer.Controllers
         [HttpPost]
         public async Task<IActionResult> Post(AuditEntry auditEntry)
         {
-            try
-            {
-                //TODO: Add fluent validation
+            //TODO: Add fluent validation
 
-                var clientId = User.FindFirstValue("client_id");
-                auditEntry.ClientId = clientId;
-                _transactionPool.AddAuditEntry(auditEntry);
+            var clientId = User.FindFirstValue("client_id");
+            auditEntry.ClientId = clientId;
+            _transactionPool.AddAuditEntry(auditEntry);
 
-                return NoContent();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Failed to queue audit entry");
-                throw;
-            }
+            return NoContent();
         }
     }
 }

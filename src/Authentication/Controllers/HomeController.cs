@@ -21,6 +21,7 @@ using Raven.Client.Documents.Session;
 using System;
 using System.Drawing;
 using System.Globalization;
+using System.IO;
 using System.Reflection;
 using System.Threading.Tasks;
 
@@ -160,28 +161,33 @@ namespace Authentication.Controllers
         /// Shows the error page
         /// </summary>
         [AllowAnonymous]
+        [Route("error")]
         public async Task<IActionResult> Error(string errorId)
         {
             var vm = new ErrorViewModel();
 
             var version = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "0.0.0";
             if (version.Length > 32)
-                version = version.Substring(0, version.Length - 32);
+                version = version[0..^32];
             vm.Version = $"{version}-{_environment.EnvironmentName}";
 
-            var exceptionFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
-            if (exceptionFeature != null)
-                _logger.LogError(exceptionFeature.Error.Message);
+            var exceptionHandlerPathFeature = HttpContext.Features.Get<IExceptionHandlerPathFeature>();
+            if (exceptionHandlerPathFeature != null)
+            {
+                if (exceptionHandlerPathFeature.Error is FileNotFoundException)
+                    Response.StatusCode = 404;
+                _logger.LogError(exceptionHandlerPathFeature.Error, "Uncaught exception {path}", exceptionHandlerPathFeature.Path);
+            }
 
             // retrieve error details from identityserver
             var message = await _interaction.GetErrorContextAsync(errorId);
             if (message != null)
             {
-                vm.Error = message;
-                _logger.LogError(message.Error);
+                _logger.LogError("Identity Exception: {error}", message.Error);
 
                 if (!_environment.IsDevelopment())
                     message.ErrorDescription = null; // only show in development
+                vm.Error = message;
             }
 
             return View("Error", vm);
@@ -191,11 +197,11 @@ namespace Authentication.Controllers
         /// Shows the current version info
         /// </summary>
         [AllowAnonymous]
-        public async Task<IActionResult> Version()
+        public IActionResult Version()
         {
             var version = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "0.0.0";
             if (version.Length > 32)
-                version = version.Substring(0, version.Length - 32);
+                version = version[0..^32];
             return Content($"{version}-{_environment.EnvironmentName}");
         }
     }

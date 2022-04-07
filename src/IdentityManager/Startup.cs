@@ -353,14 +353,10 @@ namespace IdentityManager
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
-            if (env.IsDevelopment())
-            {
-                app.UseDeveloperExceptionPage();
-                IdentityModelEventSource.ShowPII = true;
-            }
+            IdentityModelEventSource.ShowPII = true;
+            app.UseExceptionHandler(new ExceptionHandlerOptions { AllowStatusCode404Response = true, ExceptionHandlingPath = "/error" });
 
             app.UseHttpsRedirection();
-
             app.UseForwardedHeaders();
 
             var auditConfig = Audit.Core.Configuration.Setup().UseFactory(
