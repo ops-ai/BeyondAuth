@@ -33,7 +33,7 @@ namespace Identity.Core
 
             await _session.SaveChangesAsync();
 
-            return hash;
+            return code;
         }
 
         public async Task<(IdentityResult, ApplicationUser?)> ValidateOtacAsync(string code, CancellationToken ct = default)
