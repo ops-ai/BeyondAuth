@@ -2,7 +2,7 @@
 using IdentityModel;
 using Microsoft.AspNetCore.Identity;
 using Raven.Client;
-using Raven.Client.Documents;
+using Raven.Client.Documents.Session;
 using System;
 using System.Threading;
 using System.Threading.Tasks;
@@ -11,51 +11,45 @@ namespace Identity.Core
 {
     public class OtacManager : IOtacManager
     {
-        private readonly IDocumentStore _store;
+        private readonly IAsyncDocumentSession _session;
 
-        public OtacManager(IDocumentStore store)
+        public OtacManager(IAsyncDocumentSession session)
         {
-            _store = store;
+            _session = session;
         }
 
         public async Task<string> GenerateOtacAsync(ApplicationUser user, CancellationToken ct = default)
         {
-            using (var session = _store.OpenAsyncSession())
+            var code = CryptoRandom.CreateUniqueId();
+            var hash = Hashing.GetStringSha256Hash(code);
+
+            var otac = new Otac
             {
-                var code = CryptoRandom.CreateUniqueId();
-                var hash = Hashing.GetStringSha256Hash(code);
+                Id = $"Otacs/{hash}",
+                UserId = user.Id!
+            };
+            await _session.StoreAsync(otac);
+            _session.Advanced.GetMetadataFor(otac)[Constants.Documents.Metadata.Expires] = DateTime.UtcNow.AddMinutes(1);
 
-                var otac = new Otac
-                {
-                    Id = $"Otacs/{hash}",
-                    UserId = user.Id!
-                };
-                await session.StoreAsync(otac);
-                session.Advanced.GetMetadataFor(otac)[Constants.Documents.Metadata.Expires] = DateTime.UtcNow.AddMinutes(1);
+            await _session.SaveChangesAsync();
 
-                await session.SaveChangesAsync();
-
-                return hash;
-            }
+            return hash;
         }
 
         public async Task<(IdentityResult, ApplicationUser?)> ValidateOtacAsync(string code, CancellationToken ct = default)
         {
-            using (var session = _store.OpenAsyncSession())
+            var hash = Hashing.GetStringSha256Hash(code);
+            var otac = await _session.Include<Otac>(t => t.UserId).LoadAsync<Otac>($"Otacs/{hash}", ct);
+            if (otac != null)
             {
-                var hash = Hashing.GetStringSha256Hash(code);
-                var otac = await session.Include<Otac>(t => t.UserId).LoadAsync<Otac>($"Otacs/{hash}", ct);
-                if (otac != null)
-                {
-                    session.Delete(otac);
-                    await session.SaveChangesAsync(ct);
+                _session.Delete(otac);
+                await _session.SaveChangesAsync(ct);
 
-                    if (otac.CreatedOnUtc > DateTime.UtcNow.AddMinutes(-1))
-                        return (IdentityResult.Success, await session.LoadAsync<ApplicationUser>(otac.UserId, ct));
-                }
-
-                return (IdentityResult.Failed(new IdentityError { Code = "Invalid", Description = "Code was not found or it expired" }), null);
+                if (otac.CreatedOnUtc > DateTime.UtcNow.AddMinutes(-1))
+                    return (IdentityResult.Success, await _session.LoadAsync<ApplicationUser>(otac.UserId, ct));
             }
+
+            return (IdentityResult.Failed(new IdentityError { Code = "Invalid", Description = "Code was not found or it expired" }), null);
         }
     }
 }
