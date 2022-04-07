@@ -86,7 +86,7 @@ namespace Authentication.Controllers
         public async Task<IActionResult> Login(string returnUrl, [FromServices] IOtacManager otacManager)
         {
             var context = await _interaction.GetAuthorizationContextAsync(returnUrl);
-            if (context.AcrValues.Any(t => t.StartsWith("otac:", StringComparison.OrdinalIgnoreCase)))
+            if (context?.AcrValues?.Any(t => t.StartsWith("otac:", StringComparison.OrdinalIgnoreCase)) == true)
             {
                 //try to auto log the user in
                 var otac = context.AcrValues.First(t => t.StartsWith("otac:", StringComparison.OrdinalIgnoreCase)).Split(':').Last();
