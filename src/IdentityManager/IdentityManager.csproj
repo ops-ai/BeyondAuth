@@ -22,7 +22,7 @@
 
 	<ItemGroup>
 		<PackageReference Include="Audit.NET" Version="19.0.7" />
-		<PackageReference Include="Audit.NET.RavenDB" Version="1.6.2" />
+		<PackageReference Include="Audit.NET.RavenDB" Version="1.6.3" />
 		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="6.0.3" />
 		<PackageReference Include="AspNetCore.HealthChecks.RavenDB" Version="6.0.2" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI" Version="6.0.4" />
@@ -30,14 +30,14 @@
 		<PackageReference Include="Autofac" Version="6.3.0" />
 		<PackageReference Include="Autofac.Configuration" Version="6.0.0" />
 		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.2.0" />
-		<PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.1" />
+		<PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.2" />
 		<PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Keys" Version="1.1.0" />
-		<PackageReference Include="Azure.Identity" Version="1.5.0" />
+		<PackageReference Include="Azure.Identity" Version="1.6.0" />
 		<PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.3.0" />
 		<PackageReference Include="CommonPasswordsValidator" Version="1.4.0" />
 		<PackageReference Include="CorrelationId" Version="3.0.1" />
-		<PackageReference Include="Finbuckle.MultiTenant" Version="6.7.1" />
-		<PackageReference Include="Finbuckle.MultiTenant.AspNetCore" Version="6.7.1" />
+		<PackageReference Include="Finbuckle.MultiTenant" Version="6.7.2" />
+		<PackageReference Include="Finbuckle.MultiTenant.AspNetCore" Version="6.7.2" />
 		<PackageReference Include="IdentityServer4" Version="4.1.2" />
 		<PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
 		<PackageReference Include="IdentityServer4.Contrib.RavenDB" Version="1.0.0" />
