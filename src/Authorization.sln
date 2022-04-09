@@ -15,6 +15,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = ".Solution Items", ".Solutio
 		..\azure-pipelines.analyze.yml = ..\azure-pipelines.analyze.yml
 		..\azure-pipelines.release.yml = ..\azure-pipelines.release.yml
 		..\GitVersion.yml = ..\GitVersion.yml
+		GlobalSuppressions.cs = GlobalSuppressions.cs
 		nlog.config = nlog.config
 		nuget.config = nuget.config
 		xunit.runner.json = xunit.runner.json
@@ -248,7 +249,7 @@ Global
 		{E038D21E-73D1-4C93-A90C-CE33E3677179} = {84BCB7A7-6678-441F-B075-15D4A7E04ACB}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
 		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
+		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
 	EndGlobalSection
 EndGlobal

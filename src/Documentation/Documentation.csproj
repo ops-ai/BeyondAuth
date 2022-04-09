@@ -10,6 +10,10 @@
 	</PropertyGroup>
 
 	<ItemGroup>
+	  <Compile Include="..\GlobalSuppressions.cs" Link="Properties\GlobalSuppressions.cs" />
+	</ItemGroup>
+
+	<ItemGroup>
 		<Content Include="..\nlog.config" Link="nlog.config">
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
