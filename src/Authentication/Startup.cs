@@ -557,7 +557,7 @@ namespace Authentication
             services.AddSingleton<IEmailSender, MessageSender>();
             services.AddSingleton<IEventSink, IdentityServerEventSink>();
 
-            services.AddTransient<IEventSink, IdentityServerStatsSink>();
+            services.AddSingleton<IEventSink, IdentityServerStatsSink>();
             services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
             services.AddTransient<IEmailService, EmailController>();
             services.AddTransient<IPasswordTopologyProvider, PasswordTopologyProvider>();
