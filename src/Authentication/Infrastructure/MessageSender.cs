@@ -1,5 +1,4 @@
 ﻿using Authentication.Models;
-using Authentication.Options;
 using Finbuckle.MultiTenant;
 using Identity.Core;
 using Identity.Core.Settings;
@@ -12,7 +11,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Security.Claims;
 using System.Threading.Tasks;
 using Twilio;
 using Twilio.Rest.Api.V2010.Account;
@@ -25,7 +23,7 @@ namespace Authentication.Infrastructure
     /// when you turn on two-factor authentication in ASP.NET Identity.
     /// For more details see this link http://go.microsoft.com/fwlink/?LinkID=532713
     /// </summary>
-    public class MessageSender : IEmailSender, ISmsSender
+    public class MessageSender : ISmsSender
     {
         private readonly ILogger _logger;
         private readonly IOptions<SmsOptions> _smsSettings;
@@ -51,70 +49,6 @@ namespace Authentication.Infrastructure
             _store = store;
             _clientFactory = clientFactory;
             _httpContextAccessor = httpContextAccessor;
-        }
-
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="email">The email message</param>
-        /// <param name="subject"></param>
-        /// <param name="htmlMessage"></param>
-        /// <param name="txtMessage"></param>
-        /// <returns></returns>
-        public async Task SendEmailAsync(string email, string subject, string htmlMessage, string txtMessage, string cc = null)
-        {
-            try
-            {
-                using (var httpClient = _clientFactory.CreateClient("mailgun"))
-                {
-                    var formFields = new Dictionary<string, string> {
-                        { "from", $"{_emailSettings.Value.DisplayName} <{_emailSettings.Value.From}>" },
-                        { "h:Reply-To", $"{_emailSettings.Value.DisplayName} <{_emailSettings.Value.ReplyTo}>" },
-                        { "to", email },
-                        { "subject", subject },
-                        { "text", txtMessage },
-                        { "html", htmlMessage }
-                    };
-
-                    if (cc != null)
-                        formFields.Add("cc", cc);
-
-                    var formContent = new FormUrlEncodedContent(formFields);
-
-                    var result = await httpClient.PostAsync("messages", formContent);
-                    result.EnsureSuccessStatusCode();
-
-                    var mailGunResponse = await result.Content.ReadAsAsync<MailGunResponseModel>();
-                    _logger.LogInformation($"Sent message to mailgun - {mailGunResponse.Id} - {mailGunResponse.Message}");
-
-                    var tenantInfo = _httpContextAccessor.HttpContext.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
-                    using (var session = _store.OpenAsyncSession($"TenantIdentity-{tenantInfo.Identifier}"))
-                    {
-                        var newEmail = new SentEmail
-                        {
-                            Id = $"SentEmails/{mailGunResponse.Id[1..^1]}",
-                            From = formFields["from"],
-                            ReplyTo = formFields["h:Reply-To"],
-                            To = email,
-                            Subject = subject,
-                            TxtMessage = txtMessage,
-                            HtmlMessage = htmlMessage,
-                            Cc = cc,
-                            UserId = _httpContextAccessor.HttpContext?.User.FindFirst(ClaimTypes.Email)?.Value,
-                            RefId = mailGunResponse.Id
-                        };
-                        await session.StoreAsync(newEmail);
-                        session.Advanced.GetMetadataFor(newEmail)["@expires"] = DateTime.UtcNow.AddDays(30);
-                        await session.SaveChangesAsync();
-                    }
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogCritical(ex, "Sending email failed");
-
-                throw;
-            }
         }
 
         /// <summary>

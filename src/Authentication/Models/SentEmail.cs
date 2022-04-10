@@ -14,6 +14,10 @@ namespace Authentication.Models
         /// </summary>
         public string Id { get; set; }
 
+        public string? TemplateId { get; set; }
+
+        public object? TemplateData { get; set; }
+
         /// <summary>
         /// Email subject
         /// </summary>
@@ -27,17 +31,22 @@ namespace Authentication.Models
         /// <summary>
         /// Id of the user who sent message
         /// </summary>
-        public string UserId { get; set; }
+        public string? UserId { get; set; }
 
         /// <summary>
         /// To
         /// </summary>
-        public string To { get; set; }
+        public List<string> To { get; set; }
 
         /// <summary>
         /// Cc
         /// </summary>
-        public string Cc { get; set; }
+        public List<string>? Cc { get; set; }
+
+        /// <summary>
+        /// Bcc
+        /// </summary>
+        public List<string>? Bcc { get; set; }
 
         /// <summary>
         /// From
@@ -64,46 +73,30 @@ namespace Authentication.Models
         /// </summary>
         public string RefId { get; set; }
 
-        /// <summary>
-        /// Email deliverability events
-        /// </summary>
         public List<EmailEvent> Events { get; set; } = new List<EmailEvent>();
     }
 
-    /// <summary>
-    /// Mailgun response mapping
-    /// </summary>
     public class MailGunResponseModel
     {
-        /// <summary>
-        /// Message id
-        /// </summary>
         public string Id { get; set; }
-        
-        /// <summary>
-        /// Response status message
-        /// </summary>
+
         public string Message { get; set; }
     }
 
-    /// <summary>
-    /// Email deliverability event
-    /// </summary>
     public class EmailEvent
     {
-        /// <summary>
-        /// Unique mailgun id
-        /// </summary>
         public string Id { get; set; }
 
-        /// <summary>
-        /// Event name
-        /// </summary>
         public string Name { get; set; }
 
-        /// <summary>
-        /// Date event ocurred
-        /// </summary>
+        public string? Recipient { get; set; }
+
         public DateTime CreatedOnUtc { get; set; }
+
+        public string? Location { get; set; }
+
+        public string? LogLevel { get; set; }
+
+        public string? Ip { get; set; }
     }
 }

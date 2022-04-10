@@ -1,4 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using Authentication.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace Authentication.Infrastructure
 {
@@ -7,15 +9,17 @@ namespace Authentication.Infrastructure
     /// </summary>
     public interface IEmailSender
     {
-        /// <summary>
-        /// 
-        /// </summary>
-        /// <param name="to"></param>
-        /// <param name="subject"></param>
-        /// <param name="htmlMessage"></param>
-        /// <param name="txtMessage"></param>
-        /// <param name="cc">Email to CC</param>
-        /// <returns></returns>
-        Task SendEmailAsync(string to, string subject, string htmlMessage, string txtMessage, string cc = null);
+        Task SendEmailAsync(string to, string subject, string htmlMessage, string txtMessage, List<string>? cc = null);
+
+        Task SendEmailAsync(string toEmail, string toName, string htmlMessage, string fromName, string fromEmail, Dictionary<string, string>? customArgs,
+            string subject, string? replyTo = null, List<string>? cc = null, List<string>? bcc = null);
+
+        Task SendEmailAsync(string toEmail, string toName, string templateId, object templateData, string fromName, string fromEmail,
+            string subject, string? replyTo = null, List<string>? cc = null, List<string>? bcc = null);
+
+        Task SendEmailWithAttachmentAsync(string toEmail, string toName, string templateId, object templateData, string fromEmail, string fromName,
+            EmailAttachmentModel attachment, string subject);
+
+        Task ReportIssueAsync(string subject, string txtMessage);
     }
 }

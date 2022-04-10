@@ -554,7 +554,7 @@ namespace Authentication
             services.Configure<GoogleCaptchaOptions>(Configuration.GetSection("GoogleCaptcha"));
 
             services.AddSingleton<ISmsSender, MessageSender>();
-            services.AddSingleton<IEmailSender, MessageSender>();
+            services.AddSingleton<IEmailSender, MailgunMessageSender>();
             services.AddSingleton<IEventSink, IdentityServerEventSink>();
 
             services.AddSingleton<IEventSink, IdentityServerStatsSink>();

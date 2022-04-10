@@ -1,4 +1,6 @@
-﻿namespace Identity.Core.Settings
+﻿using System.Collections.Generic;
+
+namespace Identity.Core.Settings
 {
     /// <summary>
     /// Email sending options
@@ -36,8 +38,20 @@
         public string PrivateKey { get; set; }
 
         /// <summary>
+        /// HTTP webhook signing key
+        /// </summary>
+        public string WebhookSigningKey { get; set; }
+
+        /// <summary>
         /// Mailgun Api base url including domain
         /// </summary>
         public string ApiBaseUrl { get; set; }
+
+        /// <summary>
+        /// Mailgun Api endpoint ofr message sending
+        /// </summary>
+        public string? ApiEndpoint { get; set; }
+
+        public Dictionary<string, string> Templates { get; set; } = new Dictionary<string, string>();
     }
 }
