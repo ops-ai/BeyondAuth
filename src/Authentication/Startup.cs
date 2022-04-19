@@ -155,7 +155,7 @@ namespace Authentication
 
             if (!string.IsNullOrEmpty(Environment.GetEnvironmentVariable("VaultUri")))
             {
-                TokenCredential clientCredential = Environment.GetEnvironmentVariable("ClientId") != null ? new ClientSecretCredential(Environment.GetEnvironmentVariable("TenantId"), Environment.GetEnvironmentVariable("ClientId"), Environment.GetEnvironmentVariable("ClientSecret")) : null;
+                TokenCredential? clientCredential = Environment.GetEnvironmentVariable("ClientId") != null ? new ClientSecretCredential(Environment.GetEnvironmentVariable("TenantId"), Environment.GetEnvironmentVariable("ClientId"), Environment.GetEnvironmentVariable("ClientSecret")) : null;
                 var keyClient = new KeyClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")!), clientCredential ?? new DefaultAzureCredential());
                 var blobClient = new BlobClient(Configuration["DataProtection:StorageConnectionString"], Configuration["DataProtection:StorageContainer"], "keys.xml");
 
@@ -407,8 +407,10 @@ namespace Authentication
             X509Certificate2 ravenDBcert = null;
             if (Environment.GetEnvironmentVariable("VaultUri") != null)
             {
-                var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")), credential: new DefaultAzureCredential());
-                var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
+                TokenCredential? clientCredential = Environment.GetEnvironmentVariable("ClientId") != null ? new ClientSecretCredential(Environment.GetEnvironmentVariable("TenantId"), Environment.GetEnvironmentVariable("ClientId"), Environment.GetEnvironmentVariable("ClientSecret")) : null;
+
+                var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")), credential: clientCredential ?? new DefaultAzureCredential());
+                var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")), clientCredential ?? new DefaultAzureCredential());
 
                 var ravenDbCertificateClient = certificateClient.GetCertificate("RavenDB");
                 var ravenDbCertificateSegments = ravenDbCertificateClient.Value.SecretId.Segments;
@@ -471,10 +473,14 @@ namespace Authentication
                 .AddIdentityServer(new Uri(Configuration["BaseUrl"]), "openid-connect");
 
             if (Environment.GetEnvironmentVariable("VaultUri") != null)
-                healthChecks.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential(), options =>
+            {
+                TokenCredential? clientCredential = Environment.GetEnvironmentVariable("ClientId") != null ? new ClientSecretCredential(Environment.GetEnvironmentVariable("TenantId"), Environment.GetEnvironmentVariable("ClientId"), Environment.GetEnvironmentVariable("ClientSecret")) : null;
+
+                healthChecks.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")), clientCredential ?? new DefaultAzureCredential(), options =>
                 {
 
                 });
+            }
 
             services.AddHttpClient("mailgun", config =>
             {
@@ -533,8 +539,10 @@ namespace Authentication
 
             try
             {
-                var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")), credential: new DefaultAzureCredential());
-                var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
+                TokenCredential? clientCredential = Environment.GetEnvironmentVariable("ClientId") != null ? new ClientSecretCredential(Environment.GetEnvironmentVariable("TenantId"), Environment.GetEnvironmentVariable("ClientId"), Environment.GetEnvironmentVariable("ClientSecret")) : null;
+
+                var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")), credential: clientCredential ?? new DefaultAzureCredential());
+                var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")), clientCredential ?? new DefaultAzureCredential());
 
                 var idpSigningCertificateClient = certificateClient.GetCertificate("IdentitySigning");
                 var idpSigningCertificateSegments = idpSigningCertificateClient.Value.SecretId.Segments;

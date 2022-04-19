@@ -1,5 +1,6 @@
 using Autofac;
 using Autofac.Configuration;
+using Azure.Core;
 using Azure.Identity;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Secrets;
@@ -7,14 +8,9 @@ using Blockchain;
 using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
 using IdentityServer4.AccessTokenValidation;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Hosting;
 using NetTools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -28,11 +24,6 @@ using Prometheus;
 using Prometheus.SystemMetrics;
 using Prometheus.SystemMetrics.Collectors;
 using Raven.Client.Documents;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Security.Cryptography.X509Certificates;
 
 namespace AuditServer
@@ -83,11 +74,13 @@ namespace AuditServer
 
             services.AddSingleton<ITransactionPool, TransactionPool>();
 
-            X509Certificate2 ravenDBcert = null;
+            X509Certificate2? ravenDBcert = null;
             if (Environment.GetEnvironmentVariable("VaultUri") != null)
             {
-                var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")), credential: new DefaultAzureCredential());
-                var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")), new DefaultAzureCredential());
+                TokenCredential? clientCredential = Environment.GetEnvironmentVariable("ClientId") != null ? new ClientSecretCredential(Environment.GetEnvironmentVariable("TenantId"), Environment.GetEnvironmentVariable("ClientId"), Environment.GetEnvironmentVariable("ClientSecret")) : null;
+
+                var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")!), credential: clientCredential ?? new DefaultAzureCredential());
+                var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")!), clientCredential ?? new DefaultAzureCredential());
 
                 var ravenDbCertificateClient = certificateClient.GetCertificate("RavenDB");
                 var ravenDbCertificateSegments = ravenDbCertificateClient.Value.SecretId.Segments;

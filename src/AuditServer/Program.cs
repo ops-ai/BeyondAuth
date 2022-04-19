@@ -28,9 +28,9 @@ namespace AuditServer
                     if (Environment.GetEnvironmentVariable("VaultUri") != null)
                     {
                         var keyVaultEndpoint = new Uri(Environment.GetEnvironmentVariable("VaultUri")!);
-                        TokenCredential clientCredential = Environment.GetEnvironmentVariable("ClientId") != null ? new ClientSecretCredential(Environment.GetEnvironmentVariable("TenantId"), Environment.GetEnvironmentVariable("ClientId"), Environment.GetEnvironmentVariable("ClientSecret")) : null;
+                        TokenCredential? clientCredential = Environment.GetEnvironmentVariable("ClientId") != null ? new ClientSecretCredential(Environment.GetEnvironmentVariable("TenantId"), Environment.GetEnvironmentVariable("ClientId"), Environment.GetEnvironmentVariable("ClientSecret")) : null;
 
-                        config.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")), clientCredential ?? new DefaultAzureCredential());
+                        config.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")!), clientCredential ?? new DefaultAzureCredential());
                     }
                 })
                 .UseContentRoot(Directory.GetCurrentDirectory())
