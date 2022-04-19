@@ -21,7 +21,7 @@ spec:
     spec:
       containers:
       - name: ba-auth
-        image: opsairegistry.azurecr.io/beyondauthweb:latest 
+        image: opsairegistry.azurecr.io/beyondauth-auth:latest 
         env:
         - name: ASPNETCORE_ENVIRONMENT
           value: "Staging"
