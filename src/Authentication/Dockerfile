@@ -4,18 +4,21 @@ FROM mcr.microsoft.com/dotnet/core/aspnet:3.1-buster-slim AS base
 WORKDIR /app
 EXPOSE 80
 EXPOSE 443
+ARG VERSION=0
 
 FROM mcr.microsoft.com/dotnet/core/sdk:3.1-buster AS build
+ARG VERSION=0
 WORKDIR /src
 COPY ["Authentication/Authentication.csproj", "Authentication/"]
 COPY ["IdentityServer4.Contrib.RavenDB/IdentityServer4.Contrib.RavenDB.csproj", "IdentityServer4.Contrib.RavenDB/"]
 RUN dotnet restore "Authentication/Authentication.csproj"
 COPY . .
 WORKDIR "/src/Authentication"
-RUN dotnet build "Authentication.csproj" -c Release -o /app/build
+RUN dotnet build "Authentication.csproj" -c Release /p:Version=${VERSION} -o /app/build
 
 FROM build AS publish
-RUN dotnet publish "Authentication.csproj" -c Release -o /app/publish
+ARG VERSION=0
+RUN dotnet publish "Authentication.csproj" -c Release /p:Version=${VERSION} -o /app/publish
 
 FROM base AS final
 WORKDIR /app
