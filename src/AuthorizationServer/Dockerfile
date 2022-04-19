@@ -12,6 +12,8 @@ WORKDIR /src
 COPY ["AuthorizationServer/AuthorizationServer.csproj", "AuthorizationServer/"]
 COPY ["Authorization Handlers/AuthorizationPolicyProvider/BeyondAuth.PolicyProvider.csproj", "Authorization Handlers/AuthorizationPolicyProvider/"]
 COPY ["BeyondAuth.PolicyServer.Core/BeyondAuth.PolicyServer.Core.csproj", "BeyondAuth.PolicyServer.Core/"]
+COPY ["Authorization Handlers/BeyondAuth.Acl/BeyondAuth.Acl.csproj", "Authorization Handlers/BeyondAuth.Acl/"]
+COPY ["Authorization Handlers/BeyondAuth.RelatedDataValidation/BeyondAuth.RelatedDataValidation.csproj", "Authorization Handlers/BeyondAuth.RelatedDataValidation/"]
 RUN dotnet restore "AuthorizationServer/AuthorizationServer.csproj"
 COPY . .
 WORKDIR "/src/AuthorizationServer"

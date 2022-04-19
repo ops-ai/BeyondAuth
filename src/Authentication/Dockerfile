@@ -12,7 +12,7 @@ WORKDIR /src
 COPY ["Authentication/Authentication.csproj", "Authentication/"]
 COPY ["Password Validators/BeyondAuth.PasswordValidators.Common/BeyondAuth.PasswordValidators.Common.csproj", "Password Validators/BeyondAuth.PasswordValidators.Common/"]
 COPY ["Password Validators/BeyondAuth.PasswordValidators.Topology/BeyondAuth.PasswordValidators.Topology.csproj", "Password Validators/BeyondAuth.PasswordValidators.Topology/"]
-COPY ["Password Validators/BeyondAuth.PasswordValidators.Topology/BlackstarSolar.AspNetCore.Identity.PwnedPasswords.csproj", "Password Validators/BlackstarSolar.AspNetCore.Identity.PwnedPasswords/"]
+COPY ["Password Validators/BlackstarSolar.AspNetCore.Identity.PwnedPasswords/BlackstarSolar.AspNetCore.Identity.PwnedPasswords.csproj", "Password Validators/BlackstarSolar.AspNetCore.Identity.PwnedPasswords/"]
 COPY ["Password Validators/SharpPwned.NET/SharpPwned.NET.csproj", "Password Validators/SharpPwned.NET/"]
 COPY ["Identity.Core/Identity.Core.csproj", "Identity.Core/"]
 RUN dotnet restore "Authentication/Authentication.csproj"
