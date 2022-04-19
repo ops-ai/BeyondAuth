@@ -14,7 +14,6 @@ COPY ["Password Validators/BeyondAuth.PasswordValidators.Common/BeyondAuth.Passw
 COPY ["Password Validators/BeyondAuth.PasswordValidators.Topology/BeyondAuth.PasswordValidators.Topology.csproj", "Password Validators/BeyondAuth.PasswordValidators.Topology/"]
 COPY ["Password Validators/BlackstarSolar.AspNetCore.Identity.PwnedPasswords/BlackstarSolar.AspNetCore.Identity.PwnedPasswords.csproj", "Password Validators/BlackstarSolar.AspNetCore.Identity.PwnedPasswords/"]
 COPY ["Password Validators/SharpPwned.NET/SharpPwned.NET.csproj", "Password Validators/SharpPwned.NET/"]
-COPY ["BeyondAuth.PolicyServer.Core/BeyondAuth.PolicyServer.Core.csproj", "BeyondAuth.PolicyServer.Core/"]
 COPY ["Identity.Core/Identity.Core.csproj", "Identity.Core/"]
 RUN dotnet restore "Authentication/Authentication.csproj"
 COPY . .

@@ -8,7 +8,7 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 ARG VERSION=0
 WORKDIR /src
 COPY ["PolicyServer/PolicyServer.csproj", "PolicyServer/"]
-COPY ["BeyondAuth.PolicyServer.Core/BeyondAuth.PolicyServer.Core.csproj", "BeyondAuth.PolicyServer.Core/"]
+COPY ["PolicyServer.Core/BeyondAuth.PolicyServer.Core.csproj", "PolicyServer.Core/"]
 COPY ["Identity.Core/Identity.Core.csproj", "Identity.Core/"]
 RUN dotnet restore "PolicyServer/PolicyServer.csproj"
 COPY . .
