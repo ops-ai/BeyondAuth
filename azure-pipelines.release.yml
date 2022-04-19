@@ -9,7 +9,7 @@ resources:
 - repo: self
 
 variables:
-  dockerRegistryServiceConnection: '86986db6-cabf-436b-a436-2cf8c1337c1b'
+  dockerRegistryServiceConnection: '2090ed42-3209-4e98-bd10-118042d5815e'
   imageNameAudit: 'beyondauth-audit'
   imageNameAccount: 'beyondauth-account'
   imageNameAuth: 'beyondauth-auth'
