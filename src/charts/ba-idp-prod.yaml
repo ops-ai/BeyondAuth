@@ -47,13 +47,13 @@ spec:
              key: "ClientSecret"
         ports:
         - containerPort: 443
-          name: ba-idp-https
+          name: idp-https
         - containerPort: 80
-          name: ba-idp-http
+          name: idp-http
         livenessProbe:
           httpGet:
             path: /hz
-            port: ba-idp-http
+            port: idp-http
             httpHeaders:
               - name: Accept
                 value: text/html
@@ -62,7 +62,7 @@ spec:
         startupProbe:
           httpGet:
             path: /hz
-            port: ba-idp-http
+            port: idp-http
             httpHeaders:
               - name: Accept
                 value: text/html
@@ -79,10 +79,10 @@ spec:
   - port: 443
     protocol: TCP
     targetPort: 443
-    name: ba-idp-https
+    name: idp-https
   - port: 80
     protocol: TCP
     targetPort: 80
-    name: ba-idp-http
+    name: idp-http
   selector:
     app: ba-idp

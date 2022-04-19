@@ -47,13 +47,13 @@ spec:
              key: "ClientSecret"
         ports:
         - containerPort: 443
-          name: ba-auth-https
+          name: auth-https
         - containerPort: 80
-          name: ba-auth-http
+          name: auth-http
         livenessProbe:
           httpGet:
             path: /hz
-            port: ba-auth-http
+            port: auth-http
             httpHeaders:
               - name: Accept
                 value: text/html
@@ -62,7 +62,7 @@ spec:
         startupProbe:
           httpGet:
             path: /hz
-            port: ba-auth-http
+            port: auth-http
             httpHeaders:
               - name: Accept
                 value: text/html
@@ -79,10 +79,10 @@ spec:
   - port: 443
     protocol: TCP
     targetPort: 443
-    name: ba-auth-https
+    name: auth-https
   - port: 80
     protocol: TCP
     targetPort: 80
-    name: ba-auth-http
+    name: auth-http
   selector:
     app: ba-auth
