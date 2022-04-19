@@ -276,11 +276,23 @@ namespace IdentityManager.Controllers
                         newUser.Claims.Add(claim);
 
                     var result = await _userManager.CreateAsync(newUser, userInfo.Password);
-                    await _session.SaveChangesAsync(ct);
-                    audit.SetCustomField("Id", newUser.Id);
 
                     if (result.Succeeded)
                     {
+                        try
+                        {
+                            await _session.SaveChangesAsync(ct);
+                            audit.SetCustomField("Id", newUser.Id);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogError(ex, "Error creating user");
+                            audit.Discard();
+
+                            ModelState.AddModelError(nameof(newUser.Email), "Error creating user");
+                            return ValidationProblem(ModelState);
+                        }
+
                         var createdUser = ToUserModel(newUser);
                         if (userInfo.GenerateOtac.HasValue && userInfo.GenerateOtac.Value)
                         {
