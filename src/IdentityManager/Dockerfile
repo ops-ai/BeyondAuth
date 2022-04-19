@@ -10,6 +10,12 @@ FROM mcr.microsoft.com/dotnet/sdk:6.0 AS build
 ARG VERSION=0
 WORKDIR /src
 COPY ["IdentityManager/IdentityManager.csproj", "IdentityManager/"]
+COPY ["Authorization Handlers/BeyondAuth.Acl/BeyondAuth.Acl.csproj", "Authorization Handlers/BeyondAuth.Acl/"]
+COPY ["Password Validators/BeyondAuth.PasswordValidators.Common/BeyondAuth.PasswordValidators.Common.csproj", "Password Validators/BeyondAuth.PasswordValidators.Common/"]
+COPY ["Password Validators/BeyondAuth.PasswordValidators.Topology/BeyondAuth.PasswordValidators.Topology.csproj", "Password Validators/BeyondAuth.PasswordValidators.Topology/"]
+COPY ["Password Validators/BlackstarSolar.AspNetCore.Identity.PwnedPasswords/BlackstarSolar.AspNetCore.Identity.PwnedPasswords.csproj", "Password Validators/BlackstarSolar.AspNetCore.Identity.PwnedPasswords/"]
+COPY ["Password Validators/SharpPwned.NET/SharpPwned.NET.csproj", "Password Validators/SharpPwned.NET/"]
+COPY ["Identity.Core/Identity.Core.csproj", "Identity.Core/"]
 RUN dotnet restore "IdentityManager/IdentityManager.csproj"
 COPY . .
 WORKDIR "/src/IdentityManager"

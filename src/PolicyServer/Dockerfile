@@ -9,6 +9,7 @@ ARG VERSION=0
 WORKDIR /src
 COPY ["PolicyServer/PolicyServer.csproj", "PolicyServer/"]
 COPY ["BeyondAuth.PolicyServer.Core/BeyondAuth.PolicyServer.Core.csproj", "BeyondAuth.PolicyServer.Core/"]
+COPY ["Identity.Core/Identity.Core.csproj", "Identity.Core/"]
 RUN dotnet restore "PolicyServer/PolicyServer.csproj"
 COPY . .
 WORKDIR "/src/PolicyServer"
