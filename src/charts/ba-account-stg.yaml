@@ -1,0 +1,88 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ba-account-stg
+  labels:
+    app: ba-account-stg
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: ba-account-stg
+  strategy:
+    rollingUpdate:
+      maxSurge: 2
+      maxUnavailable: 1
+  minReadySeconds: 5
+  template:
+    metadata:
+      labels:
+        app: ba-account-stg
+    spec:
+      containers:
+      - name: ba-account-stg
+        image: opsairegistry.azurecr.io/beyondauthweb:latest 
+        env:
+        - name: ASPNETCORE_ENVIRONMENT
+          value: "Staging"
+        - name: VaultUri
+          valueFrom:
+           secretKeyRef:
+             name: "ba-account-secrets"
+             key: "VaultUri"
+        - name: TenantId
+          valueFrom:
+           secretKeyRef:
+             name: "ba-account-secrets"
+             key: "TenantId"
+        - name: ClientId
+          valueFrom:
+           secretKeyRef:
+             name: "ba-account-secrets"
+             key: "ClientId"
+        - name: ClientSecret
+          valueFrom:
+           secretKeyRef:
+             name: "ba-account-secrets"
+             key: "ClientSecret"
+        ports:
+        - containerPort: 443
+          name: ba-account-stg-https
+        - containerPort: 80
+          name: ba-account-stg-http
+        livenessProbe:
+          httpGet:
+            path: /hz
+            port: ba-account-stg-http
+            httpHeaders:
+              - name: Accept
+                value: text/html
+          failureThreshold: 1
+          periodSeconds: 20
+        startupProbe:
+          httpGet:
+            path: /hz
+            port: ba-account-stg-http
+            httpHeaders:
+              - name: Accept
+                value: text/html
+          failureThreshold: 1
+          periodSeconds: 20
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ba-account-stg-srv
+spec:
+  type: ClusterIP
+  ports:
+  - port: 443
+    protocol: TCP
+    targetPort: 443
+    name: ba-account-stg-https
+  - port: 80
+    protocol: TCP
+    targetPort: 80
+    name: ba-account-stg-http
+  selector:
+    app: ba-account-stg
