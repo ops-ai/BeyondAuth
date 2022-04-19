@@ -94,6 +94,22 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FeatureManagement.SecureFea
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.PolicyProvider.Storage.RavenDB", "Authorization Handlers\BeyondAuth.PolicyProvider.Storage.RavenDB\BeyondAuth.PolicyProvider.Storage.RavenDB.csproj", "{E038D21E-73D1-4C93-A90C-CE33E3677179}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "charts", "charts", "{96BC0F17-6FB1-4C96-A1CA-2B4CF5723E69}"
+	ProjectSection(SolutionItems) = preProject
+		charts\ba-account-prod.yaml = charts\ba-account-prod.yaml
+		charts\ba-account-stg.yaml = charts\ba-account-stg.yaml
+		charts\ba-audit-prod.yaml = charts\ba-audit-prod.yaml
+		charts\ba-audit-stg.yaml = charts\ba-audit-stg.yaml
+		charts\ba-auth-prod.yaml = charts\ba-auth-prod.yaml
+		charts\ba-auth-stg.yaml = charts\ba-auth-stg.yaml
+		charts\ba-docs-prod.yaml = charts\ba-docs-prod.yaml
+		charts\ba-docs-stg.yaml = charts\ba-docs-stg.yaml
+		charts\ba-idp-prod.yaml = charts\ba-idp-prod.yaml
+		charts\ba-idp-stg.yaml = charts\ba-idp-stg.yaml
+		charts\ba-policy-prod.yaml = charts\ba-policy-prod.yaml
+		charts\ba-policy-stg.yaml = charts\ba-policy-stg.yaml
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -247,9 +263,10 @@ Global
 		{19204E87-D442-4C0F-8CE3-0BA765BECD78} = {909B4F42-EC1D-4237-B5E2-7C31FB55A29E}
 		{AE2D3228-A98E-4383-BA5E-4198735A6B66} = {574904F3-F9C4-4D89-AC33-9C9A2B590BD8}
 		{E038D21E-73D1-4C93-A90C-CE33E3677179} = {84BCB7A7-6678-441F-B075-15D4A7E04ACB}
+		{96BC0F17-6FB1-4C96-A1CA-2B4CF5723E69} = {EBA8BEB2-ECFB-49AF-B2A2-7C8E06039BEF}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
 		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
+		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
 	EndGlobalSection
 EndGlobal

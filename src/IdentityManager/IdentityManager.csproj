@@ -5,12 +5,13 @@
 		<UserSecretsId>268aa8a3-e15c-4b79-84cc-77fcdae5b61e</UserSecretsId>
 		<DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
-		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
 		<DockerComposeProjectPath>..\docker-compose.dcproj</DockerComposeProjectPath>
 		<ApplicationIcon />
 		<OutputType>Exe</OutputType>
 		<Nullable>enable</Nullable>
 		<ImplicitUsings>enable</ImplicitUsings>
+		<IsPackable>false</IsPackable>
+		<ServerGarbageCollection>true</ServerGarbageCollection>
 		<StartupObject />
 	</PropertyGroup>
 
