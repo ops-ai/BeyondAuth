@@ -1,65 +1,187 @@
-# ASP.NET Core (.NET Framework)
-# Build and test ASP.NET Core projects targeting the full .NET Framework.
-# Add steps that publish symbols, save build artifacts, and more:
-# https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
+# Docker
+# Build and push an image to Azure Container Registry
+# https://docs.microsoft.com/azure/devops/pipelines/languages/docker
 
 trigger:
 - develop
 
-pool:
-  vmImage: 'windows-2022'
+resources:
+- repo: self
 
 variables:
-  solution: 'src/Authorization.sln'
-  buildPlatform: 'Any CPU'
-  buildConfiguration: 'Release'
+  dockerRegistryServiceConnection: '86986db6-cabf-436b-a436-2cf8c1337c1b'
+  imageNameAudit: 'beyondauth-audit'
+  imageNameAccount: 'beyondauth-account'
+  imageNameAuth: 'beyondauth-auth'
+  imageNameDocs: 'beyondauth-docs'
+  imageNameIdp: 'beyondauth-idp'
+  imageNamePolicy: 'beyondauth-policy'
+  tag: '$(Build.BuildId)'
 
-steps:
-- task: NuGetToolInstaller@1
-  inputs:
-    versionSpec: 
-    checkLatest: true
+  # Agent VM image name
+  vmImageName: 'ubuntu-latest'
 
-- task: gitversion/setup@0
-  inputs:
-    versionSpec: '5.x'
+stages:
+- stage: Build
+  displayName: Build and push stage
+  jobs:
+  - job: Build
+    displayName: Build
+    pool:
+      vmImage: $(vmImageName)
+    steps:
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-account-stg.yaml > $(Build.ArtifactStagingDirectory)/ba-account-stg.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-account-prod.yaml > $(Build.ArtifactStagingDirectory)/ba-account-prod.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-audit-stg.yaml > $(Build.ArtifactStagingDirectory)/ba-audit-stg.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-audit-prod.yaml > $(Build.ArtifactStagingDirectory)/ba-audit-prod.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-auth-stg.yaml > $(Build.ArtifactStagingDirectory)/ba-auth-stg.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-auth-prod.yaml > $(Build.ArtifactStagingDirectory)/ba-auth-prod.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-docs-stg.yaml > $(Build.ArtifactStagingDirectory)/ba-docs-stg.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-docs-prod.yaml > $(Build.ArtifactStagingDirectory)/ba-docs-prod.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-idp-stg.yaml > $(Build.ArtifactStagingDirectory)/ba-idp-stg.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-idp-prod.yaml > $(Build.ArtifactStagingDirectory)/ba-idp-prod.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-policy-stg.yaml > $(Build.ArtifactStagingDirectory)/ba-policy-stg.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-policy-prod.yaml > $(Build.ArtifactStagingDirectory)/ba-policy-prod.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+        ArtifactName: 'charts'
+        publishLocation: 'Container'
 
-- task: gitversion/execute@0
-  inputs:
-    updateAssemblyInfo: true
-    updateAssemblyInfoFilename: '$(Build.SourcesDirectory)\src\AssemblyInfo.cs'
-    additionalArguments: '/output buildserver'
+    - task: Docker@2
+      displayName: Build Audit image
+      inputs:
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        repository: '$(imageNameAudit)'
+        command: 'build'
+        Dockerfile: 'src/AuditServer/Dockerfile'
+        buildContext: 'src'
+        tags: '$(tag)'
+        arguments: '--build-arg VERSION=$(tag)'
+    - task: Docker@2
+      displayName: Push Audit image to container registry
+      inputs:
+        containerRegistry: 'opsairegistry'
+        repository: '$(imageNameAudit)'
+        command: 'push'
 
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet restore'
-  inputs:
-    command: 'restore'
-    projects: '$(solution)'
-    feedsToUse: 'select'
-    vstsFeed: 'a176869a-9c3b-49c9-a033-c415e60df8aa'
+    - task: Docker@2
+      displayName: Build Account image
+      inputs:
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        repository: '$(imageNameAccount)'
+        command: 'build'
+        Dockerfile: 'src/Authentication/Dockerfile'
+        buildContext: 'src'
+        tags: '$(tag)'
+        arguments: '--build-arg VERSION=$(tag)'
+    - task: Docker@2
+      displayName: Push Account image to container registry
+      inputs:
+        containerRegistry: 'opsairegistry'
+        repository: '$(imageNameAccount)'
+        command: 'push'
 
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet build'
-  inputs:
-    command: 'build'
-    projects: '$(solution)'
-    arguments: '--no-restore -c $(buildConfiguration)'
+    - task: Docker@2
+      displayName: Build Auth image
+      inputs:
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        repository: '$(imageNameAuth)'
+        command: 'build'
+        Dockerfile: 'src/AuthorizationServer/Dockerfile'
+        buildContext: 'src'
+        tags: '$(tag)'
+        arguments: '--build-arg VERSION=$(tag)'
+    - task: Docker@2
+      displayName: Push Auth image to container registry
+      inputs:
+        containerRegistry: 'opsairegistry'
+        repository: '$(imageNameAuth)'
+        command: 'push'
 
-- task: DotNetCoreCLI@2
-  displayName: 'dotnet test'
-  inputs:
-    command: test
-    projects: '$(solution)'
-    arguments: '--no-restore --no-build -c $(buildConfiguration) --collect:"XPlat Code Coverage"'
+    - task: Docker@2
+      displayName: Build Docs image
+      inputs:
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        repository: '$(imageNameDocs)'
+        command: 'build'
+        Dockerfile: 'src/Documentation/Dockerfile'
+        buildContext: 'src'
+        tags: '$(tag)'
+        arguments: '--build-arg VERSION=$(tag)'
+    - task: Docker@2
+      displayName: Push Docs image to container registry
+      inputs:
+        containerRegistry: 'opsairegistry'
+        repository: '$(imageNameDocs)'
+        command: 'push'
 
-- task: DotNetCoreCLI@2
-  inputs:
-    command: 'publish'
-    publishWebProjects: true
-    arguments: '--no-restore --configuration $(buildConfiguration) --output $(Build.ArtifactStagingDirectory)'
+    - task: Docker@2
+      displayName: Build IdP image
+      inputs:
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        repository: '$(imageNameIdp)'
+        command: 'build'
+        Dockerfile: 'src/IdentityManager/Dockerfile'
+        buildContext: 'src'
+        tags: '$(tag)'
+        arguments: '--build-arg VERSION=$(tag)'
+    - task: Docker@2
+      displayName: Push IdP image to container registry
+      inputs:
+        containerRegistry: 'opsairegistry'
+        repository: '$(imageNameIdp)'
+        command: 'push'
 
-- task: PublishBuildArtifacts@1
-  inputs:
-    PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-    ArtifactName: 'drop'
-    publishLocation: 'Container'
+    - task: Docker@2
+      displayName: Build Policy image
+      inputs:
+        containerRegistry: '$(dockerRegistryServiceConnection)'
+        repository: '$(imageNamePolicy)'
+        command: 'build'
+        Dockerfile: 'src/PolicyServer/Dockerfile'
+        buildContext: 'src'
+        tags: '$(tag)'
+        arguments: '--build-arg VERSION=$(tag)'
+    - task: Docker@2
+      displayName: Push Policy image to container registry
+      inputs:
+        containerRegistry: 'opsairegistry'
+        repository: '$(imageNamePolicy)'
+        command: 'push'
