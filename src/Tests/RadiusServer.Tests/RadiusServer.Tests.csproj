@@ -20,7 +20,7 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Divergic.Logging.Xunit" Version="4.0.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.3" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="6.0.4" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.1.0" />
     <PackageReference Include="Microsoft.TestPlatform.TestHost" Version="17.1.0" />
     <PackageReference Include="Moq" Version="4.17.2" />
