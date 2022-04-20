@@ -362,8 +362,17 @@ namespace IdentityManager
             IdentityModelEventSource.ShowPII = true;
             app.UseExceptionHandler(new ExceptionHandlerOptions { AllowStatusCode404Response = true, ExceptionHandlingPath = "/error" });
 
+            var forwardOptions = new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.All,
+                ForwardedForHeaderName = "cf-connecting-ip",
+                ForwardedHostHeaderName = "X-Forwarded-Host",
+                ForwardedProtoHeaderName = "X-Forwarded-Proto",
+            };
+            forwardOptions.KnownNetworks.Clear();
+            forwardOptions.KnownProxies.Clear();
+            app.UseForwardedHeaders(forwardOptions);
             app.UseHttpsRedirection();
-            app.UseForwardedHeaders();
 
             if (auditStoreDb != null)
             {

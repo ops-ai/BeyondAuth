@@ -226,7 +226,17 @@ namespace AuthorizationServer
         {
             app.UseExceptionHandler(new ExceptionHandlerOptions { AllowStatusCode404Response = true, ExceptionHandlingPath = "/error" });
 
-            app.UseForwardedHeaders();
+            var forwardOptions = new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.All,
+                ForwardedForHeaderName = "cf-connecting-ip",
+                ForwardedHostHeaderName = "X-Forwarded-Host",
+                ForwardedProtoHeaderName = "X-Forwarded-Proto",
+            };
+            forwardOptions.KnownNetworks.Clear();
+            forwardOptions.KnownProxies.Clear();
+            app.UseForwardedHeaders(forwardOptions);
+            app.UseHttpsRedirection();
 
             app.UseXContentTypeOptions();
             app.UseXDownloadOptions();

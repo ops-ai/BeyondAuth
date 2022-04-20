@@ -289,8 +289,17 @@ namespace PolicyServer
         {
             app.UseExceptionHandler(new ExceptionHandlerOptions { ExceptionHandlingPath = "/error", AllowStatusCode404Response = true });
 
+            var forwardOptions = new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.All,
+                ForwardedForHeaderName = "cf-connecting-ip",
+                ForwardedHostHeaderName = "X-Forwarded-Host",
+                ForwardedProtoHeaderName = "X-Forwarded-Proto",
+            };
+            forwardOptions.KnownNetworks.Clear();
+            forwardOptions.KnownProxies.Clear();
+            app.UseForwardedHeaders(forwardOptions);
             app.UseHttpsRedirection();
-            app.UseForwardedHeaders();
 
             app.UseCors(x => x.AllowAnyOrigin().WithHeaders("accept", "authorization", "content-type", "origin").AllowAnyMethod());
 

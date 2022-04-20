@@ -138,6 +138,16 @@ namespace Documentation
         {
             app.UseExceptionHandler(new ExceptionHandlerOptions { AllowStatusCode404Response = false, ExceptionHandlingPath = "/error" });
 
+            var forwardOptions = new ForwardedHeadersOptions
+            {
+                ForwardedHeaders = ForwardedHeaders.All,
+                ForwardedForHeaderName = "cf-connecting-ip",
+                ForwardedHostHeaderName = "X-Forwarded-Host",
+                ForwardedProtoHeaderName = "X-Forwarded-Proto",
+            };
+            forwardOptions.KnownNetworks.Clear();
+            forwardOptions.KnownProxies.Clear();
+            app.UseForwardedHeaders(forwardOptions);
             app.UseForwardedHeaders();
 
             app.UseRouting();
