@@ -1,4 +1,8 @@
 using Autofac;
+using Azure.Core;
+using Azure.Identity;
+using Azure.Security.KeyVault.Certificates;
+using Azure.Security.KeyVault.Secrets;
 using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -16,6 +20,8 @@ using OpenTelemetry.Trace;
 using Prometheus;
 using Prometheus.SystemMetrics;
 using Prometheus.SystemMetrics.Collectors;
+using Raven.Client.Documents;
+using System.Security.Cryptography.X509Certificates;
 
 namespace Documentation
 {
@@ -99,6 +105,32 @@ namespace Documentation
             });
 
             services.AddControllers();
+
+
+            X509Certificate2? ravenDBcert = null;
+            if (Environment.GetEnvironmentVariable("VaultUri") != null)
+            {
+                TokenCredential? clientCredential = Environment.GetEnvironmentVariable("ClientId") != null ? new ClientSecretCredential(Environment.GetEnvironmentVariable("TenantId"), Environment.GetEnvironmentVariable("ClientId"), Environment.GetEnvironmentVariable("ClientSecret")) : null;
+
+                var certificateClient = new CertificateClient(vaultUri: new Uri(Environment.GetEnvironmentVariable("VaultUri")!), credential: clientCredential ?? new DefaultAzureCredential());
+                var secretClient = new SecretClient(new Uri(Environment.GetEnvironmentVariable("VaultUri")!), clientCredential ?? new DefaultAzureCredential());
+
+                var ravenDbCertificateClient = certificateClient.GetCertificate("RavenDB");
+                var ravenDbCertificateSegments = ravenDbCertificateClient.Value.SecretId.Segments;
+                var ravenDbCertificateBytes = Convert.FromBase64String(secretClient.GetSecret(ravenDbCertificateSegments[2].Trim('/'), ravenDbCertificateSegments[3].TrimEnd('/')).Value.Value);
+                ravenDBcert = new X509Certificate2(ravenDbCertificateBytes);
+            }
+
+            services.AddSingleton((ctx) =>
+            {
+                IDocumentStore store = new DocumentStore
+                {
+                    Urls = Configuration.GetSection("Raven:Urls").Get<string[]>(),
+                    Database = Configuration["Raven:Database"],
+                    Certificate = ravenDBcert
+                };
+                return store.Initialize();
+            });
 
             services.AddOpenTelemetryTracing(
                 (builder) => builder
