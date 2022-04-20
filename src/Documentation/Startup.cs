@@ -51,8 +51,6 @@ namespace Documentation
 
             services.AddCorrelationId();
 
-            services.AddHealthChecks();
-
             services.AddOpenApiDocument(config =>
             {
                 config.DocumentName = "v1";
