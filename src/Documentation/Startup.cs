@@ -1,28 +1,18 @@
-using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
+using Autofac;
 using CorrelationId.DependencyInjection;
-using Microsoft.Extensions.Hosting;
+using Microsoft.AspNetCore.HttpOverrides;
+using NetTools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 using NSwag;
-using NSwag.Generation.Processors.Security;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using Autofac;
 using NSwag.AspNetCore;
-using Microsoft.AspNetCore.HttpOverrides;
-using NetTools;
+using NSwag.Generation.Processors.Security;
 using OpenTelemetry.Metrics;
 using OpenTelemetry.Resources;
 using OpenTelemetry.Trace;
+using Prometheus;
 using Prometheus.SystemMetrics;
 using Prometheus.SystemMetrics.Collectors;
-using Prometheus;
 
 namespace Documentation
 {

@@ -4,9 +4,7 @@
 
 using IdentityModel;
 using Microsoft.AspNetCore.Authentication;
-using Microsoft.AspNetCore.Http;
 using Newtonsoft.Json;
-using System.Collections.Generic;
 using System.Text;
 
 namespace Authentication.Models.Diagnostics

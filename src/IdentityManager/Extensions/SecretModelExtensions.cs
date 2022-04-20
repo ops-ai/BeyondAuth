@@ -1,6 +1,5 @@
 ﻿using IdentityManager.Models;
 using IdentityServer4.Models;
-using System;
 
 namespace IdentityManager.Extensions
 {

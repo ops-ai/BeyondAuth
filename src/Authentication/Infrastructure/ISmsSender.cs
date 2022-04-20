@@ -1,5 +1,4 @@
-﻿using System.Threading.Tasks;
-using static Authentication.Infrastructure.MessageSender;
+﻿using static Authentication.Infrastructure.MessageSender;
 
 namespace Authentication.Infrastructure
 {

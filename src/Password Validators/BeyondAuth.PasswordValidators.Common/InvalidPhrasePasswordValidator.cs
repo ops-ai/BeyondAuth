@@ -23,8 +23,8 @@ namespace BeyondAuth.PasswordValidators.Common
             if (password == null) { throw new ArgumentNullException(nameof(password)); }
             if (manager == null) { throw new ArgumentNullException(nameof(manager)); }
 
-            var result = _invalidPhrases.Contains(password) ? 
-                IdentityResult.Failed(new IdentityError { Code = "InvalidPhrase", Description = $"You cannot use '{password}' as your password" }) : 
+            var result = _invalidPhrases.Contains(password) ?
+                IdentityResult.Failed(new IdentityError { Code = "InvalidPhrase", Description = $"You cannot use '{password}' as your password" }) :
                 IdentityResult.Success;
 
             return Task.FromResult(result);

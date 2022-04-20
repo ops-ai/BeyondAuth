@@ -8,17 +8,12 @@ using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Raven.Client.Documents.Session;
-using System;
 using System.Net;
 using System.Text.RegularExpressions;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Authentication.Controllers
 {
@@ -39,7 +34,7 @@ namespace Authentication.Controllers
         private readonly IEmailSender _emailSender;
 
         public PasswordResetController(
-            IAsyncDocumentSession dbSession, 
+            IAsyncDocumentSession dbSession,
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IAuthenticationSchemeProvider schemeProvider,
@@ -53,7 +48,7 @@ namespace Authentication.Controllers
             IEmailSender emailSender) : base(dbSession)
         {
             _userManager = userManager;
-            
+
             _interaction = interaction;
             _clientStore = clientStore;
             _schemeProvider = schemeProvider;
@@ -213,7 +208,7 @@ namespace Authentication.Controllers
                     return View(model);
 
                 var user = await _userManager.FindByNameAsync(model.Email);
-                
+
                 Thread.Sleep(new Random(1).Next(500, 2000));
 
                 if (user == null)

@@ -1,6 +1,4 @@
 ﻿using Authentication.Models;
-using System.Collections.Generic;
-using System.Threading.Tasks;
 
 namespace Authentication.Infrastructure
 {

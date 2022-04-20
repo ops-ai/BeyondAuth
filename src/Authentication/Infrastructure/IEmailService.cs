@@ -1,6 +1,4 @@
-﻿using System.Threading.Tasks;
-
-namespace Authentication.Infrastructure
+﻿namespace Authentication.Infrastructure
 {
     /// <summary>
     /// 

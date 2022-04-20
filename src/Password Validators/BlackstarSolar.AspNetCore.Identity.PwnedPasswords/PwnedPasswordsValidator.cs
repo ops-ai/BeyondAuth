@@ -1,10 +1,10 @@
 ﻿namespace BlackstarSolar.AspNetCore.Identity.PwnedPasswords
 {
-    using System;
-    using System.Threading.Tasks;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.Options;
     using SharpPwned.NET;
+    using System;
+    using System.Threading.Tasks;
 
     public class PwnedPasswordsValidator<TUser> : IPasswordValidator<TUser> where TUser : class
     {
@@ -16,7 +16,7 @@
         {
             if (options == null)
                 throw new ArgumentNullException(nameof(options));
-            
+
             //if (string.IsNullOrEmpty(options.Value.ApiKey))
             //    throw new ArgumentNullException(nameof(options.Value.ApiKey));
 
@@ -31,7 +31,7 @@
                 return IdentityResult.Success;
             }
 
-            var result = IdentityResult.Failed(new IdentityError {Description = options.ErrorMessage, Code = "PwnedPassword" });
+            var result = IdentityResult.Failed(new IdentityError { Description = options.ErrorMessage, Code = "PwnedPassword" });
             return result;
         }
     }

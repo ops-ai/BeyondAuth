@@ -1,7 +1,6 @@
-﻿using JsonSubTypes;
+﻿using BeyondAuth.PolicyServer.Core.Entities.StorageRequirements;
+using JsonSubTypes;
 using Newtonsoft.Json;
-using NJsonSchema.Converters;
-using BeyondAuth.PolicyServer.Core.Entities.StorageRequirements;
 
 namespace BeyondAuth.PolicyServer.Core.Entities
 {

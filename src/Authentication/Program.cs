@@ -1,13 +1,7 @@
-using Azure.Identity;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
-using NLog.Web;
-using System;
-using System.IO;
-using OpenTelemetry.Logs;
 using Azure.Core;
+using Azure.Identity;
+using NLog.Web;
+using OpenTelemetry.Logs;
 
 namespace Authentication
 {
@@ -43,7 +37,7 @@ namespace Authentication
                 {
                     builder.AddNLog("nlog.config").AddNLogWeb();
                     builder.AddConsole();
-                    
+
                     var useLogging = context.Configuration.GetValue<bool>("UseLogging");
                     if (useLogging)
                     {

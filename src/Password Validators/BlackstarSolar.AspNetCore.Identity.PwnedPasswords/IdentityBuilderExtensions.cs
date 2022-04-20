@@ -1,8 +1,8 @@
 ﻿namespace BlackstarSolar.AspNetCore.Identity.PwnedPasswords
 {
-    using System;
     using Microsoft.AspNetCore.Identity;
     using Microsoft.Extensions.DependencyInjection;
+    using System;
 
     public static class IdentityBuilderExtensions
     {

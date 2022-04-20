@@ -450,7 +450,7 @@ namespace IdentityManager.Controllers
                         if (!userInfo.PhoneNumberConfirmed.HasValue)
                             user.PhoneNumberConfirmed = false;
                     }
-                    
+
                     if (userInfo.ChangePasswordOnNextLogin.HasValue)
                         user.ChangePasswordOnNextLogin = userInfo.ChangePasswordOnNextLogin.Value;
 

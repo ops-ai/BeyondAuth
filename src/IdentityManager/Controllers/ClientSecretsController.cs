@@ -63,7 +63,7 @@ namespace IdentityManager.Controllers
 
                     Response.Headers.Add("X-Total-Count", query.Count().ToString());
 
-                    return this.Partial(query.Skip(skip??0).Take(take??20).Select(t => t.ToModel()));
+                    return this.Partial(query.Skip(skip ?? 0).Take(take ?? 20).Select(t => t.ToModel()));
                 }
             }
             catch (Exception ex)
@@ -287,7 +287,7 @@ namespace IdentityManager.Controllers
                     var secret = client.ClientSecrets.First(t => t.Value.Sha256().Equals(id));
                     if (!client.ClientSecrets.Remove(secret))
                         throw new Exception("Failed to remove secret");
-                    
+
                     using (var audit = await AuditScope.CreateAsync("Client:RemoveSecret", () => client, new { client.Id, SecretId = secret.Value }))
                     {
                         await session.SaveChangesAsync(ct);

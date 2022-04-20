@@ -14,12 +14,8 @@ using IdentityServer4.Stores;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Raven.Client.Documents.Session;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Authentication.Controllers
 {
@@ -38,7 +34,7 @@ namespace Authentication.Controllers
         private readonly IOptions<ConsentOptions> _consentOptions;
 
         public ConsentController(
-            IAsyncDocumentSession dbSession, 
+            IAsyncDocumentSession dbSession,
             IIdentityServerInteractionService interaction,
             IClientStore clientStore,
             IResourceStore resourceStore,

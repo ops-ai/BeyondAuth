@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-
-namespace BeyondAuth.PolicyServer.Core.Entities.AuthorizationRequirements
+﻿namespace BeyondAuth.PolicyServer.Core.Entities.AuthorizationRequirements
 {
     /// <summary>
     /// Access is allowed during certain times

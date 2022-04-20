@@ -1,7 +1,6 @@
-﻿using JsonSubTypes;
+﻿using BeyondAuth.PolicyServer.Core.Entities.RoutingRequirements;
+using JsonSubTypes;
 using Newtonsoft.Json;
-using NJsonSchema.Converters;
-using BeyondAuth.PolicyServer.Core.Entities.RoutingRequirements;
 
 namespace BeyondAuth.PolicyServer.Core.Entities
 {

@@ -11,17 +11,11 @@ using IdentityServer4.Events;
 using IdentityServer4.Extensions;
 using IdentityServer4.Models;
 using IdentityServer4.Services;
-using IdentityServer4.Stores;
 using IdentityServer4.Validation;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Raven.Client.Documents.Session;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Authentication.Controllers
 {
@@ -36,7 +30,7 @@ namespace Authentication.Controllers
         private readonly IOptions<IdentityServerOptions> _options;
 
         public DeviceController(
-            IAsyncDocumentSession dbSession, 
+            IAsyncDocumentSession dbSession,
             IDeviceFlowInteractionService interaction,
             IEventService eventService,
             ILogger<DeviceController> logger,

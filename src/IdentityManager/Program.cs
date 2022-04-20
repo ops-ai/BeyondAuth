@@ -1,7 +1,7 @@
+using Azure.Core;
 using Azure.Identity;
 using NLog.Web;
 using OpenTelemetry.Logs;
-using Azure.Core;
 
 namespace IdentityManager
 {

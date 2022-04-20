@@ -1,8 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using Raven.Client.Documents.Session;
-using System;
-using System.Threading.Tasks;
 
 namespace Authentication.Controllers
 {

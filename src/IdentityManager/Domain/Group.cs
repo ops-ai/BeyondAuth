@@ -1,6 +1,4 @@
 ﻿using BeyondAuth.Acl;
-using System;
-using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace IdentityManager.Domain

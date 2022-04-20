@@ -1,16 +1,11 @@
-﻿using Identity.Core;
-using IdentityModel;
+﻿using IdentityModel;
 using IdentityServer.LdapExtension;
 using IdentityServer.LdapExtension.UserModel;
 using IdentityServer.LdapExtension.UserStore;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Raven.Client.Documents;
 using Raven.DependencyInjection;
-using System;
-using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Security.Claims;
 
 namespace Authentication.Stores

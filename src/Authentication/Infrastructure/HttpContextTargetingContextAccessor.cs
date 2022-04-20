@@ -1,9 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.FeatureManagement.FeatureFilters;
-using System;
-using System.Collections.Generic;
+﻿using Microsoft.FeatureManagement.FeatureFilters;
 using System.Security.Claims;
-using System.Threading.Tasks;
 
 namespace Authentication.Infrastructure
 {

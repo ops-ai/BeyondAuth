@@ -68,7 +68,7 @@ namespace IdentityManager.Controllers
 
                     Response.Headers.Add("X-Total-Count", stats.TotalResults.ToString());
 
-                    return this.Partial(await query.Skip(skip??0).Take(take??20).ToListAsync(ct).ContinueWith(t => t.Result.Select(c => new GroupModel {  CreatedOnUtc = c.CreatedOnUtc, Name = c.Name, Tags = c.Tags, UpdatedAt = c.UpdatedAt, MemberCount = c.Members.Count() }), ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
+                    return this.Partial(await query.Skip(skip ?? 0).Take(take ?? 20).ToListAsync(ct).ContinueWith(t => t.Result.Select(c => new GroupModel { CreatedOnUtc = c.CreatedOnUtc, Name = c.Name, Tags = c.Tags, UpdatedAt = c.UpdatedAt, MemberCount = c.Members.Count() }), ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
                 }
             }
             catch (Exception ex)
@@ -89,7 +89,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet("{name}")]
-        public async Task<IActionResult> Get([FromRoute]string name)
+        public async Task<IActionResult> Get([FromRoute] string name)
         {
             try
             {

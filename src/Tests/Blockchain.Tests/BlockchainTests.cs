@@ -1,8 +1,4 @@
 using Cryptography;
-using Org.BouncyCastle.Asn1.Sec;
-using Org.BouncyCastle.Crypto.Generators;
-using Org.BouncyCastle.Crypto.Parameters;
-using Org.BouncyCastle.Security;
 using System;
 using System.Collections.Generic;
 using System.Security.Cryptography;

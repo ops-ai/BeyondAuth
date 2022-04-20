@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace Authentication.Models
+﻿namespace Authentication.Models
 {
     /// <summary>
     /// Temporarily saved email message

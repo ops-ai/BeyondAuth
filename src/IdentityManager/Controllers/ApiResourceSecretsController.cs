@@ -63,7 +63,7 @@ namespace IdentityManager.Controllers
 
                     Response.Headers.Add("X-Total-Count", query.Count().ToString());
 
-                    return this.Partial(query.Skip(skip??0).Take(take??20).Select((t, idx) => t.ToModel()));
+                    return this.Partial(query.Skip(skip ?? 0).Take(take ?? 20).Select((t, idx) => t.ToModel()));
                 }
             }
             catch (Exception ex)

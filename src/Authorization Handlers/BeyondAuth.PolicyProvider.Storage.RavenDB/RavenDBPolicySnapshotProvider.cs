@@ -1,5 +1,5 @@
-﻿using Microsoft.Extensions.Options;
-using BeyondAuth.PolicyServer.Core.Models;
+﻿using BeyondAuth.PolicyServer.Core.Models;
+using Microsoft.Extensions.Options;
 using Raven.Client.Documents;
 
 namespace BeyondAuth.PolicyProvider.Storage.RavenDB

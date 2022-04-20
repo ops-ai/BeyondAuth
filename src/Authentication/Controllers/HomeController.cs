@@ -10,20 +10,12 @@ using IdentityServer4.Extensions;
 using IdentityServer4.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Raven.Client.Documents.Session;
-using System;
 using System.Drawing;
 using System.Globalization;
-using System.IO;
 using System.Reflection;
-using System.Threading.Tasks;
 
 namespace Authentication.Controllers
 {
@@ -38,10 +30,10 @@ namespace Authentication.Controllers
         private readonly UserManager<ApplicationUser> _userManager;
 
         public HomeController(
-            IAsyncDocumentSession dbSession, 
-            IIdentityServerInteractionService interaction, 
-            IWebHostEnvironment environment, 
-            ILogger<HomeController> logger, 
+            IAsyncDocumentSession dbSession,
+            IIdentityServerInteractionService interaction,
+            IWebHostEnvironment environment,
+            ILogger<HomeController> logger,
             IConfiguration configuration,
             IHttpContextAccessor httpContextAccessor,
             UserManager<ApplicationUser> userManager) : base(dbSession)

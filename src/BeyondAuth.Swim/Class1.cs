@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BeyondAuth.Swim
+﻿namespace BeyondAuth.Swim
 {
     public class Class1
     {

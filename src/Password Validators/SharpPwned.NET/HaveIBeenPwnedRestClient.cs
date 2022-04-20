@@ -1,12 +1,12 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using SharpPwned.NET.Interfaces;
+using SharpPwned.NET.Model;
+using System;
+using System.Collections.Generic;
 using System.Net.Http;
+using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
-using System.Security.Cryptography;
-using SharpPwned.NET.Model;
-using Newtonsoft.Json;
-using System.Collections.Generic;
-using SharpPwned.NET.Interfaces;
 
 namespace SharpPwned.NET
 {
@@ -81,7 +81,7 @@ namespace SharpPwned.NET
         {
             string api = "breachedaccount";
             string includeUnverifiedQueryString = string.Empty;
-            if(includeUnverified.HasValue && !includeUnverified.Value)
+            if (includeUnverified.HasValue && !includeUnverified.Value)
             {
                 includeUnverifiedQueryString = "?includeUnverified=false";
             }
@@ -89,7 +89,7 @@ namespace SharpPwned.NET
 
             List<Breach> AllBreaches = new List<Breach>();
 
-            if(response.StatusCode == "OK")
+            if (response.StatusCode == "OK")
             {
                 string body = response.Body;
                 AllBreaches = JsonConvert.DeserializeObject<List<Breach>>(body);
@@ -139,7 +139,7 @@ namespace SharpPwned.NET
             Uri uri = new Uri($"{overrideURL}/{parameters}");
 
             HttpRequestMessage request = new HttpRequestMessage(HttpMethod.Get, uri);
-            request.Headers.Add ("hibp-api-key", hibpApiKey);
+            request.Headers.Add("hibp-api-key", hibpApiKey);
 
             HttpResponseMessage response = null;
             request.Headers.TryAddWithoutValidation("User-Agent", userAgent);
@@ -157,7 +157,7 @@ namespace SharpPwned.NET
 
                 return RestResponse;
             }
-            catch(HttpRequestException e)
+            catch (HttpRequestException e)
             {
                 RestResponse.Body = null;
                 if (response != null) RestResponse.StatusCode = response.StatusCode.ToString();

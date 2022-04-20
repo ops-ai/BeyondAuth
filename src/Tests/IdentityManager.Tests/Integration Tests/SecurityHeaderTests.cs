@@ -1,5 +1,4 @@
 ﻿using Autofac;
-using IdentityManager.Tests.DataManagement;
 using IdentityManager.Tests.Fakes;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Authorization;

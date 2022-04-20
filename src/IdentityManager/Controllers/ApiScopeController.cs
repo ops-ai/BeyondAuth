@@ -57,7 +57,7 @@ namespace IdentityManager.Controllers
 
                     Response.Headers.Add("X-Total-Count", stats.TotalResults.ToString());
 
-                    return this.Partial(await query.Skip(skip??0).Take(take??20).ToListAsync(ct).ContinueWith(t => t.Result.Select(c => c.ToModel()), ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
+                    return this.Partial(await query.Skip(skip ?? 0).Take(take ?? 20).ToListAsync(ct).ContinueWith(t => t.Result.Select(c => c.ToModel()), ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
                 }
             }
             catch (Exception ex)

@@ -1,8 +1,7 @@
-﻿using JsonSubTypes;
+﻿using BeyondAuth.PolicyServer.Core.Entities.AuthorizationRequirements;
+using JsonSubTypes;
 using Microsoft.AspNetCore.Authorization;
 using Newtonsoft.Json;
-using NJsonSchema.Converters;
-using BeyondAuth.PolicyServer.Core.Entities.AuthorizationRequirements;
 
 namespace BeyondAuth.PolicyServer.Core.Entities
 {

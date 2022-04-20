@@ -1,7 +1,4 @@
-﻿using System;
-using System.Runtime.Serialization;
-
-namespace Authentication.Infrastructure
+﻿namespace Authentication.Infrastructure
 {
     public class SendNotificationException : Exception
     {

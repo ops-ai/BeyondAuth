@@ -1,7 +1,6 @@
 using Authentication.Models;
 using IdentityServer4.Models;
 using Microsoft.AspNetCore.Mvc;
-using System;
 
 namespace Authentication.Extensions
 {

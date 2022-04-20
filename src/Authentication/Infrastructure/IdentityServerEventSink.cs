@@ -1,7 +1,6 @@
 ﻿using IdentityServer4.Events;
 using IdentityServer4.Services;
 using System.Diagnostics;
-using System.Threading.Tasks;
 
 namespace Authentication.Infrastructure
 {
@@ -26,7 +25,7 @@ namespace Authentication.Infrastructure
                 activity.SetTag(nameof(evt.RemoteIpAddress), evt.RemoteIpAddress);
                 activity.SetTag(nameof(evt.Category), evt.Category);
                 activity.SetStartTime(evt.TimeStamp);
-                
+
                 switch (evt)
                 {
                     case ApiAuthenticationSuccessEvent authenticationSuccessEvent:

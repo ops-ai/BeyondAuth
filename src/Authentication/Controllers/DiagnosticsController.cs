@@ -7,12 +7,8 @@ using Authentication.Models.Diagnostics;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Microsoft.FeatureManagement.Mvc;
 using Raven.Client.Documents.Session;
-using System;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Authentication.Controllers
 {
@@ -49,6 +45,26 @@ namespace Authentication.Controllers
                 _logger.LogError(ex, "Error displaying diagnostics");
                 throw;
             }
+        }
+
+        /// <summary>
+        /// Diagnostics in json format
+        /// </summary>
+        [AllowAnonymous]
+        [Route("diagnostics.json")]
+        public async Task<IActionResult> Diagnostics()
+        {
+            var authResult = await HttpContext.AuthenticateAsync();
+
+            return Ok(new
+            {
+                Request.Headers,
+                RemoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString(),
+                Request.IsHttps,
+                Request.HttpContext.Connection.LocalPort,
+                authResult?.Principal?.Claims,
+                authResult?.Properties?.Items
+            });
         }
     }
 }

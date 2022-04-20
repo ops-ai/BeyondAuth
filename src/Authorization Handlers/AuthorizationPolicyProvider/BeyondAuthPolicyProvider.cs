@@ -1,15 +1,14 @@
 ﻿using BeyondAuth.PolicyProvider.Exceptions;
+using BeyondAuth.PolicyServer.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
-using BeyondAuth.PolicyServer.Core.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
 using System.Net.Http;
-using System.Net.Http.Json;
 using System.Threading.Tasks;
 
 namespace BeyondAuth.PolicyProvider
@@ -101,7 +100,7 @@ namespace BeyondAuth.PolicyProvider
                 {
                     if (timeout.HasValue)
                         httpClient.Timeout = new TimeSpan(timeout.Value);
-                    
+
                     var newDefinitionsRequest = await httpClient.GetAsync($"policies").ConfigureAwait(false);
                     if (newDefinitionsRequest.StatusCode == System.Net.HttpStatusCode.NotModified)
                         return;

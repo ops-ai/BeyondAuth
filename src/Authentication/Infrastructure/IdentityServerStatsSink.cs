@@ -1,15 +1,10 @@
 ﻿using IdentityServer4.Contrib.RavenDB.Options;
 using IdentityServer4.Events;
 using IdentityServer4.Services;
-using Microsoft.Extensions.Hosting;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Raven.Client.Documents;
-using System;
 using System.Collections.Concurrent;
 using System.Text;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Authentication.Infrastructure
 {

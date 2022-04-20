@@ -1,8 +1,8 @@
 ﻿using Autofac;
-using BeyondAuth.PolicyProvider;
+using BeyondAuth.PolicyServer.Core.Entities;
+using BeyondAuth.PolicyServer.Core.Entities.AuthorizationRequirements;
+using BeyondAuth.PolicyServer.Core.Models;
 using Identity.Core;
-using JsonSubTypes;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Authorization;
 using Microsoft.AspNetCore.TestHost;
@@ -12,10 +12,6 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Moq;
 using Newtonsoft.Json.Linq;
-using NJsonSchema.Converters;
-using BeyondAuth.PolicyServer.Core.Entities;
-using BeyondAuth.PolicyServer.Core.Entities.AuthorizationRequirements;
-using BeyondAuth.PolicyServer.Core.Models;
 using PolicyServer.Tests.Fakes;
 using Raven.Client.Documents;
 using Raven.Client.ServerWide;
@@ -25,15 +21,9 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
-using System.Linq;
 using System.Net;
 using System.Net.Http;
-using System.Net.Http.Json;
-using System.Reflection;
-using System.Runtime.Serialization;
 using System.Security.Claims;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using tsh.Xunit.Logging;
 using Xunit;
@@ -119,7 +109,7 @@ namespace PolicyServer.Tests.Integration_Tests
                     Requirements = new List<AuthorizationRequirement> { new GroupMembershipRequirement { GroupName = "Special Users" } },
                     Id = "Policies/test"
                 });
-                
+
                 await session.SaveChangesAsync();
             }
 
@@ -130,7 +120,7 @@ namespace PolicyServer.Tests.Integration_Tests
 
             var srt = await response.Content.ReadAsStringAsync();
             var policies = Newtonsoft.Json.JsonConvert.DeserializeObject<List<PolicyModel>>(srt);
-            
+
             Assert.Single(policies);
             var policy = policies[0];
             Assert.Null(policy.Name);
@@ -148,7 +138,7 @@ namespace PolicyServer.Tests.Integration_Tests
             Assert.IsType<JArray>(policy.Criteria["Name"]);
             Assert.Equal("Feature1", ((JArray)policy.Criteria["Name"])[0]);
             Assert.Equal("Feature2", ((JArray)policy.Criteria["Name"])[1]);
-            
+
             Assert.Equal(PolicyMatch.Criteria, policy.Matching);
         }
 
@@ -197,7 +187,8 @@ namespace PolicyServer.Tests.Integration_Tests
             var policies = Newtonsoft.Json.JsonConvert.DeserializeObject<List<PolicyModel>>(srt);
 
             var httpClientFactoryMock = new Mock<IHttpClientFactory>();
-            var clientHandlerStub = new DelegatingHandlerStub((request, cancellationToken) => {
+            var clientHandlerStub = new DelegatingHandlerStub((request, cancellationToken) =>
+            {
                 var response = new HttpResponseMessage(HttpStatusCode.OK) { Content = new StringContent(srt) };
                 return Task.FromResult(response);
             });

@@ -1,8 +1,8 @@
-﻿using IdentityServer4.Contrib.RavenDB.Options;
+﻿using BeyondAuth.PolicyServer.Core.Entities;
+using BeyondAuth.PolicyServer.Core.Models;
+using IdentityServer4.Contrib.RavenDB.Options;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
-using BeyondAuth.PolicyServer.Core.Entities;
-using BeyondAuth.PolicyServer.Core.Models;
 using PolicyServer.Extensions;
 using Raven.Client.Documents;
 using System.Net;

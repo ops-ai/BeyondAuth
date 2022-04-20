@@ -64,7 +64,7 @@ namespace IdentityManager.Controllers
 
                     Response.Headers.Add("X-Total-Count", stats.TotalResults.ToString());
 
-                    return this.Partial(await query.Skip(skip??0).Take(take??20).ToListAsync(ct)
+                    return this.Partial(await query.Skip(skip ?? 0).Take(take ?? 20).ToListAsync(ct)
                         .ContinueWith(t => t.Result.Select(c => new GroupMemberModel { CreatedOnUtc = group.Members[c.Id!].CreatedOnUtc, DisplayName = c.DisplayName, FirstName = c.FirstName, LastName = c.LastName, Email = c.Email, Id = c.Id!.Split('/').Last() }), ct, TaskContinuationOptions.ExecuteSynchronously, TaskScheduler.Default));
                 }
             }

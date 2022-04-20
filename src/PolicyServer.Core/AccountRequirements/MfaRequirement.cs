@@ -1,6 +1,4 @@
-﻿using System;
-
-namespace BeyondAuth.PolicyServer.Core.Entities.AccountRequirements
+﻿namespace BeyondAuth.PolicyServer.Core.Entities.AccountRequirements
 {
     /// <summary>
     /// Account requires MFA upon login

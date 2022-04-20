@@ -10,11 +10,7 @@ using IdentityServer4.Services;
 using IdentityServer4.Stores;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.Extensions.Logging;
 using Raven.Client.Documents.Session;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace Authentication.Controllers
 {
@@ -32,7 +28,7 @@ namespace Authentication.Controllers
         private readonly ILogger _logger;
 
         public GrantsController(
-            IAsyncDocumentSession dbSession, 
+            IAsyncDocumentSession dbSession,
             IIdentityServerInteractionService interaction,
             IClientStore clients,
             IResourceStore resources,

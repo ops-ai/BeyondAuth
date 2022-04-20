@@ -1,14 +1,8 @@
-﻿using Identity.Core;
-using Microsoft.Extensions.Hosting;
-using Raven.Client.Documents;
-using System.Threading;
-using System.Threading.Tasks;
-using System;
+﻿using Authentication.Infrastructure;
 using Authentication.Models.Messages;
-using System.Net;
-using Authentication.Infrastructure;
+using Identity.Core;
 using Microsoft.AspNetCore.Identity;
-using Microsoft.Extensions.Logging;
+using Raven.Client.Documents;
 
 namespace Authentication.Services
 {
@@ -79,7 +73,8 @@ namespace Authentication.Services
                 foreach (var tenantSetting in tenantSettings)
                 {
                     _store.Changes($"TenantIdentity-{tenantSetting.Identifier}").ForDocumentsInCollection<PasswordResetRequest>()
-                        .Subscribe(change => {
+                        .Subscribe(change =>
+                        {
                             if (change.Type == Raven.Client.Documents.Changes.DocumentChangeTypes.Put)
                                 SendPasswordAsync(change.Id, tenantSetting.Identifier).ConfigureAwait(false).GetAwaiter().GetResult();
                         });

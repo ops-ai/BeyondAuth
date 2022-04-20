@@ -1,9 +1,7 @@
 ﻿using IdentityServer4.Models;
 using OpenTelemetry;
 using Raven.Client.Documents.Session;
-using System;
 using System.Diagnostics;
-using System.Linq;
 
 namespace Authentication.Infrastructure
 {

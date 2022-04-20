@@ -1,6 +1,6 @@
 ﻿using BeyondAuth.Acl;
-using System.Linq;
 using Microsoft.AspNetCore.Authorization;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace BeyondAuth.PolicyProvider

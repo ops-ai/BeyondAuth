@@ -2,17 +2,9 @@
 using Finbuckle.MultiTenant;
 using Identity.Core;
 using Identity.Core.Settings;
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using Raven.Client.Documents;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Net.Http;
-using System.Security.Claims;
 using System.Text.Json;
-using System.Threading.Tasks;
 
 namespace Authentication.Infrastructure
 {

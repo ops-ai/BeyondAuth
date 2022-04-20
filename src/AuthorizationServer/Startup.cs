@@ -10,15 +10,9 @@ using HealthChecks.UI.Client;
 using IdentityServer4.AccessTokenValidation;
 using IdentityServer4.Stores.Serialization;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
-using Microsoft.Extensions.Hosting;
 using NetTools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -33,11 +27,6 @@ using Prometheus.SystemMetrics;
 using Prometheus.SystemMetrics.Collectors;
 using Raven.Client.Documents;
 using Raven.Client.Json.Serialization.NewtonsoftJson;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
 using System.Security.Cryptography.X509Certificates;
 
 namespace AuthorizationServer

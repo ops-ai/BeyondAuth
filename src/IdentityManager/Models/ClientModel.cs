@@ -1,10 +1,7 @@
 ﻿using IdentityServer4;
 using IdentityServer4.Models;
 using Newtonsoft.Json;
-using Newtonsoft.Json.Converters;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Security.Claims;
 
 namespace IdentityManager.Models
 {
@@ -211,7 +208,7 @@ namespace IdentityManager.Models
         /// Hybrid, ResourceOwner, ClientCredentials).
         /// </summary>
         public ICollection<string> AllowedGrantTypes { get; set; }
-        
+
         /// <summary>
         /// Specifies whether a proof key is required for authorization code based token
         /// requests (defaults to false).

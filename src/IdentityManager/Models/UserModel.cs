@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-
-namespace IdentityManager.Models
+﻿namespace IdentityManager.Models
 {
     /// <summary>
     /// 

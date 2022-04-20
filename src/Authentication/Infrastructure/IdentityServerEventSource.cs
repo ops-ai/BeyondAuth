@@ -36,7 +36,7 @@ namespace Authentication.Infrastructure
         /// Api Authentication Success
         /// </summary>
         /// <param name="evt"></param>
-        [Event(1, Message = "Api Authentication Success: {0}", Level = EventLevel.Informational, Keywords = Keywords.Api)] 
+        [Event(1, Message = "Api Authentication Success: {0}", Level = EventLevel.Informational, Keywords = Keywords.Api)]
         public void ApiAuthenticationSuccess(ApiAuthenticationSuccessEvent evt) { WriteEvent(1, evt.ApiName, evt); }
 
         /// <summary>

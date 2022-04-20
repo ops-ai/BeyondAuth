@@ -1,8 +1,8 @@
 ﻿using BeyondAuth.PolicyProvider.Exceptions;
+using BeyondAuth.PolicyServer.Core.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.Extensions.Options;
 using Newtonsoft.Json;
-using BeyondAuth.PolicyServer.Core.Models;
 using System.Net.Http;
 using System.Threading.Tasks;
 
