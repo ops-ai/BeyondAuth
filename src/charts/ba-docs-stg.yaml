@@ -66,8 +66,8 @@ spec:
             httpHeaders:
               - name: Accept
                 value: text/html
-          failureThreshold: 1
-          periodSeconds: 20
+          failureThreshold: 3
+          periodSeconds: 60
 ---
 apiVersion: v1
 kind: Service
