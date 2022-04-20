@@ -117,6 +117,11 @@ namespace AuthorizationServer
                 return store.Initialize();
             });
 
+            services.AddGrpcHealthChecks(o =>
+            {
+                o.Services.MapService("", r => r.Tags.Contains("public"));
+            }).AddCheck("grpc", () => HealthCheckResult.Healthy());
+
             services.AddHealthChecks()
                 .AddRavenDB(setup => { setup.Urls = Configuration.GetSection("Raven:Urls").Get<string[]>(); setup.Database = Configuration["Raven:Database"]; setup.Certificate = ravenDBcert; }, "ravendb");
 

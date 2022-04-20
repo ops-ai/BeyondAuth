@@ -310,11 +310,6 @@ namespace PolicyServer
             app.UseHsts(options => options.MaxAge(30).AllResponses());
             app.UseCorrelationId();
 
-            app.UseRouting();
-            app.UseMultiTenant();
-            app.UseAuthentication();
-            app.UseAuthorization();
-
             app.UseOpenApi();
             app.UseSwaggerUi3(options =>
             {
@@ -336,6 +331,11 @@ namespace PolicyServer
             {
                 Predicate = _ => _.FailureStatus == HealthStatus.Unhealthy
             });
+
+            app.UseRouting();
+            app.UseMultiTenant();
+            app.UseAuthentication();
+            app.UseAuthorization();
 
             app.UseEndpoints(endpoints =>
             {

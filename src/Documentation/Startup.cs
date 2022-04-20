@@ -1,6 +1,9 @@
 using Autofac;
 using CorrelationId.DependencyInjection;
+using HealthChecks.UI.Client;
+using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 using NetTools;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
@@ -114,6 +117,9 @@ namespace Documentation
                 builder.AddHttpClientInstrumentation();
             });
 
+            services.AddHealthChecks()
+                .AddRavenDB(setup => { setup.Urls = Configuration.GetSection("Raven:Urls").Get<string[]>(); setup.Database = Configuration["Raven:Database"]; setup.Certificate = ravenDBcert; }, "ravendb");
+
             services.AddSystemMetrics(registerDefaultCollectors: false);
             services.AddSystemMetricCollector<WindowsMemoryCollector>();
             services.AddSystemMetricCollector<LoadAverageCollector>();
@@ -158,6 +164,17 @@ namespace Documentation
                 };
             });
             app.UseOpenTelemetryPrometheusScrapingEndpoint();
+
+            app.UseHealthChecks(Configuration["HealthChecks:FullEndpoint"], new HealthCheckOptions
+            {
+                Predicate = _ => true,
+                ResponseWriter = UIResponseWriter.WriteHealthCheckUIResponse
+            });
+
+            app.UseHealthChecks(Configuration["HealthChecks:SummaryEndpoint"], new HealthCheckOptions
+            {
+                Predicate = _ => _.FailureStatus == HealthStatus.Unhealthy
+            });
 
             app.UseEndpoints(endpoints =>
             {

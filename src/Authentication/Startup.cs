@@ -614,7 +614,7 @@ namespace Authentication
             app.UseForwardedHeaders(forwardOptions);
 
             app.UseHsts();
-            //app.UseHttpsRedirection();
+            app.UseHttpsRedirection();
             app.UseCertificateForwarding();
 
             app.UseResponseCaching();

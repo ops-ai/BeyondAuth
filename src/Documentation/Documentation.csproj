@@ -24,6 +24,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="6.0.4" />
 		<PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.2" />
 		<PackageReference Include="Azure.Identity" Version="1.6.0" />
 		<PackageReference Include="IPAddressRange" Version="4.2.0" />
