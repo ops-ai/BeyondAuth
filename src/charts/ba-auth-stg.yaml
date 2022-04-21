@@ -45,6 +45,16 @@ spec:
            secretKeyRef:
              name: "ba-auth-secrets"
              key: "ClientSecret"
+        - name: CertificateLocation
+          valueFrom:
+           secretKeyRef:
+             name: "ba-auth-secrets"
+             key: "CertificateLocation"
+        - name: CertificatePassword
+          valueFrom:
+           secretKeyRef:
+             name: "ba-auth-secrets"
+             key: "CertificatePassword"
         ports:
         - containerPort: 443
           name: auth-stg-https
