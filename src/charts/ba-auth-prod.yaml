@@ -68,6 +68,13 @@ spec:
                 value: text/html
           failureThreshold: 3
           periodSeconds: 60
+        volumeMounts:
+        - name: pfx-volume
+          mountPath: /app/certs
+      volumes:
+      - name: pfx-volume
+        secret:
+          secretName: beyondauthpfx
 ---
 apiVersion: v1
 kind: Service

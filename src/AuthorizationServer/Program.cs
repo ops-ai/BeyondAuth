@@ -1,8 +1,10 @@
 using Autofac.Extensions.DependencyInjection;
 using Azure.Core;
 using Azure.Identity;
+using Microsoft.AspNetCore.Server.Kestrel.Core;
 using NLog.Web;
 using OpenTelemetry.Logs;
+using System.Net;
 
 namespace AuthorizationServer
 {
@@ -30,6 +32,22 @@ namespace AuthorizationServer
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+
+                    if (Environment.GetEnvironmentVariable("CertificatePassword") != null && Environment.GetEnvironmentVariable("CertificateLocation") != null)
+                    {
+                        webBuilder.ConfigureKestrel(options => options.Listen(IPAddress.Any, 80,
+                            lo =>
+                            {
+                                lo.Protocols = HttpProtocols.Http1AndHttp2;
+                            }));
+                        webBuilder.ConfigureKestrel(options => options.Listen(IPAddress.Any, 443,
+                            lo =>
+                            {
+                                lo.Protocols = HttpProtocols.Http1AndHttp2;
+                                lo.UseHttps(Environment.GetEnvironmentVariable("CertificateLocation")!, Environment.GetEnvironmentVariable("CertificatePassword")!);
+                            })
+                        );
+                    }
                 })
                 .ConfigureLogging((context, builder) =>
                 {
