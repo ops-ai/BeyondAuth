@@ -458,7 +458,7 @@ namespace Authentication
 
             var healthChecks = services.AddHealthChecks()
                 .AddRavenDB(setup => { setup.Urls = Configuration.GetSection("Raven:Urls").Get<string[]>(); setup.Database = Configuration["Raven:Database"]; setup.Certificate = ravenDBcert; }, "ravendb")
-                .AddIdentityServer(new Uri(Configuration["BaseUrl"]), "openid-connect");
+                .AddIdentityServer(new Uri(Configuration["BaseUrl"]), "openid-connect", HealthStatus.Degraded);
 
             if (Environment.GetEnvironmentVariable("VaultUri") != null)
             {
@@ -467,7 +467,7 @@ namespace Authentication
                 healthChecks.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")), clientCredential ?? new DefaultAzureCredential(), options =>
                 {
 
-                });
+                }, "vault", HealthStatus.Degraded);
             }
 
             services.AddHttpClient("mailgun", config =>
