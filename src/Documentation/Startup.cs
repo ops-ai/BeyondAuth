@@ -193,7 +193,6 @@ namespace Documentation
                     UsePkceWithAuthorizationCodeGrant = true,
                 };
             });
-            app.UseOpenTelemetryPrometheusScrapingEndpoint();
 
             app.UseHealthChecks(Configuration["HealthChecks:FullEndpoint"], new HealthCheckOptions
             {
