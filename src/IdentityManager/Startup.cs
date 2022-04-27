@@ -1,5 +1,6 @@
 using Audit.Core;
 using Audit.NET.RavenDB;
+using Audit.NET.RavenDB.ConfigurationApi;
 using Audit.NET.RavenDB.Providers;
 using Azure.Core;
 using Azure.Identity;
@@ -45,6 +46,7 @@ using Raven.Client.Documents.Conventions;
 using Raven.Client.Json.Serialization.NewtonsoftJson;
 using Raven.DependencyInjection;
 using Raven.Identity;
+using SimpleHelpers;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json.Serialization;
 
@@ -55,7 +57,7 @@ namespace IdentityManager
         public Startup(IConfiguration configuration) => Configuration = configuration;
 
         public IConfiguration Configuration { get; }
-        private DocumentStore auditStoreDb;
+        X509Certificate2? ravenDBcert = null;
 
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
@@ -231,7 +233,6 @@ namespace IdentityManager
                 options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
             });
 
-            X509Certificate2? ravenDBcert = null;
             if (Environment.GetEnvironmentVariable("VaultUri") != null)
             {
                 TokenCredential? clientCredential = Environment.GetEnvironmentVariable("ClientId") != null ? new ClientSecretCredential(Environment.GetEnvironmentVariable("TenantId"), Environment.GetEnvironmentVariable("ClientId"), Environment.GetEnvironmentVariable("ClientSecret")) : null;
@@ -283,22 +284,6 @@ namespace IdentityManager
 
             services.ConfigureOptions<RavenOptionsSetup>();
             services.AddScoped(sp => sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<RavenSettings>>()?.Value?.DatabaseName));
-
-            if (ravenDBcert != null)
-            {
-                auditStoreDb = new DocumentStore { Urls = Configuration.GetSection("Raven:Urls").Get<string[]>(), Certificate = ravenDBcert, Database = Configuration["Raven:DatabaseName"] };
-                var serializer = new NewtonsoftJsonSerializationConventions
-                {
-                    JsonContractResolver = new AuditContractResolver()
-                };
-                serializer.CustomizeJsonSerializer += (JsonSerializer serializer) =>
-                {
-                    serializer.DefaultValueHandling = DefaultValueHandling.IgnoreAndPopulate;
-                    serializer.NullValueHandling = NullValueHandling.Ignore;
-                };
-                auditStoreDb.Conventions.Serialization = serializer;
-                auditStoreDb.Initialize();
-            }
 
             services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
             services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();
@@ -374,12 +359,26 @@ namespace IdentityManager
             app.UseForwardedHeaders(forwardOptions);
             app.UseHttpsRedirection();
 
-            if (auditStoreDb != null)
+            if (ravenDBcert != null)
             {
-                var auditConfig = Audit.Core.Configuration.Setup().UseFactory(
-                    () =>
-                    new RavenDbDataProvider(auditStoreDb, app.ApplicationServices.GetRequiredService<IOptions<IdentityStoreOptions>>().Value.DatabaseName, storeDiffOnly: true));
+                Audit.Core.Configuration.Setup()
+                    .JsonNewtonsoftAdapter(new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore })
+                    .UseRavenDB(config => config
+                    .WithSettings(settings => settings
+                        .Urls(Configuration.GetSection("Raven:Urls").Get<string[]>())
+                        .Database(ev => app.ApplicationServices.GetRequiredService<IOptions<IdentityStoreOptions>>().Value.DatabaseName)
+                        .Certificate(ravenDBcert)));
 
+                Audit.Core.Configuration.AddCustomAction(ActionType.OnEventSaving, scope =>
+                {
+                    var auditEvent = scope.Event;
+                    if (auditEvent.Target != null)
+                    {
+                        var diff = ObjectDiffPatch.GenerateDiff(auditEvent.Target.Old, auditEvent.Target.New);
+                        auditEvent.Target.Old = diff.OldValues;
+                        auditEvent.Target.New = diff.NewValues;
+                    }
+                });
                 Audit.Core.Configuration.AddCustomAction(ActionType.OnEventSaving, scope =>
                 {
                     var httpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
