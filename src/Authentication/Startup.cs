@@ -176,6 +176,8 @@ namespace Authentication
                     options.SupportLink = tenantInfo.AccountOptions.SupportLink;
                     options.WindowsAuthenticationSchemeName = tenantInfo.AccountOptions.WindowsAuthenticationSchemeName;
                     options.SignupUrl = tenantInfo.AccountOptions.SignupUrl;
+                    options.SignupMessage = tenantInfo.AccountOptions.SignupMessage;
+                    options.SignupText = tenantInfo.AccountOptions.SignupText;
                 })
                 .WithPerTenantOptions<ConsentOptions>((options, tenantInfo) =>
                 {

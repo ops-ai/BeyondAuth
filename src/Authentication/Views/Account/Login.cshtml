@@ -34,15 +34,17 @@
                             </label>
                         </div>
                     }
-                    @if (Model.SignupUrl != null)
-                    {
-                        <a href="@Model.SignupUrl" class="position-absolute top-0 end-0 link-dark text-decoration-none">Sign up</a>
-                    }
 
                 </div>
                 <div class="d-grid gap-2">
                     <button class="btn btn-primary btn-lg" name="button" type="submit" value="login">Login</button>
                 </div>
+                @if (Model.SignupUrl != null)
+                {
+                    <div class="mt-3 gap-2 text-center">
+                        @Model.SignupMessage <a href="@Model.SignupUrl" class="text-decoration-none">@Model.SignupText</a>
+                    </div>
+                }
             </form>
         }
         <div></div>

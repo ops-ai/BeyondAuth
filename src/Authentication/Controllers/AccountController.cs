@@ -287,7 +287,9 @@ namespace Authentication.Controllers
                     EnableLocalLogin = local,
                     ReturnUrl = returnUrl,
                     Email = context?.LoginHint,
-                    SignupUrl = _accountOptions.Value.SignupUrl
+                    SignupUrl = _accountOptions.Value.SignupUrl,
+                    SignupMessage = _accountOptions.Value.SignupMessage,
+                    SignupText = _accountOptions.Value.SignupText
                 };
 
                 if (!local)
@@ -328,7 +330,9 @@ namespace Authentication.Controllers
                 ReturnUrl = returnUrl,
                 Email = context?.LoginHint,
                 ExternalProviders = providers.ToArray(),
-                SignupUrl = _accountOptions.Value.SignupUrl
+                SignupUrl = _accountOptions.Value.SignupUrl,
+                SignupMessage = _accountOptions.Value.SignupMessage,
+                SignupText = _accountOptions.Value.SignupText
             };
         }
 

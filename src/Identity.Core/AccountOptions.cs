@@ -73,5 +73,15 @@ namespace Identity.Core
         /// Url to provide the user to sign up
         /// </summary>
         public string SignupUrl { get; set; }
+
+        /// <summary>
+        /// Message to display before the signup link
+        /// </summary>
+        public string SignupMessage { get; set; }
+
+        /// <summary>
+        /// Text inside the signup anchor
+        /// </summary>
+        public string SignupText { get; set; }
     }
 }

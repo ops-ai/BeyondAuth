@@ -11,7 +11,11 @@ namespace Authentication.Models.Account
 
         public bool AllowPasswordReset { get; set; } = true;
 
-        public string SignupUrl { get; set; }
+        public string? SignupUrl { get; set; }
+
+        public string? SignupMessage { get; set; }
+
+        public string? SignupText { get; set; }
 
         public IEnumerable<ExternalProvider> ExternalProviders { get; set; } = Enumerable.Empty<ExternalProvider>();
 

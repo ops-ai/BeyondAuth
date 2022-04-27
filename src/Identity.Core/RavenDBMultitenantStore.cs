@@ -25,6 +25,12 @@ namespace Identity.Core
         {
             _store = store;
             _cache = memoryCache;
+
+            _store.Changes().ForDocumentsInCollection<TenantSetting>().Subscribe(change =>
+            {
+                _cache.Remove($"TenantSettingId-{change.Id.Split('/').Last()}");
+                _cache.Remove($"TenantSetting-{change.Id.Split('/').Last()}");
+            });
         }
 
         public async Task<IEnumerable<TenantSetting>> GetAllAsync()
