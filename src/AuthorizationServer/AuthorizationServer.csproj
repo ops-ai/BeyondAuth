@@ -40,7 +40,7 @@
 		<PackageReference Include="Azure.Identity" Version="1.6.0" />
 		<PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.3.0" />
 		<PackageReference Include="CorrelationId" Version="3.0.1" />
-		<PackageReference Include="Grpc.AspNetCore" Version="2.44.0" />
+		<PackageReference Include="Grpc.AspNetCore" Version="2.45.0" />
 		<PackageReference Include="Grpc.AspNetCore.HealthChecks" Version="2.45.0" />
 		<PackageReference Include="Grpc.Tools" Version="2.45.0">
 			<PrivateAssets>all</PrivateAssets>
@@ -49,7 +49,7 @@
 		<PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
 		<PackageReference Include="IdentityServer4.Storage" Version="4.1.2" />
 		<PackageReference Include="IPAddressRange" Version="4.2.0" />
-		<PackageReference Include="Microsoft.AspNetCore.DataProtection.AzureStorage" Version="3.1.23" />
+		<PackageReference Include="Microsoft.AspNetCore.DataProtection.AzureStorage" Version="3.1.24" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
 		<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.1.46">
 			<PrivateAssets>all</PrivateAssets>
@@ -76,7 +76,7 @@
 		<PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="6.0.0" />
 		<PackageReference Include="prometheus-net.Contrib" Version="1.0.0" />
 		<PackageReference Include="prometheus-net.SystemMetrics" Version="2.0.0" />
-		<PackageReference Include="RavenDB.Client" Version="5.3.101" />
+		<PackageReference Include="RavenDB.Client" Version="5.3.102" />
 		<PackageReference Include="scientist" Version="2.0.0" />
 		<PackageReference Include="Toggly.FeatureManagement" Version="1.6.3" />
 	</ItemGroup>

@@ -42,7 +42,7 @@
 		<PackageReference Include="IdentityServer4.Contrib.RavenDB" Version="1.0.0" />
 		<PackageReference Include="IPAddressRange" Version="4.2.0" />
 		<PackageReference Include="JsonSubTypes" Version="1.8.0" />
-		<PackageReference Include="Microsoft.AspNetCore.DataProtection.AzureStorage" Version="3.1.23" />
+		<PackageReference Include="Microsoft.AspNetCore.DataProtection.AzureStorage" Version="3.1.24" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="6.0.4" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
 		<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.1.46">
@@ -71,7 +71,7 @@
 		<PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="6.0.0" />
 		<PackageReference Include="prometheus-net.Contrib" Version="1.0.0" />
 		<PackageReference Include="prometheus-net.SystemMetrics" Version="2.0.0" />
-		<PackageReference Include="RavenDB.Client" Version="5.3.101" />
+		<PackageReference Include="RavenDB.Client" Version="5.3.102" />
 		<PackageReference Include="scientist" Version="2.0.0" />
 		<PackageReference Include="Toggly.FeatureManagement" Version="1.6.3" />
 	</ItemGroup>

@@ -80,7 +80,7 @@
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="6.0.4" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.4" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Twitter" Version="6.0.4" />
-		<PackageReference Include="Microsoft.AspNetCore.DataProtection.AzureStorage" Version="3.1.23" />
+		<PackageReference Include="Microsoft.AspNetCore.DataProtection.AzureStorage" Version="3.1.24" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.4" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.4" />
 		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="6.0.4" />
@@ -109,7 +109,7 @@
 		<PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="6.0.0" />
 		<PackageReference Include="prometheus-net.Contrib" Version="1.0.0" />
 		<PackageReference Include="prometheus-net.SystemMetrics" Version="2.0.0" />
-		<PackageReference Include="RavenDB.Client" Version="5.3.101" />
+		<PackageReference Include="RavenDB.Client" Version="5.3.102" />
 		<PackageReference Include="scientist" Version="2.0.0" />
 		<PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
 		<PackageReference Include="System.Reactive.Core" Version="5.0.0" />
