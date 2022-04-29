@@ -178,6 +178,8 @@ namespace Authentication
                     options.SignupUrl = tenantInfo.AccountOptions.SignupUrl;
                     options.SignupMessage = tenantInfo.AccountOptions.SignupMessage;
                     options.SignupText = tenantInfo.AccountOptions.SignupText;
+                    options.EnableLockedOutMessage = tenantInfo.AccountOptions.EnableLockedOutMessage;
+                    options.LockedOutErrorMessage = tenantInfo.AccountOptions.LockedOutErrorMessage;
                 })
                 .WithPerTenantOptions<ConsentOptions>((options, tenantInfo) =>
                 {

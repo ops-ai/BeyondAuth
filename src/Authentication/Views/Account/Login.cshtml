@@ -17,6 +17,7 @@
                     <input type="password" class="form-control form-control-lg" placeholder="Your Password *" asp-for="Password" autocomplete="off" required />
                     <label asp-for="Password" class="form-label">Password</label>
                 </div>
+                @Html.ValidationMessageFor(m => m.Email)
                 @Html.ValidationMessageFor(m => m.Password)
                 <div class="position-relative mb-3 mt-3">
 

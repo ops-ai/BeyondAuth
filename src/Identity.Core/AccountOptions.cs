@@ -55,6 +55,16 @@ namespace Identity.Core
         public string InvalidCredentialsErrorMessage { get; set; }
 
         /// <summary>
+        /// Account locked out error message
+        /// </summary>
+        public string LockedOutErrorMessage { get; set; }
+
+        /// <summary>
+        /// Allow propagating a message to the user indicating their account is locked
+        /// </summary>
+        public bool EnableLockedOutMessage { get; set; }
+
+        /// <summary>
         /// Customer support email that should be displayed
         /// </summary>
         public string SupportEmail { get; set; }

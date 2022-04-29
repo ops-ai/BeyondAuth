@@ -167,7 +167,7 @@ namespace Authentication.Controllers
 
                 // validate username/password against in-memory store
                 var user = await _userManager.FindByNameAsync(model.Email);
-                if (user != null && !user.Disabled)
+                if (user != null && !user.Disabled && _accountOptions.Value.AllowLocalLogin)
                 {
                     var signinResult = await _signInManager.CheckPasswordSignInAsync(user, model.Password, true);
                     if (signinResult.Succeeded)
@@ -185,6 +185,9 @@ namespace Authentication.Controllers
 
                         await _signInManager.SignInAsync(user, props, "pwd");
 
+                        if (user.ChangePasswordOnNextLogin)
+                            return RedirectToAction("ChangePassword");
+
                         if (context != null)
                         {
                             if (context.IsNativeClient())
@@ -200,14 +203,36 @@ namespace Authentication.Controllers
 
                         return Redirect(props.RedirectUri);
                     }
-                    //TODO: Handle locked out message propagation if allowed by tenant settings
-                    //TODO: Handle local login not allowed for user signinResult.IsNotAllowed
-                    //TODO: Handle signinResult.RequiresTwoFactor
-                    //TODO: Handle change password on next login
+                    else if (signinResult.IsLockedOut && _accountOptions.Value.EnableLockedOutMessage) //Handle locked out message propagation if allowed by tenant settings
+                    {
+                        await _events.RaiseAsync(new UserLoginFailureEvent(model.Email, "locked out", clientId: context?.Client.ClientId));
+                        ModelState.AddModelError(nameof(model.Email), _accountOptions.Value.LockedOutErrorMessage);
+                    }
+                    else if (signinResult.IsNotAllowed) //Handle local login not allowed for user signinResult.IsNotAllowed
+                    {
+                        await _events.RaiseAsync(new UserLoginFailureEvent(model.Email, "not allowed", clientId: context?.Client.ClientId));
+                        ModelState.AddModelError(nameof(model.Email), "local login is not allowed");
+                    }
+                    else if (signinResult.RequiresTwoFactor)
+                    {
+                        //TODO: Handle signinResult.RequiresTwoFactor
+                        throw new NotSupportedException("two-factor not supported");
+                    }
+                    else
+                    {
+                        await _events.RaiseAsync(new UserLoginFailureEvent(model.Email, "invalid credentials", clientId: context?.Client.ClientId));
+                        ModelState.AddModelError(nameof(model.Password), _accountOptions.Value.InvalidCredentialsErrorMessage);
+                    }
                 }
+                else if (!_accountOptions.Value.AllowLocalLogin)
+                {
 
-                await _events.RaiseAsync(new UserLoginFailureEvent(model.Email, "invalid credentials", clientId: context?.Client.ClientId));
-                ModelState.AddModelError(nameof(model.Password), _accountOptions.Value.InvalidCredentialsErrorMessage);
+                }
+                else
+                {
+                    await _events.RaiseAsync(new UserLoginFailureEvent(model.Email, "invalid credentials", clientId: context?.Client.ClientId));
+                    ModelState.AddModelError(nameof(model.Password), _accountOptions.Value.InvalidCredentialsErrorMessage);
+                }
             }
 
             // something went wrong, show form with error
