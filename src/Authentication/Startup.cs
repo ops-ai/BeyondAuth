@@ -68,7 +68,9 @@ using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Text.Encodings.Web;
 using Toggly.FeatureManagement;
+using Toggly.FeatureManagement.Helpers;
 using Toggly.FeatureManagement.Storage.RavenDB;
+using Toggly.FeatureManagement.Web;
 
 namespace Authentication
 {
@@ -114,6 +116,9 @@ namespace Authentication
                     .AddFeatureFilter<ContextualTargetingFilter>()
                     .AddFeatureFilter<TargetingFilter>()
                     .AddFeatureFilter<TimeWindowFilter>();
+            services.AddSingleton<IFeatureContextProvider, HttpFeatureContextProvider>();
+            services.AddSingleton<IFeatureUsageStatsProvider, TogglyUsageStatsProvider>();
+            services.Decorate<IFeatureManager, TogglyFeatureManager>();
 
             NLog.GlobalDiagnosticsContext.Set("AzureLogStorageConnectionString", Configuration["LogStorage:AzureStorage"]);
             NLog.GlobalDiagnosticsContext.Set("LokiConnectionString", Configuration["LogStorage:Loki:Url"]);
@@ -462,8 +467,8 @@ namespace Authentication
             identityBuilder.Services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();
 
             var healthChecks = services.AddHealthChecks()
-                .AddRavenDB(setup => { setup.Urls = Configuration.GetSection("Raven:Urls").Get<string[]>(); setup.Database = Configuration["Raven:Database"]; setup.Certificate = ravenDBcert; }, "ravendb")
-                .AddIdentityServer(new Uri(Configuration["BaseUrl"]), "openid-connect", HealthStatus.Degraded);
+                .AddRavenDB(setup => { setup.Urls = Configuration.GetSection("Raven:Urls").Get<string[]>(); setup.Database = Configuration["Raven:Database"]; setup.Certificate = ravenDBcert; }, "ravendb", timeout: new TimeSpan(0, 0, 2))
+                /*.AddIdentityServer(new Uri(Configuration["BaseUrl"]), "openid-connect", HealthStatus.Degraded)*/;
 
             if (Environment.GetEnvironmentVariable("VaultUri") != null)
             {
@@ -472,7 +477,7 @@ namespace Authentication
                 healthChecks.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")), clientCredential ?? new DefaultAzureCredential(), options =>
                 {
 
-                }, "vault", HealthStatus.Degraded);
+                }, "vault", HealthStatus.Degraded, timeout: new TimeSpan(0, 0, 2));
             }
 
             services.AddHttpClient("mailgun", config =>
@@ -619,7 +624,7 @@ namespace Authentication
             app.UseForwardedHeaders(forwardOptions);
 
             app.UseHsts();
-            app.UseHttpsRedirection();
+            //app.UseHttpsRedirection();
             app.UseCertificateForwarding();
 
             app.UseResponseCaching();
@@ -645,7 +650,7 @@ namespace Authentication
                     builder.AddFrameAncestors().None();
                     builder.AddFormAction().Self();
                     builder.AddImgSrc().Self().Data().From("opsai.blob.core.windows.net");
-                    builder.AddScriptSrc().Self().From("cdnjs.cloudflare.com").From("ajax.cloudflare.com").From("static.cloudflareinsights.com");
+                    builder.AddScriptSrc().Self().From("cdnjs.cloudflare.com").From("ajax.cloudflare.com").From("static.cloudflareinsights.com").UnsafeEval();
                     builder.AddStyleSrc().Self().UnsafeInline();
 
                     //default-src 'self'; object-src 'none'; frame-ancestors 'none'; sandbox allow-forms allow-same-origin allow-scripts; base-uri 'self';

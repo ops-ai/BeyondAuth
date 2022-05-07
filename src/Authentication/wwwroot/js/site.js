@@ -1,5 +1,6 @@
 ﻿// Please see documentation at https://docs.microsoft.com/aspnet/core/client-side/bundling-and-minification
 // for details on configuring this project to bundle and minify static web assets.
+import FingerprintJS from '/lib/esm.min.js'
 
 (function () {
     'use strict'
@@ -52,5 +53,15 @@
 
         window.addEventListener("online", handleNetworkChange);
         window.addEventListener("offline", handleNetworkChange);
+
+        const fpPromise = FingerprintJS.load();
+
+        fpPromise
+            .then(fp => fp.get())
+            .then(result => {
+                var browserId = document.getElementById('BrowserId');
+                if (browserId) browserId.setAttribute('value', result.visitorId)
+            });
+
     });
 })()

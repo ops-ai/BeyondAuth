@@ -18,5 +18,7 @@ namespace Authentication.Models.Account
         public bool RememberLogin { get; set; }
 
         public string ReturnUrl { get; set; }
+
+        public string? BrowserId { get; set; }
     }
 }

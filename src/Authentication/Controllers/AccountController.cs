@@ -182,7 +182,8 @@ namespace Authentication.Controllers
                             ExpiresUtc = _accountOptions.Value.AllowRememberLogin && model.RememberLogin ? DateTimeOffset.UtcNow.Add(_accountOptions.Value.RememberMeLoginDuration) : null,
                             RedirectUri = !string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl) ? model.ReturnUrl : "~/"
                         };
-
+                        props.Items.Add("BrowserId", model.BrowserId);
+                        
                         await _signInManager.SignInAsync(user, props, "pwd");
 
                         if (user.ChangePasswordOnNextLogin)
