@@ -1,0 +1,30 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+	<PropertyGroup>
+		<TargetFramework>netstandard2.1</TargetFramework>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<Nullable>enable</Nullable>
+		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+		<GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+		<PackageProjectUrl>https://beyondauth.io</PackageProjectUrl>
+		<PackageIcon>favicon.png</PackageIcon>
+		<RepositoryUrl>https://github.com/ops-ai/BeyondAuth</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>user store;identity provider;authentication;beyondauth</PackageTags>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	</PropertyGroup>
+
+	<ItemGroup>
+		<None Include="..\..\favicon.png" Pack="true" PackagePath="" Link="favicon.png" />
+	</ItemGroup>
+
+	<ItemGroup>
+		<PackageReference Include="IdentityModel" Version="5.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="6.0.4" />
+		<PackageReference Include="Microsoft.Extensions.Http" Version="6.0.0" />
+		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="6.0.4" />
+		<PackageReference Include="Newtonsoft.Json" Version="13.0.1" />
+		<PackageReference Include="System.Net.Http.Json" Version="6.0.0" />
+	</ItemGroup>
+
+</Project>

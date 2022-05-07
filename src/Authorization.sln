@@ -110,6 +110,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "charts", "charts", "{96BC0F
 		charts\ba-policy-stg.yaml = charts\ba-policy-stg.yaml
 	EndProjectSection
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondAuth.UserManagement", "Policy Connectors\BeyondAuth.UserManagement\BeyondAuth.UserManagement.csproj", "{C0E4F481-065E-44F7-9804-4166B40F1282}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -239,6 +241,10 @@ Global
 		{E038D21E-73D1-4C93-A90C-CE33E3677179}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E038D21E-73D1-4C93-A90C-CE33E3677179}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E038D21E-73D1-4C93-A90C-CE33E3677179}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C0E4F481-065E-44F7-9804-4166B40F1282}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C0E4F481-065E-44F7-9804-4166B40F1282}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C0E4F481-065E-44F7-9804-4166B40F1282}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C0E4F481-065E-44F7-9804-4166B40F1282}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -264,9 +270,10 @@ Global
 		{AE2D3228-A98E-4383-BA5E-4198735A6B66} = {574904F3-F9C4-4D89-AC33-9C9A2B590BD8}
 		{E038D21E-73D1-4C93-A90C-CE33E3677179} = {84BCB7A7-6678-441F-B075-15D4A7E04ACB}
 		{96BC0F17-6FB1-4C96-A1CA-2B4CF5723E69} = {EBA8BEB2-ECFB-49AF-B2A2-7C8E06039BEF}
+		{C0E4F481-065E-44F7-9804-4166B40F1282} = {574904F3-F9C4-4D89-AC33-9C9A2B590BD8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
 		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
+		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
 	EndGlobalSection
 EndGlobal
