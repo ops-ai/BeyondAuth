@@ -56,13 +56,13 @@ namespace Authentication.Controllers
         {
             var authResult = await HttpContext.AuthenticateAsync();
 
-            return Ok(new
+            return Json(new
             {
                 Request.Headers,
                 RemoteIpAddress = Request.HttpContext.Connection.RemoteIpAddress?.ToString(),
                 Request.IsHttps,
                 Request.HttpContext.Connection.LocalPort,
-                authResult?.Principal?.Claims,
+                Claims = authResult?.Principal?.Claims.Select(t => new { t.Type, t.Value }),
                 authResult?.Properties?.Items
             });
         }
