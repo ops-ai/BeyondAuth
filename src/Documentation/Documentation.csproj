@@ -63,7 +63,7 @@
 		<PackageReference Include="prometheus-net.Contrib" Version="1.0.0" />
 		<PackageReference Include="prometheus-net.SystemMetrics" Version="2.0.0" />
 		<PackageReference Include="scientist" Version="2.0.0" />
-		<PackageReference Include="Toggly.FeatureManagement" Version="1.6.3" />
+		<PackageReference Include="Toggly.FeatureManagement" Version="1.9.3" />
 	</ItemGroup>
 
 	<ItemGroup>

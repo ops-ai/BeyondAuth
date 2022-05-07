@@ -59,6 +59,7 @@
 		<PackageReference Include="Autofac.Configuration" Version="6.0.0" />
 		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.2.0" />
 		<PackageReference Include="Azure.Extensions.AspNetCore.Configuration.Secrets" Version="1.2.2" />
+		<PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" Version="1.2.1" />
 		<PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Keys" Version="1.1.0" />
 		<PackageReference Include="Azure.Identity" Version="1.6.0" />
 		<PackageReference Include="BuildBundlerMinifier" Version="3.2.449" />
@@ -80,14 +81,13 @@
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="6.0.4" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.4" />
 		<PackageReference Include="Microsoft.AspNetCore.Authentication.Twitter" Version="6.0.4" />
-		<PackageReference Include="Microsoft.AspNetCore.DataProtection.AzureStorage" Version="3.1.24" />
 		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.4" />
 		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.4" />
 		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="6.0.4" />
 		<PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="2.5.1" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Kubernetes.Tools.Targets" Version="1.1.0" />
-		<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.1.46">
+		<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.2.32">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -113,9 +113,10 @@
 		<PackageReference Include="scientist" Version="2.0.0" />
 		<PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
 		<PackageReference Include="System.Reactive.Core" Version="5.0.0" />
-		<PackageReference Include="Toggly.FeatureManagement" Version="1.6.3" />
-		<PackageReference Include="Toggly.FeatureManagement.Storage.RavenDB" Version="1.6.3" />
-		<PackageReference Include="Twilio" Version="5.74.0" />
+		<PackageReference Include="Toggly.FeatureManagement" Version="1.9.3" />
+		<PackageReference Include="Toggly.FeatureManagement.Storage.RavenDB" Version="1.9.3" />
+		<PackageReference Include="Toggly.FeatureManagement.Web" Version="1.9.3" />
+		<PackageReference Include="Twilio" Version="5.75.0" />
 		<PackageReference Include="VaultSharp" Version="1.7.0.4" />
 		<PackageReference Include="WinInsider.System.Net.Http.Formatting" Version="1.0.14" />
 	</ItemGroup>
