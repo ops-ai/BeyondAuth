@@ -294,7 +294,7 @@ namespace Authentication
                             var store = ctx.HttpContext.RequestServices.GetRequiredService<IDocumentStore>();
                             using (var session = store.OpenAsyncSession($"TenantIdentity-{tenantInfo.Identifier}"))
                             {
-                                await session.StoreAsync(new UserSession
+                                var userSessions = new UserSession
                                 {
                                     Id = $"UserSessions/{ctx.Properties.GetString("session_id")}",
                                     BrowserIds = new List<string> { ctx.Properties.GetString("browser_id") },
@@ -304,7 +304,9 @@ namespace Authentication
                                     Idp = ctx.Principal.FindFirstValue("idp"),
                                     Amr = ctx.Principal.FindFirstValue("amr"),
                                     MaxExpireOnUtc = ctx.Properties.ExpiresUtc
-                                });
+                                };
+                                await session.StoreAsync(userSessions);
+                                session.Advanced.GetMetadataFor(userSessions)["@expires"] = ctx.Properties.ExpiresUtc ?? DateTime.UtcNow.AddYears(1);
                                 if (ctx.Properties.GetString("browser_id") != null)
                                 {
                                     var browserInfo = await session.LoadAsync<UserBrowser>($"UserBrowsers/{ctx.Properties.GetString("session_id")}");
@@ -318,6 +320,26 @@ namespace Authentication
                                     browserInfo.LastSeenOnUtc = DateTime.UtcNow;
                                 }
                                 await session.SaveChangesAsync();
+                            }
+                        },
+                        OnRedirectToLogout = async ctx =>
+                        {
+
+                        },
+                        OnSigningOut = async ctx =>
+                        {
+                            if (ctx.Scheme.Name == "Identity.Application")
+                            {
+                                var store = ctx.HttpContext.RequestServices.GetRequiredService<IDocumentStore>();
+                                using (var session = store.OpenAsyncSession($"TenantIdentity-{tenantInfo.Identifier}"))
+                                {
+                                    var userSession = await session.LoadAsync<UserSession>($"UserSessions/{ctx.Request.Cookies["idsrv.session"]}");
+                                    if (userSession.UserId == ctx.HttpContext.User.FindFirstValue("sub"))
+                                    {
+                                        session.Delete(userSession);
+                                        await session.SaveChangesAsync().ConfigureAwait(false);
+                                    }
+                                }
                             }
                         }
                     };
