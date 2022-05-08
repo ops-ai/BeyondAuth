@@ -277,7 +277,7 @@ namespace Authentication
                         {
                             var session = ctx.HttpContext.RequestServices.GetRequiredService<IAsyncDocumentSession>();
                             var userSession = await session.LoadAsync<UserSession>($"UserSessions/{ctx.Properties.GetString("session_id")}");
-                            if (userSession == null || userSession.UserAgent != ctx.Request.Headers.UserAgent) //TODO: Replace with a smart parser taking into account browser upgrades
+                            if (userSession == null) //TODO:  || userSession.UserAgent != ctx.Request.Headers.UserAgent Replace with a smart parser taking into account browser upgrades
                                 ctx.RejectPrincipal();
                             else
                             {
