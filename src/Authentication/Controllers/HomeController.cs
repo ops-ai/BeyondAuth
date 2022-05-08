@@ -168,7 +168,14 @@ namespace Authentication.Controllers
             {
                 if (exceptionHandlerPathFeature.Error is FileNotFoundException)
                     Response.StatusCode = 404;
-                _logger.LogError(exceptionHandlerPathFeature.Error, "Uncaught exception {path}", exceptionHandlerPathFeature.Path);
+                try
+                {
+                    throw exceptionHandlerPathFeature.Error;
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Uncaught exception {path}", exceptionHandlerPathFeature.Path);
+                }
             }
 
             // retrieve error details from identityserver
@@ -189,6 +196,7 @@ namespace Authentication.Controllers
         /// Shows the current version info
         /// </summary>
         [AllowAnonymous]
+        [Route("version")]
         public IActionResult Version()
         {
             var version = Assembly.GetEntryAssembly().GetCustomAttribute<AssemblyInformationalVersionAttribute>()?.InformationalVersion ?? "0.0.0";
