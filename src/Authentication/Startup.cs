@@ -1,4 +1,5 @@
 using Authentication.Controllers;
+using Authentication.Domain;
 using Authentication.Extensions;
 using Authentication.Infrastructure;
 using Authentication.Options;
@@ -58,6 +59,7 @@ using Prometheus.SystemMetrics.Collectors;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Conventions;
 using Raven.Client.Documents.Linq;
+using Raven.Client.Documents.Session;
 using Raven.Client.Json.Serialization.NewtonsoftJson;
 using Raven.DependencyInjection;
 using Raven.Identity;
@@ -266,9 +268,54 @@ namespace Authentication
                 })
                 .WithPerTenantOptions<CookieAuthenticationOptions>((o, tenantInfo) =>
                 {
+                    o.Cookie.Name = $"BA.{tenantInfo.Id}";
                     o.LoginPath = "/login";
                     o.LogoutPath = "/logout";
-                    o.Cookie.Name += tenantInfo.Id;
+                    o.Events = new CookieAuthenticationEvents
+                    {
+                        OnValidatePrincipal = async ctx =>
+                        {
+                            var session = ctx.HttpContext.RequestServices.GetRequiredService<IAsyncDocumentSession>();
+                            var userSession = await session.LoadAsync<UserSession>($"UserSessions/{ctx.Properties.GetString("session_id")}");
+                            if (userSession == null || userSession.UserAgent != ctx.Request.Headers.UserAgent) //TODO: Replace with a smart parser taking into account browser upgrades
+                                ctx.RejectPrincipal();
+                            else
+                            {
+                                userSession.LastSeenOnUtc = DateTime.UtcNow;
+                                if (!userSession.IPAddresses.Contains(ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString()))
+                                    userSession.IPAddresses.Add(ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString());
+                                await session.SaveChangesAsync();
+                            }
+                        },
+                        OnSignedIn = async ctx =>
+                        {
+                            var session = ctx.HttpContext.RequestServices.GetRequiredService<IAsyncDocumentSession>();
+                            await session.StoreAsync(new UserSession
+                            {
+                                Id = $"UserSessions/{ctx.Properties.GetString("session_id")}",
+                                BrowserIds = new List<string> { ctx.Properties.GetString("browser_id") },
+                                UserId = ctx.Principal.FindFirstValue("sub"),
+                                IPAddresses = new List<string> { ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString() },
+                                UserAgent = ctx.Request.Headers.UserAgent.ToString(),
+                                Idp = ctx.Principal.FindFirstValue("idp"),
+                                Amr = ctx.Principal.FindFirstValue("amr"),
+                                MaxExpireOnUtc = ctx.Properties.ExpiresUtc
+                            });
+                            if (ctx.Properties.GetString("browser_id") != null)
+                            {
+                                var browserInfo = await session.LoadAsync<UserBrowser>($"UserBrowsers/{ctx.Properties.GetString("session_id")}");
+                                if (browserInfo == null)
+                                {
+                                    browserInfo = new UserBrowser { Id = $"UserBrowsers/{ctx.Properties.GetString("browser_id")}" };
+                                    await session.StoreAsync(browserInfo);
+                                }
+                                if (!browserInfo.UserIds.Contains(ctx.Principal.FindFirstValue("sub")))
+                                    browserInfo.UserIds.Add(ctx.Principal.FindFirstValue("sub"));
+                                browserInfo.LastSeenOnUtc = DateTime.UtcNow;
+                            }
+                            await session.SaveChangesAsync();
+                        }
+                    };
                 })
                 .WithPerTenantOptions<GoogleOptions>((o, tenantInfo) =>
                 {
@@ -502,12 +549,7 @@ namespace Authentication
              {
                  // allows both self-signed and CA-based certs. Check the MTLS spec for details.
                  options.AllowedCertificateTypes = CertificateTypes.All;
-             }).AddCookie(options =>
-             {
-                 options.Cookie.Name = "BA.";
-                 options.LoginPath = "/login";
-                 options.LogoutPath = "/logout";
-             });
+             }).AddCookie();
             //.AddOpenIdConnect()
             //.AddGoogle();
             //.AddFacebook()

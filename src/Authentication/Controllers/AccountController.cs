@@ -97,7 +97,8 @@ namespace Authentication.Controllers
                         ExpiresUtc = null,
                         RedirectUri = !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl) ? returnUrl : "~/"
                     };
-
+                    
+                    //TODO: props.Items.Add("browser_id", model.BrowserId);
                     await _signInManager.SignInAsync(user, props, "otac");
 
                     if (context != null)
@@ -182,7 +183,7 @@ namespace Authentication.Controllers
                             ExpiresUtc = _accountOptions.Value.AllowRememberLogin && model.RememberLogin ? DateTimeOffset.UtcNow.Add(_accountOptions.Value.RememberMeLoginDuration) : null,
                             RedirectUri = !string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl) ? model.ReturnUrl : "~/"
                         };
-                        props.Items.Add("BrowserId", model.BrowserId);
+                        props.Items.Add("browser_id", model.BrowserId);
                         
                         await _signInManager.SignInAsync(user, props, "pwd");
 
