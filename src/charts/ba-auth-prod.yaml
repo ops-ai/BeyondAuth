@@ -67,8 +67,9 @@ spec:
             httpHeaders:
               - name: Accept
                 value: text/html
-          failureThreshold: 1
+          failureThreshold: 5
           periodSeconds: 20
+          timeoutSeconds: 4
         startupProbe:
           httpGet:
             path: /hz
@@ -76,8 +77,9 @@ spec:
             httpHeaders:
               - name: Accept
                 value: text/html
-          failureThreshold: 3
+          failureThreshold: 5
           periodSeconds: 60
+          timeoutSeconds: 4
         volumeMounts:
         - name: pfx-volume
           mountPath: /app/certs
