@@ -21,5 +21,7 @@
         public string Idp { get; set; }
         
         public string Amr { get; set; }
+
+        public List<string> ClientIds { get; set; }
     }
 }

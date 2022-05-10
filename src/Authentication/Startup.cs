@@ -279,7 +279,10 @@ namespace Authentication
                             using (var session = store.OpenAsyncSession($"TenantIdentity-{tenantInfo.Identifier}"))
                             {
                                 if (!await session.Advanced.ExistsAsync($"UserSessions/{ctx.Properties.GetString("session_id")}").ConfigureAwait(false)) //TODO:  || userSession.UserAgent != ctx.Request.Headers.UserAgent Replace with a smart parser taking into account browser upgrades
+                                {
+                                    await ctx.HttpContext.SignOutAsync();
                                     ctx.RejectPrincipal();
+                                }
                                 else
                                 {
                                     session.Advanced.Patch<UserSession, DateTime>($"UserSessions/{ctx.Properties.GetString("session_id")}", t => t.LastSeenOnUtc, DateTime.UtcNow);
@@ -602,7 +605,8 @@ namespace Authentication
                 .AddCorsPolicyService<CorsPolicyService>()
                 .AddAspNetIdentity<ApplicationUser>()
                 .AddResourceOwnerValidator<ResourceOwnerPasswordValidator<ApplicationUser>>()
-                .AddProfileService<ProfileService<ApplicationUser>>();
+                .AddProfileService<ProfileService<ApplicationUser>>()
+                .AddUserSession<RavenDbSessionProvider>();
 
             try
             {
