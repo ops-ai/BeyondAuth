@@ -70,4 +70,9 @@ namespace BeyondAuth.UserManagement
 
         public string? SecurityStamp { get; set; }
     }
+
+    public class IdPUserCreateRequest : IdPUser
+    {
+        public bool GenerateOtac { get; set; } = false;
+    }
 }
