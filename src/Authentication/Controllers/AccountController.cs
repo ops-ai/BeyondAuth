@@ -168,7 +168,7 @@ namespace Authentication.Controllers
 
                 // validate username/password against in-memory store
                 var user = await _userManager.FindByNameAsync(model.Email);
-                if (user != null && !user.Disabled && _accountOptions.Value.AllowLocalLogin)
+                if (user != null && !user.Disabled && (user.AccountExpiration == null || user.AccountExpiration > DateTime.UtcNow) && _accountOptions.Value.AllowLocalLogin)
                 {
                     var signinResult = await _signInManager.CheckPasswordSignInAsync(user, model.Password, true);
                     if (signinResult.Succeeded)
