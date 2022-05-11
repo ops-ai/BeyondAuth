@@ -38,7 +38,11 @@ namespace Identity.Core
             using (var session = _store.OpenAsyncSession())
             {
                 var tenants = await session.Query<TenantSetting>().ToListAsync();
-                tenants.ForEach(t => t.Id = t.Id.Split('/').Last());
+                tenants.ForEach(t =>
+                {
+                    t.Id = t.Id.Split('/').Last();
+                    t.AclHolder = t;
+                });
                 return tenants;
             }
         }
@@ -70,7 +74,7 @@ namespace Identity.Core
         /// </summary>
         /// <param name="id"></param>
         /// <returns></returns>
-        public async Task<TenantSetting> TryGetAsync(string id)
+        public async Task<TenantSetting?> TryGetAsync(string id)
         {
             if (!_cache.TryGetValue($"TenantSettingId-{id}", out TenantSetting cachedTenant))
             {
@@ -78,6 +82,7 @@ namespace Identity.Core
                 {
                     cachedTenant = await session.LoadAsync<TenantSetting>($"TenantSettings/{id}");
                     cachedTenant.Id = cachedTenant.Id.Split('/').Last();
+                    cachedTenant.AclHolder = cachedTenant;
                 }
 
                 _cache.Set($"TenantSettingId-{id}", cachedTenant, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(1)));
@@ -90,7 +95,7 @@ namespace Identity.Core
         /// </summary>
         /// <param name="identifier"></param>
         /// <returns></returns>
-        public async Task<TenantSetting> TryGetByIdentifierAsync(string identifier)
+        public async Task<TenantSetting?> TryGetByIdentifierAsync(string identifier)
         {
             if (!_cache.TryGetValue($"TenantSetting-{identifier}", out TenantSetting cachedTenant))
             {
@@ -101,6 +106,7 @@ namespace Identity.Core
                         return null;
 
                     cachedTenant.Id = cachedTenant.Id.Split('/').Last();
+                    cachedTenant.AclHolder = cachedTenant;
                 }
 
                 _cache.Set($"TenantSetting-{identifier}", cachedTenant, new MemoryCacheEntryOptions().SetSlidingExpiration(TimeSpan.FromMinutes(1)));

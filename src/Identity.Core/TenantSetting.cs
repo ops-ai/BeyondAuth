@@ -18,17 +18,17 @@ namespace Identity.Core
         /// <summary>
         /// Account behavior
         /// </summary>
-        public AccountOptions AccountOptions { get; set; }
+        public AccountOptions AccountOptions { get; set; } = new AccountOptions();
 
         /// <summary>
         /// Consent behavior
         /// </summary>
-        public ConsentOptions ConsentOptions { get; set; }
+        public ConsentOptions ConsentOptions { get; set; } = new ConsentOptions();
 
         /// <summary>
         /// Identity requirements
         /// </summary>
-        public IdentityOptions IdentityOptions { get; set; }
+        public IdentityOptions IdentityOptions { get; set; } = new IdentityOptions();
 
         /// <summary>
         /// The value used to actually resolve a tenant and should have a syntax compatible for the app (i.e. no crazy symbols in a web app where the identifier will be part of the URL). 
@@ -43,12 +43,12 @@ namespace Identity.Core
         /// <summary>
         /// Connection string that should be used for database operations for this tenant. It might connect to a shared database or a dedicated database for the single tenant. 
         /// </summary>
-        public string ConnectionString { get; set; }
+        public string? ConnectionString { get; set; }
 
         /// <summary>
         /// Branding options
         /// </summary>
-        public BrandingOptions BrandingOptions { get; set; }
+        public BrandingOptions? BrandingOptions { get; set; }
 
         /// <summary>
         /// External login providers
@@ -58,12 +58,17 @@ namespace Identity.Core
         /// <summary>
         /// Parent
         /// </summary>
-        public string ParentId { get; set; }
+        public string? ParentId { get; set; }
 
         /// <summary>
         /// Owner of client
         /// </summary>
         public string OwnerId { get; set; }
+
+        /// <summary>
+        /// IdP the resource owner is in
+        /// </summary>
+        public string OwnerIdP { get; set; }
 
         /// <summary>
         /// Id of the nearest parent that contains the ACEs
@@ -73,15 +78,18 @@ namespace Identity.Core
         /// <summary>
         /// Nesting level of inheritance
         /// </summary>
-        public int Level { get; set; } = 0;
+        public ushort Level { get; set; } = 0;
 
         /// <summary>
         /// List of ACEs storing permissions for the secured entity
         /// </summary>
         public List<AceEntry> AceEntries { get; set; } = new List<AceEntry>();
 
+        /// <summary>
+        /// Referenced parent entity containing the ACEs
+        /// </summary>
         [JsonIgnore]
-        public ISecurableEntity AclHolder { get; set; }
+        public virtual ISecurableEntity? AclHolder { get; set; }
 
         public IdpOptions IdpSettings { get; set; } = new IdpOptions();
 
