@@ -1,6 +1,9 @@
 ﻿using Audit.Core;
+using BeyondAuth.Acl;
 using Cryptography;
+using Finbuckle.MultiTenant;
 using Identity.Core;
+using Identity.Core.Permissions;
 using IdentityManager.Models;
 using IdentityServer4.Contrib.RavenDB.Options;
 using Microsoft.AspNetCore.Authorization;
@@ -29,8 +32,9 @@ namespace IdentityManager.Controllers
         private readonly IAuthorizationService _authorizationService;
         private readonly IOptions<IdentityStoreOptions> _identityStoreOptions;
         private readonly IOtacManager _otacManager;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public UsersController(UserManager<ApplicationUser> userManager, ILogger<UsersController> logger, IAsyncDocumentSession session, IAuthorizationService authorizationService, IOptions<IdentityStoreOptions> identityStoreOptions, IOtacManager otacManager)
+        public UsersController(UserManager<ApplicationUser> userManager, ILogger<UsersController> logger, IAsyncDocumentSession session, IAuthorizationService authorizationService, IOptions<IdentityStoreOptions> identityStoreOptions, IOtacManager otacManager, IHttpContextAccessor httpContextAccessor)
         {
             _userManager = userManager;
             _logger = logger;
@@ -38,6 +42,7 @@ namespace IdentityManager.Controllers
             _authorizationService = authorizationService;
             _identityStoreOptions = identityStoreOptions;
             _otacManager = otacManager;
+            _httpContextAccessor = httpContextAccessor;
         }
 
         /// <summary>
@@ -66,14 +71,6 @@ namespace IdentityManager.Controllers
         {
             try
             {
-                //using (var session = _store.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
-                //{
-                //    var dataSource = await session.Include<IdPSettings>(t => t.NearestSecurityHolderId).LoadAsync<TenantSetting>($"TenantSettings/{dataSourceId}", ct);
-                //    dataSource.AclHolder = dataSource.NearestSecurityHolderId != null ? await session.LoadAsync<ISecurableEntity>(dataSource.NearestSecurityHolderId, ct) : null;
-                //    if (await _authorizationService.AuthorizeAsync(User, dataSource, AclPermissions.List).ContinueWith(s => s.Result.Succeeded))
-                //        throw new UnauthorizedAccessException();
-                //}
-
                 //TODO: Add direct querying + filtering + permssion filtering
 
                 var query = ((IRavenQueryable<ApplicationUser>)_userManager.Users).Statistics(out var stats);
@@ -557,7 +554,7 @@ namespace IdentityManager.Controllers
             UpdatedAt = user.UpdatedAt,
             PhoneNumber = user.PhoneNumber,
             PhoneNumberConfirmed = user.PhoneNumberConfirmed,
-            SecurityStamp = Hashing.GetStringSha256Hash(user.SecurityStamp)
+            SecurityStamp = Cryptography.Hashing.GetStringSha256Hash(user.SecurityStamp)
         };
 
         /// <summary>

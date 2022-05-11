@@ -1,5 +1,4 @@
-﻿using Cryptography;
-using IdentityModel;
+﻿using IdentityModel;
 using Microsoft.AspNetCore.Identity;
 using Raven.Client;
 using Raven.Client.Documents.Session;

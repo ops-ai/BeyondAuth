@@ -14,8 +14,6 @@ namespace Identity.Core
         /// </summary>
         public string Id { get; set; }
 
-
-
         /// <summary>
         /// Parent
         /// </summary>
@@ -27,6 +25,11 @@ namespace Identity.Core
         public string OwnerId { get; set; }
 
         /// <summary>
+        /// IdP the resource owner is in
+        /// </summary>
+        public string? OwnerIdP { get; set; }
+
+        /// <summary>
         /// Id of the nearest parent that contains the ACEs
         /// </summary>
         public string NearestSecurityHolderId { get; set; }
@@ -34,14 +37,17 @@ namespace Identity.Core
         /// <summary>
         /// Nesting level of inheritance
         /// </summary>
-        public int Level { get; set; } = 0;
+        public ushort Level { get; set; } = 0;
 
         /// <summary>
         /// List of ACEs storing permissions for the secured entity
         /// </summary>
-        public List<AceEntry> AceEntries { get; set; }
+        public List<AceEntry>? AceEntries { get; set; }
 
+        /// <summary>
+        /// Referenced parent entity containing the ACEs
+        /// </summary>
         [JsonIgnore]
-        public ISecurableEntity AclHolder { get; set; }
+        public virtual ISecurableEntity? AclHolder { get; set; }
     }
 }

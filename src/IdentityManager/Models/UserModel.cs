@@ -53,7 +53,7 @@
         /// <summary>
         /// Password policy
         /// </summary>
-        public string PasswordPolicy { get; set; }
+        public string? PasswordPolicy { get; set; }
 
         /// <summary>
         /// Account is disabled
@@ -103,7 +103,7 @@
         /// <summary>
         /// TimeZone info for current user in IANA format. (e.g. America/Los_Angeles)
         /// </summary>
-        public string ZoneInfo { get; set; }
+        public string? ZoneInfo { get; set; }
 
         /// <summary>
         /// User can be locked out if repeatedly enters password incorrect
@@ -113,7 +113,7 @@
         /// <summary>
         /// User's default language
         /// </summary>
-        public string Locale { get; set; }
+        public string? Locale { get; set; }
 
         /// <summary>
         /// The date when the user was created
@@ -123,7 +123,7 @@
         /// <summary>
         /// Default redirect upon login unless authenticating into a specific app
         /// </summary>
-        public string DefaultApp { get; set; }
+        public string? DefaultApp { get; set; }
 
         /// <summary>
         /// Last date account was updated
