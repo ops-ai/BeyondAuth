@@ -19,6 +19,7 @@ using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
 using Identity.Core;
 using Identity.Core.Settings;
+using IdentityModel;
 using IdentityServer4;
 using IdentityServer4.AspNetIdentity;
 using IdentityServer4.Contrib.RavenDB.Options;
@@ -301,11 +302,11 @@ namespace Authentication
                                 {
                                     Id = $"UserSessions/{ctx.Properties.GetString("session_id")}",
                                     BrowserIds = new List<string> { ctx.Properties.GetString("browser_id") },
-                                    UserId = ctx.Principal.FindFirstValue("sub"),
+                                    UserId = ctx.Principal.FindFirstValue(JwtClaimTypes.Subject),
                                     IPAddresses = new List<string> { ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString() },
                                     UserAgent = ctx.Request.Headers.UserAgent.ToString(),
-                                    Idp = ctx.Principal.FindFirstValue("idp"),
-                                    Amr = ctx.Principal.FindFirstValue("amr"),
+                                    Idp = ctx.Principal.FindFirstValue(JwtClaimTypes.IdentityProvider),
+                                    Amr = ctx.Principal.FindFirstValue(JwtClaimTypes.AuthenticationMethod),
                                     MaxExpireOnUtc = ctx.Properties.ExpiresUtc
                                 };
                                 await session.StoreAsync(userSessions);
@@ -324,10 +325,6 @@ namespace Authentication
                                 }
                                 await session.SaveChangesAsync();
                             }
-                        },
-                        OnRedirectToLogout = async ctx =>
-                        {
-
                         },
                         OnSigningOut = async ctx =>
                         {

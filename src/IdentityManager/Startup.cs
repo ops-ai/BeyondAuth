@@ -6,6 +6,7 @@ using Azure.Core;
 using Azure.Identity;
 using Azure.Security.KeyVault.Certificates;
 using Azure.Security.KeyVault.Secrets;
+using BeyondAuth.Acl;
 using BeyondAuth.PasswordValidators.Common;
 using BeyondAuth.PasswordValidators.Topology;
 using BeyondAuth.PolicyProvider;
@@ -14,6 +15,9 @@ using CorrelationId;
 using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
 using Identity.Core;
+using Identity.Core.Permissions;
+using IdentityManager.Extensions;
+using IdentityManager.Infrastructure;
 using IdentityServer4.AccessTokenValidation;
 using IdentityServer4.Contrib.RavenDB.Options;
 using IdentityServer4.Models;
@@ -47,6 +51,7 @@ using Raven.Client.Json.Serialization.NewtonsoftJson;
 using Raven.DependencyInjection;
 using Raven.Identity;
 using SimpleHelpers;
+using System.IdentityModel.Tokens.Jwt;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json.Serialization;
 
@@ -85,6 +90,7 @@ namespace IdentityManager
                 options.UpdateTraceIdentifier = true;
             });
             services.AddMemoryCache();
+            JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
 
             services.Configure<IdentityOptions>(options =>
             {
@@ -104,7 +110,7 @@ namespace IdentityManager
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
                 .AddJwtBearer();
 
-            services.AddMultiTenant<TenantSetting>().WithBasePathStrategy().WithStore(new ServiceLifetime(), (sp) => new RavenDBMultitenantStore(sp.GetService<IDocumentStore>(), sp.GetService<IMemoryCache>()))
+            services.AddMultiTenant<TenantSetting>().WithBasePathStrategy().WithStore(new ServiceLifetime(), (sp) => new RavenDBMultitenantStore(sp.GetRequiredService<IDocumentStore>(), sp.GetService<IMemoryCache>()))
                 .WithPerTenantOptions<IdentityStoreOptions>((options, tenantInfo) =>
                 {
                     options.DatabaseName = $"TenantIdentity-{tenantInfo.Identifier}";
@@ -145,12 +151,11 @@ namespace IdentityManager
                     options.TokenValidationParameters.ValidIssuers = new[] { $"https://{tenantInfo.Identifier}", Configuration["Authentication:Authority"] };
                     options.Audience = tenantInfo.IdpSettings.ApiName;
 
-
                     //options.ApiSecret = tenantInfo.IdpSettings.ApiSecret;
                     options.RequireHttpsMetadata = true;
                     //options.SupportedTokens = SupportedTokens.Both;
                     //options.EnableCaching = true;
-                    //options.Validate();
+                    options.Validate();
                     //options.CacheDuration = TimeSpan.FromMinutes(1);
                 })
                 .WithPerTenantOptions<NSwag.Generation.AspNetCore.AspNetCoreOpenApiDocumentGeneratorSettings>((config, tenantInfo) =>
@@ -227,8 +232,9 @@ namespace IdentityManager
             {
                 options.AddPolicy("ApiScope", policy =>
                 {
-                    policy.RequireAuthenticatedUser();
-                    policy.RequireClaim("scope", Configuration["Authentication:ApiName"]);
+                    policy.RequireAuthenticatedUser()
+                        .RequireClaim("scope", Configuration["Authentication:ApiName"])
+                        .AddRequirements(new TenantAuthorizationRequirement((ulong)TenantPermissions.Manage));
                 });
                 options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
             });
@@ -289,6 +295,7 @@ namespace IdentityManager
             services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();
             services.AddTransient<IPasswordTopologyProvider, PasswordTopologyProvider>();
             services.AddSingleton<IAuthorizationHandler, AclAuthorizationHandler>();
+            services.AddSingleton<IAuthorizationHandler, TenantAccessAuthorizationHandler>();
             services.AddTransient<IOtacManager, OtacManager>();
 
             services.AddHealthChecks()
@@ -299,7 +306,7 @@ namespace IdentityManager
 
             });
 
-            services.AddMvc()
+            services.AddMvc(/*t => t.Filters.Add<TenantAccessFilter>()*/)
                 .AddJsonOptions(o => o.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
 
             services.AddControllers().AddNewtonsoftJson();
