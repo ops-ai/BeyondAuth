@@ -9,6 +9,7 @@
 	  <PackageTags>beyondauth;identity;authentication</PackageTags>
 	  <PackageLicenseExpression>MIT</PackageLicenseExpression>
 	  <PackageId>$(AssemblyName)</PackageId>
+	  <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <ItemGroup>

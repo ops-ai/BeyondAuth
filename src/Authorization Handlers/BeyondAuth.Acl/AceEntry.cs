@@ -2,9 +2,14 @@
 
 namespace BeyondAuth.Acl
 {
-    [DebuggerDisplay("Subject: {Subject}, Allow: {AllowBits}, Deny: {DenyBits}")]
+    [DebuggerDisplay("IdP: {IdP}, Subject: {Subject}, Allow: {AllowBits}, Deny: {DenyBits}")]
     public class AceEntry
     {
+        /// <summary>
+        /// Optional Identity Provider the user primarily belongs to
+        /// </summary>
+        public string? IdP { get; set; }
+
         /// <summary>
         /// Identifier of the user or group
         /// </summary>
@@ -13,11 +18,11 @@ namespace BeyondAuth.Acl
         /// <summary>
         /// Computed bitwise-map of allowed permissions
         /// </summary>
-        public uint AllowBits { get; set; }
+        public ulong AllowBits { get; set; } = 0;
 
         /// <summary>
         /// Computed bitwise-map of denied permissions
         /// </summary>
-        public uint DenyBits { get; set; }
+        public ulong DenyBits { get; set; } = 0;
     }
 }
