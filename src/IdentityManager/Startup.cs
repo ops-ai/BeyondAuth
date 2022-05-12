@@ -236,6 +236,12 @@ namespace IdentityManager
                         .RequireClaim("scope", Configuration["Authentication:ApiName"])
                         .AddRequirements(new TenantAuthorizationRequirement((ulong)TenantPermissions.Manage));
                 });
+                options.AddPolicy("ManagePermissions", policy =>
+                {
+                    policy.RequireAuthenticatedUser()
+                        .RequireClaim("scope", Configuration["Authentication:ApiName"])
+                        .AddRequirements(new TenantAuthorizationRequirement((ulong)TenantPermissions.ManagePermissions));
+                });
                 options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
             });
 

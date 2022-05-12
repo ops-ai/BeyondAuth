@@ -7,7 +7,11 @@
         /// </summary>
         public string Id { get; set; }
 
-        public List<string> UserIds { get; set; } = new List<string>();
+        public Dictionary<string, DateTime> UserIds { get; set; } = new Dictionary<string, DateTime>();
+
+        public string UserAgent { get; set; }
+
+        public List<string> IPAddresses { get; set; }
 
         public DateTime CreatedOnUtc { get; set; } = DateTime.UtcNow;
 

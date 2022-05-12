@@ -316,11 +316,15 @@ namespace Authentication
                                     var browserInfo = await session.LoadAsync<UserBrowser>($"UserBrowsers/{ctx.Properties.GetString("session_id")}");
                                     if (browserInfo == null)
                                     {
-                                        browserInfo = new UserBrowser { Id = $"UserBrowsers/{ctx.Properties.GetString("browser_id")}" };
+                                        browserInfo = new UserBrowser { Id = $"UserBrowsers/{ctx.Properties.GetString("browser_id")}", UserAgent = ctx.Request.Headers.UserAgent.ToString(), IPAddresses = new List<string> { ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString() } };
                                         await session.StoreAsync(browserInfo);
                                     }
-                                    if (!browserInfo.UserIds.Contains(ctx.Principal.FindFirstValue("sub")))
-                                        browserInfo.UserIds.Add(ctx.Principal.FindFirstValue("sub"));
+                                    if (!browserInfo.UserIds.ContainsKey(ctx.Principal.FindFirstValue("sub")))
+                                        browserInfo.UserIds.Add(ctx.Principal.FindFirstValue("sub"), DateTime.UtcNow);
+                                    else
+                                        browserInfo.UserIds[ctx.Principal.FindFirstValue("sub")] = DateTime.UtcNow;
+                                    if (!browserInfo.IPAddresses.Contains(ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString()))
+                                        browserInfo.IPAddresses.Add(ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString());
                                     browserInfo.LastSeenOnUtc = DateTime.UtcNow;
                                 }
                                 await session.SaveChangesAsync();

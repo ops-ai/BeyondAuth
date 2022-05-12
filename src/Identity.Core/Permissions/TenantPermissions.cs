@@ -4,6 +4,7 @@
     {
         Read = 1,
         Edit = 2,
-        Manage = 4
+        Manage = 4,
+        ManagePermissions = 8,
     }
 }
