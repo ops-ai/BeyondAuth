@@ -57,6 +57,8 @@ spec:
             httpHeaders:
               - name: Accept
                 value: text/html
+              - name: Host
+                value: account.beyondauth.io
           failureThreshold: 5
           periodSeconds: 20
           timeoutSeconds: 4
@@ -67,6 +69,8 @@ spec:
             httpHeaders:
               - name: Accept
                 value: text/html
+              - name: Host
+                value: account.beyondauth.io
           failureThreshold: 5
           periodSeconds: 60
           timeoutSeconds: 4
