@@ -75,15 +75,15 @@
 		<PackageReference Include="JSNLog" Version="3.0.1" />
 		<PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.20.0" />
 		<PackageReference Include="Microsoft.ApplicationInsights.NLogTarget" Version="2.20.0" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="6.0.4" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="6.0.4" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="6.0.4" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="6.0.4" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.4" />
-		<PackageReference Include="Microsoft.AspNetCore.Authentication.Twitter" Version="6.0.4" />
-		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.4" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.4" />
-		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="6.0.4" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Certificate" Version="6.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Facebook" Version="6.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Google" Version="6.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.MicrosoftAccount" Version="6.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.OpenIdConnect" Version="6.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Authentication.Twitter" Version="6.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Identity.UI" Version="6.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.Razor.RuntimeCompilation" Version="6.0.5" />
+		<PackageReference Include="Microsoft.Extensions.Http.Polly" Version="6.0.5" />
 		<PackageReference Include="Microsoft.FeatureManagement.AspNetCore" Version="2.5.1" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.15.1" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Kubernetes.Tools.Targets" Version="1.1.0" />

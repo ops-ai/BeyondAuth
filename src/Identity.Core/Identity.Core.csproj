@@ -19,7 +19,7 @@
     <PackageReference Include="OpenTelemetry" Version="1.2.0" />
     <PackageReference Include="RavenDB.Identity" Version="8.0.7" />
 	<PackageReference Include="System.Reactive.Core" Version="5.0.0" />
-    <PackageReference Include="System.Text.Json" Version="6.0.3" />
+    <PackageReference Include="System.Text.Json" Version="6.0.4" />
   </ItemGroup>
 
   <ItemGroup>
