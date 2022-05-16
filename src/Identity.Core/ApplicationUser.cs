@@ -102,19 +102,17 @@ namespace Identity.Core
             {
                 var claims = new List<IdentityUserClaim>()
                 {
-                    new IdentityUserClaim { ClaimType = JwtClaimTypes.Subject, ClaimValue = Email },
+                    //new IdentityUserClaim { ClaimType = JwtClaimTypes.Subject, ClaimValue = Email },
                     new IdentityUserClaim { ClaimType = JwtClaimTypes.FamilyName, ClaimValue = LastName ?? "" },
                     new IdentityUserClaim { ClaimType = JwtClaimTypes.GivenName, ClaimValue = FirstName ?? "" },
                     new IdentityUserClaim { ClaimType = JwtClaimTypes.Name, ClaimValue = DisplayName ?? "" },
-                    new IdentityUserClaim { ClaimType = JwtClaimTypes.Email, ClaimValue = Email },
+                    //new IdentityUserClaim { ClaimType = JwtClaimTypes.Email, ClaimValue = Email },
                     new IdentityUserClaim { ClaimType = JwtClaimTypes.PhoneNumber, ClaimValue = PhoneNumber ?? "" },
                     new IdentityUserClaim { ClaimType = JwtClaimTypes.Locale, ClaimValue = Locale ?? "" },
                     new IdentityUserClaim { ClaimType = JwtClaimTypes.UpdatedAt, ClaimValue = JsonConvert.SerializeObject(UpdatedAt, new JsonSerializerSettings { DateFormatString = "yyyy-MM-ddTHH:mm:ss.fffZ" }) },
-                    new IdentityUserClaim { ClaimType = JwtClaimTypes.ZoneInfo, ClaimValue = ZoneInfo ?? "" }
+                    new IdentityUserClaim { ClaimType = JwtClaimTypes.ZoneInfo, ClaimValue = ZoneInfo ?? "" },
+                    //new IdentityUserClaim { ClaimType = JwtClaimTypes.Id, ClaimValue = ZoneInfo ?? "" }
                 };
-
-                foreach (var role in Roles)
-                    claims.Add(new IdentityUserClaim { ClaimType = JwtClaimTypes.Role, ClaimValue = role });
 
                 return claims;
             }
