@@ -97,9 +97,17 @@ namespace Authentication.Controllers
                         ExpiresUtc = null,
                         RedirectUri = !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl) ? returnUrl : "~/"
                     };
-                    
+
+                    var tenantSettings = _httpContextAccessor.HttpContext.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
+                    var isuser = new IdentityServerUser(user.Id)
+                    {
+                        DisplayName = user.DisplayName,
+                        AuthenticationMethods = new List<string> { "otp" },
+                        IdentityProvider = $"https://{tenantSettings.Identifier}"
+                    };
                     //TODO: props.Items.Add("browser_id", model.BrowserId);
-                    await _signInManager.SignInAsync(user, props, "otac");
+
+                    await HttpContext.SignInAsync(isuser, props);
 
                     if (context != null)
                     {
@@ -184,8 +192,16 @@ namespace Authentication.Controllers
                             RedirectUri = !string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl) ? model.ReturnUrl : "~/"
                         };
                         props.Items.Add("browser_id", model.BrowserId);
+                        var tenantSettings = _httpContextAccessor.HttpContext.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
+                        var isuser = new IdentityServerUser(user.Id)
+                        {
+                            DisplayName = user.DisplayName,
+                            AuthenticationMethods = new List<string> { "pwd" },
+                            IdentityProvider = $"https://{tenantSettings.Identifier}"
+                        };
+                        //TODO: check for MFA add to Authentication Methods https://datatracker.ietf.org/doc/html/rfc8176
                         
-                        await _signInManager.SignInAsync(user, props, "pwd");
+                        await HttpContext.SignInAsync(isuser, props);
 
                         if (user.ChangePasswordOnNextLogin)
                             return RedirectToAction("ChangePassword");
