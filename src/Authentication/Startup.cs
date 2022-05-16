@@ -606,7 +606,7 @@ namespace Authentication
                 .AddCorsPolicyService<CorsPolicyService>()
                 .AddAspNetIdentity<ApplicationUser>()
                 .AddResourceOwnerValidator<ResourceOwnerPasswordValidator<ApplicationUser>>()
-                .AddProfileService<ProfileService<ApplicationUser>>()
+                .AddProfileService<Extensions.ProfileService<ApplicationUser>>()
                 .AddUserSession<RavenDbSessionProvider>();
 
             try
