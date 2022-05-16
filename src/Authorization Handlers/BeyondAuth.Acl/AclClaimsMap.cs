@@ -5,7 +5,7 @@
         /// <summary>
         /// Name of the cliam containing the user's IdP
         /// </summary>
-        public static string IdP { get; set; } = "iss";
+        public static string IdP { get; set; } = "idp";
 
         /// <summary>
         /// Name of the claim containing the user's id
