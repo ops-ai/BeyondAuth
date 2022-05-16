@@ -66,7 +66,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// Account expiration date
         /// </summary>
-        public DateTime? AccountExpiration { get; set; } = DateTime.MinValue;
+        public DateTime? AccountExpiration { get; set; }
 
         /// <summary>
         /// Account is disabled
