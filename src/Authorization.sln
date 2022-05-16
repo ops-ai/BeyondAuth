@@ -110,7 +110,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "charts", "charts", "{96BC0F
 		charts\ba-policy-stg.yaml = charts\ba-policy-stg.yaml
 	EndProjectSection
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BeyondAuth.UserManagement", "Policy Connectors\BeyondAuth.UserManagement\BeyondAuth.UserManagement.csproj", "{C0E4F481-065E-44F7-9804-4166B40F1282}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.UserManagement", "Policy Connectors\BeyondAuth.UserManagement\BeyondAuth.UserManagement.csproj", "{C0E4F481-065E-44F7-9804-4166B40F1282}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RavenDB.Identity", "RavenDB.Identity\RavenDB.Identity.csproj", "{05B3205F-0E77-4809-951D-3B863FC43F99}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -213,10 +215,6 @@ Global
 		{8F00ED31-7EE0-4DB7-AD6F-27BA7E910674}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8F00ED31-7EE0-4DB7-AD6F-27BA7E910674}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8F00ED31-7EE0-4DB7-AD6F-27BA7E910674}.Release|Any CPU.Build.0 = Release|Any CPU
-		{1E991308-C786-44C6-B68F-062F5D0F3896}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{1E991308-C786-44C6-B68F-062F5D0F3896}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{1E991308-C786-44C6-B68F-062F5D0F3896}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{1E991308-C786-44C6-B68F-062F5D0F3896}.Release|Any CPU.Build.0 = Release|Any CPU
 		{3EE2D96A-56C8-4391-B424-FCB76612D547}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{3EE2D96A-56C8-4391-B424-FCB76612D547}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{3EE2D96A-56C8-4391-B424-FCB76612D547}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -245,6 +243,10 @@ Global
 		{C0E4F481-065E-44F7-9804-4166B40F1282}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C0E4F481-065E-44F7-9804-4166B40F1282}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C0E4F481-065E-44F7-9804-4166B40F1282}.Release|Any CPU.Build.0 = Release|Any CPU
+		{05B3205F-0E77-4809-951D-3B863FC43F99}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{05B3205F-0E77-4809-951D-3B863FC43F99}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{05B3205F-0E77-4809-951D-3B863FC43F99}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{05B3205F-0E77-4809-951D-3B863FC43F99}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -273,7 +275,7 @@ Global
 		{C0E4F481-065E-44F7-9804-4166B40F1282} = {574904F3-F9C4-4D89-AC33-9C9A2B590BD8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
 		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
+		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
 	EndGlobalSection
 EndGlobal
