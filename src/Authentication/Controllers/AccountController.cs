@@ -85,7 +85,7 @@ namespace Authentication.Controllers
                 var otac = context.AcrValues.First(t => t.StartsWith("otac:", StringComparison.OrdinalIgnoreCase)).Split(':').Last();
 
                 var (status, user) = await otacManager.ValidateOtacAsync(otac); //this is a destructive operation
-                if (status.Succeeded && user != null && !user.Disabled)
+                if (status.Succeeded && user != null && !user.Disabled && (user.AccountExpiration == null || user.AccountExpiration > DateTime.UtcNow))
                 {
                     await _events.RaiseAsync(new UserLoginSuccessEvent(user.Email, user.Id, user.DisplayName, clientId: context?.Client.ClientId));
 
