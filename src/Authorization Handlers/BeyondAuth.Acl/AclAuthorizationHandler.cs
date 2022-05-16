@@ -28,6 +28,8 @@ namespace BeyondAuth.PolicyProvider
 
             if (userId == null) //Allow client_credentials
                 context.Succeed(requirement);
+            else if (resource.AclHolder == null)
+                context.Fail(new AuthorizationFailureReason(this, "ACL Holder is null"));
             else if (userId == resource.AclHolder?.OwnerId && (resource.AclHolder?.OwnerIdP == null || resource.AclHolder?.OwnerIdP == idp))
                 context.Succeed(requirement);
             else if ((resource.AclHolder?.AceEntries.FirstOrDefault(t => t.Subject == userId && (t.IdP == null || t.IdP == idp))?.DenyBits & requirement.Bitmask) == requirement.Bitmask)
