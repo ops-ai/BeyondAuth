@@ -176,7 +176,27 @@ namespace Authentication.Controllers
 
                 // validate username/password against in-memory store
                 var user = await _userManager.FindByNameAsync(model.Email);
-                if (user != null && !user.Disabled && (user.AccountExpiration == null || user.AccountExpiration > DateTime.UtcNow) && _accountOptions.Value.AllowLocalLogin)
+                if (user == null)
+                {
+                    await _events.RaiseAsync(new UserLoginFailureEvent(model.Email, "user doesn't exist", clientId: context?.Client.ClientId));
+                    ModelState.AddModelError(nameof(model.Password), _accountOptions.Value.InvalidCredentialsErrorMessage);
+                }
+                else if (user.Disabled)
+                {
+                    await _events.RaiseAsync(new UserLoginFailureEvent(model.Email, "user disabled", clientId: context?.Client.ClientId));
+                    ModelState.AddModelError(nameof(model.Password), _accountOptions.Value.InvalidCredentialsErrorMessage);
+                }
+                else if (user.AccountExpiration != null && user.AccountExpiration > DateTime.UtcNow)
+                {
+                    await _events.RaiseAsync(new UserLoginFailureEvent(model.Email, "account expired", clientId: context?.Client.ClientId));
+                    ModelState.AddModelError(nameof(model.Password), _accountOptions.Value.InvalidCredentialsErrorMessage);
+                }
+                else if (!_accountOptions.Value.AllowLocalLogin)
+                {
+                    await _events.RaiseAsync(new UserLoginFailureEvent(model.Email, "local login not allowed", clientId: context?.Client.ClientId));
+                    ModelState.AddModelError(nameof(model.Email), "Local login not allowed");
+                }
+                else
                 {
                     var signinResult = await _signInManager.CheckPasswordSignInAsync(user, model.Password, true);
                     if (signinResult.Succeeded)
@@ -242,15 +262,6 @@ namespace Authentication.Controllers
                         ModelState.AddModelError(nameof(model.Password), _accountOptions.Value.InvalidCredentialsErrorMessage);
                     }
                 }
-                else if (!_accountOptions.Value.AllowLocalLogin)
-                {
-
-                }
-                else
-                {
-                    await _events.RaiseAsync(new UserLoginFailureEvent(model.Email, "invalid credentials", clientId: context?.Client.ClientId));
-                    ModelState.AddModelError(nameof(model.Password), _accountOptions.Value.InvalidCredentialsErrorMessage);
-                }
             }
 
             // something went wrong, show form with error
@@ -286,10 +297,10 @@ namespace Authentication.Controllers
             // build a model so the logged out page knows what to display
             var vm = await BuildLoggedOutViewModelAsync(model.LogoutId);
 
-            if (_signInManager.IsSignedIn(User))
+            if ((await HttpContext.AuthenticateAsync()).Succeeded)
             {
                 // delete local authentication cookie
-                await _signInManager.SignOutAsync();
+                await HttpContext.SignOutAsync();
 
                 // raise the logout event
                 await _events.RaiseAsync(new UserLogoutSuccessEvent(User.GetSubjectId(), User.GetDisplayName()));

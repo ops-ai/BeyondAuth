@@ -88,6 +88,8 @@ namespace Authentication
 
         public ILifetimeScope AutofacContainer { get; private set; }
 
+        X509Certificate2 ravenDBcert = null;
+
         /// <summary>
         /// This method gets called by the runtime. Use this method to add services to the container.
         /// </summary>
@@ -483,7 +485,6 @@ namespace Authentication
 #endif
             services.AddSameSiteCookiePolicy();
 
-            X509Certificate2 ravenDBcert = null;
             if (Environment.GetEnvironmentVariable("VaultUri") != null)
             {
                 TokenCredential? clientCredential = Environment.GetEnvironmentVariable("ClientId") != null ? new ClientSecretCredential(Environment.GetEnvironmentVariable("TenantId"), Environment.GetEnvironmentVariable("ClientId"), Environment.GetEnvironmentVariable("ClientSecret")) : null;
@@ -532,14 +533,6 @@ namespace Authentication
 
                 return store.Initialize();
             });
-
-            Audit.Core.Configuration.Setup()
-                .JsonNewtonsoftAdapter(new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
-                .UseRavenDB(config => config
-                .WithSettings(settings => settings
-                    .Urls(Configuration.GetSection("Raven:Urls").Get<string[]>())
-                    .Database(ev => Configuration["Raven:DatabaseName"])
-                    .Certificate(ravenDBcert)));
 
             services.ConfigureOptions<RavenOptionsSetup>();
             services.AddScoped(sp => sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<RavenSettings>>()?.Value?.DatabaseName));
@@ -647,8 +640,8 @@ namespace Authentication
             services.AddSingleton<ISmsSender, MessageSender>();
             services.AddSingleton<IEmailSender, MailgunMessageSender>();
             services.AddSingleton<IEventSink, IdentityServerEventSink>();
-
             services.AddSingleton<IEventSink, IdentityServerStatsSink>();
+            services.AddSingleton<IEventSink, IdentityServerAuditSink>();
             services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
             services.AddTransient<IEmailService, EmailController>();
             services.AddTransient<IPasswordTopologyProvider, PasswordTopologyProvider>();
@@ -718,11 +711,24 @@ namespace Authentication
 
             app.UseStaticFiles();
 
+
+            Audit.Core.Configuration.Setup()
+                .JsonNewtonsoftAdapter(new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
+                .UseRavenDB(config => config
+                .WithSettings(settings => settings
+                    .Urls(Configuration.GetSection("Raven:Urls").Get<string[]>())
+                    .Database(ev => app.ApplicationServices.GetService<IOptions<IdentityStoreOptions>>().Value.DatabaseName)
+                    .Certificate(ravenDBcert)));
+
             Audit.Core.Configuration.AddCustomAction(ActionType.OnEventSaving, scope =>
             {
                 var httpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
                 if (httpContextAccessor?.HttpContext?.User?.FindFirstValue("sub") != null)
                     scope.SetCustomField("UserId", httpContextAccessor?.HttpContext?.User?.FindFirstValue("sub"));
+                if (httpContextAccessor?.HttpContext != null)
+                    scope.SetCustomField("UserAgent", httpContextAccessor.HttpContext.Request.Headers.UserAgent.ToString());
+                if (httpContextAccessor?.HttpContext?.User?.FindFirstValue("sub") != null)
+                    scope.SetCustomField("BrowserId", httpContextAccessor?.HttpContext?.User?.FindFirstValue("browser_id"));
 
                 var auditEvent = scope.Event;
                 if (auditEvent.Target != null)
@@ -731,6 +737,9 @@ namespace Authentication
                     auditEvent.Target.Old = diff.OldValues;
                     auditEvent.Target.New = diff.NewValues;
                 }
+
+                if (!auditEvent.CustomFields.ContainsKey("RemoteIpAddress") && httpContextAccessor?.HttpContext != null)
+                    scope.SetCustomField("RemoteIpAddress", httpContextAccessor?.HttpContext?.Connection.RemoteIpAddress);
             });
 
             //app.UseCors(x => x.AllowAnyOrigin().WithHeaders("accept", "authorization", "content-type", "origin").AllowAnyMethod());
