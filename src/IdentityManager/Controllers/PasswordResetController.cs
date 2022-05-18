@@ -57,7 +57,7 @@ namespace IdentityManager.Controllers
                     if (user == null)
                         throw new KeyNotFoundException(userId);
 
-                    using (var audit = await AuditScope.CreateAsync("User:PasswordResetRequest", () => user, new { user.Id }))
+                    using (var audit = await AuditScope.CreateAsync("User:PasswordResetRequest", () => user, new { TargetUserId = user.Id }))
                     {
                         var request = new PasswordResetRequest
                         {

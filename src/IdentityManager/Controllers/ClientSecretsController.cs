@@ -144,7 +144,7 @@ namespace IdentityManager.Controllers
                         throw new KeyNotFoundException($"Client {clientId} was not found");
 
                     var newSecret = shortid.ShortId.Generate(new shortid.Configuration.GenerationOptions { Length = 32, UseNumbers = true, UseSpecialCharacters = true });
-                    using (var audit = await AuditScope.CreateAsync("Client:AddSecret", () => client, new { client.Id }))
+                    using (var audit = await AuditScope.CreateAsync("Client:AddSecret", () => client, new { ClientId = client.Id }))
                     {
                         var secret = clientSecret.FromModel();
                         secret.Value = newSecret.Sha256();
@@ -199,7 +199,7 @@ namespace IdentityManager.Controllers
 
                     var secret = client.ClientSecrets.First(t => t.Value.Sha256().Equals(id));
 
-                    using (var audit = await AuditScope.CreateAsync("Client:UpdateSecret", () => client, new { client.Id, SecretId = secret.Value }))
+                    using (var audit = await AuditScope.CreateAsync("Client:UpdateSecret", () => client, new { ClientId = client.Id, SecretId = secret.Value }))
                     {
                         secret.Description = model.Description;
                         secret.Expiration = model.Expiration;
@@ -288,7 +288,7 @@ namespace IdentityManager.Controllers
                     if (!client.ClientSecrets.Remove(secret))
                         throw new Exception("Failed to remove secret");
 
-                    using (var audit = await AuditScope.CreateAsync("Client:RemoveSecret", () => client, new { client.Id, SecretId = secret.Value }))
+                    using (var audit = await AuditScope.CreateAsync("Client:RemoveSecret", () => client, new { ClientId = client.Id, SecretId = secret.Value }))
                     {
                         await session.SaveChangesAsync(ct);
                     }

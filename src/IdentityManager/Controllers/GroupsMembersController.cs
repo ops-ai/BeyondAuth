@@ -110,7 +110,7 @@ namespace IdentityManager.Controllers
                     if (!usersToAdd.Any())
                         return NoContent();
 
-                    using (var audit = await AuditScope.CreateAsync("Group:AddMembers", () => group, new { group.Id, MemberIds = usersToAdd }))
+                    using (var audit = await AuditScope.CreateAsync("Group:AddMembers", () => group, new { GroupId = group.Id, MemberIds = usersToAdd }))
                     {
                         foreach (var user in usersToAdd)
                         {
@@ -164,7 +164,7 @@ namespace IdentityManager.Controllers
                     if (!usersToRemove.Any())
                         return NoContent();
 
-                    using (var audit = await AuditScope.CreateAsync("Group:AddMembers", () => group, new { group.Id, MemberIds = usersToRemove }))
+                    using (var audit = await AuditScope.CreateAsync("Group:AddMembers", () => group, new { GroupId = group.Id, MemberIds = usersToRemove }))
                     {
                         foreach (var user in usersToRemove)
                         {

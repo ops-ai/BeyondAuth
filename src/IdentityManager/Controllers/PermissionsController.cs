@@ -84,7 +84,7 @@ namespace IdentityManager.Controllers
                 //make sure user exists in idp
 
                 var tenant = await session.LoadAsync<TenantSetting>(tenantSetting.Id, ct);
-                using (var audit = await AuditScope.CreateAsync("Tenant:AddPermission", () => tenant, new { tenant.Id }))
+                using (var audit = await AuditScope.CreateAsync("Tenant:AddPermission", () => tenant, new { TenantId = tenant.Id }))
                 {
                     tenant.AceEntries.Add(new AceEntry { Subject = model.UserId, IdP = model.IdP, AllowBits = model.AllowBits, DenyBits = model.DenyBits });
                     await session.SaveChangesAsync(ct);
@@ -121,7 +121,7 @@ namespace IdentityManager.Controllers
                     return NotFound();
 
                 var tenant = await session.LoadAsync<TenantSetting>(tenantSetting.Id, ct);
-                using (var audit = await AuditScope.CreateAsync("Tenant:UpdatePermission", () => tenant, new { tenant.Id, PermissionUserId = model.UserId, model.IdP }))
+                using (var audit = await AuditScope.CreateAsync("Tenant:UpdatePermission", () => tenant, new { TenantId = tenant.Id, TargetUserId = model.UserId, model.IdP }))
                 {
                     var permission = tenant.AceEntries.First(t => t.Subject == $"ApplicationUsers/{model.UserId}" && t.IdP == model.IdP);
                     permission.AllowBits = model.AllowBits;
@@ -155,7 +155,7 @@ namespace IdentityManager.Controllers
                     return NotFound();
 
                 var tenant = await session.LoadAsync<TenantSetting>(tenantSetting.Id, ct);
-                using (var audit = await AuditScope.CreateAsync("Tenant:UpdatePermission", () => tenant, new { tenant.Id, PermissionUserId = model.UserId, model.IdP }))
+                using (var audit = await AuditScope.CreateAsync("Tenant:UpdatePermission", () => tenant, new { TenantId = tenant.Id, TargetUserId = model.UserId, model.IdP }))
                 {
                     var permission = tenant.AceEntries.First(t => t.Subject == $"ApplicationUsers/{model.UserId}" && t.IdP == model.IdP);
                     tenant.AceEntries.Remove(permission);

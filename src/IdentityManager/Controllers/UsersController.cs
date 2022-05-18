@@ -279,7 +279,7 @@ namespace IdentityManager.Controllers
                         try
                         {
                             await _session.SaveChangesAsync(ct);
-                            audit.SetCustomField("Id", newUser.Id);
+                            audit.SetCustomField("TargetUserId", newUser.Id);
                         }
                         catch (Exception ex)
                         {
@@ -355,7 +355,7 @@ namespace IdentityManager.Controllers
                 if (user == null)
                     throw new KeyNotFoundException(userId);
 
-                using (var audit = await AuditScope.CreateAsync("User:Update", () => user, new { user.Id }))
+                using (var audit = await AuditScope.CreateAsync("User:Update", () => user, new { TargetUserId = user.Id }))
                 {
                     if (userInfo.Password != null)
                     {
@@ -654,7 +654,7 @@ namespace IdentityManager.Controllers
                 if (user == null)
                     return NotFound();
 
-                using (var audit = await AuditScope.CreateAsync("User:Delete", () => user, new { user.Id }))
+                using (var audit = await AuditScope.CreateAsync("User:Delete", () => user, new { TargetUserId = user.Id }))
                 {
                     await _userManager.DeleteAsync(user);
                     await _session.SaveChangesAsync(ct);

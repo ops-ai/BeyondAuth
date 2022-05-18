@@ -144,7 +144,7 @@ namespace IdentityManager.Controllers
                         throw new KeyNotFoundException($"Api Resource {name} was not found");
 
                     var newSecret = shortid.ShortId.Generate(new shortid.Configuration.GenerationOptions { Length = 32, UseNumbers = true, UseSpecialCharacters = true });
-                    using (var audit = await AuditScope.CreateAsync("ApiResource:AddSecret", () => resource, new { resource.Id }))
+                    using (var audit = await AuditScope.CreateAsync("ApiResource:AddSecret", () => resource, new { ResourceId = resource.Id }))
                     {
                         var secret = apiResourceSecret.FromModel();
                         secret.Value = newSecret.Sha256();
@@ -199,7 +199,7 @@ namespace IdentityManager.Controllers
                         throw new KeyNotFoundException($"Api Resource {name} was not found");
 
                     var secret = resource.ApiSecrets.First(t => t.Value.Sha256().Equals(id));
-                    using (var audit = await AuditScope.CreateAsync("ApiResource:UpdateSecret", () => resource, new { resource.Id, secretId = secret.Value }))
+                    using (var audit = await AuditScope.CreateAsync("ApiResource:UpdateSecret", () => resource, new { ResourceId = resource.Id, secretId = secret.Value }))
                     {
                         secret.Description = model.Description;
                         secret.Expiration = model.Expiration;
@@ -288,7 +288,7 @@ namespace IdentityManager.Controllers
                     if (!resource.ApiSecrets.Remove(secret))
                         throw new Exception("Failed to remove secret");
 
-                    using (var audit = await AuditScope.CreateAsync("ApiResource:DeleteSecret", () => resource, new { resource.Id, SecretId = secret.Value }))
+                    using (var audit = await AuditScope.CreateAsync("ApiResource:DeleteSecret", () => resource, new { ResourceId = resource.Id, SecretId = secret.Value }))
                     {
                         await session.SaveChangesAsync(ct);
                     }

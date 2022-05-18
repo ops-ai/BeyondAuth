@@ -137,7 +137,7 @@ namespace IdentityManager.Controllers
                         entity = resource.FromModel();
                         await session.StoreAsync(entity, $"ApiResources/{resource.Name}", ct);
                         await session.SaveChangesAsync(ct);
-                        audit.SetCustomField("Id", entity.Id);
+                        audit.SetCustomField("ResourceId", entity.Id);
                     }
                 }
 
@@ -181,7 +181,7 @@ namespace IdentityManager.Controllers
                     if (resource == null)
                         throw new KeyNotFoundException($"Resource {model.Name} was not found");
 
-                    using (var audit = await AuditScope.CreateAsync("ApiResource:Update", () => resource, new { resource.Id }))
+                    using (var audit = await AuditScope.CreateAsync("ApiResource:Update", () => resource, new { ResourceId = resource.Id }))
                     {
                         resource.Description = model.Description;
                         resource.DisplayName = model.DisplayName;
@@ -269,7 +269,7 @@ namespace IdentityManager.Controllers
                     if (resource == null)
                         throw new KeyNotFoundException($"Api Resource {name} was not found");
 
-                    using (var audit = await AuditScope.CreateAsync("ApiResource:Delete", () => resource, new { resource.Id }))
+                    using (var audit = await AuditScope.CreateAsync("ApiResource:Delete", () => resource, new { ResourceId = resource.Id }))
                     {
                         session.Delete(resource);
                         await session.SaveChangesAsync(ct);

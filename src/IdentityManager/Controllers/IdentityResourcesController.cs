@@ -132,7 +132,7 @@ namespace IdentityManager.Controllers
                         throw new ArgumentException("Identity Resource already exists");
 
                     IdentityResourceEntity? entity = null;
-                    using (var audit = await AuditScope.CreateAsync("IdentityResource:Create", () => entity, new { Id = $"IdentityResources/{resource.Name}" }))
+                    using (var audit = await AuditScope.CreateAsync("IdentityResource:Create", () => entity, new { ResourceId = $"IdentityResources/{resource.Name}" }))
                     {
                         entity = resource.FromModel();
                         await session.StoreAsync(entity, $"IdentityResources/{resource.Name}", ct);
@@ -180,7 +180,7 @@ namespace IdentityManager.Controllers
                     if (resource == null)
                         throw new KeyNotFoundException($"Resource {model.Name} was not found");
 
-                    using (var audit = await AuditScope.CreateAsync("IdentityResource:Update", () => resource, new { Id = resource.Id }))
+                    using (var audit = await AuditScope.CreateAsync("IdentityResource:Update", () => resource, new { ResourceId = resource.Id }))
                     {
                         resource.Description = model.Description;
                         resource.DisplayName = model.DisplayName;
@@ -269,7 +269,7 @@ namespace IdentityManager.Controllers
                     if (resource == null)
                         throw new KeyNotFoundException($"Identity Resource {name} was not found");
 
-                    using (var audit = await AuditScope.CreateAsync("IdentityResource:Delete", () => resource, new { resource.Id }))
+                    using (var audit = await AuditScope.CreateAsync("IdentityResource:Delete", () => resource, new { ResourceId = resource.Id }))
                     {
                         session.Delete(resource);
                         await session.SaveChangesAsync(ct);

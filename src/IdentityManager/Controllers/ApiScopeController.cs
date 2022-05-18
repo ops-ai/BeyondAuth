@@ -137,7 +137,7 @@ namespace IdentityManager.Controllers
                         entity = scope.FromModel();
                         await session.StoreAsync(entity, $"Scopes/{scope.Name}", ct);
                         await session.SaveChangesAsync(ct);
-                        audit.SetCustomField("Id", entity.Id);
+                        audit.SetCustomField("ScopeId", entity.Id);
                     }
                 }
 
@@ -181,7 +181,7 @@ namespace IdentityManager.Controllers
                     if (scope == null)
                         throw new KeyNotFoundException($"Scope {model.Name} was not found");
 
-                    using (var audit = await AuditScope.CreateAsync("ApiScope:Update", () => scope, new { scope.Id }))
+                    using (var audit = await AuditScope.CreateAsync("ApiScope:Update", () => scope, new { ScopeId = scope.Id }))
                     {
                         scope.Description = model.Description;
                         scope.DisplayName = model.DisplayName;
@@ -270,7 +270,7 @@ namespace IdentityManager.Controllers
                     if (scope == null)
                         throw new KeyNotFoundException($"Api Scope {name} was not found");
 
-                    using (var audit = await AuditScope.CreateAsync("ApiScope:Delete", () => scope, new { scope.Id }))
+                    using (var audit = await AuditScope.CreateAsync("ApiScope:Delete", () => scope, new { ScopeId = scope.Id }))
                     {
                         session.Delete(scope);
                         await session.SaveChangesAsync(ct);

@@ -26,6 +26,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<PackageReference Include="Audit.Mvc.Core" Version="19.1.1" />
 		<PackageReference Include="Audit.NET" Version="19.1.1" />
 		<PackageReference Include="Audit.NET.RavenDB" Version="19.1.1" />
 		<PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" Version="1.2.1" />

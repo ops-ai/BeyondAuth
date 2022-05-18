@@ -142,7 +142,7 @@ namespace IdentityManager.Controllers
                         throw new ArgumentException("Client already exists");
 
                     ClientEntity? entity = null;
-                    using (var audit = await AuditScope.CreateAsync("Client:Create", () => entity, new { Id = $"Clients/{client.ClientId}" }))
+                    using (var audit = await AuditScope.CreateAsync("Client:Create", () => entity, new { ClientId = $"Clients/{client.ClientId}" }))
                     {
                         entity = client.FromModel();
                         await session.StoreAsync(entity, $"Clients/{client.ClientId}", ct);
@@ -193,7 +193,7 @@ namespace IdentityManager.Controllers
                     if (!client.AllowedGrantTypes.All(t => t.In(new[] { GrantType.ClientCredentials, GrantType.Implicit, GrantType.Hybrid, GrantType.AuthorizationCode, GrantType.ResourceOwnerPassword, GrantType.DeviceFlow })))
                         throw new ArgumentException("value in allowedGrantTypes is not supported", nameof(client.AllowedGrantTypes));
 
-                    using (var audit = await AuditScope.CreateAsync("Client:Update", () => client, new { client.Id }))
+                    using (var audit = await AuditScope.CreateAsync("Client:Update", () => client, new { ClientId = client.Id }))
                     {
                         client.AbsoluteRefreshTokenLifetime = model.AbsoluteRefreshTokenLifetime;
                         client.AccessTokenLifetime = model.AccessTokenLifetime;
@@ -318,7 +318,7 @@ namespace IdentityManager.Controllers
                     if (client == null)
                         throw new KeyNotFoundException($"Client {clientId} was not found");
 
-                    using (var audit = await AuditScope.CreateAsync("Client:Delete", () => client, new { client.Id }))
+                    using (var audit = await AuditScope.CreateAsync("Client:Delete", () => client, new { ClientId = client.Id }))
                     {
                         session.Delete(client);
                         await session.SaveChangesAsync(ct);

@@ -155,7 +155,7 @@ namespace IdentityManager.Controllers
 
                         await session.StoreAsync(group, ct);
                         await session.SaveChangesAsync(ct);
-                        audit.SetCustomField("Id", group.Id);
+                        audit.SetCustomField("GroupId", group.Id);
                     }
                 }
 
@@ -200,7 +200,7 @@ namespace IdentityManager.Controllers
                     if (group == null)
                         throw new KeyNotFoundException($"Group {name} was not found");
 
-                    using (var audit = await AuditScope.CreateAsync("Group:Update", () => group, new { group.Id }))
+                    using (var audit = await AuditScope.CreateAsync("Group:Update", () => group, new { GroupId = group.Id }))
                     {
                         group.Name = model.Name;
                         group.UpdatedAt = DateTime.UtcNow;
@@ -283,7 +283,7 @@ namespace IdentityManager.Controllers
                     if (group == null)
                         throw new KeyNotFoundException($"Group {name} was not found");
 
-                    using (var audit = await AuditScope.CreateAsync("Group:Delete", () => group, new { group.Id, MemberIds = group.Members.Keys }))
+                    using (var audit = await AuditScope.CreateAsync("Group:Delete", () => group, new { GroupId = group.Id, MemberIds = group.Members.Keys }))
                     {
                         foreach (var userId in group.Members.Keys)
                             session.Advanced.Patch<ApplicationUser, string>(userId, t => t.Groups, g => g.RemoveAll(t => t == group.Id));
