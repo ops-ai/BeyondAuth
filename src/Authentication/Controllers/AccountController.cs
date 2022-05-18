@@ -2,6 +2,7 @@
 // Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
 
 
+using Audit.Core;
 using Authentication.Extensions;
 using Authentication.Filters;
 using Authentication.Infrastructure;
@@ -514,11 +515,13 @@ namespace Authentication.Controllers
                         var bodyTxt = await _emailService.RenderPartialViewToString("ChangePasswordConfirmation.txt", emailMessage, null);
 
                         await _emailSender.SendEmailAsync(user.Email, "Password Changed Confirmation", bodyHtml, bodyTxt);
+                        await AuditScope.LogAsync($"User:Passowrd Changed", new { SubjectId = user.Id });
 
                         return View("ChangePasswordConfirmation");
                     }
 
                     AddErrors(result);
+                    await AuditScope.LogAsync($"User:Passowrd Change Failure", new { SubjectId = user.Id, result.Errors });
                 }
 
                 return View(model);

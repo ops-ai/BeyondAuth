@@ -1,3 +1,4 @@
+using Audit.Core;
 using Authentication.Domain;
 using Authentication.Filters;
 using Authentication.Infrastructure;
@@ -137,6 +138,7 @@ namespace Authentication.Controllers
                 var bodyHtml = await _emailService.RenderPartialViewToString("ResetPassword.html", emailMessage, null);
                 var bodyTxt = await _emailService.RenderPartialViewToString("ResetPassword.txt", emailMessage, null);
                 await _emailSender.SendEmailAsync(emailMessage.To, "Password reset", bodyHtml, bodyTxt);
+                await AuditScope.LogAsync($"User:Password Reset Requested", new { SubjectId = user.Id });
 
                 // If we got this far, something failed, redisplay form
                 return View("ForgotPasswordConfirmation");
@@ -221,6 +223,7 @@ namespace Authentication.Controllers
                 var resetPasswordStatus = await _userManager.ResetPasswordAsync(user, model.Code, model.Password);
                 if (!resetPasswordStatus.Succeeded)
                 {
+                    await AuditScope.LogAsync($"User:Passowrd Reset Failure", new { SubjectId = user.Id, resetPasswordStatus.Errors });
                     AddErrors(resetPasswordStatus);
                     return View(model);
                 }
@@ -240,6 +243,7 @@ namespace Authentication.Controllers
                 var bodyTxt = await _emailService.RenderPartialViewToString("ResetPasswordConfirmation.txt", emailMessage, null);
 
                 await _emailSender.SendEmailAsync(user.Email, "Password Reset Confirmation", bodyHtml, bodyTxt);
+                await AuditScope.LogAsync($"User:Passowrd Reset Successfully", new { SubjectId = user.Id });
 
                 return RedirectToAction(nameof(ResetPasswordConfirmation), "PasswordReset", new { returnUrl = model.ReturnUrl });
             }
