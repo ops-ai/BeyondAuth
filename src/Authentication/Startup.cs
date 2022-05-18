@@ -1,3 +1,5 @@
+using Audit.Core;
+using Audit.NET.RavenDB.ConfigurationApi;
 using Authentication.Controllers;
 using Authentication.Domain;
 using Authentication.Extensions;
@@ -64,6 +66,7 @@ using Raven.Client.Documents.Session;
 using Raven.Client.Json.Serialization.NewtonsoftJson;
 using Raven.DependencyInjection;
 using Raven.Identity;
+using SimpleHelpers;
 using System.Diagnostics;
 using System.Net.Http.Headers;
 using System.Security.Claims;
@@ -530,6 +533,14 @@ namespace Authentication
                 return store.Initialize();
             });
 
+            Audit.Core.Configuration.Setup()
+                .JsonNewtonsoftAdapter(new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
+                .UseRavenDB(config => config
+                .WithSettings(settings => settings
+                    .Urls(Configuration.GetSection("Raven:Urls").Get<string[]>())
+                    .Database(ev => Configuration["Raven:DatabaseName"])
+                    .Certificate(ravenDBcert)));
+
             services.ConfigureOptions<RavenOptionsSetup>();
             services.AddScoped(sp => sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<RavenSettings>>()?.Value?.DatabaseName));
 
@@ -680,7 +691,6 @@ namespace Authentication
                 services.AddHostedService<PasswordResetService>();
         }
 
-        // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
         public void Configure(IApplicationBuilder app, IWebHostEnvironment env, ILoggerFactory loggerFactory)
         {
             IdentityModelEventSource.ShowPII = true;
@@ -707,6 +717,21 @@ namespace Authentication
             app.UseJSNLog(new LoggingAdapter(loggerFactory), jsnlogConfiguration);
 
             app.UseStaticFiles();
+
+            Audit.Core.Configuration.AddCustomAction(ActionType.OnEventSaving, scope =>
+            {
+                var httpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
+                if (httpContextAccessor?.HttpContext?.User?.FindFirstValue("sub") != null)
+                    scope.SetCustomField("UserId", httpContextAccessor?.HttpContext?.User?.FindFirstValue("sub"));
+
+                var auditEvent = scope.Event;
+                if (auditEvent.Target != null)
+                {
+                    var diff = ObjectDiffPatch.GenerateDiff(auditEvent.Target.Old, auditEvent.Target.New);
+                    auditEvent.Target.Old = diff.OldValues;
+                    auditEvent.Target.New = diff.NewValues;
+                }
+            });
 
             //app.UseCors(x => x.AllowAnyOrigin().WithHeaders("accept", "authorization", "content-type", "origin").AllowAnyMethod());
 

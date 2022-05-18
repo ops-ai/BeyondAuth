@@ -48,13 +48,15 @@
 		<None Include="wwwroot\lib\jquery-validation\LICENSE.md" />
 	</ItemGroup>
 
-
 	<ItemGroup>
 		<PackageReference Include="AspNetCore.HealthChecks.AzureKeyVault" Version="6.0.2" />
 		<PackageReference Include="AspNetCore.HealthChecks.OpenIdConnectServer" Version="6.0.2" />
 		<PackageReference Include="AspNetCore.HealthChecks.RavenDB" Version="6.0.2" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI" Version="6.0.4" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="6.0.4" />
+		<PackageReference Include="Audit.Mvc.Core" Version="19.1.1" />
+		<PackageReference Include="Audit.NET" Version="19.1.1" />
+		<PackageReference Include="Audit.NET.RavenDB" Version="19.1.1" />
 		<PackageReference Include="Autofac" Version="6.3.0" />
 		<PackageReference Include="Autofac.Configuration" Version="6.0.0" />
 		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="7.2.0" />
@@ -121,14 +123,12 @@
 		<PackageReference Include="WinInsider.System.Net.Http.Formatting" Version="1.0.14" />
 	</ItemGroup>
 
-
 	<ItemGroup>
 		<ProjectReference Include="..\Identity.Core\Identity.Core.csproj" />
 		<ProjectReference Include="..\Password Validators\BeyondAuth.PasswordValidators.Common\BeyondAuth.PasswordValidators.Common.csproj" />
 		<ProjectReference Include="..\Password Validators\BeyondAuth.PasswordValidators.Topology\BeyondAuth.PasswordValidators.Topology.csproj" />
 		<ProjectReference Include="..\Password Validators\BlackstarSolar.AspNetCore.Identity.PwnedPasswords\BlackstarSolar.AspNetCore.Identity.PwnedPasswords.csproj" />
 	</ItemGroup>
-
 
 	<ItemGroup>
 		<Compile Update="Program.cs">
