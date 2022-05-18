@@ -43,7 +43,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromRoute] string name, [FromQuery] string? sort = "+email", [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
+        public async Task<IActionResult> Get([FromRoute] string name, [FromQuery] string? sort = "email", [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
         {
             try
             {
@@ -53,11 +53,11 @@ namespace IdentityManager.Controllers
                     var query = session.Query<ApplicationUser>().Where(t => t.Groups.Contains(name)).Statistics(out var stats).AsQueryable();
                     query = sort switch
                     {
-                        "+firstName" => query.OrderBy(t => t.FirstName),
+                        "firstName" => query.OrderBy(t => t.FirstName),
                         "-firstName" => query.OrderByDescending(t => t.FirstName),
-                        "+lastName" => query.OrderBy(t => t.LastName),
+                        "lastName" => query.OrderBy(t => t.LastName),
                         "-lastName" => query.OrderByDescending(t => t.LastName),
-                        "+email" => query.OrderBy(t => t.Email),
+                        "email" => query.OrderBy(t => t.Email),
                         "-email" => query.OrderByDescending(t => t.Email),
                         _ => query.OrderBy(t => t.FirstName),
                     };

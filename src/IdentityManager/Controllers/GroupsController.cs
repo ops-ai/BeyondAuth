@@ -37,7 +37,7 @@ namespace IdentityManager.Controllers
         /// </summary>
         /// <param name="name">Name starts with</param>
         /// <param name="tag">Contains tag</param>
-        /// <param name="sort">+/- field to sort by</param>
+        /// <param name="sort">[-]field to sort by</param>
         /// <param name="skip">Result range to return. Format: 0-19 (result index from - result index to)</param>
         /// <param name="take">Result range to return. Format: 0-19 (result index from - result index to)</param>
         /// <param name="ct"></param>
@@ -47,7 +47,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string? name = null, [FromQuery] string? tag = null, [FromQuery] string? sort = "+name", [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
+        public async Task<IActionResult> Get([FromQuery] string? name = null, [FromQuery] string? tag = null, [FromQuery] string? sort = "name", [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
         {
             try
             {
@@ -61,7 +61,7 @@ namespace IdentityManager.Controllers
 
                     query = sort switch
                     {
-                        "+name" => query.OrderBy(t => t.Name),
+                        "name" => query.OrderBy(t => t.Name),
                         "-name" => query.OrderByDescending(t => t.Name),
                         _ => query.OrderBy(t => t.Name),
                     };

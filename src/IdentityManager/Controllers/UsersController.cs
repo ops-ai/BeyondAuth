@@ -56,7 +56,7 @@ namespace IdentityManager.Controllers
         /// <param name="email">Email</param>
         /// <param name="includeDisabled">Include disabled accounts</param>
         /// <param name="lockedOnly">Show only locked accounts</param>
-        /// <param name="sort">Field and direction to sort by. Format: ([+/-]FieldName) By default: +email (sort by email ascending)</param>
+        /// <param name="sort">Field and direction to sort by. Format: ([-]FieldName) By default: email (sort by email ascending)</param>
         /// <param name="skip">Result range to return. Format: 0-19 (result index from - result index to)</param>
         /// <param name="take">Result range to return. Format: 0-19 (result index from - result index to)</param>
         /// <param name="ct"></param>
@@ -67,7 +67,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(IList<UserModel>), (int)HttpStatusCode.PartialContent)]
         [ProducesResponseType(typeof(IDictionary<string, string>), (int)HttpStatusCode.BadRequest)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        public async Task<IActionResult> Get([FromRoute] string dataSourceId, [FromQuery] string? firstName, [FromQuery] string? lastName, [FromQuery] string? displayName, [FromQuery] string? organization, [FromQuery] string? email, [FromQuery] bool includeDisabled = false, [FromQuery] bool lockedOnly = false, [FromQuery] string? sort = "+email", [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
+        public async Task<IActionResult> Get([FromRoute] string dataSourceId, [FromQuery] string? firstName, [FromQuery] string? lastName, [FromQuery] string? displayName, [FromQuery] string? organization, [FromQuery] string? email, [FromQuery] bool includeDisabled = false, [FromQuery] bool lockedOnly = false, [FromQuery] string? sort = "email", [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
         {
             try
             {
@@ -91,13 +91,13 @@ namespace IdentityManager.Controllers
 
                 query = sort switch
                 {
-                    "+email" => query.OrderBy(t => t.Email),
+                    "email" => query.OrderBy(t => t.Email),
                     "-email" => query.OrderByDescending(t => t.Email),
-                    "+firstName" => query.OrderBy(t => t.FirstName),
+                    "firstName" => query.OrderBy(t => t.FirstName),
                     "-firstName" => query.OrderByDescending(t => t.FirstName),
-                    "+lastName" => query.OrderBy(t => t.LastName),
+                    "lastName" => query.OrderBy(t => t.LastName),
                     "-lastName" => query.OrderByDescending(t => t.LastName),
-                    "+organization" => query.OrderBy(t => t.Organization),
+                    "organization" => query.OrderBy(t => t.Organization),
                     "-organization" => query.OrderByDescending(t => t.Organization),
                     _ => query.OrderBy(t => t.Email),
                 };

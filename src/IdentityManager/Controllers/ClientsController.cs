@@ -34,7 +34,7 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Get clients
         /// </summary>
-        /// <param name="sort">+/- field to sort by</param>
+        /// <param name="sort">[-]field to sort by</param>
         /// <param name="skip">Result range to return. Format: 0-19 (result index from - result index to)</param>
         /// <param name="take">Result range to return. Format: 0-19 (result index from - result index to)</param>
         /// <response code="206">Clients information</response>
@@ -43,7 +43,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string? sort = "+clientName", [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
+        public async Task<IActionResult> Get([FromQuery] string? sort = "clientName", [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
         {
             try
             {
@@ -52,9 +52,9 @@ namespace IdentityManager.Controllers
                     var query = session.Query<ClientEntity>().Statistics(out var stats).AsQueryable();
                     query = sort switch
                     {
-                        "+clientName" => query.OrderBy(t => t.ClientName),
+                        "clientName" => query.OrderBy(t => t.ClientName),
                         "-clientName" => query.OrderByDescending(t => t.ClientName),
-                        "+clientId" => query.OrderBy(t => t.ClientId),
+                        "clientId" => query.OrderBy(t => t.ClientId),
                         "-clientId" => query.OrderByDescending(t => t.ClientId),
                         _ => query.OrderBy(t => t.ClientName),
                     };

@@ -32,7 +32,7 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Get Api Resources
         /// </summary>
-        /// <param name="sort">+/- field to sort by</param>
+        /// <param name="sort">[-]field to sort by</param>
         /// <param name="skip">Result range to return. Format: 0-19 (result index from - result index to)</param>
         /// <param name="take">Result range to return. Format: 0-19 (result index from - result index to)</param>
         /// <response code="206">Api Resources</response>
@@ -41,7 +41,7 @@ namespace IdentityManager.Controllers
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] string? sort = "+name", [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
+        public async Task<IActionResult> Get([FromQuery] string? sort = "name", [FromQuery] int? skip = 0, [FromQuery] int? take = 20, CancellationToken ct = default)
         {
             try
             {
@@ -50,7 +50,7 @@ namespace IdentityManager.Controllers
                     var query = session.Query<ApiResourceEntity>().Statistics(out var stats).AsQueryable();
                     query = sort switch
                     {
-                        "+name" => query.OrderBy(t => t.Name),
+                        "name" => query.OrderBy(t => t.Name),
                         "-name" => query.OrderByDescending(t => t.Name),
                         _ => query.OrderBy(t => t.Name),
                     };
