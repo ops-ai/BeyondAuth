@@ -17,6 +17,7 @@ namespace Authentication.Infrastructure
         private readonly IDocumentStore _store;
         private readonly IOptions<IdentityStoreOptions> _identityStoreOptions;
         private readonly ConcurrentDictionary<string, int> _stats = new();
+        private readonly Timer timer;
 
         /// <summary>
         /// 
@@ -30,7 +31,7 @@ namespace Authentication.Infrastructure
             _store = store ?? throw new ArgumentException("store is required", nameof(store));
             _identityStoreOptions = identityStoreOptions;
 
-            var timer = new Timer((s) => SaveStatsAsync().ConfigureAwait(false), null, new TimeSpan(0, 5, 0), new TimeSpan(0, 5, 0));
+            timer = new Timer((s) => SaveStatsAsync().ConfigureAwait(false), null, new TimeSpan(0, 5, 0), new TimeSpan(0, 5, 0));
             applicationLifetime.ApplicationStopping.Register(() => SaveStatsAsync().ConfigureAwait(false).GetAwaiter().GetResult());
         }
 
