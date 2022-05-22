@@ -80,7 +80,8 @@ namespace Authentication.Infrastructure
                         TemplateData = templateData.ToDictionary(t => t.Name, t => t.Sensitive ? "****" : t.Value),
                         Cc = cc,
                         UserId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(JwtClaimTypes.Subject),
-                        RefId = mailGunResponse.Id
+                        RefId = mailGunResponse.Id,
+                        Events = new List<EmailEvent> { new EmailEvent { CreatedOnUtc = DateTime.UtcNow, Ip = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString(), LogLevel = "Info", Name = "Queued", Recipient = toEmail } }
                     };
                     await session.StoreAsync(newEmail);
                     session.Advanced.GetMetadataFor(newEmail)["@expires"] = DateTime.UtcNow.AddDays(60);
@@ -160,7 +161,8 @@ namespace Authentication.Infrastructure
                         TemplateId = templateId,
                         TemplateData = templateData.ToDictionary(t => t.Name, t => t.Sensitive ? "****" : t.Value),
                         UserId = _httpContextAccessor.HttpContext?.User?.FindFirstValue(JwtClaimTypes.Subject),
-                        RefId = mailGunResponse.Id
+                        RefId = mailGunResponse.Id,
+                        Events = new List<EmailEvent> { new EmailEvent { CreatedOnUtc = DateTime.UtcNow, Ip = _httpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString(), LogLevel = "Info", Name = "Queued", Recipient = toEmail } }
                     };
                     await session.StoreAsync(newEmail);
                     session.Advanced.GetMetadataFor(newEmail)["@expires"] = DateTime.UtcNow.AddDays(60);
