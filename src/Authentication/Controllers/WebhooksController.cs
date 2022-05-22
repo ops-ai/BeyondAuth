@@ -35,8 +35,14 @@ namespace Authentication.Controllers
                 _logger.LogWarning("Mailgun signature validation failed");
                 throw new InvalidOperationException("Invalid signature");
             }
+            if (!emailEvent.EventData.UserVariables.ContainsKey("tenantId"))
+            {
+                _logger.LogWarning("Email sent without a tenant id");
+                return Ok();
+            }
 
-            using var session = _store.OpenAsyncSession();
+            var tenantId = emailEvent.EventData.UserVariables["tenantId"];
+            using var session = _store.OpenAsyncSession($"TenantIdentity-{tenantId}");
 
             var id = emailEvent.EventData.Message.Headers.MessageId.Split('@').FirstOrDefault();
 
@@ -44,7 +50,7 @@ namespace Authentication.Controllers
             if (email == null)
                 throw new KeyNotFoundException($"Email {id} not found");
 
-            email.Events.Add(new EmailEvent
+            session.Advanced.Patch(email, t => t.Events, t => t.Add(new EmailEvent
             {
                 CreatedOnUtc = DateTime.UtcNow,
                 Recipient = emailEvent.EventData.Recipient,
@@ -52,7 +58,8 @@ namespace Authentication.Controllers
                 LogLevel = emailEvent.EventData.LogLevel,
                 Name = emailEvent.EventData.Event,
                 Ip = emailEvent.EventData.Ip
-            });
+            }));
+            
             await session.SaveChangesAsync(ct);
 
             return Ok();

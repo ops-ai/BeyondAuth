@@ -38,6 +38,7 @@ namespace Authentication.Infrastructure
                 vars.Add(new TemplateVariable { Name = "logo", Value = tenantInfo.BrandingOptions?.Logo ?? "https://account.beyondauth.io/logo.png" });
                 vars.Add(new TemplateVariable { Name = "primaryColor", Value = tenantInfo.BrandingOptions?.PrimaryColor ?? "#177CAB" });
                 vars.Add(new TemplateVariable { Name = "secondaryColor", Value = tenantInfo.BrandingOptions?.SecondaryColor ?? "#177CAB" });
+                vars.Add(new TemplateVariable { Name = "tenantId", Value = tenantInfo.Identifier });
 
                 var formContent = new FormUrlEncodedContent(new Dictionary<string, string> {
                  { "from", $"{fromName} <{fromEmail}>" },
@@ -105,6 +106,7 @@ namespace Authentication.Infrastructure
                 vars.Add(new TemplateVariable { Name = "logo", Value = tenantInfo.BrandingOptions?.Logo ?? "https://account.beyondauth.io/logo.png" });
                 vars.Add(new TemplateVariable { Name = "primaryColor", Value = tenantInfo.BrandingOptions?.PrimaryColor ?? "#177CAB" });
                 vars.Add(new TemplateVariable { Name = "secondaryColor", Value = tenantInfo.BrandingOptions?.SecondaryColor ?? "#177CAB" });
+                vars.Add(new TemplateVariable { Name = "tenantId", Value = tenantInfo.Identifier });
 
                 var multipart = new MultipartFormDataContent
                 {
