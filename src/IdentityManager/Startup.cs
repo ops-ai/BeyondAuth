@@ -52,6 +52,7 @@ using Raven.DependencyInjection;
 using Raven.Identity;
 using SimpleHelpers;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json.Serialization;
 
@@ -375,7 +376,7 @@ namespace IdentityManager
             if (ravenDBcert != null)
             {
                 Audit.Core.Configuration.Setup()
-                    .JsonNewtonsoftAdapter(new Newtonsoft.Json.JsonSerializerSettings { NullValueHandling = Newtonsoft.Json.NullValueHandling.Ignore })
+                    .JsonNewtonsoftAdapter(new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
                     .UseRavenDB(config => config
                     .WithSettings(settings => settings
                         .Urls(Configuration.GetSection("Raven:Urls").Get<string[]>())
@@ -384,6 +385,14 @@ namespace IdentityManager
 
                 Audit.Core.Configuration.AddCustomAction(ActionType.OnEventSaving, scope =>
                 {
+                    var httpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
+                    if (httpContextAccessor?.HttpContext?.User?.FindFirstValue("sub") != null)
+                        scope.SetCustomField("UserId", httpContextAccessor?.HttpContext?.User?.FindFirstValue("sub"));
+                    if (httpContextAccessor?.HttpContext != null)
+                        scope.SetCustomField("UserAgent", httpContextAccessor.HttpContext.Request.Headers.UserAgent.ToString());
+                    if (httpContextAccessor?.HttpContext?.User?.FindFirstValue("sub") != null)
+                        scope.SetCustomField("BrowserId", httpContextAccessor?.HttpContext?.User?.FindFirstValue("browser_id"));
+
                     var auditEvent = scope.Event;
                     if (auditEvent.Target != null)
                     {
@@ -391,12 +400,9 @@ namespace IdentityManager
                         auditEvent.Target.Old = diff.OldValues;
                         auditEvent.Target.New = diff.NewValues;
                     }
-                });
-                Audit.Core.Configuration.AddCustomAction(ActionType.OnEventSaving, scope =>
-                {
-                    var httpContextAccessor = app.ApplicationServices.GetService<IHttpContextAccessor>();
-                    if (httpContextAccessor?.HttpContext?.User?.Identity?.Name != null)
-                        scope.SetCustomField("Username", httpContextAccessor.HttpContext?.User?.Identity?.Name);
+
+                    if (!auditEvent.CustomFields.ContainsKey("RemoteIpAddress") && httpContextAccessor?.HttpContext?.Connection.RemoteIpAddress != null)
+                        scope.SetCustomField("RemoteIpAddress", httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString());
                 });
             }
 

@@ -737,8 +737,8 @@ namespace Authentication
                     auditEvent.Target.New = diff.NewValues;
                 }
 
-                if (!auditEvent.CustomFields.ContainsKey("RemoteIpAddress") && httpContextAccessor?.HttpContext != null)
-                    scope.SetCustomField("RemoteIpAddress", httpContextAccessor?.HttpContext?.Connection.RemoteIpAddress);
+                if (!auditEvent.CustomFields.ContainsKey("RemoteIpAddress") && httpContextAccessor?.HttpContext?.Connection.RemoteIpAddress != null)
+                    scope.SetCustomField("RemoteIpAddress", httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString());
             });
 
             //app.UseCors(x => x.AllowAnyOrigin().WithHeaders("accept", "authorization", "content-type", "origin").AllowAnyMethod());
