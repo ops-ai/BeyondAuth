@@ -12,6 +12,7 @@ namespace Authentication.Controllers
 {
     [SecurityHeaders]
     [AllowAnonymous]
+    [Route("{controller}")]
     public class WebhooksController : Controller
     {
         private readonly IDocumentStore _store;
@@ -44,7 +45,7 @@ namespace Authentication.Controllers
             var tenantId = emailEvent.EventData.UserVariables["tenantId"];
             using var session = _store.OpenAsyncSession($"TenantIdentity-{tenantId}");
 
-            var id = emailEvent.EventData.Message.Headers.MessageId.Split('@').FirstOrDefault();
+            var id = emailEvent.EventData.Message.Headers.MessageId;
 
             var email = await session.LoadAsync<SentEmail>($"SentEmails/{id}", ct);
             if (email == null)
