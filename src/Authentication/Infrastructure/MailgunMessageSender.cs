@@ -45,7 +45,7 @@ namespace Authentication.Infrastructure
                  { "subject", subject  },
                  { "template", templateId },
                  { "h:Reply-To", $"{fromName} <{replyTo??fromEmail}>" },
-                 { "h:X-Mailgun-Variables", JsonSerializer.Serialize(templateData.ToDictionary(d => d.Name, d => d.Value)) }
+                 { "h:X-Mailgun-Variables", JsonSerializer.Serialize(vars.ToDictionary(d => d.Name, d => d.Value)) }
                  });
 
                 var response = await httpClient.PostAsync($"{_emailSettings.Value.ApiBaseUrl}messages", formContent);
@@ -100,6 +100,11 @@ namespace Authentication.Infrastructure
             try
             {
                 using var httpClient = _httpClientFactory.CreateClient("mailgun");
+                var tenantInfo = _httpContextAccessor.HttpContext.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
+                var vars = templateData.ToList();
+                vars.Add(new TemplateVariable { Name = "logo", Value = tenantInfo.BrandingOptions?.Logo ?? "https://account.beyondauth.io/logo.png" });
+                vars.Add(new TemplateVariable { Name = "primaryColor", Value = tenantInfo.BrandingOptions?.PrimaryColor ?? "#177CAB" });
+                vars.Add(new TemplateVariable { Name = "secondaryColor", Value = tenantInfo.BrandingOptions?.SecondaryColor ?? "#177CAB" });
 
                 var multipart = new MultipartFormDataContent
                 {
@@ -108,7 +113,7 @@ namespace Authentication.Infrastructure
                     { new StringContent(subject), "subject" },
                     { new StringContent(templateId), "template" },
                     { new StringContent($"{fromName} <{fromEmail}>"), "h:Reply-To" },
-                    { new StringContent(JsonSerializer.Serialize(templateData.ToDictionary(d => d.Name, d => d.Value))), "h:X-Mailgun-Variables" }
+                    { new StringContent(JsonSerializer.Serialize(vars.ToDictionary(d => d.Name, d => d.Value))), "h:X-Mailgun-Variables" }
                 };
 
                 if (attachment != null && attachment.File != null)
@@ -141,7 +146,6 @@ namespace Authentication.Infrastructure
                     return;
                 }
 
-                var tenantInfo = _httpContextAccessor.HttpContext.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
                 using (var session = _store.OpenAsyncSession($"TenantIdentity-{tenantInfo.Identifier}"))
                 {
                     var newEmail = new SentEmail
