@@ -6,6 +6,7 @@ using Audit.Core;
 using Authentication.Extensions;
 using Authentication.Filters;
 using Authentication.Infrastructure;
+using Authentication.Models;
 using Authentication.Models.Account;
 using Authentication.Models.Messages;
 using Finbuckle.MultiTenant;
@@ -42,7 +43,6 @@ namespace Authentication.Controllers
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger _logger;
         private readonly SignInManager<ApplicationUser> _signInManager;
-        private readonly IEmailService _emailService;
         private readonly IEmailSender _emailSender;
 
         public AccountController(
@@ -56,7 +56,6 @@ namespace Authentication.Controllers
             IHttpContextAccessor httpContextAccessor,
             ILogger<AccountController> logger,
             SignInManager<ApplicationUser> signInManager,
-            IEmailService emailService,
             IEmailSender emailSender) : base(dbSession)
         {
             _userManager = userManager;
@@ -69,7 +68,6 @@ namespace Authentication.Controllers
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _signInManager = signInManager;
-            _emailService = emailService;
             _emailSender = emailSender;
         }
 
@@ -505,16 +503,7 @@ namespace Authentication.Controllers
                     {
                         _logger.LogInformation(6, "User changed their password successfully.");
 
-                        var emailMessage = new ChangePasswordConfirmationEmailMessage
-                        {
-                            To = user.Email,
-                            FirstName = user.FirstName
-                        };
-
-                        var bodyHtml = await _emailService.RenderPartialViewToString("ChangePasswordConfirmation.html", emailMessage, null);
-                        var bodyTxt = await _emailService.RenderPartialViewToString("ChangePasswordConfirmation.txt", emailMessage, null);
-
-                        await _emailSender.SendEmailAsync(user.Email, "Password Changed Confirmation", bodyHtml, bodyTxt);
+                        await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-change-confirmation", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Password Changed Confirmation");
                         await AuditScope.LogAsync($"User:Passowrd Changed", new { SubjectId = user.Id });
 
                         return View("ChangePasswordConfirmation");

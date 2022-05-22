@@ -643,7 +643,6 @@ namespace Authentication
             services.AddSingleton<IEventSink, IdentityServerStatsSink>();
             services.AddSingleton<IEventSink, IdentityServerAuditSink>();
             services.AddTransient<IActionContextAccessor, ActionContextAccessor>();
-            services.AddTransient<IEmailService, EmailController>();
             services.AddTransient<IPasswordTopologyProvider, PasswordTopologyProvider>();
             services.AddTransient<IOtacManager, OtacManager>();
 

@@ -1,4 +1,6 @@
-﻿using Authentication.Infrastructure;
+﻿using Audit.Core;
+using Authentication.Infrastructure;
+using Authentication.Models;
 using Authentication.Models.Messages;
 using Identity.Core;
 using Microsoft.AspNetCore.Identity;
@@ -11,14 +13,12 @@ namespace Authentication.Services
         private readonly IDocumentStore _store;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly IEmailSender _emailSender;
-        private readonly IEmailService _emailService;
         private readonly ILogger _logger;
 
-        public PasswordResetService(IDocumentStore store, IEmailSender emailSender, IEmailService emailService, ILoggerFactory loggerFactory)
+        public PasswordResetService(IDocumentStore store, IEmailSender emailSender, ILoggerFactory loggerFactory)
         {
             _store = store;
             _emailSender = emailSender;
-            _emailService = emailService;
             _logger = loggerFactory.CreateLogger<PasswordResetService>();
         }
 
@@ -43,10 +43,10 @@ namespace Authentication.Services
                     var callbackUrl = $"https://{tenant}/reset-password?code={code}";
 
                     var emailMessage = new ResetPasswordEmailMessage { To = user.Email, FirstName = user.FirstName, CallbackUrl = callbackUrl };
+                    var supportEmail = "support@beyondauth.io";
 
-                    var bodyHtml = await _emailService.RenderPartialViewToString("ResetPassword.html", emailMessage, null);
-                    var bodyTxt = await _emailService.RenderPartialViewToString("ResetPassword.txt", emailMessage, null);
-                    await _emailSender.SendEmailAsync(emailMessage.To, "Password reset", bodyHtml, bodyTxt);
+                    await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "callbackUrl", Value = callbackUrl, Sensitive = true }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = true } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Reset Password");
+                    await AuditScope.LogAsync($"User:Password Reset Requested", new { SubjectId = user.Id });
 
                     request.Handled = true;
                     await session.SaveChangesAsync();

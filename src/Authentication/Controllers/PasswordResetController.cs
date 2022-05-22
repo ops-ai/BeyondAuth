@@ -2,6 +2,7 @@ using Audit.Core;
 using Authentication.Domain;
 using Authentication.Filters;
 using Authentication.Infrastructure;
+using Authentication.Models;
 using Authentication.Models.Messages;
 using Authentication.Models.PasswordReset;
 using Identity.Core;
@@ -31,7 +32,6 @@ namespace Authentication.Controllers
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly ILogger _logger;
         private readonly IdentityErrorDescriber _identityErrorDescriber;
-        private readonly IEmailService _emailService;
         private readonly IEmailSender _emailSender;
 
         public PasswordResetController(
@@ -45,7 +45,6 @@ namespace Authentication.Controllers
             IHttpContextAccessor httpContextAccessor,
             ILogger<PasswordResetController> logger,
             IdentityErrorDescriber identityErrorDescriber,
-            IEmailService emailService,
             IEmailSender emailSender) : base(dbSession)
         {
             _userManager = userManager;
@@ -58,7 +57,6 @@ namespace Authentication.Controllers
             _httpContextAccessor = httpContextAccessor;
             _logger = logger;
             _identityErrorDescriber = identityErrorDescriber;
-            _emailService = emailService;
             _emailSender = emailSender;
         }
 
@@ -129,15 +127,14 @@ namespace Authentication.Controllers
                 var emailMessage = new ResetPasswordEmailMessage { To = model.Email, FirstName = user.FirstName, CallbackUrl = callbackUrl };
 
                 var interaction = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
+                var supportEmail = "support@beyondauth.io";
                 if (interaction != null)
                 {
                     var clientSetting = interaction.Client as ClientEntity;
-                    emailMessage.SupportEmail = clientSetting?.SupportEmail ?? _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
+                    supportEmail = clientSetting?.SupportEmail ?? _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
                 }
 
-                var bodyHtml = await _emailService.RenderPartialViewToString("ResetPassword.html", emailMessage, null);
-                var bodyTxt = await _emailService.RenderPartialViewToString("ResetPassword.txt", emailMessage, null);
-                await _emailSender.SendEmailAsync(emailMessage.To, "Password reset", bodyHtml, bodyTxt);
+                await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "callbackUrl", Value = callbackUrl, Sensitive = true }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = true } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Reset Password");
                 await AuditScope.LogAsync($"User:Password Reset Requested", new { SubjectId = user.Id });
 
                 // If we got this far, something failed, redisplay form
@@ -233,16 +230,14 @@ namespace Authentication.Controllers
                 var emailMessage = new ResetPasswordConfirmationEmailMessage { To = user.Email, FirstName = user.FirstName };
 
                 var interaction = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
+                var supportEmail = "support@beyondauth.io";
                 if (interaction != null)
                 {
-                    //var clientSetting = interaction.Client as ClientEntity;
-                    //emailMessage.SupportEmail = clientSetting?.SupportEmail ?? _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
+                    var clientSetting = interaction.Client as ClientEntity;
+                    supportEmail = clientSetting?.SupportEmail ?? _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
                 }
 
-                var bodyHtml = await _emailService.RenderPartialViewToString("ResetPasswordConfirmation.html", emailMessage, null);
-                var bodyTxt = await _emailService.RenderPartialViewToString("ResetPasswordConfirmation.txt", emailMessage, null);
-
-                await _emailSender.SendEmailAsync(user.Email, "Password Reset Confirmation", bodyHtml, bodyTxt);
+                await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset-confirmation", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = true } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Password Reset Confirmation");
                 await AuditScope.LogAsync($"User:Passowrd Reset Successfully", new { SubjectId = user.Id });
 
                 return RedirectToAction(nameof(ResetPasswordConfirmation), "PasswordReset", new { returnUrl = model.ReturnUrl });

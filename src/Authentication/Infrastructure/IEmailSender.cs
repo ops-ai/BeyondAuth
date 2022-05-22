@@ -7,17 +7,10 @@ namespace Authentication.Infrastructure
     /// </summary>
     public interface IEmailSender
     {
-        Task SendEmailAsync(string to, string subject, string htmlMessage, string txtMessage, List<string>? cc = null);
-
-        Task SendEmailAsync(string toEmail, string toName, string htmlMessage, string fromName, string fromEmail, Dictionary<string, string>? customArgs,
+        Task SendEmailAsync(string toEmail, string toName, string templateId, IEnumerable<TemplateVariable> templateData, string fromName, string fromEmail,
             string subject, string? replyTo = null, List<string>? cc = null, List<string>? bcc = null);
 
-        Task SendEmailAsync(string toEmail, string toName, string templateId, object templateData, string fromName, string fromEmail,
-            string subject, string? replyTo = null, List<string>? cc = null, List<string>? bcc = null);
-
-        Task SendEmailWithAttachmentAsync(string toEmail, string toName, string templateId, object templateData, string fromEmail, string fromName,
+        Task SendEmailWithAttachmentAsync(string toEmail, string toName, string templateId, IEnumerable<TemplateVariable> templateData, string fromEmail, string fromName,
             EmailAttachmentModel attachment, string subject);
-
-        Task ReportIssueAsync(string subject, string txtMessage);
     }
 }
