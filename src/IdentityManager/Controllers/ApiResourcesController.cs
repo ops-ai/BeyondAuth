@@ -126,7 +126,7 @@ namespace IdentityManager.Controllers
 
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    _logger.LogDebug($"Creating Api Resource {resource.Name}");
+                    _logger.LogDebug("Creating Api Resource {resource.Name}", resource.Name);
 
                     if (await session.Advanced.ExistsAsync($"ApiResources/{resource.Name}", ct))
                         throw new ArgumentException("Api Resource already exists");

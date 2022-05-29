@@ -2,15 +2,10 @@
 using BeyondAuth.Acl;
 using Finbuckle.MultiTenant;
 using Identity.Core;
-using Identity.Core.Permissions;
-using IdentityManager.Domain;
 using IdentityManager.Extensions;
 using IdentityManager.Models;
 using IdentityServer4.Contrib.RavenDB.Options;
-using IdentityServer4.Models;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.JsonPatch;
-using Microsoft.AspNetCore.JsonPatch.Exceptions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
 using NSwag.Annotations;

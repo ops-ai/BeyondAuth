@@ -16,6 +16,7 @@ using Microsoft.Extensions.Options;
 using NSwag.Annotations;
 using Raven.Client.Documents;
 using Raven.Client.Documents.Linq;
+using Raven.Client.Documents.Operations.CompareExchange;
 using Raven.Client.Documents.Session;
 using System.Net;
 
@@ -285,6 +286,9 @@ namespace IdentityManager.Controllers
                         {
                             _logger.LogError(ex, "Error creating user");
                             audit.Discard();
+                            var cmpExg = _session.Advanced.DocumentStore.Operations.Send(new GetCompareExchangeValueOperation<string>($"emails/{newUser.Email.ToLower()}"));
+                            if (cmpExg != null)
+                                _session.Advanced.DocumentStore.Operations.Send(new DeleteCompareExchangeValueOperation<string>(cmpExg.Key, cmpExg.Index));
 
                             ModelState.AddModelError(nameof(newUser.Email), "Error creating user");
                             return ValidationProblem(ModelState);
@@ -309,7 +313,7 @@ namespace IdentityManager.Controllers
                     }
                 }
             }
-            catch (UnauthorizedAccessException ex)
+            catch (UnauthorizedAccessException)
             {
                 return Forbid();
             }
