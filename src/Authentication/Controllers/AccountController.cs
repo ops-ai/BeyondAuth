@@ -498,6 +498,9 @@ namespace Authentication.Controllers
                 var user = await _userManager.FindByIdAsync(sub);
                 if (user != null && user.ChangePasswordAllowed)
                 {
+                    if (user.ChangePasswordOnNextLogin)
+                        user.ChangePasswordOnNextLogin = false;
+
                     var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
                     if (result.Succeeded)
                     {
