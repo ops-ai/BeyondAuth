@@ -95,6 +95,8 @@ namespace Identity.Core
 
         public List<string> Groups { get; set; } = new List<string>();
 
+        public Dictionary<string, string>? Properties { get; set; }
+
         [JsonIgnore]
         public override List<IdentityUserClaim> Claims
         {

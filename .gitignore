@@ -352,3 +352,4 @@ appsettings.Development.json
 appsettings.*.json
 src/Authentication/tempkey.jwk
 src/BeyondAuth.Web/imageflow_*
+src/.idea/
