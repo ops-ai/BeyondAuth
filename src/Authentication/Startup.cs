@@ -1,10 +1,10 @@
+using AspNet.Security.OAuth.GitHub;
 using Audit.Core;
 using Audit.NET.RavenDB.ConfigurationApi;
 using Authentication.Controllers;
 using Authentication.Domain;
 using Authentication.Extensions;
 using Authentication.Infrastructure;
-using Authentication.Options;
 using Authentication.Services;
 using Autofac;
 using Azure.Core;
@@ -77,6 +77,9 @@ using Toggly.FeatureManagement;
 using Toggly.FeatureManagement.Helpers;
 using Toggly.FeatureManagement.Storage.RavenDB;
 using Toggly.FeatureManagement.Web;
+using Toggly.FeatureManagement.Web.Configuration;
+using Toggly.FeatureManagement.Storage.RavenDB.Configuration;
+using System.IdentityModel.Tokens.Jwt;
 
 namespace Authentication
 {
@@ -107,26 +110,14 @@ namespace Authentication
                 //options.KnownProxies.Clear();
             });
             services.AddCertificateForwarding(options => options.CertificateHeader = "X-ARR-ClientCert");
-            services.Configure<TogglySettings>(Configuration.GetSection("Toggly"));
-            services.AddSingleton<IFeatureDefinitionProvider, TogglyFeatureProvider>();
-            services.AddSingleton<IFeatureSnapshotProvider, RavenDBFeatureSnapshotProvider>();
 
             services.AddHttpClient();
-            services.AddHttpClient("toggly", config =>
+            services.AddTogglyWeb(options =>
             {
-                config.BaseAddress = new Uri(Configuration["Toggly:BaseUrl"]);
-            })
-                .ConfigurePrimaryHttpMessageHandler(() => { return new SocketsHttpHandler { UseCookies = false }; });
-
-            services.AddSingleton<ITargetingContextAccessor, HttpContextTargetingContextAccessor>();
-            services.AddFeatureManagement()
-                    .AddFeatureFilter<PercentageFilter>()
-                    .AddFeatureFilter<ContextualTargetingFilter>()
-                    .AddFeatureFilter<TargetingFilter>()
-                    .AddFeatureFilter<TimeWindowFilter>();
-            services.AddSingleton<IFeatureContextProvider, HttpFeatureContextProvider>();
-            services.AddSingleton<IFeatureUsageStatsProvider, TogglyUsageStatsProvider>();
-            services.Decorate<IFeatureManager, TogglyFeatureManager>();
+                options.AppKey = Configuration["Toggly:AppKey"];
+                options.Environment = Configuration["Toggly:Environment"];
+            });
+            services.AddTogglyRavenDbSnapshotProvider();
 
             NLog.GlobalDiagnosticsContext.Set("AzureLogStorageConnectionString", Configuration["LogStorage:AzureStorage"]);
             NLog.GlobalDiagnosticsContext.Set("LokiConnectionString", Configuration["LogStorage:Loki:Url"]);
@@ -170,9 +161,56 @@ namespace Authentication
             services.AddDistributedMemoryCache();
             services.AddOidcStateDataFormatterCache();
 
+            //JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();
+
             var authenticationServices = services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme);
+            authenticationServices.AddCertificate("Certificate", options =>
+            {
+                // allows both self-signed and CA-based certs. Check the MTLS spec for details.
+                options.AllowedCertificateTypes = CertificateTypes.All;
+            })
+                .AddCookie(options => options.Cookie.Name = "BA.Auth")
+                .AddOpenIdConnect(options => { options.ClientId = "__tenant__"; options.ClientSecret = "__tenant__"; options.Authority = "__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; })
+                .AddGoogle(options => { options.ClientId = "__tenant__"; options.ClientSecret = "__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; })
+                .AddFacebook(options => { options.ClientId = "__tenant__"; options.ClientSecret = "__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; })
+                .AddTwitter(options => { options.ConsumerKey = "__tenant__"; options.ConsumerSecret = "__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; })
+                .AddMicrosoftAccount(options => { options.ClientId = "__tenant__"; options.ClientSecret = "__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; })
+                .AddGitHub(options => { options.ClientId = "__tenant__";  options.ClientSecret = "__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; });
+
+            var identityBuilder = services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => { })
+                .AddDefaultTokenProviders()
+                .AddPasswordValidator<EmailAsPasswordValidator<ApplicationUser>>()
+                .AddPasswordValidator<InvalidPhrasePasswordValidator<ApplicationUser>>()
+                .AddPwnedPasswordsValidator<ApplicationUser>(options => options.ApiKey = Configuration["HaveIBeenPwned:ApiKey"])
+                .AddTop1000PasswordValidator<ApplicationUser>()
+                .AddPasswordValidator<PasswordTopologyValidator<ApplicationUser>>();
+
+            var builder = services.AddIdentityServer(options =>
+            {
+                options.Events.RaiseErrorEvents = true;
+                options.Events.RaiseInformationEvents = true;
+                options.Events.RaiseFailureEvents = true;
+                options.Events.RaiseSuccessEvents = true;
+
+                options.UserInteraction.LoginUrl = "/login";
+                options.UserInteraction.LogoutUrl = "/logout";
+
+                options.MutualTls.Enabled = true;
+                options.MutualTls.ClientCertificateAuthenticationScheme = "Certificate";
+            })
+                .AddPersistedGrantStore<RavenDBPersistedGrantStore>()
+                .AddClientStore<RavenDBClientStore>()
+                .AddResourceStore<RavenDBResourceStore>()
+                .AddCorsPolicyService<CorsPolicyService>()
+                .AddAspNetIdentity<ApplicationUser>()
+                .AddResourceOwnerValidator<ResourceOwnerPasswordValidator<ApplicationUser>>()
+                .AddProfileService<Extensions.ProfileService<ApplicationUser>>()
+                .AddUserSession<RavenDbSessionProvider>();
+
+            #region Multitenant
 
             services.AddMultiTenant<TenantSetting>().WithHostStrategy("__tenant__").WithStore(new ServiceLifetime(), (sp) => new RavenDBMultitenantStore(sp.GetService<IDocumentStore>(), sp.GetService<IMemoryCache>()))
+                
                 .WithPerTenantOptions<AccountOptions>((options, tenantInfo) =>
                 {
                     options.AllowLocalLogin = tenantInfo.AccountOptions.AllowLocalLogin;
@@ -205,6 +243,18 @@ namespace Authentication
                 .WithPerTenantOptions<AuthenticationOptions>((options, tenantInfo) =>
                 {
                     //options.DefaultChallengeScheme = ;
+                    //options.AddScheme<GoogleHandler>(GoogleDefaults.AuthenticationScheme, "Google");
+                    //options.AddScheme(GoogleDefaults.AuthenticationScheme, config =>
+                    //{
+                    //    config.HandlerType = typeof(GoogleHandler);
+                    //    config.DisplayName = "Google";
+                    //});
+                    //options.AddScheme(GitHubAuthenticationDefaults.AuthenticationScheme, config =>
+                    //{
+                    //    config.HandlerType = typeof(GitHubAuthenticationHandler);
+                    //    config.DisplayName = GitHubAuthenticationDefaults.DisplayName;
+                    //});
+                    //options.RequireAuthenticatedSignIn
                 })
                 .WithPerTenantOptions<IdentityStoreOptions>((options, tenantInfo) =>
                 {
@@ -274,65 +324,70 @@ namespace Authentication
                 })
                 .WithPerTenantOptions<CookieAuthenticationOptions>((o, tenantInfo) =>
                 {
-                    o.Cookie.Name = $"BA.{tenantInfo.Id}";
                     o.LoginPath = "/login";
                     o.LogoutPath = "/logout";
                     o.Events = new CookieAuthenticationEvents
                     {
                         OnValidatePrincipal = async ctx =>
                         {
-                            var store = ctx.HttpContext.RequestServices.GetRequiredService<IDocumentStore>();
-                            using (var session = store.OpenAsyncSession($"TenantIdentity-{tenantInfo.Identifier}"))
+                            if (ctx.Scheme.Name == "Identity.Application")
                             {
-                                if (!await session.Advanced.ExistsAsync($"UserSessions/{ctx.Properties.GetString("session_id")}").ConfigureAwait(false)) //TODO:  || userSession.UserAgent != ctx.Request.Headers.UserAgent Replace with a smart parser taking into account browser upgrades
+                                var store = ctx.HttpContext.RequestServices.GetRequiredService<IDocumentStore>();
+                                using (var session = store.OpenAsyncSession($"TenantIdentity-{tenantInfo.Identifier}"))
                                 {
-                                    await ctx.HttpContext.SignOutAsync();
-                                    ctx.RejectPrincipal();
-                                }
-                                else
-                                {
-                                    session.Advanced.Patch<UserSession, DateTime>($"UserSessions/{ctx.Properties.GetString("session_id")}", t => t.LastSeenOnUtc, DateTime.UtcNow);
-                                    //if (!userSession.IPAddresses.Contains(ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString()))
-                                    //    session.Advanced.Patch<UserSession, string>($"UserSessions/{ctx.Properties.GetString("session_id")}", t => t.IPAddresses, t => t.Add(ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString()));
-                                    await session.SaveChangesAsync();
+                                    if (!await session.Advanced.ExistsAsync($"UserSessions/{ctx.Properties.GetString("session_id")}").ConfigureAwait(false)) //TODO:  || userSession.UserAgent != ctx.Request.Headers.UserAgent Replace with a smart parser taking into account browser upgrades
+                                    {
+                                        await ctx.HttpContext.SignOutAsync();
+                                        ctx.RejectPrincipal();
+                                    }
+                                    else
+                                    {
+                                        session.Advanced.Patch<UserSession, DateTime>($"UserSessions/{ctx.Properties.GetString("session_id")}", t => t.LastSeenOnUtc, DateTime.UtcNow);
+                                        //if (!userSession.IPAddresses.Contains(ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString()))
+                                        //    session.Advanced.Patch<UserSession, string>($"UserSessions/{ctx.Properties.GetString("session_id")}", t => t.IPAddresses, t => t.Add(ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString()));
+                                        await session.SaveChangesAsync();
+                                    }
                                 }
                             }
                         },
                         OnSignedIn = async ctx =>
                         {
-                            var store = ctx.HttpContext.RequestServices.GetRequiredService<IDocumentStore>();
-                            using (var session = store.OpenAsyncSession($"TenantIdentity-{tenantInfo.Identifier}"))
+                            if (ctx.Scheme.Name == "Identity.Application")
                             {
-                                var userSessions = new UserSession
+                                var store = ctx.HttpContext.RequestServices.GetRequiredService<IDocumentStore>();
+                                using (var session = store.OpenAsyncSession($"TenantIdentity-{tenantInfo.Identifier}"))
                                 {
-                                    Id = $"UserSessions/{ctx.Properties.GetString("session_id")}",
-                                    BrowserIds = new List<string> { ctx.Properties.GetString("browser_id") },
-                                    UserId = ctx.Principal.FindFirstValue(JwtClaimTypes.Subject),
-                                    IPAddresses = new List<string> { ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString() },
-                                    UserAgent = ctx.Request.Headers.UserAgent.ToString(),
-                                    Idp = ctx.Principal.FindFirstValue(JwtClaimTypes.IdentityProvider),
-                                    Amr = ctx.Principal.FindFirstValue(JwtClaimTypes.AuthenticationMethod),
-                                    MaxExpireOnUtc = ctx.Properties.ExpiresUtc
-                                };
-                                await session.StoreAsync(userSessions);
-                                session.Advanced.GetMetadataFor(userSessions)["@expires"] = ctx.Properties.ExpiresUtc ?? DateTime.UtcNow.AddYears(1);
-                                if (ctx.Properties.GetString("browser_id") != null)
-                                {
-                                    var browserInfo = await session.LoadAsync<UserBrowser>($"UserBrowsers/{ctx.Properties.GetString("session_id")}");
-                                    if (browserInfo == null)
+                                    var userSessions = new UserSession
                                     {
-                                        browserInfo = new UserBrowser { Id = $"UserBrowsers/{ctx.Properties.GetString("browser_id")}", UserAgent = ctx.Request.Headers.UserAgent.ToString(), IPAddresses = new List<string> { ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString() } };
-                                        await session.StoreAsync(browserInfo);
+                                        Id = $"UserSessions/{ctx.Properties.GetString("session_id")}",
+                                        BrowserIds = new List<string> { ctx.Properties.GetString("browser_id") },
+                                        UserId = ctx.Principal.FindFirstValue(JwtClaimTypes.Subject),
+                                        IPAddresses = new List<string> { ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString() },
+                                        UserAgent = ctx.Request.Headers.UserAgent.ToString(),
+                                        Idp = ctx.Principal.FindFirstValue(JwtClaimTypes.IdentityProvider),
+                                        Amr = ctx.Principal.FindFirstValue(JwtClaimTypes.AuthenticationMethod),
+                                        MaxExpireOnUtc = ctx.Properties.ExpiresUtc
+                                    };
+                                    await session.StoreAsync(userSessions);
+                                    session.Advanced.GetMetadataFor(userSessions)["@expires"] = ctx.Properties.ExpiresUtc ?? DateTime.UtcNow.AddYears(1);
+                                    if (ctx.Properties.GetString("browser_id") != null)
+                                    {
+                                        var browserInfo = await session.LoadAsync<UserBrowser>($"UserBrowsers/{ctx.Properties.GetString("session_id")}");
+                                        if (browserInfo == null)
+                                        {
+                                            browserInfo = new UserBrowser { Id = $"UserBrowsers/{ctx.Properties.GetString("browser_id")}", UserAgent = ctx.Request.Headers.UserAgent.ToString(), IPAddresses = new List<string> { ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString() } };
+                                            await session.StoreAsync(browserInfo);
+                                        }
+                                        if (!browserInfo.UserIds.ContainsKey(ctx.Principal.FindFirstValue("sub")))
+                                            browserInfo.UserIds.Add(ctx.Principal.FindFirstValue("sub"), DateTime.UtcNow);
+                                        else
+                                            browserInfo.UserIds[ctx.Principal.FindFirstValue("sub")] = DateTime.UtcNow;
+                                        if (!browserInfo.IPAddresses.Contains(ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString()))
+                                            browserInfo.IPAddresses.Add(ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString());
+                                        browserInfo.LastSeenOnUtc = DateTime.UtcNow;
                                     }
-                                    if (!browserInfo.UserIds.ContainsKey(ctx.Principal.FindFirstValue("sub")))
-                                        browserInfo.UserIds.Add(ctx.Principal.FindFirstValue("sub"), DateTime.UtcNow);
-                                    else
-                                        browserInfo.UserIds[ctx.Principal.FindFirstValue("sub")] = DateTime.UtcNow;
-                                    if (!browserInfo.IPAddresses.Contains(ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString()))
-                                        browserInfo.IPAddresses.Add(ctx.Request.HttpContext.Connection.RemoteIpAddress.ToString());
-                                    browserInfo.LastSeenOnUtc = DateTime.UtcNow;
+                                    await session.SaveChangesAsync();
                                 }
-                                await session.SaveChangesAsync();
                             }
                         },
                         OnSigningOut = async ctx =>
@@ -358,8 +413,6 @@ namespace Authentication
                     if (!tenantInfo.ExternalIdps.Any(t => t.Name.Equals("Google") && t.Enabled))
                         return;
 
-                    o.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
-
                     // register your IdentityServer with Google at https://console.developers.google.com
                     // enable the Google+ API
                     // set the redirect URI to https://localhost:5001/signin-google
@@ -369,6 +422,7 @@ namespace Authentication
                     o.ClientId = googleSettings.ClientId;
                     o.ClientSecret = googleSettings.ClientSecret;
 
+                    o.Scope.Add("user");
                     o.AuthorizationEndpoint += "?prompt=consent"; // Hack so we always get a refresh token, it only comes on the first authorization response
                     o.AccessType = "offline";
                     o.SaveTokens = true;
@@ -383,8 +437,6 @@ namespace Authentication
                 {
                     if (!tenantInfo.ExternalIdps.Any(t => t.Name.Equals("Facebook") && t.Enabled))
                         return;
-
-                    o.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
 
                     // You must first create an app with Facebook and add its ID and Secret to your user-secrets.
                     // https://developers.facebook.com/apps/
@@ -407,8 +459,6 @@ namespace Authentication
                 {
                     if (!tenantInfo.ExternalIdps.Any(t => t.Name.Equals("Twitter") && t.Enabled))
                         return;
-
-                    o.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
 
                     // You must first create an app with Twitter and add its key and Secret to your user-secrets.
                     // https://apps.twitter.com/
@@ -433,8 +483,6 @@ namespace Authentication
                     if (!tenantInfo.ExternalIdps.Any(t => t.Name.Equals("MicrosoftAccount") && t.Enabled))
                         return;
 
-                    o.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
-
                     // You must first create an app with Microsoft Account and add its ID and Secret to your user-secrets.
                     // https://azure.microsoft.com/en-us/documentation/articles/active-directory-v2-app-registration/
                     // https://apps.dev.microsoft.com/
@@ -453,31 +501,53 @@ namespace Authentication
                 .WithPerTenantOptions<OpenIdConnectOptions>((o, tenantInfo) =>
                 {
                     if (!tenantInfo.ExternalIdps.Any(t => !t.Name.In("MicrosoftAccount", "Twitter", "Facebook", "Google") && t.Enabled))
-                    {
-                        o.ClientId = "test";
-                        o.ClientSecret = "test";
                         return;
-                    }
 
-                    o.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme;
+                    var openIdConnectSettings = tenantInfo.ExternalIdps.First(t => !t.Name.In("MicrosoftAccount", "Twitter", "Facebook", "Google")) as ExternalOidcIdentityProvider;
 
-                    // You must first create an app with Microsoft Account and add its ID and Secret to your user-secrets.
-                    // https://azure.microsoft.com/en-us/documentation/articles/active-directory-v2-app-registration/
-                    // https://apps.dev.microsoft.com/
+                    o.Configuration = new Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration
+                    {
+                        AuthorizationEndpoint = "https://github.com/login/oauth/authorize",
+                        TokenEndpoint = "https://github.com/login/oauth/access_token",
+                        UserInfoEndpoint = "https://api.github.com/user"
 
-                    var microsoftSettings = tenantInfo.ExternalIdps.First(t => t.Name == "MicrosoftAccount") as ExternalOidcIdentityProvider;
-
-                    o.ClientId = microsoftSettings.ClientId;
-                    o.ClientSecret = microsoftSettings.ClientSecret;
+                    };
+                    //o.Authority = openIdConnectSettings.Authority;
+                    o.ClientId = openIdConnectSettings.ClientId;
+                    o.ClientSecret = openIdConnectSettings.ClientSecret;
+                    o.ResponseType = "code";
                     o.SaveTokens = true;
+                    o.ResponseMode = "query";
                     o.Scope.Add("offline_access");
                     o.Events = new OpenIdConnectEvents()
                     {
                         OnRemoteFailure = HandleOnRemoteFailure
                     };
                 })
-                .WithPerTenantAuthentication();
+                .WithPerTenantOptions<GitHubAuthenticationOptions>((o, tenantInfo) =>
+                {
+                    if (!tenantInfo.ExternalIdps.Any(t => t.Name.In("GitHub") && t.Enabled))
+                        return;
 
+                    var openIdConnectSettings = tenantInfo.ExternalIdps.First(t => t.Name.In("GitHub")) as ExternalOidcIdentityProvider;
+
+                    //o.ClaimActions.MapJsonKey(JwtClaimTypes.PreferredUserName, ClaimTypes.Name);
+                    //o.ClaimActions.MapJsonKey(JwtClaimTypes.Name, "urn:github:name");
+                    //o.ClaimActions.MapJsonKey(JwtClaimTypes.Email, ClaimTypes.Email);
+                    //o.ClaimActions.MapJsonKey("github_url", "urn:github:url");
+                    
+                    o.ClientId = openIdConnectSettings.ClientId;
+                    o.ClientSecret = openIdConnectSettings.ClientSecret;
+                    o.SaveTokens = true;
+                    o.Scope.Add("user");
+                    o.Events = new OAuthEvents
+                    {
+                        OnRemoteFailure = HandleOnRemoteFailure
+                    };
+                })
+                .WithPerTenantAuthentication();
+            #endregion
+            
             services.AddControllersWithViews();
             var razorBuilder = services.AddRazorPages();
 #if DEBUG
@@ -537,14 +607,6 @@ namespace Authentication
             services.ConfigureOptions<RavenOptionsSetup>();
             services.AddScoped(sp => sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<RavenSettings>>()?.Value?.DatabaseName));
 
-            var identityBuilder = services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => { })
-                .AddDefaultTokenProviders()
-                .AddPasswordValidator<EmailAsPasswordValidator<ApplicationUser>>()
-                .AddPasswordValidator<InvalidPhrasePasswordValidator<ApplicationUser>>()
-                .AddPwnedPasswordsValidator<ApplicationUser>(options => options.ApiKey = Configuration["HaveIBeenPwned:ApiKey"])
-                .AddTop1000PasswordValidator<ApplicationUser>()
-                .AddPasswordValidator<PasswordTopologyValidator<ApplicationUser>>();
-
             identityBuilder.Services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
             identityBuilder.Services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();
 
@@ -579,39 +641,6 @@ namespace Authentication
                 .AddTransientHttpErrorPolicy(p => p.WaitAndRetryAsync(20, retryAttempt => TimeSpan.FromMilliseconds(300 * retryAttempt)));
 
             //services.AddTransient<IRedirectUriValidator, RedirectUriValidator>();
-
-            authenticationServices.AddCertificate("Certificate", options =>
-             {
-                 // allows both self-signed and CA-based certs. Check the MTLS spec for details.
-                 options.AllowedCertificateTypes = CertificateTypes.All;
-             }).AddCookie();
-            //.AddOpenIdConnect()
-            //.AddGoogle();
-            //.AddFacebook()
-            //.AddTwitter()
-            //.AddMicrosoftAccount();
-
-            var builder = services.AddIdentityServer(options =>
-            {
-                options.Events.RaiseErrorEvents = true;
-                options.Events.RaiseInformationEvents = true;
-                options.Events.RaiseFailureEvents = true;
-                options.Events.RaiseSuccessEvents = true;
-
-                options.UserInteraction.LoginUrl = "/login";
-                options.UserInteraction.LogoutUrl = "/logout";
-
-                options.MutualTls.Enabled = true;
-                options.MutualTls.ClientCertificateAuthenticationScheme = "Certificate";
-            })
-                .AddPersistedGrantStore<RavenDBPersistedGrantStore>()
-                .AddClientStore<RavenDBClientStore>()
-                .AddResourceStore<RavenDBResourceStore>()
-                .AddCorsPolicyService<CorsPolicyService>()
-                .AddAspNetIdentity<ApplicationUser>()
-                .AddResourceOwnerValidator<ResourceOwnerPasswordValidator<ApplicationUser>>()
-                .AddProfileService<Extensions.ProfileService<ApplicationUser>>()
-                .AddUserSession<RavenDbSessionProvider>();
 
             try
             {
@@ -709,8 +738,7 @@ namespace Authentication
             app.UseJSNLog(new LoggingAdapter(loggerFactory), jsnlogConfiguration);
 
             app.UseStaticFiles();
-
-
+            
             Audit.Core.Configuration.Setup()
                 .JsonNewtonsoftAdapter(new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
                 .UseRavenDB(config => config
@@ -824,7 +852,7 @@ namespace Authentication
                 await context.Response.WriteAsync("Properties:<br>");
                 foreach (var pair in context.Properties.Items)
                 {
-                    await context.Response.WriteAsync($"-{ HtmlEncoder.Default.Encode(pair.Key)}={ HtmlEncoder.Default.Encode(pair.Value)}<br>");
+                    await context.Response.WriteAsync($"-{HtmlEncoder.Default.Encode(pair.Key)}={HtmlEncoder.Default.Encode(pair.Value)}<br>");
                 }
             }
 
