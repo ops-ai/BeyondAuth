@@ -53,7 +53,7 @@ namespace Identity.Core
         /// <summary>
         /// External login providers
         /// </summary>
-        public IList<IExternalIdentityProvider> ExternalIdps = new List<IExternalIdentityProvider>();
+        public IList<ExternalOidcIdentityProvider> ExternalIdps = new List<ExternalOidcIdentityProvider>();
 
         /// <summary>
         /// Parent

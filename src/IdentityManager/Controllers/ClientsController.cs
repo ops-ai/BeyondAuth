@@ -217,7 +217,7 @@ namespace IdentityManager.Controllers
                         client.ClientUri = model.ClientUri;
                         client.ConsentLifetime = model.ConsentLifetime;
                         client.Description = model.Description;
-                        client.DeviceCodeLifetime = model.DeviceCodeLifetime;
+                        client.DeviceCodeLifetime = model.DeviceCodeLifetime ?? 0;
                         client.Enabled = model.Enabled;
                         client.EnableLocalLogin = model.EnableLocalLogin;
                         client.FrontChannelLogoutSessionRequired = model.FrontChannelLogoutSessionRequired;
@@ -231,7 +231,7 @@ namespace IdentityManager.Controllers
                         client.Properties = model.Properties;
                         client.ProtocolType = model.ProtocolType;
                         client.RedirectUris = model.RedirectUris;
-                        client.RefreshTokenExpiration = model.RefreshTokenExpiration;
+                        client.RefreshTokenExpiration = model.RefreshTokenExpiration ??  TokenExpiration.Absolute;
                         client.RefreshTokenUsage = model.RefreshTokenUsage;
                         client.RequireClientSecret = model.RequireClientSecret;
                         client.RequireConsent = model.RequireConsent;

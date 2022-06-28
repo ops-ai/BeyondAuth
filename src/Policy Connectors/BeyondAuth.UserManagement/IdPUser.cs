@@ -15,7 +15,7 @@ namespace BeyondAuth.UserManagement
 
         public string DisplayName { get; set; }
 
-        public string OrganizationName { get; set; }
+        public string Organization { get; set; }
 
         public List<string>? PhoneNumbers { get; set; }
 

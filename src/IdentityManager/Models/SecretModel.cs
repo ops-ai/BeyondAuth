@@ -22,7 +22,7 @@ namespace IdentityManager.Models
         /// Description
         /// </summary>
         [Required]
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         /// <summary>
         /// Lifetime of identity token in seconds (defaults to 900 seconds / 15 minutes)

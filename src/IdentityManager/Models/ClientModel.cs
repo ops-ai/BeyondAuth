@@ -77,7 +77,7 @@ namespace IdentityManager.Models
         /// renewed (by the amount specified in SlidingRefreshTokenLifetime).
         /// The lifetime will not exceed AbsoluteRefreshTokenLifetime.
         /// </summary>
-        public TokenExpiration RefreshTokenExpiration { get; set; }
+        public TokenExpiration? RefreshTokenExpiration { get; set; }
 
         /// <summary>
         /// Specifies whether the access token is a reference token or a self contained JWT
@@ -117,13 +117,13 @@ namespace IdentityManager.Models
         /// <summary>
         /// Gets or sets a value to prefix it on client claim types. Defaults to client_.
         /// </summary>
-        public string ClientClaimsPrefix { get; set; }
+        public string? ClientClaimsPrefix { get; set; }
 
         /// <summary>
         /// Gets or sets a salt value used in pair-wise subjectId generation for users of
         /// this client.
         /// </summary>
-        public string PairWiseSubjectSalt { get; set; }
+        public string? PairWiseSubjectSalt { get; set; }
 
         /// <summary>
         /// The maximum duration (in seconds) since the last time the user authenticated.
@@ -133,12 +133,12 @@ namespace IdentityManager.Models
         /// <summary>
         /// Gets or sets the type of the device flow user code.
         /// </summary>
-        public string UserCodeType { get; set; }
+        public string? UserCodeType { get; set; }
 
         /// <summary>
         /// Gets or sets the device code lifetime.
         /// </summary>
-        public int DeviceCodeLifetime { get; set; }
+        public int? DeviceCodeLifetime { get; set; }
 
         /// <summary>
         /// When requesting both an id token and access token, should the user claims always
@@ -176,27 +176,27 @@ namespace IdentityManager.Models
         /// Client display name (used for logging and consent screen)
         /// </summary>
         [Required]
-        public string ClientName { get; set; }
+        public string? ClientName { get; set; }
 
         /// <summary>
         /// Description of the client.
         /// </summary>
-        public string Description { get; set; }
+        public string? Description { get; set; }
 
         /// <summary>
         /// URI to further information about client (used on consent screen)
         /// </summary>
-        public string ClientUri { get; set; }
+        public string? ClientUri { get; set; }
 
         /// <summary>
         /// URI to client logo (used on consent screen)
         /// </summary>
-        public string LogoUri { get; set; }
+        public string? LogoUri { get; set; }
 
         /// <summary>
         /// Gets or sets the allowed CORS origins for JavaScript clients.
         /// </summary>
-        public ICollection<string> AllowedCorsOrigins { get; set; }
+        public ICollection<string>? AllowedCorsOrigins { get; set; }
 
         /// <summary>
         /// Specifies whether a consent screen is required (defaults to <c>false</c>)
@@ -241,7 +241,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// Specifies logout URI at client for HTTP front-channel based logout.
         /// </summary>
-        public string FrontChannelLogoutUri { get; set; }
+        public string? FrontChannelLogoutUri { get; set; }
 
         /// <summary>
         /// Specifies is the user's session id should be sent to the FrontChannelLogoutUri.
@@ -252,7 +252,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// Specifies logout URI at client for HTTP back-channel based logout.
         /// </summary>
-        public string BackChannelLogoutUri { get; set; }
+        public string? BackChannelLogoutUri { get; set; }
 
         /// <summary>
         /// Specifies whether user can choose to store consent decisions (defaults to true)
@@ -262,6 +262,6 @@ namespace IdentityManager.Models
         /// <summary>
         /// Gets or sets the custom properties for the client.
         /// </summary>
-        public IDictionary<string, string> Properties { get; set; }
+        public IDictionary<string, string>? Properties { get; set; }
     }
 }

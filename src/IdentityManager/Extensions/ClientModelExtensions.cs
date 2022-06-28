@@ -1,5 +1,6 @@
 ﻿using IdentityManager.Domain;
 using IdentityManager.Models;
+using IdentityServer4.Models;
 
 namespace IdentityManager.Extensions
 {
@@ -36,7 +37,7 @@ namespace IdentityManager.Extensions
                 ClientUri = model.ClientUri,
                 ConsentLifetime = model.ConsentLifetime,
                 Description = model.Description,
-                DeviceCodeLifetime = model.DeviceCodeLifetime,
+                DeviceCodeLifetime = model.DeviceCodeLifetime ?? 0,
                 Enabled = model.Enabled,
                 EnableLocalLogin = model.EnableLocalLogin,
                 FrontChannelLogoutSessionRequired = model.FrontChannelLogoutSessionRequired,
@@ -50,7 +51,7 @@ namespace IdentityManager.Extensions
                 Properties = model.Properties,
                 ProtocolType = model.ProtocolType,
                 RedirectUris = model.RedirectUris,
-                RefreshTokenExpiration = model.RefreshTokenExpiration,
+                RefreshTokenExpiration = model.RefreshTokenExpiration ?? TokenExpiration.Absolute,
                 RefreshTokenUsage = model.RefreshTokenUsage,
                 RequireClientSecret = model.RequireClientSecret,
                 RequireConsent = model.RequireConsent,
