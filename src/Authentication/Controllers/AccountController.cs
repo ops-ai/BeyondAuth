@@ -354,12 +354,13 @@ namespace Authentication.Controllers
             var schemes = await _schemeProvider.GetAllSchemesAsync();
             var tenantSettings = _httpContextAccessor.HttpContext.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
 
-            var providers = schemes
-                .Where(x => (x.DisplayName != null || x.Name.Equals(_accountOptions.Value.WindowsAuthenticationSchemeName, StringComparison.OrdinalIgnoreCase)) && tenantSettings.ExternalIdps.Any(s => s.Enabled && x.Name == s.Name))
+            //var providers = new List<ExternalProvider>();
+            //providers.Add(new ExternalProvider { AuthenticationScheme = GoogleDefaults.AuthenticationScheme, DisplayName = "Google" });
+            var providers = tenantSettings.ExternalIdps.Where(s => s.Enabled)
                 .Select(x => new ExternalProvider
                 {
-                    DisplayName = x.DisplayName ?? x.Name,
-                    AuthenticationScheme = x.Name
+                    DisplayName = x.Name,
+                    AuthenticationScheme = x.Scheme
                 }).ToList();
 
             var allowLocal = true;
