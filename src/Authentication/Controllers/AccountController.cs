@@ -299,7 +299,7 @@ namespace Authentication.Controllers
             if ((await HttpContext.AuthenticateAsync()).Succeeded)
             {
                 // delete local authentication cookie
-                await HttpContext.SignOutAsync();
+                await _signInManager.SignOutAsync();
 
                 // raise the logout event
                 await _events.RaiseAsync(new UserLogoutSuccessEvent(User.GetSubjectId(), User.GetDisplayName()));
