@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Options;
+using Raven.Client.Documents.Linq;
 using Raven.Client.Documents.Session;
 using System.Security.Claims;
 using System.Security.Principal;
@@ -95,7 +96,7 @@ namespace Authentication.Controllers
         public async Task<IActionResult> Callback()
         {
             // read external identity from the temporary cookie
-            var result = await HttpContext.AuthenticateAsync(IdentityServer4.IdentityServerConstants.ExternalCookieAuthenticationScheme);
+            var result = await HttpContext.AuthenticateAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
             if (result?.Succeeded != true)
             {
                 throw new Exception("External authentication error");
@@ -114,7 +115,37 @@ namespace Authentication.Controllers
                 // this might be where you might initiate a custom workflow for user registration
                 // in this sample we don't show how that would be done, as our sample implementation
                 // simply auto-provisions new external user
-                user = await AutoProvisionUser(provider, providerUserId, claims);
+
+                user = new ApplicationUser
+                {
+                    UserName = $"{provider}.{providerUserId}",
+                    DisplayName = claims.FirstOrDefault(t => t.Type == JwtClaimTypes.Name)?.Value ?? "",
+                    LastName = claims.FirstOrDefault(t => t.Type == JwtClaimTypes.FamilyName)?.Value ?? "",
+                    FirstName = claims.FirstOrDefault(t => t.Type == JwtClaimTypes.GivenName)?.Value ?? "",
+                    Email = claims.First(t => t.Type == JwtClaimTypes.Email).Value,
+                    Organization = claims.First(t => t.Type == "organization").Value,
+                    CreatedOnUtc = DateTime.UtcNow,
+                    ChangePasswordAllowed = true,
+                    PasswordResetAllowed = true,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                var remainingProperties = claims.Where(t => !t.Type.In(ClaimTypes.Name, ClaimTypes.Surname, ClaimTypes.GivenName, ClaimTypes.Email)).ToList();
+                if (remainingProperties.Any())
+                    user.Properties = remainingProperties.ToDictionary(t => t.Type, t => t.Value);
+
+                user.Logins.Add(new UserLoginInfo(provider, providerUserId, provider));
+
+                var createResult = await _userManager.CreateAsync(user);
+
+                if (!createResult.Succeeded)
+                {
+                    TempData.Add("ErrorMessage", $"{provider} login failed");
+                    foreach (var error in createResult.Errors)
+                        TempData.Add("Errors", error.Description);
+
+                    await HttpContext.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
+                    return RedirectToAction(nameof(AccountController.Login), "Account");
+                }
             }
 
             // this allows us to collect any additonal claims or properties
@@ -228,25 +259,6 @@ namespace Authentication.Controllers
             var user = await _userManager.FindByLoginAsync(provider, providerUserId);
 
             return (user, provider, providerUserId, claims);
-        }
-
-        private async Task<ApplicationUser> AutoProvisionUser(string provider, string providerUserId, IEnumerable<Claim> claims)
-        {
-            var user = new ApplicationUser
-            {
-                UserName = providerUserId,
-                DisplayName = claims.FirstOrDefault(t => t.Type == ClaimTypes.Name)?.Value,
-                LastName = claims.FirstOrDefault(t => t.Type == ClaimTypes.Surname)?.Value,
-                Email = claims.FirstOrDefault(t => t.Type == ClaimTypes.Email)?.Value
-            };
-
-            user.Logins.Add(new UserLoginInfo(provider, providerUserId, provider));
-
-
-            await _userManager.CreateAsync(user);
-
-            //_users.AutoProvisionUser(provider, providerUserId, claims.ToList());
-            return user;
         }
 
         private void ProcessLoginCallbackForOidc(AuthenticateResult externalResult, List<Claim> localClaims, AuthenticationProperties localSignInProps)

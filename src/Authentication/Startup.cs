@@ -531,11 +531,16 @@ namespace Authentication
 
                     var openIdConnectSettings = tenantInfo.ExternalIdps.First(t => t.Name.In("GitHub")) as ExternalOidcIdentityProvider;
 
-                    //o.ClaimActions.MapJsonKey(JwtClaimTypes.PreferredUserName, ClaimTypes.Name);
-                    //o.ClaimActions.MapJsonKey(JwtClaimTypes.Name, "urn:github:name");
-                    //o.ClaimActions.MapJsonKey(JwtClaimTypes.Email, ClaimTypes.Email);
-                    //o.ClaimActions.MapJsonKey("github_url", "urn:github:url");
-                    
+                    o.ClaimActions.MapJsonKey(JwtClaimTypes.Name, "name");
+                    o.ClaimActions.MapJsonKey("github_url", "html_url");
+                    o.ClaimActions.MapJsonKey(JwtClaimTypes.Email, "email");
+                    o.ClaimActions.MapJsonKey("organization", "company");
+                    o.ClaimActions.MapJsonKey("two_factor_authentication", "two_factor_authentication");
+                    o.ClaimActions.Remove(ClaimTypes.Name);
+                    o.ClaimActions.Remove(ClaimTypes.Email);
+                    o.ClaimActions.Remove("urn:github:name");
+                    o.ClaimActions.Remove("urn:github:url");
+
                     o.ClientId = openIdConnectSettings.ClientId;
                     o.ClientSecret = openIdConnectSettings.ClientSecret;
                     o.SaveTokens = true;
@@ -732,8 +737,6 @@ namespace Authentication
             //app.UseHttpsRedirection();
             app.UseCertificateForwarding();
 
-            app.UseResponseCaching();
-
             var jsnlogConfiguration = new JsnlogConfiguration();
             app.UseJSNLog(new LoggingAdapter(loggerFactory), jsnlogConfiguration);
 
@@ -769,8 +772,6 @@ namespace Authentication
                     scope.SetCustomField("RemoteIpAddress", httpContextAccessor.HttpContext.Connection.RemoteIpAddress.ToString());
             });
 
-            //app.UseCors(x => x.AllowAnyOrigin().WithHeaders("accept", "authorization", "content-type", "origin").AllowAnyMethod());
-
             var policyCollection = new HeaderPolicyCollection()
                 .AddFrameOptionsSameOrigin()
                 .AddXssProtectionBlock()
@@ -802,11 +803,23 @@ namespace Authentication
                     options.AddSyncXHR().Self();
                 });
 
+            app.UseCookiePolicy(new CookiePolicyOptions
+            {
+                Secure = CookieSecurePolicy.Always,
+                MinimumSameSitePolicy = SameSiteMode.None
+            });
+
             app.UseRouting();
             app.UseMultiTenant();
             app.UseAuthentication();
             app.UseAuthorization();
             app.UseIdentityServer();
+
+            app.UseRequestLocalization();
+
+            //app.UseCors(x => x.AllowAnyOrigin().WithHeaders("accept", "authorization", "content-type", "origin").AllowAnyMethod());
+            app.UseResponseCaching();
+            app.UseResponseCompression();
 
             app.UseSecurityHeaders(policyCollection);
             app.UseHealthChecks(Configuration["HealthChecks:FullEndpoint"], new HealthCheckOptions()
@@ -818,12 +831,6 @@ namespace Authentication
             app.UseHealthChecks(Configuration["HealthChecks:SummaryEndpoint"], new HealthCheckOptions()
             {
                 Predicate = _ => _.FailureStatus == HealthStatus.Unhealthy
-            });
-
-            app.UseCookiePolicy(new CookiePolicyOptions
-            {
-                Secure = CookieSecurePolicy.Always,
-                MinimumSameSitePolicy = SameSiteMode.None
             });
 
             app.UseCorrelationId();
@@ -858,8 +865,6 @@ namespace Authentication
 
             await context.Response.WriteAsync("<a href=\"/\">Home</a>");
             await context.Response.WriteAsync("</body></html>");
-
-            // context.Response.Redirect("/error?FailureMessage=" + UrlEncoder.Default.Encode(context.Failure.Message));
 
             context.HandleResponse();
         }
