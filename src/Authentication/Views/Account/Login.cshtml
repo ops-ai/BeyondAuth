@@ -1,89 +1,85 @@
 @model Authentication.Models.Account.LoginViewModel
 
-<div class="container login-container">
-    <div class="row justify-content-center align-items-center">
+<div class="container login-container py-5 my-auto">
+  <div class="row">
 
-        <h1 class="text-center mb-3">Login</h1>
+    <h1 class="text-center mb-3">Login</h1>
 
-        @if (Model.EnableLocalLogin)
-        {
-            <form asp-route="Login" class="col-lg-6 needs-validation" novalidate>
-                <input type="hidden" asp-for="ReturnUrl" />
-                <div class="form-floating mb-3 has-validation">
-                    <input type="text" class="form-control form-control-lg" placeholder="" asp-for="Email" autofocus fieldsize="large" required />@*pattern=".+@@.+\..+"*@
-                    <label asp-for="Email" class="">Username or Email address</label>
-                </div>
-                <div class="form-floating">
-                    <input type="password" class="form-control form-control-lg" placeholder="Your Password *" asp-for="Password" autocomplete="off" required />
-                    <label asp-for="Password" class="form-label">Password</label>
-                </div>
-                @Html.ValidationMessageFor(m => m.Email)
-                @Html.ValidationMessageFor(m => m.Password)
-                <div class="position-relative mb-3 mt-3">
-
-                    @if (Model.AllowPasswordReset)
-                    {
-                        <a asp-action="ForgotPassword" asp-controller="PasswordReset" class="position-absolute top-0 end-0 link-dark text-decoration-none">Forgot Password?</a>
-                    }
-
-                    @if (Model.AllowRememberLogin)
-                    {
-                        <div class="form-check">
-                            <input class="form-check-input" type="checkbox" asp-for="RememberLogin">
-                            <label class="form-check-label" asp-for="RememberLogin">
-                                Remember Me
-                            </label>
-                        </div>
-                    }
-
-                </div>
-                <div class="d-grid gap-2">
-                    <button class="btn btn-primary btn-lg" name="button" type="submit" value="login">Login</button>
-                </div>
-                @if (Model.SignupUrl != null)
-                {
-                    <div class="mt-3 gap-2 text-center">
-                        @Model.SignupMessage <a href="@Model.SignupUrl" class="text-decoration-none">@Model.SignupText</a>
-                    </div>
-                }
-                <input type="hidden" asp-for="BrowserId"/>
-            </form>
-        }
-        <div></div>
-
-        @if (Model.VisibleExternalProviders.Any())
-        {
-            <div class="col-lg-6 mt-3">
-
-                <p class="sub-title text-center">or login using</p>
-
-                <div class="panel-body">
-                    <div class="text-center">
-                        @foreach (var provider in Model.VisibleExternalProviders)
-                        {
-                            <a class="btn btn-primary"
-                               asp-controller="External"
-                               asp-action="Challenge"
-                               asp-route-provider="@provider.AuthenticationScheme"
-                               asp-route-returnUrl="@Model.ReturnUrl">
-                                @provider.DisplayName
-                                @if (!string.IsNullOrEmpty(provider.Icon))
-                                {
-                                    <img src="@provider.Icon" />
-                                }
-                            </a>
-                        }
-                    </div>
-                </div>
-
+    @if (Model.EnableLocalLogin)
+    {
+      <form asp-route="Login" class="col-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3 needs-validation" novalidate>
+        <input type="hidden" asp-for="ReturnUrl" />
+        <div class="form-floating mb-3 has-validation">
+          <input type="text" class="form-control" placeholder=" " asp-for="Email" autofocus
+          required />@*pattern=".+@@.+\..+"*@
+          <label asp-for="Email" class="form-label">Username or Email address</label>
+        </div>
+        <div class="form-floating">
+          <input type="password" class="form-control" placeholder="Your Password *" asp-for="Password" autocomplete="off"
+          required />
+          <label asp-for="Password" class="form-label">Password</label>
+        </div>
+        @Html.ValidationMessageFor(m => m.Email)
+        @Html.ValidationMessageFor(m => m.Password)
+        <div class="d-flex justify-content-between my-3">
+          @if (Model.AllowRememberLogin)
+          {
+            <div class="form-check">
+              <input class="form-check-input" type="checkbox" asp-for="RememberLogin">
+              <label class="form-check-label" asp-for="RememberLogin">
+                Remember Me
+              </label>
             </div>
-        }
-        @if (!Model.EnableLocalLogin && !Model.VisibleExternalProviders.Any())
+          }
+          @if (Model.AllowPasswordReset)
+          {
+            <a asp-action="ForgotPassword" asp-controller="PasswordReset" class="link-dark">Forgot Password?</a>
+          }
+        </div>
+
+        <button class="btn btn-primary btn-lg w-100" name="button" type="submit" value="login">Login</button>
+        
+        @if (Model.SignupUrl != null)
         {
-            <div class="alert alert-warning">
-                <strong>Invalid login request</strong>
-                There are no login schemes configured for this client.
-            </div>
+          <div class="text-center mt-3">
+            @Model.SignupMessage <a href="@Model.SignupUrl" class="link-dark">@Model.SignupText</a>
+          </div>
         }
-    </div>
+        <input type="hidden" asp-for="BrowserId" />
+      </form>
+    }
+    <div></div>
+
+    @if (Model.VisibleExternalProviders.Any())
+    {
+      <div class="col-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3 mt-5">
+
+        <div class="divider">
+          <small class="divider-text">or login using</small>
+        </div>
+
+        <div class="text-center mt-3">
+          @foreach (var provider in Model.VisibleExternalProviders)
+          {
+            <a class="btn btn-primary" asp-controller="External" asp-action="Challenge"
+          asp-route-provider="@provider.AuthenticationScheme" asp-route-returnUrl="@Model.ReturnUrl">
+              @provider.DisplayName
+              @if (!string.IsNullOrEmpty(provider.Icon))
+              {
+                <img src="@provider.Icon" />
+              }
+            </a>
+          }
+        </div>
+
+      </div>
+    }
+    @if (!Model.EnableLocalLogin && !Model.VisibleExternalProviders.Any())
+    {
+      <div class="alert alert-warning">
+        <strong>Invalid login request</strong>
+        There are no login schemes configured for this client.
+      </div>
+    }
+  </div>
 </div>

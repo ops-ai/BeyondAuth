@@ -4,27 +4,23 @@
     ViewData["signed-out"] = true;
 }
 
-<div class="container logout-container">
-    <div class="row justify-content-center align-items-center">
-
-        <div class="col-lg-6">
-            <h1>Logout</h1>
-
-            <div class="sub-title">You are now logged out</div>
+<div class="container logout-container py-5 my-auto">
+    <div class="row">
+        <div class="col-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3 ">
+            <h1 class="text-center">Logout</h1>
+            <p class="text-center">You are now logged out</p>
 
             @if (Model.PostLogoutRedirectUri != null)
             {
-                <div>
+                <p class="text-center">
                     Click <a class="PostLogoutRedirectUri" href="@Model.PostLogoutRedirectUri">here</a> to return to the
                     <span>@Model.ClientName</span> application.
-                </div>
+                </p>
             }
             else
             {
                 <fieldset>
-                    <div class="gap-2 row mt-5">
-                        <a asp-action="Login" asp-controller="Account" class="btn btn-primary btn-lg col">Login</a>
-                    </div>
+                    <a asp-action="Login" asp-controller="Account" class="btn btn-primary btn-lg mt-5 w-100">Login</a>
                 </fieldset>
             }
 

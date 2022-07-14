@@ -10,6 +10,7 @@
 }
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="utf-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -26,40 +27,46 @@
     <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-icon-180.png">
 
     <link rel="manifest" href="~/manifest.json" />
+
+    <link rel="stylesheet" href="~/css/variables.css" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
+
     <environment names="Development">
-        <link rel="stylesheet" href="~/css/bootstrap.custom.min.css" />
         <link rel="stylesheet" href="~/css/site.css" />
-        <link rel="stylesheet" href="~/css/custom.css" />
     </environment>
     <environment names="Staging,Production">
-        <link rel="stylesheet" href="~/css/bootstrap.custom.min.css" />
-        <link rel="stylesheet" href="~/css/site.min.css" />
-        <link rel="stylesheet" href="~/css/custom.css" />
+        <link rel="stylesheet" href="~/css/site.css" />
     </environment>
 </head>
-<body class="min-vh-100">
+
+<body class="d-flex flex-column min-vh-100">
     <div class="navbar container-fluid">
         <div class="row">
             <div class="col-md-6 col-12 text-center text-md-start p-2">
-                <a href="~/"><img src="@(tenantInfo?.BrandingOptions?.Logo ?? "/logo.svg")" class="icon-banner" alt="logo"></a>
+                <a href="~/"><img src="@(tenantInfo?.BrandingOptions?.Logo ?? "/logo.svg")" class="icon-banner"
+                        alt="logo"></a>
             </div>
         </div>
 
         @if (!string.IsNullOrWhiteSpace(name))
-            {
-        <div class="dropdown position-absolute top-0 end-0 m-3 link-dark text-decoration-none">
-            <button class="btn dropdown-toggle" type="button" id="headermenu" data-bs-toggle="dropdown" aria-expanded="false">
-                @name
-            </button>
-            <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="headermenu">
-                <li><a asp-action="Index" asp-controller="Profile" class="dropdown-item">Profile</a></li>
-                <li><a asp-action="ChangePassword" asp-controller="Account" class="dropdown-item">Change Password</a></li>
-                <li><hr class="dropdown-divider"></li>
-                <li><a asp-action="Logout" asp-controller="Account" class="dropdown-item">Logout</a></li>
-            </ul>
-        </div>
+        {
+            <div class="dropdown position-absolute top-0 end-0 m-3 link-dark text-decoration-none">
+                <button class="btn dropdown-toggle" type="button" id="headermenu" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                    @name
+                </button>
+                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="headermenu">
+                    <li><a asp-action="Index" asp-controller="Profile" class="dropdown-item">Profile</a></li>
+                    <li><a asp-action="ChangePassword" asp-controller="Account" class="dropdown-item">Change Password</a>
+                    </li>
+                    <li>
+                        <hr class="dropdown-divider">
+                    </li>
+                    <li><a asp-action="Logout" asp-controller="Account" class="dropdown-item">Logout</a></li>
+                </ul>
+            </div>
 
-            }
+        }
     </div>
     <div class="app-offline d-none text-center bg-danger text-white">You are currently offline</div>
 
@@ -76,9 +83,10 @@
         <script src="~/js/jsnlog.min.js" asp-append-version="true"></script>
     </environment>
     @RenderSection("scripts", required: false)
-    
+
     <script src="~/pwa.js" type="text/javascript" asp-append-version="true"></script>
     <script src="~/js/site.js" async type="module" asp-append-version="true"></script>
 
 </body>
+
 </html>

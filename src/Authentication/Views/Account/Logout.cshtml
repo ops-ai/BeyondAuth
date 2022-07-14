@@ -1,18 +1,18 @@
 ﻿@model Authentication.Models.Account.LogoutViewModel
 
 <div class="container logout-container">
-    <div class="row justify-content-center align-items-center">
+    <div class="row py-5 my-auto">
         
-        <form asp-action="Logout" class="col-lg-6">
-            <h1>Logout</h1>
+        <form asp-action="Logout" class="col-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3 ">
+            <h1 class="text-center">Logout</h1>
 
-            <p>Would you like to log out?</p>
+            <p class="text-center">Would you like to log out?</p>
 
             <input type="hidden" name="logoutId" value="@Model.LogoutId" />
             <fieldset>
-                <div class="gap-2 row">
-                    <button class="btn btn-primary btn-lg col" name="button" type="submit">Yes</button>
-                    <a href="/" class="btn btn-secondary btn-lg col">Back to My Account</a>
+                <div class="d-flex justify-content-center">
+                    <button class="btn btn-primary btn-lg w-50" name="button" type="submit">Yes</button>
+                    <a href="/" class="btn btn-secondary btn-lg w-50">Back to My Account</a>
                 </div>
             </fieldset>
         </form>
