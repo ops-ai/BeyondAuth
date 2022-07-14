@@ -80,6 +80,10 @@ using Toggly.FeatureManagement.Web;
 using Toggly.FeatureManagement.Web.Configuration;
 using Toggly.FeatureManagement.Storage.RavenDB.Configuration;
 using System.IdentityModel.Tokens.Jwt;
+using Microsoft.AspNetCore.Mvc.Razor;
+using Finbuckle.MultiTenant;
+using System.Drawing;
+using System.Globalization;
 
 namespace Authentication
 {
@@ -92,6 +96,8 @@ namespace Authentication
         public ILifetimeScope AutofacContainer { get; private set; }
 
         X509Certificate2 ravenDBcert = null;
+
+        IWebHostEnvironment _env;
 
         /// <summary>
         /// This method gets called by the runtime. Use this method to add services to the container.
@@ -713,6 +719,16 @@ namespace Authentication
             services.AddPrometheusAspNetCoreMetrics();
             services.AddPrometheusHttpClientMetrics();
 
+            services.Configure<RazorViewEngineOptions>(options =>
+            {
+                options.ViewLocationExpanders.Add(new ViewLocationExpander());
+            });
+
+            services.AddResponseCompression(options =>
+            {
+                options.EnableForHttps = true;
+            });
+
             if (Configuration.GetValue<bool>("FeatureManagement:PasswordResetService"))
                 services.AddHostedService<PasswordResetService>();
         }
@@ -721,6 +737,7 @@ namespace Authentication
         {
             IdentityModelEventSource.ShowPII = true;
             app.UseExceptionHandler(new ExceptionHandlerOptions { ExceptionHandlingPath = "/error", AllowStatusCode404Response = false });
+            _env = env;
 
             var forwardOptions = new ForwardedHeadersOptions
             {
@@ -837,6 +854,7 @@ namespace Authentication
 
             app.UseEndpoints(endpoints =>
             {
+                endpoints.MapGet("css/colors.t.css", context => MapColors(context, "wwwroot\\css\\colors.css"));
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
@@ -869,5 +887,56 @@ namespace Authentication
             context.HandleResponse();
         }
 
+        public static Color ParseColor(string cssColor)
+        {
+            cssColor = cssColor.Trim();
+
+            if (cssColor.StartsWith("#"))
+            {
+                return ColorTranslator.FromHtml(cssColor);
+            }
+            else if (cssColor.StartsWith("rgb")) //rgb or argb
+            {
+                int left = cssColor.IndexOf('(');
+                int right = cssColor.IndexOf(')');
+
+                if (left < 0 || right < 0)
+                    throw new FormatException("rgba format error");
+                string noBrackets = cssColor.Substring(left + 1, right - left - 1);
+
+                string[] parts = noBrackets.Split(',');
+
+                int r = int.Parse(parts[0], CultureInfo.InvariantCulture);
+                int g = int.Parse(parts[1], CultureInfo.InvariantCulture);
+                int b = int.Parse(parts[2], CultureInfo.InvariantCulture);
+
+                if (parts.Length == 3)
+                {
+                    return Color.FromArgb(r, g, b);
+                }
+                else if (parts.Length == 4)
+                {
+                    float a = float.Parse(parts[3], CultureInfo.InvariantCulture);
+                    return Color.FromArgb((int)(a * 255), r, g, b);
+                }
+            }
+            throw new FormatException("Not rgb, rgba or hexa color string");
+        }
+
+        private async Task MapColors(HttpContext context, string cssPath)
+        {
+            var tenantSettings = context.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
+            context.Response.ContentType = "text/css";
+
+            if (tenantSettings.BrandingOptions.PrimaryColor != null)
+            {
+                var colorsCss = File.ReadAllText(Path.Combine(_env.ContentRootPath, cssPath));
+
+                var rgba = ParseColor(tenantSettings.BrandingOptions.PrimaryColor);
+                await context.Response.WriteAsync(colorsCss.Replace("#7367f0", tenantSettings.BrandingOptions.PrimaryColor).Replace("34, 41, 47", $"{rgba.R},{rgba.G},{rgba.B}"));
+            }
+            else
+                await context.Response.SendFileAsync(Path.Combine(_env.ContentRootPath, "css/colors.css"));
+        }
     }
 }
