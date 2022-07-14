@@ -28,7 +28,6 @@
 	<ItemGroup>
 		<PackageReference Include="Audit.Mvc.Core" Version="19.1.4" />
 		<PackageReference Include="Audit.NET" Version="19.1.4" />
-		<PackageReference Include="Audit.NET.RavenDB" Version="19.1.4" />
 		<PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" Version="1.2.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="6.0.6" />
 		<PackageReference Include="AspNetCore.HealthChecks.RavenDB" Version="6.0.2" />
@@ -91,6 +90,7 @@
 	</ItemGroup>
 
 	<ItemGroup>
+		<ProjectReference Include="..\Audit.NET.RavenDB\Audit.NET.RavenDB.csproj" />
 		<ProjectReference Include="..\Authorization Handlers\BeyondAuth.Acl\BeyondAuth.Acl.csproj" />
 		<ProjectReference Include="..\Identity.Core\Identity.Core.csproj" />
 		<ProjectReference Include="..\Password Validators\BeyondAuth.PasswordValidators.Common\BeyondAuth.PasswordValidators.Common.csproj" />

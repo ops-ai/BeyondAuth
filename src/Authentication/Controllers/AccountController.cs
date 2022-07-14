@@ -360,7 +360,8 @@ namespace Authentication.Controllers
                 .Select(x => new ExternalProvider
                 {
                     DisplayName = x.Name,
-                    AuthenticationScheme = x.Scheme
+                    AuthenticationScheme = x.Scheme,
+                    Icon = x.Icon
                 }).ToList();
 
             var allowLocal = true;
@@ -374,6 +375,12 @@ namespace Authentication.Controllers
                     if (client.IdentityProviderRestrictions != null && client.IdentityProviderRestrictions.Any())
                         providers = providers.Where(provider => client.IdentityProviderRestrictions.Contains(provider.AuthenticationScheme)).ToList();
                 }
+            }
+
+            if (TempData.ContainsKey("ErrorMessage"))
+            {
+                foreach (var error in TempData)
+                    ModelState.AddModelError(error.Key, error.Value.ToString());
             }
 
             return new LoginViewModel
