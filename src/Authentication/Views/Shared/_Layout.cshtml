@@ -40,34 +40,32 @@
 </head>
 
 <body class="d-flex flex-column min-vh-100">
-    <div class="navbar container-fluid">
-        <div class="row">
-            <div class="col-md-6 col-12 text-center text-md-start p-2">
-                <a href="~/"><img src="@(tenantInfo?.BrandingOptions?.Logo ?? "/logo.svg")" class="icon-banner"
-                        alt="logo"></a>
-            </div>
+    <nav class="navbar">
+        <div class="container-fluid align-items-center flex-nowrap">
+            <a class="navbar-brand mx-md-0 @(!string.IsNullOrWhiteSpace(name) ? "" : "mx-auto")" href="~/">
+                <img src="@(tenantInfo?.BrandingOptions?.Logo ?? "/logo.svg")" class="icon-banner" alt="logo">
+            </a>
+            @if (!string.IsNullOrWhiteSpace(name))
+            {
+                <div class="dropdown link-dark text-decoration-none">
+                    <button class="btn dropdown-toggle" type="button" id="headermenu" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                        @name
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="headermenu">
+                        <li><a asp-action="Index" asp-controller="Profile" class="dropdown-item">Profile</a></li>
+                        <li><a asp-action="ChangePassword" asp-controller="Account" class="dropdown-item">Change Password</a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a asp-action="Logout" asp-controller="Account" class="dropdown-item">Logout</a></li>
+                    </ul>
+                </div>
+            }
         </div>
+    </nav>
 
-        @if (!string.IsNullOrWhiteSpace(name))
-        {
-            <div class="dropdown position-absolute top-0 end-0 m-3 link-dark text-decoration-none">
-                <button class="btn dropdown-toggle" type="button" id="headermenu" data-bs-toggle="dropdown"
-                aria-expanded="false">
-                    @name
-                </button>
-                <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="headermenu">
-                    <li><a asp-action="Index" asp-controller="Profile" class="dropdown-item">Profile</a></li>
-                    <li><a asp-action="ChangePassword" asp-controller="Account" class="dropdown-item">Change Password</a>
-                    </li>
-                    <li>
-                        <hr class="dropdown-divider">
-                    </li>
-                    <li><a asp-action="Logout" asp-controller="Account" class="dropdown-item">Logout</a></li>
-                </ul>
-            </div>
-
-        }
-    </div>
     <div class="app-offline d-none text-center bg-danger text-white">You are currently offline</div>
 
     @RenderBody()

@@ -21,6 +21,10 @@ body {
   opacity: 0.8;
 }
 
+.btn-check:focus+.btn, .btn:focus {
+  box-shadow: 0 0 0 .25rem rgb(var(--theme-primary-bg-color-rgb), .25);
+}
+
 a {
   color: rgb(var(--theme-primary-bg-color-rgb));
   transition: opacity .15s ease-out;
@@ -31,6 +35,12 @@ a:hover {
   opacity: 0.8;
 }
 /* /Buttons & Links */
+
+/* Dropdowns */
+.dropdown-item.active, .dropdown-item:active {
+  background-color: rgb(var(--theme-primary-bg-color-rgb));
+}
+/* /Dropdowns */
 
 /* Forms */
 .form-check-input, .form-check-label {
@@ -85,14 +95,7 @@ a:hover {
   display: block;
 }
 
-.navbar-brand {
-  height: 100px;
-}
-
 .navbar .icon-banner {
-  position: relative;
-  top: -2px;
-  display: inline;
   max-width: 350px;
   max-height: 80px;
 }
