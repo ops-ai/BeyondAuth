@@ -39,7 +39,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.6" />
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.7" />
 		<PackageReference Include="NLog.Extensions.AzureBlobStorage" Version="3.1.0" />
 		<PackageReference Include="NLog.Targets.Loki" Version="1.4.4" />
 		<PackageReference Include="NLog.Web.AspNetCore" Version="5.0.0" />
@@ -62,7 +62,7 @@
 		<PackageReference Include="prometheus-net.SystemMetrics" Version="2.0.0" />
 		<PackageReference Include="RavenDB.Client" Version="5.3.103" />
 		<PackageReference Include="scientist" Version="2.0.0" />
-		<PackageReference Include="Toggly.FeatureManagement" Version="2.1.5" />
+		<PackageReference Include="Toggly.FeatureManagement" Version="2.1.9" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -31,7 +31,7 @@
 		<PackageReference Include="IPAddressRange" Version="4.2.0" />
 		<PackageReference Include="AspNetCore.HealthChecks.RavenDB" Version="6.0.2" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.16.1" />
-		<PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="0.16.1" />
+		<PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="0.17.0" />
 		<PackageReference Include="NLog.Extensions.AzureBlobStorage" Version="3.1.0" />
 		<PackageReference Include="NLog.Targets.Loki" Version="1.4.4" />
 		<PackageReference Include="NLog.Web.AspNetCore" Version="5.0.0" />
@@ -42,7 +42,7 @@
 		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
 		<PackageReference Include="CorrelationId" Version="3.0.1" />
 		<PackageReference Include="JsonSubTypes" Version="1.9.0" />
-		<PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="6.0.6" />
+		<PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="6.0.7" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="6.0.0" />
 		<PackageReference Include="NJsonSchema" Version="10.7.2" />
 		<PackageReference Include="NSwag.AspNetCore" Version="13.16.1" />
@@ -63,7 +63,7 @@
 		<PackageReference Include="prometheus-net.Contrib" Version="1.0.0" />
 		<PackageReference Include="prometheus-net.SystemMetrics" Version="2.0.0" />
 		<PackageReference Include="scientist" Version="2.0.0" />
-		<PackageReference Include="Toggly.FeatureManagement" Version="2.1.5" />
+		<PackageReference Include="Toggly.FeatureManagement" Version="2.1.9" />
 	</ItemGroup>
 
 	<ItemGroup>

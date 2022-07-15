@@ -41,9 +41,9 @@
 		<PackageReference Include="Azure.Identity" Version="1.6.0" />
 		<PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.3.0" />
 		<PackageReference Include="CorrelationId" Version="3.0.1" />
-		<PackageReference Include="Grpc.AspNetCore" Version="2.46.0" />
-		<PackageReference Include="Grpc.AspNetCore.HealthChecks" Version="2.46.0" />
-		<PackageReference Include="Grpc.Tools" Version="2.46.3">
+		<PackageReference Include="Grpc.AspNetCore" Version="2.47.0" />
+		<PackageReference Include="Grpc.AspNetCore.HealthChecks" Version="2.47.0" />
+		<PackageReference Include="Grpc.Tools" Version="2.47.0">
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
@@ -55,7 +55,7 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="0.16.1" />
+		<PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="0.17.0" />
 		<PackageReference Include="NLog.Extensions.AzureBlobStorage" Version="3.1.0" />
 		<PackageReference Include="NLog.Targets.Loki" Version="1.4.4" />
 		<PackageReference Include="NLog.Web.AspNetCore" Version="5.0.0" />
@@ -78,7 +78,7 @@
 		<PackageReference Include="prometheus-net.SystemMetrics" Version="2.0.0" />
 		<PackageReference Include="RavenDB.Client" Version="5.3.103" />
 		<PackageReference Include="scientist" Version="2.0.0" />
-		<PackageReference Include="Toggly.FeatureManagement" Version="2.1.5" />
+		<PackageReference Include="Toggly.FeatureManagement" Version="2.1.9" />
 	</ItemGroup>
 
 	<ItemGroup>
