@@ -1,0 +1,45 @@
+﻿@model Authentication.Models.Account.LoggedOutViewModel
+@{
+    // set this so the layout rendering sees an anonymous user
+    ViewData["signed-out"] = true;
+}
+
+<div class="container account-container py-5 my-auto">
+    <div class="card">
+    <div class="card-decor d-none d-sm-block">
+      <div class="card-decor-t"></div>
+      <div class="card-decor-b"></div>
+    </div>
+    <div class="card-body">
+      <h4 class="card-title text-center py-3">Logout</h4>
+      <p class="text-center">You are now logged out</p>
+      
+      @if (Model.PostLogoutRedirectUri != null)
+      {
+          <p class="text-center">
+              Click <a class="PostLogoutRedirectUri" href="@Model.PostLogoutRedirectUri">here</a> to return to the
+              <span>@Model.ClientName</span> application.
+          </p>
+      }
+      else
+      {
+          <fieldset>
+              <a asp-action="Login" asp-controller="Account" class="btn btn-primary mt-4 w-100">Login</a>
+          </fieldset>
+      }
+
+      @if (Model.SignOutIframeUrl != null)
+      {
+          <iframe width="0" height="0" class="signout" src="@Model.SignOutIframeUrl" title="Logging out"></iframe>
+      }
+    </div>
+  </div>
+</div>
+
+@section scripts
+{
+    @if (Model.AutomaticRedirectAfterSignOut)
+    {
+        <script src="~/js/signout-redirect.js"></script>
+    }
+}

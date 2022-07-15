@@ -1,6 +1,6 @@
 @model Authentication.Models.Account.LoginViewModel
 
-<div class="container login-container py-5 my-auto">
+<div class="container account-container py-5 my-auto">
   <div class="row">
 
     <h1 class="text-center mb-3">Login</h1>
@@ -48,17 +48,19 @@
         <input type="hidden" asp-for="BrowserId" />
       </form>
     }
-    <div></div>
 
     @if (Model.VisibleExternalProviders.Any())
     {
-      <div class="col-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3 mt-5">
+      <div class="col-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3">
 
-        <div class="divider">
-          <small class="divider-text">or login using</small>
-        </div>
+        @if (Model.EnableLocalLogin)
+        {
+          <div class="divider mt-5 mb-3">
+            <small class="divider-text">or login using</small>
+          </div>
+        }
 
-        <div class="text-center mt-3">
+        <div class="text-center">
           @foreach (var provider in Model.VisibleExternalProviders)
           {
             <a class="btn btn-primary" asp-controller="External" asp-action="Challenge"
@@ -74,6 +76,7 @@
 
       </div>
     }
+
     @if (!Model.EnableLocalLogin && !Model.VisibleExternalProviders.Any())
     {
       <div class="alert alert-warning">
