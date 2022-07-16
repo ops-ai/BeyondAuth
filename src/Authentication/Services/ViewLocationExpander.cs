@@ -15,8 +15,7 @@ namespace Authentication.Services
 
             var tenantSettings = context.ActionContext.HttpContext.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
 
-            // context.Values[THEME_KEY] = tenantSettings.BrandingOptions.Theme;
-            context.Values[THEME_KEY] = "Modern";
+            context.Values[THEME_KEY] = tenantSettings.BrandingOptions.Theme;
         }
 
         public IEnumerable<string> ExpandViewLocations(ViewLocationExpanderContext context, IEnumerable<string> viewLocations)
