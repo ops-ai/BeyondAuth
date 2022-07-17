@@ -75,6 +75,7 @@ using Microsoft.AspNetCore.Mvc.Razor;
 using Finbuckle.MultiTenant;
 using System.Drawing;
 using System.Globalization;
+using HandlebarsDotNet;
 
 namespace Authentication
 {
@@ -407,19 +408,18 @@ namespace Authentication
                 })
                 .WithPerTenantOptions<GoogleOptions>((o, tenantInfo) =>
                 {
-                    if (!tenantInfo.ExternalIdps.Any(t => t.Name.Equals("Google") && t.Enabled))
+                    if (!tenantInfo.ExternalIdps.Any(t => t.Scheme.Equals("Google") && t.Enabled))
                         return;
 
                     // register your IdentityServer with Google at https://console.developers.google.com
                     // enable the Google+ API
                     // set the redirect URI to https://localhost:5001/signin-google
 
-                    var googleSettings = tenantInfo.ExternalIdps.First(t => t.Name == "Google") as ExternalOidcIdentityProvider;
+                    var googleSettings = tenantInfo.ExternalIdps.First(t => t.Scheme == "Google") as ExternalOidcIdentityProvider;
 
                     o.ClientId = googleSettings.ClientId;
                     o.ClientSecret = googleSettings.ClientSecret;
 
-                    o.Scope.Add("user");
                     o.AuthorizationEndpoint += "?prompt=consent"; // Hack so we always get a refresh token, it only comes on the first authorization response
                     o.AccessType = "offline";
                     o.SaveTokens = true;
@@ -432,14 +432,14 @@ namespace Authentication
                 })
                 .WithPerTenantOptions<FacebookOptions>((o, tenantInfo) =>
                 {
-                    if (!tenantInfo.ExternalIdps.Any(t => t.Name.Equals("Facebook") && t.Enabled))
+                    if (!tenantInfo.ExternalIdps.Any(t => t.Scheme.Equals("Facebook") && t.Enabled))
                         return;
 
                     // You must first create an app with Facebook and add its ID and Secret to your user-secrets.
                     // https://developers.facebook.com/apps/
                     // https://developers.facebook.com/docs/facebook-login/manually-build-a-login-flow#login
 
-                    var facebookSettings = tenantInfo.ExternalIdps.First(t => t.Name == "Facebook") as ExternalOidcIdentityProvider;
+                    var facebookSettings = tenantInfo.ExternalIdps.First(t => t.Scheme == "Facebook") as ExternalOidcIdentityProvider;
 
                     o.AppId = facebookSettings.ClientId; //appid
                     o.AppSecret = facebookSettings.ClientSecret; //appsecret
@@ -454,14 +454,14 @@ namespace Authentication
                 })
                 .WithPerTenantOptions<TwitterOptions>((o, tenantInfo) =>
                 {
-                    if (!tenantInfo.ExternalIdps.Any(t => t.Name.Equals("Twitter") && t.Enabled))
+                    if (!tenantInfo.ExternalIdps.Any(t => t.Scheme.Equals("Twitter") && t.Enabled))
                         return;
 
                     // You must first create an app with Twitter and add its key and Secret to your user-secrets.
                     // https://apps.twitter.com/
                     // https://developer.twitter.com/en/docs/basics/authentication/api-reference/access_token
 
-                    var twitterSettings = tenantInfo.ExternalIdps.First(t => t.Name == "Twitter") as ExternalOidcIdentityProvider;
+                    var twitterSettings = tenantInfo.ExternalIdps.First(t => t.Scheme == "Twitter") as ExternalOidcIdentityProvider;
 
                     o.ConsumerKey = twitterSettings.ClientId; //consumerkey
                     o.ConsumerSecret = twitterSettings.ClientSecret; //consumersecret
@@ -477,14 +477,14 @@ namespace Authentication
                 })
                 .WithPerTenantOptions<MicrosoftAccountOptions>((o, tenantInfo) =>
                 {
-                    if (!tenantInfo.ExternalIdps.Any(t => t.Name.Equals("MicrosoftAccount") && t.Enabled))
+                    if (!tenantInfo.ExternalIdps.Any(t => t.Scheme.Equals("MicrosoftAccount") && t.Enabled))
                         return;
 
                     // You must first create an app with Microsoft Account and add its ID and Secret to your user-secrets.
                     // https://azure.microsoft.com/en-us/documentation/articles/active-directory-v2-app-registration/
                     // https://apps.dev.microsoft.com/
 
-                    var microsoftSettings = tenantInfo.ExternalIdps.First(t => t.Name == "MicrosoftAccount") as ExternalOidcIdentityProvider;
+                    var microsoftSettings = tenantInfo.ExternalIdps.First(t => t.Scheme == "MicrosoftAccount") as ExternalOidcIdentityProvider;
 
                     o.ClientId = microsoftSettings.ClientId;
                     o.ClientSecret = microsoftSettings.ClientSecret;
@@ -497,18 +497,18 @@ namespace Authentication
                 })
                 .WithPerTenantOptions<OpenIdConnectOptions>((o, tenantInfo) =>
                 {
-                    if (!tenantInfo.ExternalIdps.Any(t => !t.Name.In("MicrosoftAccount", "Twitter", "Facebook", "Google") && t.Enabled))
+                    if (!tenantInfo.ExternalIdps.Any(t => !t.Scheme.In("MicrosoftAccount", "Twitter", "Facebook", "Google") && t.Enabled))
                         return;
 
-                    var openIdConnectSettings = tenantInfo.ExternalIdps.First(t => !t.Name.In("MicrosoftAccount", "Twitter", "Facebook", "Google")) as ExternalOidcIdentityProvider;
+                    var openIdConnectSettings = tenantInfo.ExternalIdps.First(t => !t.Scheme.In("MicrosoftAccount", "Twitter", "Facebook", "Google")) as ExternalOidcIdentityProvider;
 
                     o.Configuration = new Microsoft.IdentityModel.Protocols.OpenIdConnect.OpenIdConnectConfiguration
                     {
                         AuthorizationEndpoint = "https://github.com/login/oauth/authorize",
                         TokenEndpoint = "https://github.com/login/oauth/access_token",
                         UserInfoEndpoint = "https://api.github.com/user"
-
                     };
+
                     //o.Authority = openIdConnectSettings.Authority;
                     o.ClientId = openIdConnectSettings.ClientId;
                     o.ClientSecret = openIdConnectSettings.ClientSecret;
@@ -523,18 +523,18 @@ namespace Authentication
                 })
                 .WithPerTenantOptions<GitHubAuthenticationOptions>((o, tenantInfo) =>
                 {
-                    if (!tenantInfo.ExternalIdps.Any(t => t.Name.In("GitHub") && t.Enabled))
+                    if (!tenantInfo.ExternalIdps.Any(t => t.Scheme.In("GitHub") && t.Enabled))
                         return;
 
-                    var openIdConnectSettings = tenantInfo.ExternalIdps.First(t => t.Name.In("GitHub")) as ExternalOidcIdentityProvider;
+                    var openIdConnectSettings = tenantInfo.ExternalIdps.First(t => t.Scheme.In("GitHub")) as ExternalOidcIdentityProvider;
 
-                    o.ClaimActions.MapJsonKey(JwtClaimTypes.Name, "name");
+                    //o.ClaimActions.MapJsonKey(JwtClaimTypes.Name, "name");
                     o.ClaimActions.MapJsonKey("github_url", "html_url");
-                    o.ClaimActions.MapJsonKey(JwtClaimTypes.Email, "email");
+                    //o.ClaimActions.MapJsonKey(JwtClaimTypes.Email, "email");
                     o.ClaimActions.MapJsonKey("organization", "company");
                     o.ClaimActions.MapJsonKey("two_factor_authentication", "two_factor_authentication");
-                    o.ClaimActions.Remove(ClaimTypes.Name);
-                    o.ClaimActions.Remove(ClaimTypes.Email);
+                    //o.ClaimActions.Remove(ClaimTypes.Name);
+                    //o.ClaimActions.Remove(ClaimTypes.Email);
                     o.ClaimActions.Remove("urn:github:name");
                     o.ClaimActions.Remove("urn:github:url");
 
@@ -845,7 +845,7 @@ namespace Authentication
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGet("css/colors.t.css", context => MapColors(context, "wwwroot\\css\\colors.css"));
+                endpoints.MapGet("css/variables.t.css", context => MapColors(context, "wwwroot\\css\\variables.default.css"));
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
@@ -861,14 +861,14 @@ namespace Authentication
             context.Response.ContentType = "text/html";
             await context.Response.WriteAsync("<html><body>");
             await context.Response.WriteAsync("A remote failure has occurred: <br>" +
-                context.Failure.Message.Split(Environment.NewLine).Select(s => HtmlEncoder.Default.Encode(s) + "<br>").Aggregate((s1, s2) => s1 + s2));
+                context.Failure.Message.Split(Environment.NewLine).Select(s => System.Text.Encodings.Web.HtmlEncoder.Default.Encode(s) + "<br>").Aggregate((s1, s2) => s1 + s2));
 
             if (context.Properties != null)
             {
                 await context.Response.WriteAsync("Properties:<br>");
                 foreach (var pair in context.Properties.Items)
                 {
-                    await context.Response.WriteAsync($"-{HtmlEncoder.Default.Encode(pair.Key)}={HtmlEncoder.Default.Encode(pair.Value)}<br>");
+                    await context.Response.WriteAsync($"-{System.Text.Encodings.Web.HtmlEncoder.Default.Encode(pair.Key)}={System.Text.Encodings.Web.HtmlEncoder.Default.Encode(pair.Value)}<br>");
                 }
             }
 
@@ -878,8 +878,10 @@ namespace Authentication
             context.HandleResponse();
         }
 
-        public static Color ParseColor(string cssColor)
+        public static Color? ParseColor(string cssColor)
         {
+            if (cssColor == null) return null;
+
             cssColor = cssColor.Trim();
 
             if (cssColor.StartsWith("#"))
@@ -911,7 +913,7 @@ namespace Authentication
                     return Color.FromArgb((int)(a * 255), r, g, b);
                 }
             }
-            throw new FormatException("Not rgb, rgba or hexa color string");
+            return null;
         }
 
         private async Task MapColors(HttpContext context, string cssPath)
@@ -919,15 +921,20 @@ namespace Authentication
             var tenantSettings = context.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
             context.Response.ContentType = "text/css";
 
-            if (tenantSettings.BrandingOptions.PrimaryColor != null)
-            {
-                var colorsCss = File.ReadAllText(Path.Combine(_env.ContentRootPath, cssPath));
+            var colorsCss = File.ReadAllText(Path.Combine(_env.ContentRootPath, tenantSettings.BrandingOptions.Theme == null ? cssPath : cssPath.Replace("default", tenantSettings.BrandingOptions.Theme)));
 
-                var rgba = ParseColor(tenantSettings.BrandingOptions.PrimaryColor);
-                await context.Response.WriteAsync(colorsCss.Replace("#7367f0", tenantSettings.BrandingOptions.PrimaryColor).Replace("34, 41, 47", $"{rgba.R},{rgba.G},{rgba.B}"));
-            }
-            else
-                await context.Response.SendFileAsync(Path.Combine(_env.ContentRootPath, "css/colors.css"));
+            var template = Handlebars.Compile(colorsCss);
+            var primaryColor = ParseColor(tenantSettings.BrandingOptions.PrimaryColor);
+            var secondaryColor = ParseColor(tenantSettings.BrandingOptions.SecondaryColor);
+            var data = new
+            {
+                PrimaryColor = tenantSettings.BrandingOptions.PrimaryColor,
+                PrimaryColorRgb = primaryColor.HasValue ? $"{primaryColor.Value.R}, {primaryColor.Value.G}, {primaryColor.Value.B}" : "77, 199, 239",
+                SecondaryColor = tenantSettings.BrandingOptions.SecondaryColor,
+                SecondaryColorRgb = secondaryColor.HasValue ? $"{secondaryColor.Value.R}, {secondaryColor.Value.G}, {secondaryColor.Value.B}" : "2, 103, 170"
+            };
+
+            await context.Response.WriteAsync(template(data));
         }
     }
 }

@@ -119,11 +119,11 @@ namespace Authentication.Controllers
                 user = new ApplicationUser
                 {
                     UserName = $"{provider}.{providerUserId}",
-                    DisplayName = claims.FirstOrDefault(t => t.Type == JwtClaimTypes.Name)?.Value ?? "",
-                    LastName = claims.FirstOrDefault(t => t.Type == JwtClaimTypes.FamilyName)?.Value ?? "",
-                    FirstName = claims.FirstOrDefault(t => t.Type == JwtClaimTypes.GivenName)?.Value ?? "",
-                    Email = claims.First(t => t.Type == JwtClaimTypes.Email).Value,
-                    Organization = claims.First(t => t.Type == "organization").Value,
+                    DisplayName = claims.FirstOrDefault(t => t.Type == ClaimTypes.Name)?.Value ?? "",
+                    LastName = claims.FirstOrDefault(t => t.Type == ClaimTypes.Surname)?.Value ?? "",
+                    FirstName = claims.FirstOrDefault(t => t.Type == ClaimTypes.GivenName)?.Value ?? "",
+                    Email = claims.First(t => t.Type == ClaimTypes.Email).Value,
+                    Organization = claims.FirstOrDefault(t => t.Type == "organization")?.Value ?? "default",
                     CreatedOnUtc = DateTime.UtcNow,
                     ChangePasswordAllowed = true,
                     PasswordResetAllowed = true,

@@ -58,7 +58,7 @@
         </form>
       }
 
-      @if (Model.VisibleExternalProviders.Any())
+      @if (Model.ExternalProviders.Any())
       {
         @if (Model.EnableLocalLogin)
         {
@@ -68,21 +68,20 @@
         }
 
         <div class="text-center">
-          @foreach (var provider in Model.VisibleExternalProviders)
+          @foreach (var provider in Model.ExternalProviders)
           {
-            <a class="btn btn-primary" asp-controller="External" asp-action="Challenge"
-          asp-route-provider="@provider.AuthenticationScheme" asp-route-returnUrl="@Model.ReturnUrl">
+            <a class="btn btn-primary" asp-controller="External" asp-action="Challenge" asp-route-provider="@provider.AuthenticationScheme" asp-route-returnUrl="@Model.ReturnUrl">
               @provider.DisplayName
               @if (!string.IsNullOrEmpty(provider.Icon))
               {
-                <img src="@provider.Icon" />
+                  <i class="fa-brands fa-@provider.Icon"></i>
               }
             </a>
           }
         </div>
       }
 
-      @if (!Model.EnableLocalLogin && !Model.VisibleExternalProviders.Any())
+      @if (!Model.EnableLocalLogin && !Model.ExternalProviders.Any())
       {
         <div class="alert alert-warning">
           <strong>Invalid login request</strong>
