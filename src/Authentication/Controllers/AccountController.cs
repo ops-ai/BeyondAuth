@@ -74,6 +74,15 @@ namespace Authentication.Controllers
         /// <summary>
         /// Entry point into the login workflow
         /// </summary>
+        [HttpGet("account/login")]
+        public async Task<IActionResult> OldLogin(string returnUrl, [FromServices] IOtacManager otacManager)
+        {
+            return RedirectToAction(nameof(Login), new { returnUrl });
+        }
+
+        /// <summary>
+        /// Entry point into the login workflow
+        /// </summary>
         [HttpGet("login")]
         public async Task<IActionResult> Login(string returnUrl, [FromServices] IOtacManager otacManager)
         {

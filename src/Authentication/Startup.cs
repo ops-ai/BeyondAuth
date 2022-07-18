@@ -167,7 +167,7 @@ namespace Authentication
                 // allows both self-signed and CA-based certs. Check the MTLS spec for details.
                 options.AllowedCertificateTypes = CertificateTypes.All;
             })
-                .AddCookie(options => options.Cookie.Name = "BA.Auth")
+                .AddCookie(options => { options.Cookie.Name = "BA.Auth"; options.LoginPath = "/login"; options.LogoutPath = "/logout"; })
                 //.AddOpenIdConnect(options => { options.ClientId = "__tenant__"; options.ClientSecret = "__tenant__"; options.Authority = "https://__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; })
                 .AddGoogle(options => { options.ClientId = "__tenant__"; options.ClientSecret = "__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; })
                 .AddFacebook(options => { options.ClientId = "__tenant__"; options.ClientSecret = "__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; })
