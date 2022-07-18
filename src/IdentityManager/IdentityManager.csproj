@@ -42,8 +42,8 @@
 		<PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.3.0" />
 		<PackageReference Include="CommonPasswordsValidator" Version="1.4.0" />
 		<PackageReference Include="CorrelationId" Version="3.0.1" />
-		<PackageReference Include="Finbuckle.MultiTenant" Version="6.7.2" />
-		<PackageReference Include="Finbuckle.MultiTenant.AspNetCore" Version="6.7.2" />
+		<PackageReference Include="Finbuckle.MultiTenant" Version="6.7.3" />
+		<PackageReference Include="Finbuckle.MultiTenant.AspNetCore" Version="6.7.3" />
 		<PackageReference Include="IdentityServer4" Version="4.1.2" />
 		<PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
 		<PackageReference Include="IdentityServer4.Contrib.RavenDB" Version="1.0.0" />

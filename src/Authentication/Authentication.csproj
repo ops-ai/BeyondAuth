@@ -67,8 +67,8 @@
 		<PackageReference Include="BuildBundlerMinifier" Version="3.2.449" />
 		<PackageReference Include="CommonPasswordsValidator" Version="1.4.0" />
 		<PackageReference Include="CorrelationId" Version="3.0.1" />
-		<PackageReference Include="Finbuckle.MultiTenant" Version="6.7.2" />
-		<PackageReference Include="Finbuckle.MultiTenant.AspNetCore" Version="6.7.2" />
+		<PackageReference Include="Finbuckle.MultiTenant" Version="6.7.3" />
+		<PackageReference Include="Finbuckle.MultiTenant.AspNetCore" Version="6.7.3" />
 		<PackageReference Include="Handlebars.Net" Version="2.1.2" />
 		<PackageReference Include="IdentityServer.LdapExtension" Version="3.1.0" />
 		<PackageReference Include="IdentityServer4" Version="4.1.2" />
