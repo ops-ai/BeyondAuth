@@ -168,7 +168,7 @@ namespace Authentication
                 options.AllowedCertificateTypes = CertificateTypes.All;
             })
                 .AddCookie(options => options.Cookie.Name = "BA.Auth")
-                .AddOpenIdConnect(options => { options.ClientId = "__tenant__"; options.ClientSecret = "__tenant__"; options.Authority = "https://__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; })
+                //.AddOpenIdConnect(options => { options.ClientId = "__tenant__"; options.ClientSecret = "__tenant__"; options.Authority = "https://__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; })
                 .AddGoogle(options => { options.ClientId = "__tenant__"; options.ClientSecret = "__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; })
                 .AddFacebook(options => { options.ClientId = "__tenant__"; options.ClientSecret = "__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; })
                 .AddTwitter(options => { options.ConsumerKey = "__tenant__"; options.ConsumerSecret = "__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; })
