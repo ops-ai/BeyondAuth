@@ -32,20 +32,6 @@
 			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
 		</Content>
 		<None Include="compilerconfig.json" />
-		<None Include="Views\Shared\Error.cshtml" />
-		<None Include="Views\Shared\_Layout.cshtml" />
-		<None Include="Views\Shared\_LoginPartial.cshtml" />
-		<None Include="Views\Shared\_ValidationScriptsPartial.cshtml" />
-		<None Include="Views\_ViewImports.cshtml" />
-		<None Include="Views\_ViewStart.cshtml" />
-		<None Include="wwwroot\js\site.js" />
-		<None Include="wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.js" />
-		<None Include="wwwroot\lib\jquery-validation-unobtrusive\jquery.validate.unobtrusive.min.js" />
-		<None Include="wwwroot\lib\jquery-validation\dist\additional-methods.js" />
-		<None Include="wwwroot\lib\jquery-validation\dist\additional-methods.min.js" />
-		<None Include="wwwroot\lib\jquery-validation\dist\jquery.validate.js" />
-		<None Include="wwwroot\lib\jquery-validation\dist\jquery.validate.min.js" />
-		<None Include="wwwroot\lib\jquery-validation\LICENSE.md" />
 	</ItemGroup>
 
 	<ItemGroup>

@@ -845,7 +845,7 @@ namespace Authentication
 
             app.UseEndpoints(endpoints =>
             {
-                endpoints.MapGet("css/variables.t.css", context => MapColors(context, "wwwroot\\css\\variables.default.css"));
+                endpoints.MapGet("css/variables.t.css", context => MapColors(context, "wwwroot/css/variables.default.css"));
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
