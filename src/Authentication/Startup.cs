@@ -921,7 +921,7 @@ namespace Authentication
             var tenantSettings = context.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
             context.Response.ContentType = "text/css";
 
-            var colorsCss = File.ReadAllText(Path.Combine(_env.ContentRootPath, tenantSettings.BrandingOptions.Theme == null ? cssPath : cssPath.Replace("default", tenantSettings.BrandingOptions.Theme)));
+            var colorsCss = File.ReadAllText(Path.Combine(_env.ContentRootPath, tenantSettings.BrandingOptions.Theme == null ? cssPath : cssPath.Replace("default", tenantSettings.BrandingOptions.Theme.ToLower())));
 
             var template = Handlebars.Compile(colorsCss);
             var primaryColor = ParseColor(tenantSettings.BrandingOptions.PrimaryColor);
