@@ -139,9 +139,12 @@ namespace Authentication.Controllers
 
                 if (!createResult.Succeeded)
                 {
-                    TempData.Add("ErrorMessage", $"{provider} login failed");
+                    if (createResult.Errors.Any(t => t.Code == "DuplicateEmail"))
+                        TempData.Add("ErrorMessage", $"{provider} login failed. An account already exists with the same email.");
+                    else
+                        TempData.Add("ErrorMessage", $"{provider} login failed.");
                     foreach (var error in createResult.Errors)
-                        TempData.Add("Errors", error.Description);
+                        TempData.Add(error.Code, error.Description);
 
                     await HttpContext.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);
                     return RedirectToAction(nameof(AccountController.Login), "Account");

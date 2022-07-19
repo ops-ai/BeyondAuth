@@ -15,8 +15,8 @@
           <input type="hidden" asp-for="ReturnUrl" />
 
           <div class="mb-3 has-validation">
-            <label asp-for="Email" class="form-label">Username or Email address</label>
-            <input type="text" class="form-control" placeholder=" " asp-for="Email" autofocus required />@*pattern=".+@@.+\..+"*@
+            <label asp-for="Email" class="form-label">Email Address</label>
+            <input type="text" class="form-control" placeholder="Your Email Address *" asp-for="Email" autofocus required />@*pattern=".+@@.+\..+"*@
           </div>
           
           <div>
@@ -27,10 +27,10 @@
                 <a asp-action="ForgotPassword" asp-controller="PasswordReset" class="link-dark ms-auto">Forgot Password?</a>
               }
             </label>
-            <input type="password" class="form-control" placeholder="Your Password *" asp-for="Password" autocomplete="off"
-            required />
+            <input type="password" class="form-control" placeholder="Your Password *" asp-for="Password" autocomplete="off" required />
           </div>
           
+          @Html.ValidationMessage("ErrorMessage")
           @Html.ValidationMessageFor(m => m.Email)
           @Html.ValidationMessageFor(m => m.Password)
           

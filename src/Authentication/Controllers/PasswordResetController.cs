@@ -155,15 +155,7 @@ namespace Authentication.Controllers
         [Route("password-reset-sent")]
         public IActionResult ForgotPasswordConfirmation()
         {
-            try
-            {
-                return View();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(500, ex, "Error displaying forgot password confirmation page");
-                throw;
-            }
+            return View();
         }
 
 
@@ -177,18 +169,10 @@ namespace Authentication.Controllers
         [Route("reset-password")]
         public IActionResult ResetPassword(string code = null, string returnUrl = null)
         {
-            try
-            {
-                if (code == null)
-                    return RedirectToAction("Error", "Home");
+            if (code == null)
+                return RedirectToAction("Error", "Home");
 
-                return View(new ResetPasswordModel { ReturnUrl = returnUrl });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(500, ex, "Error displaying reset password page");
-                throw;
-            }
+            return View(new ResetPasswordModel { ReturnUrl = returnUrl });
         }
 
         /// <summary>
@@ -271,16 +255,8 @@ namespace Authentication.Controllers
         [Route("reset-password-successful")]
         public IActionResult ResetPasswordConfirmation(string returnUrl)
         {
-            try
-            {
-                ViewData["ReturnUrl"] = returnUrl;
-                return View();
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(500, ex, "Error displaying reset password confirmation");
-                throw;
-            }
+            ViewData["ReturnUrl"] = returnUrl;
+            return View();
         }
     }
 }

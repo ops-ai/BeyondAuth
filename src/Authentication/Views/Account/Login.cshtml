@@ -10,13 +10,11 @@
       <form asp-route="Login" class="col-12 col-md-8 offset-md-2 col-lg-6 offset-lg-3 needs-validation" novalidate>
         <input type="hidden" asp-for="ReturnUrl" />
         <div class="form-floating mb-3 has-validation">
-          <input type="text" class="form-control" placeholder=" " asp-for="Email" autofocus
-          required />@*pattern=".+@@.+\..+"*@
-          <label asp-for="Email" class="form-label">Username or Email address</label>
+          <input type="text" class="form-control" placeholder="Your Email Address *" asp-for="Email" autofocus required />@*pattern=".+@@.+\..+"*@
+          <label asp-for="Email" class="form-label">Email Address</label>
         </div>
         <div class="form-floating">
-          <input type="password" class="form-control" placeholder="Your Password *" asp-for="Password" autocomplete="off"
-          required />
+          <input type="password" class="form-control" placeholder="Your Password *" asp-for="Password" autocomplete="off" required />
           <label asp-for="Password" class="form-label">Password</label>
         </div>
         @Html.ValidationMessageFor(m => m.Email)
