@@ -373,6 +373,7 @@ namespace IdentityManager
             app.UseForwardedHeaders(forwardOptions);
             app.UseHttpsRedirection();
 
+            app.UseMiddleware<ErrorReporterMiddleware>();
             if (ravenDBcert != null)
             {
                 Audit.Core.Configuration.Setup()

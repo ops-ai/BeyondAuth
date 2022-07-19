@@ -1,7 +1,3 @@
-// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-
 using Authentication.Filters;
 using Authentication.Models;
 using Finbuckle.MultiTenant;
@@ -13,8 +9,6 @@ using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Raven.Client.Documents.Session;
-using System.Drawing;
-using System.Globalization;
 using System.Reflection;
 
 namespace Authentication.Controllers
@@ -24,8 +18,6 @@ namespace Authentication.Controllers
     {
         private readonly IIdentityServerInteractionService _interaction;
         private readonly IWebHostEnvironment _environment;
-        private readonly ILogger _logger;
-        private readonly IConfiguration _configuration;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly UserManager<ApplicationUser> _userManager;
 
@@ -33,15 +25,11 @@ namespace Authentication.Controllers
             IAsyncDocumentSession dbSession,
             IIdentityServerInteractionService interaction,
             IWebHostEnvironment environment,
-            ILogger<HomeController> logger,
-            IConfiguration configuration,
             IHttpContextAccessor httpContextAccessor,
             UserManager<ApplicationUser> userManager) : base(dbSession)
         {
             _interaction = interaction;
             _environment = environment;
-            _logger = logger;
-            _configuration = configuration;
             _httpContextAccessor = httpContextAccessor;
             _userManager = userManager;
         }
@@ -70,73 +58,6 @@ namespace Authentication.Controllers
         {
             Response.StatusCode = 404;
             return View();
-        }
-
-        public static Color ParseColor(string cssColor)
-        {
-            cssColor = cssColor.Trim();
-
-            if (cssColor.StartsWith("#"))
-            {
-                return ColorTranslator.FromHtml(cssColor);
-            }
-            else if (cssColor.StartsWith("rgb")) //rgb or argb
-            {
-                int left = cssColor.IndexOf('(');
-                int right = cssColor.IndexOf(')');
-
-                if (left < 0 || right < 0)
-                    throw new FormatException("rgba format error");
-                string noBrackets = cssColor.Substring(left + 1, right - left - 1);
-
-                string[] parts = noBrackets.Split(',');
-
-                int r = int.Parse(parts[0], CultureInfo.InvariantCulture);
-                int g = int.Parse(parts[1], CultureInfo.InvariantCulture);
-                int b = int.Parse(parts[2], CultureInfo.InvariantCulture);
-
-                if (parts.Length == 3)
-                {
-                    return Color.FromArgb(r, g, b);
-                }
-                else if (parts.Length == 4)
-                {
-                    float a = float.Parse(parts[3], CultureInfo.InvariantCulture);
-                    return Color.FromArgb((int)(a * 255), r, g, b);
-                }
-            }
-            throw new FormatException("Not rgb, rgba or hexa color string");
-        }
-
-        /// <summary>
-        /// Custom CSS
-        /// </summary>
-        /// <returns></returns>
-        [Route("css/custom.css")]
-        public IActionResult CustomCss()
-        {
-            var tenantSettings = _httpContextAccessor.HttpContext.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
-
-            if (tenantSettings.BrandingOptions.PrimaryColor == null)
-                return Content("", "text/css");
-
-            var rgba = ParseColor(tenantSettings.BrandingOptions.PrimaryColor);
-            var css = $@"
-.btn-primary {{
-    background-color: {tenantSettings.BrandingOptions.PrimaryColor};
-    border-color: {tenantSettings.BrandingOptions.PrimaryColor};
-}}
-.btn-primary:focus, .btn-primary:hover {{
-    background-color: rgba({rgba.R},{rgba.G},{rgba.B},.75);
-    border-color: {tenantSettings.BrandingOptions.PrimaryColor};
-}}
-.form-control:focus, .form-control:hover {{
-    border-color: {tenantSettings.BrandingOptions.PrimaryColor};
-    box-shadow: 0 0 0 .25rem rgba({rgba.R},{rgba.G},{rgba.B},.25);
-}}
-            ";
-
-            return Content(css, "text/css");
         }
 
         /// <summary>
@@ -168,22 +89,12 @@ namespace Authentication.Controllers
             {
                 if (exceptionHandlerPathFeature.Error is FileNotFoundException)
                     Response.StatusCode = 404;
-                try
-                {
-                    throw exceptionHandlerPathFeature.Error;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Uncaught exception {path}", exceptionHandlerPathFeature.Path);
-                }
             }
 
             // retrieve error details from identityserver
             var message = await _interaction.GetErrorContextAsync(errorId);
             if (message != null)
             {
-                _logger.LogError("Identity Exception: {error}", message.Error);
-
                 if (!_environment.IsDevelopment())
                     message.ErrorDescription = null; // only show in development
                 vm.Error = message;

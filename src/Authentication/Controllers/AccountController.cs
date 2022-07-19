@@ -1,14 +1,9 @@
-// Copyright (c) Brock Allen & Dominick Baier. All rights reserved.
-// Licensed under the Apache License, Version 2.0. See LICENSE in the project root for license information.
-
-
 using Audit.Core;
 using Authentication.Extensions;
 using Authentication.Filters;
 using Authentication.Infrastructure;
 using Authentication.Models;
 using Authentication.Models.Account;
-using Authentication.Models.Messages;
 using Finbuckle.MultiTenant;
 using Identity.Core;
 using IdentityModel;
@@ -228,7 +223,7 @@ namespace Authentication.Controllers
                             IdentityProvider = $"https://{tenantSettings.Identifier}"
                         };
                         //TODO: check for MFA add to Authentication Methods https://datatracker.ietf.org/doc/html/rfc8176
-                        
+
                         await HttpContext.SignInAsync(isuser, props);
 
                         if (user.ChangePasswordOnNextLogin)
@@ -484,16 +479,8 @@ namespace Authentication.Controllers
         [HttpGet("change-password")]
         public async Task<IActionResult> ChangePassword(string returnUrl)
         {
-            try
-            {
-                await Task.FromResult(0);
-                return View(new ChangePasswordViewModel { ReturnUrl = returnUrl });
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(500, ex, "Error displaying change password page");
-                throw;
-            }
+            await Task.FromResult(0);
+            return View(new ChangePasswordViewModel { ReturnUrl = returnUrl });
         }
 
         /// <summary>
@@ -506,40 +493,32 @@ namespace Authentication.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> ChangePassword(ChangePasswordViewModel model)
         {
-            try
+            if (!ModelState.IsValid)
+                return View(model);
+
+            var sub = User.GetSubjectId();
+            var user = await _userManager.FindByIdAsync(sub);
+            if (user != null && user.ChangePasswordAllowed)
             {
-                if (!ModelState.IsValid)
-                    return View(model);
+                if (user.ChangePasswordOnNextLogin)
+                    user.ChangePasswordOnNextLogin = false;
 
-                var sub = User.GetSubjectId();
-                var user = await _userManager.FindByIdAsync(sub);
-                if (user != null && user.ChangePasswordAllowed)
+                var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
+                if (result.Succeeded)
                 {
-                    if (user.ChangePasswordOnNextLogin)
-                        user.ChangePasswordOnNextLogin = false;
+                    _logger.LogInformation(6, "User changed their password successfully.");
 
-                    var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
-                    if (result.Succeeded)
-                    {
-                        _logger.LogInformation(6, "User changed their password successfully.");
+                    await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-change-confirmation", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Password Changed Confirmation");
+                    await AuditScope.LogAsync($"User:Passowrd Changed", new { SubjectId = user.Id });
 
-                        await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-change-confirmation", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Password Changed Confirmation");
-                        await AuditScope.LogAsync($"User:Passowrd Changed", new { SubjectId = user.Id });
-
-                        return View("ChangePasswordConfirmation");
-                    }
-
-                    AddErrors(result);
-                    await AuditScope.LogAsync($"User:Passowrd Change Failure", new { SubjectId = user.Id, result.Errors });
+                    return View("ChangePasswordConfirmation");
                 }
 
-                return View(model);
+                AddErrors(result);
+                await AuditScope.LogAsync($"User:Passowrd Change Failure", new { SubjectId = user.Id, result.Errors });
             }
-            catch (Exception ex)
-            {
-                _logger.LogError(500, ex, "Error changing password");
-                throw;
-            }
+
+            return View(model);
         }
 
         private void AddErrors(IdentityResult result)

@@ -7,11 +7,9 @@ namespace IdentityManager.Controllers
     [ApiController]
     public class ErrorController : ControllerBase
     {
-        private readonly ILogger<ErrorController> _logger;
-
-        public ErrorController(ILogger<ErrorController> logger)
+        public ErrorController()
         {
-            _logger = logger;
+
         }
 
         [AllowAnonymous]
@@ -23,15 +21,6 @@ namespace IdentityManager.Controllers
             {
                 if (exceptionHandlerPathFeature.Error is FileNotFoundException)
                     Response.StatusCode = 404;
-
-                try
-                {
-                    throw exceptionHandlerPathFeature.Error;
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Uncaught exception {path}", exceptionHandlerPathFeature.Path);
-                }
             }
 
             return Problem("Error processing request");

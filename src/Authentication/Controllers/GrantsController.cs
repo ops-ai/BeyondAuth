@@ -25,15 +25,13 @@ namespace Authentication.Controllers
         private readonly IClientStore _clients;
         private readonly IResourceStore _resources;
         private readonly IEventService _events;
-        private readonly ILogger _logger;
 
         public GrantsController(
             IAsyncDocumentSession dbSession,
             IIdentityServerInteractionService interaction,
             IClientStore clients,
             IResourceStore resources,
-            IEventService events,
-            ILogger<GrantsController> logger) : base(dbSession)
+            IEventService events) : base(dbSession)
         {
             _interaction = interaction;
             _clients = clients;

@@ -749,7 +749,8 @@ namespace Authentication
             app.UseJSNLog(new LoggingAdapter(loggerFactory), jsnlogConfiguration);
 
             app.UseStaticFiles();
-            
+
+            app.UseMiddleware<ErrorReporterMiddleware>();
             Audit.Core.Configuration.Setup()
                 .JsonNewtonsoftAdapter(new JsonSerializerSettings { NullValueHandling = NullValueHandling.Ignore })
                 .UseRavenDB(config => config
