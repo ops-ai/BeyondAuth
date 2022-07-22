@@ -21,8 +21,8 @@
 
 	<ItemGroup>
 		<PackageReference Include="AspNetCore.HealthChecks.RavenDB" Version="6.0.2" />
-		<PackageReference Include="AspNetCore.HealthChecks.UI" Version="6.0.4" />
-		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="6.0.4" />
+		<PackageReference Include="AspNetCore.HealthChecks.UI" Version="6.0.5" />
+		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="6.0.5" />
 		<PackageReference Include="Autofac" Version="6.4.0" />
 		<PackageReference Include="Autofac.Configuration" Version="6.0.0" />
 		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
@@ -42,7 +42,7 @@
 		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="6.0.7" />
 		<PackageReference Include="NLog.Extensions.AzureBlobStorage" Version="3.1.0" />
 		<PackageReference Include="NLog.Targets.Loki" Version="1.4.4" />
-		<PackageReference Include="NLog.Web.AspNetCore" Version="5.0.0" />
+		<PackageReference Include="NLog.Web.AspNetCore" Version="5.1.0" />
 		<PackageReference Include="NSwag.AspNetCore" Version="13.16.1" />
 		<PackageReference Include="NSwag.Core" Version="13.16.1" />
 		<PackageReference Include="NWebsec.AspNetCore.Middleware" Version="3.0.0" />
@@ -60,9 +60,9 @@
 		<PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="6.0.0" />
 		<PackageReference Include="prometheus-net.Contrib" Version="1.0.0" />
 		<PackageReference Include="prometheus-net.SystemMetrics" Version="2.0.0" />
-		<PackageReference Include="RavenDB.Client" Version="5.3.103" />
+		<PackageReference Include="RavenDB.Client" Version="5.4.1" />
 		<PackageReference Include="scientist" Version="2.0.0" />
-		<PackageReference Include="Toggly.FeatureManagement" Version="2.1.9" />
+		<PackageReference Include="Toggly.FeatureManagement" Version="2.1.11" />
 	</ItemGroup>
 
 	<ItemGroup>

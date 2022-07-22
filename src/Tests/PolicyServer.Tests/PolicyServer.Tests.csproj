@@ -23,8 +23,8 @@
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.2.0" />
     <PackageReference Include="Microsoft.TestPlatform.TestHost" Version="17.2.0" />
     <PackageReference Include="Moq" Version="4.18.1" />
-    <PackageReference Include="NLog.Web.AspNetCore" Version="5.0.0" />
-	<PackageReference Include="RavenDB.TestDriver" Version="5.3.103" />
+    <PackageReference Include="NLog.Web.AspNetCore" Version="5.1.0" />
+	<PackageReference Include="RavenDB.TestDriver" Version="5.4.1" />
 	<PackageReference Include="tsh.xunit.logging" Version="0.1.0.12" />
     <PackageReference Include="xunit" Version="2.4.1" />
     <PackageReference Include="xunit.runner.console" Version="2.4.1">

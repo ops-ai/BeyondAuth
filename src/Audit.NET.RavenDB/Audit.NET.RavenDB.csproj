@@ -27,7 +27,7 @@
 	<ItemGroup>
 		<PackageReference Include="Audit.NET" Version="19.1.4" />
 		<PackageReference Include="Audit.NET.JsonNewtonsoftAdapter" Version="19.1.4" />
-		<PackageReference Include="RavenDB.Client" Version="5.3.103" Exclude="Build,Analyzers" />
+		<PackageReference Include="RavenDB.Client" Version="5.4.1" Exclude="Build,Analyzers" />
 	</ItemGroup>
 
 	<ItemGroup>
