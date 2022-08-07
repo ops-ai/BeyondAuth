@@ -26,8 +26,8 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Audit.Mvc.Core" Version="19.1.4" />
-		<PackageReference Include="Audit.NET" Version="19.1.4" />
+		<PackageReference Include="Audit.Mvc.Core" Version="19.2.1" />
+		<PackageReference Include="Audit.NET" Version="19.2.1" />
 		<PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" Version="1.2.1" />
 		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="6.0.7" />
 		<PackageReference Include="AspNetCore.HealthChecks.RavenDB" Version="6.0.2" />
@@ -85,9 +85,9 @@
 		<PackageReference Include="prometheus-net.SystemMetrics" Version="2.0.0" />
 		<PackageReference Include="RavenDB.Client" Version="5.4.1" />
 		<PackageReference Include="scientist" Version="2.0.0" />
-		<PackageReference Include="Toggly.FeatureManagement" Version="2.1.11" />
-		<PackageReference Include="Toggly.FeatureManagement.Storage.RavenDB" Version="2.1.11" />
-		<PackageReference Include="Toggly.FeatureManagement.Web" Version="2.1.11" />
+		<PackageReference Include="Toggly.FeatureManagement" Version="2.1.14" />
+		<PackageReference Include="Toggly.FeatureManagement.Storage.RavenDB" Version="2.1.14" />
+		<PackageReference Include="Toggly.FeatureManagement.Web" Version="2.1.14" />
 	</ItemGroup>
 
 	<ItemGroup>

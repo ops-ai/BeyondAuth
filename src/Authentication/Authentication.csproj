@@ -36,13 +36,13 @@
 
 	<ItemGroup>
 		<PackageReference Include="AspNet.Security.OAuth.GitHub" Version="6.0.6" />
-		<PackageReference Include="AspNetCore.HealthChecks.AzureKeyVault" Version="6.0.2" />
+		<PackageReference Include="AspNetCore.HealthChecks.AzureKeyVault" Version="6.0.3" />
 		<PackageReference Include="AspNetCore.HealthChecks.OpenIdConnectServer" Version="6.0.2" />
 		<PackageReference Include="AspNetCore.HealthChecks.RavenDB" Version="6.0.2" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI" Version="6.0.5" />
 		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="6.0.5" />
-		<PackageReference Include="Audit.Mvc.Core" Version="19.1.4" />
-		<PackageReference Include="Audit.NET" Version="19.1.4" />
+		<PackageReference Include="Audit.Mvc.Core" Version="19.2.1" />
+		<PackageReference Include="Audit.NET" Version="19.2.1" />
 		<PackageReference Include="idunno.Authentication.Basic" Version="2.2.3" />
 		<PackageReference Include="Autofac" Version="6.4.0" />
 		<PackageReference Include="Autofac.Configuration" Version="6.0.0" />
@@ -103,12 +103,12 @@
 		<PackageReference Include="scientist" Version="2.0.0" />
 		<PackageReference Include="System.Diagnostics.DiagnosticSource" Version="6.0.0" />
 		<PackageReference Include="System.Reactive.Core" Version="5.0.0" />
-		<PackageReference Include="Toggly.FeatureManagement" Version="2.1.11" />
-		<PackageReference Include="Toggly.FeatureManagement.Storage.RavenDB" Version="2.1.11" />
-		<PackageReference Include="Toggly.FeatureManagement.Web" Version="2.1.11" />
+		<PackageReference Include="Toggly.FeatureManagement" Version="2.1.14" />
+		<PackageReference Include="Toggly.FeatureManagement.Storage.RavenDB" Version="2.1.14" />
+		<PackageReference Include="Toggly.FeatureManagement.Web" Version="2.1.14" />
 		<PackageReference Include="Twilio" Version="5.78.0" />
 		<PackageReference Include="UAParser" Version="3.1.47" />
-		<PackageReference Include="VaultSharp" Version="1.7.0.5" />
+		<PackageReference Include="VaultSharp" Version="1.7.1" />
 		<PackageReference Include="WinInsider.System.Net.Http.Formatting" Version="1.0.14" />
 	</ItemGroup>
 

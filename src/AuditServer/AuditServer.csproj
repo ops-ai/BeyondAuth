@@ -31,7 +31,7 @@
 		<PackageReference Include="Azure.Identity" Version="1.6.0" />
 		<PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.3.0" />
 		<PackageReference Include="CorrelationId" Version="3.0.1" />
-		<PackageReference Include="FluentValidation" Version="11.1.0" />
+		<PackageReference Include="FluentValidation" Version="11.1.1" />
 		<PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
 		<PackageReference Include="IPAddressRange" Version="4.2.0" />
 		<PackageReference Include="idunno.Authentication.Basic" Version="2.2.3" />
@@ -63,7 +63,7 @@
 		<PackageReference Include="prometheus-net.SystemMetrics" Version="2.0.0" />
 		<PackageReference Include="RavenDB.Client" Version="5.4.1" />
 		<PackageReference Include="scientist" Version="2.0.0" />
-		<PackageReference Include="Toggly.FeatureManagement" Version="2.1.11" />
+		<PackageReference Include="Toggly.FeatureManagement" Version="2.1.14" />
 	</ItemGroup>
 
 	<ItemGroup>
