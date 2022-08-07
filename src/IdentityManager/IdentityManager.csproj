@@ -47,6 +47,7 @@
 		<PackageReference Include="IdentityServer4" Version="4.1.2" />
 		<PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
 		<PackageReference Include="IdentityServer4.Contrib.RavenDB" Version="1.0.0" />
+		<PackageReference Include="idunno.Authentication.Basic" Version="2.2.3" />
 		<PackageReference Include="IPAddressRange" Version="4.2.0" />
 		<PackageReference Include="JsonSubTypes" Version="1.9.0" />
 		<PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />

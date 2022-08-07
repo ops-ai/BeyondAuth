@@ -15,6 +15,7 @@ using Raven.Client.Documents.Linq;
 using Raven.Client.Documents.Session;
 using System.Security.Claims;
 using System.Security.Principal;
+using Toggly.FeatureManagement;
 
 namespace Authentication.Controllers
 {
@@ -29,6 +30,7 @@ namespace Authentication.Controllers
         private readonly IEventService _events;
         private readonly IOptions<AccountOptions> _accountOptions;
         private readonly SignInManager<ApplicationUser> _signInManager;
+        private readonly IMetricsService _metricsService;
 
         public ExternalController(
             IAsyncDocumentSession dbSession,
@@ -38,7 +40,8 @@ namespace Authentication.Controllers
             ILogger<ExternalController> logger,
             IOptions<AccountOptions> accountOptions,
             UserManager<ApplicationUser> userManager,
-            SignInManager<ApplicationUser> signInManager) : base(dbSession)
+            SignInManager<ApplicationUser> signInManager,
+            IMetricsService metricsService) : base(dbSession)
         {
             // if the TestUserStore is not in DI, then we'll just use the global users collection
             // this is where you would plug in your own custom identity management library (e.g. ASP.NET Identity)
@@ -50,6 +53,7 @@ namespace Authentication.Controllers
             _events = events;
             _accountOptions = accountOptions;
             _signInManager = signInManager;
+            _metricsService = metricsService;
         }
 
         /// <summary>
@@ -169,6 +173,7 @@ namespace Authentication.Controllers
             };
 
             await _signInManager.SignInAsync(user, localSignInProps, "external");
+            await _metricsService.AddMetricAsync("Login", 1);
 
             // delete temporary cookie used during external authentication
             await HttpContext.SignOutAsync(IdentityServerConstants.ExternalCookieAuthenticationScheme);

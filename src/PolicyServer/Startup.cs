@@ -11,6 +11,7 @@ using Identity.Core;
 using IdentityServer4.AccessTokenValidation;
 using IdentityServer4.Contrib.RavenDB.Options;
 using IdentityServer4.Stores.Serialization;
+using idunno.Authentication.Basic;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
@@ -33,6 +34,7 @@ using Raven.Client.Documents;
 using Raven.Client.Json.Serialization.NewtonsoftJson;
 using Raven.DependencyInjection;
 using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 using System.Text.Json.Serialization;
 
@@ -74,7 +76,25 @@ namespace PolicyServer
             services.AddMemoryCache();
 
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
-                .AddJwtBearer();
+                .AddJwtBearer()
+                .AddBasic("BasicAuthentication", options =>
+                {
+                    options.Realm = "Basic Authentication";
+                    options.Events = new BasicAuthenticationEvents
+                    {
+                        OnValidateCredentials = context =>
+                        {
+                            if (context.Username == Configuration["Metrics:Username"] && context.Password == Configuration["Metrics:Password"])
+                            {
+                                var claims = new[] { new Claim(ClaimTypes.NameIdentifier, context.Username, ClaimValueTypes.String, context.Options.ClaimsIssuer) };
+                                context.Principal = new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name));
+                                context.Success();
+                            }
+
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
 
             services.AddMultiTenant<TenantSetting>()
                 .WithDelegateStrategy(context =>
@@ -246,6 +266,7 @@ namespace PolicyServer
             services.AddAuthorization(options =>
             {
                 options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                options.AddPolicy("ViewMetrics", new AuthorizationPolicyBuilder().RequireAuthenticatedUser().AddAuthenticationSchemes("BasicAuthentication").Build());
             });
 
             services.AddOpenTelemetryTracing(
@@ -340,7 +361,7 @@ namespace PolicyServer
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapMetrics();
+                endpoints.MapMetrics().RequireAuthorization("ViewMetrics");
             });
         }
     }

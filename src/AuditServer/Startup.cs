@@ -8,6 +8,8 @@ using Blockchain;
 using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
 using IdentityServer4.AccessTokenValidation;
+using idunno.Authentication.Basic;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
@@ -24,6 +26,7 @@ using Prometheus;
 using Prometheus.SystemMetrics;
 using Prometheus.SystemMetrics.Collectors;
 using Raven.Client.Documents;
+using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 
 namespace AuditServer
@@ -57,6 +60,11 @@ namespace AuditServer
             NLog.GlobalDiagnosticsContext.Set("LokiPassword", Configuration["LogStorage:Loki:Password"]);
             NLog.GlobalDiagnosticsContext.Set("AppName", Configuration["DataProtection:AppName"]);
 
+            services.AddAuthorization(options =>
+            {
+                options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                options.AddPolicy("ViewMetrics", new AuthorizationPolicyBuilder().RequireAuthenticatedUser().AddAuthenticationSchemes("BasicAuthentication").Build());
+            });
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
                 .AddIdentityServerAuthentication(x =>
                 {
@@ -68,6 +76,24 @@ namespace AuditServer
                     x.EnableCaching = true;
                     x.CacheDuration = TimeSpan.FromMinutes(1);
                     x.NameClaimType = "sub";
+                })
+                .AddBasic("BasicAuthentication", options =>
+                {
+                    options.Realm = "Basic Authentication";
+                    options.Events = new BasicAuthenticationEvents
+                    {
+                        OnValidateCredentials = context =>
+                        {
+                            if (context.Username == Configuration["Metrics:Username"] && context.Password == Configuration["Metrics:Password"])
+                            {
+                                var claims = new[] { new Claim(ClaimTypes.NameIdentifier, context.Username, ClaimValueTypes.String, context.Options.ClaimsIssuer) };
+                                context.Principal = new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name));
+                                context.Success();
+                            }
+
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
             services.AddCorrelationId();
@@ -242,7 +268,7 @@ namespace AuditServer
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers();
-                endpoints.MapMetrics();
+                endpoints.MapMetrics().RequireAuthorization("ViewMetrics");
             });
         }
     }

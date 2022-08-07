@@ -76,6 +76,8 @@ using Finbuckle.MultiTenant;
 using System.Drawing;
 using System.Globalization;
 using HandlebarsDotNet;
+using Microsoft.AspNetCore.Authorization;
+using idunno.Authentication.Basic;
 
 namespace Authentication
 {
@@ -154,7 +156,11 @@ namespace Authentication
                     .PersistKeysToAzureBlobStorage(new Uri(Configuration["DataProtection:StorageUri"]));
             }
 
-            services.AddAuthorization();
+            services.AddAuthorization(options =>
+            {
+                options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                options.AddPolicy("ViewMetrics", new AuthorizationPolicyBuilder().RequireAuthenticatedUser().AddAuthenticationSchemes("BasicAuthentication").Build());
+            });
 
             services.AddDistributedMemoryCache();
             services.AddOidcStateDataFormatterCache();
@@ -173,7 +179,25 @@ namespace Authentication
                 .AddFacebook(options => { options.ClientId = "__tenant__"; options.ClientSecret = "__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; })
                 .AddTwitter(options => { options.ConsumerKey = "__tenant__"; options.ConsumerSecret = "__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; })
                 .AddMicrosoftAccount(options => { options.ClientId = "__tenant__"; options.ClientSecret = "__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; })
-                .AddGitHub(options => { options.ClientId = "__tenant__";  options.ClientSecret = "__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; });
+                .AddGitHub(options => { options.ClientId = "__tenant__";  options.ClientSecret = "__tenant__"; options.SignInScheme = IdentityServerConstants.ExternalCookieAuthenticationScheme; })
+                .AddBasic("BasicAuthentication", options =>
+                {
+                    options.Realm = "Basic Authentication";
+                    options.Events = new BasicAuthenticationEvents
+                    {
+                        OnValidateCredentials = context =>
+                        {
+                            if (context.Username == Configuration["Metrics:Username"] && context.Password == Configuration["Metrics:Password"])
+                            {
+                                var claims = new[] { new Claim(ClaimTypes.NameIdentifier, context.Username, ClaimValueTypes.String, context.Options.ClaimsIssuer) };
+                                context.Principal = new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name));
+                                context.Success();
+                            }
+
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
 
             var identityBuilder = services.AddIdentity<ApplicationUser, Raven.Identity.IdentityRole>(options => { })
                 .AddDefaultTokenProviders()
@@ -850,7 +874,7 @@ namespace Authentication
                 endpoints.MapControllerRoute(
                     name: "default",
                     pattern: "{controller=Home}/{action=Index}/{id?}");
-                endpoints.MapMetrics();
+                endpoints.MapMetrics().RequireAuthorization("ViewMetrics");
                 endpoints.MapRazorPages();
                 endpoints.MapFallbackToController("PageNotFound", "Home");
             });

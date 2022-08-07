@@ -43,6 +43,7 @@
 		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="6.0.5" />
 		<PackageReference Include="Audit.Mvc.Core" Version="19.1.4" />
 		<PackageReference Include="Audit.NET" Version="19.1.4" />
+		<PackageReference Include="idunno.Authentication.Basic" Version="2.2.3" />
 		<PackageReference Include="Autofac" Version="6.4.0" />
 		<PackageReference Include="Autofac.Configuration" Version="6.0.0" />
 		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />

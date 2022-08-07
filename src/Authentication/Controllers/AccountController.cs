@@ -22,6 +22,7 @@ using Raven.Client.Documents;
 using Raven.Client.Documents.Session;
 using System.Text.Json;
 using System.Text.RegularExpressions;
+using Toggly.FeatureManagement;
 
 namespace Authentication.Controllers
 {
@@ -39,6 +40,7 @@ namespace Authentication.Controllers
         private readonly ILogger _logger;
         private readonly SignInManager<ApplicationUser> _signInManager;
         private readonly IEmailSender _emailSender;
+        private readonly IMetricsService _metricService;
 
         public AccountController(
             IAsyncDocumentSession dbSession,
@@ -51,7 +53,8 @@ namespace Authentication.Controllers
             IHttpContextAccessor httpContextAccessor,
             ILogger<AccountController> logger,
             SignInManager<ApplicationUser> signInManager,
-            IEmailSender emailSender) : base(dbSession)
+            IEmailSender emailSender,
+            IMetricsService metricService) : base(dbSession)
         {
             _userManager = userManager;
 
@@ -64,6 +67,7 @@ namespace Authentication.Controllers
             _logger = logger;
             _signInManager = signInManager;
             _emailSender = emailSender;
+            _metricService = metricService;
         }
 
         /// <summary>
@@ -225,6 +229,7 @@ namespace Authentication.Controllers
                         //TODO: check for MFA add to Authentication Methods https://datatracker.ietf.org/doc/html/rfc8176
 
                         await HttpContext.SignInAsync(isuser, props);
+                        await _metricService.AddMetricAsync("Login", 1);
 
                         if (user.ChangePasswordOnNextLogin)
                             return RedirectToAction("ChangePassword");
@@ -365,7 +370,8 @@ namespace Authentication.Controllers
                 {
                     DisplayName = x.Name,
                     AuthenticationScheme = x.Scheme,
-                    Icon = x.Icon
+                    Icon = x.Icon,
+                    Color = x.Color
                 }).ToList();
 
             var allowLocal = true;

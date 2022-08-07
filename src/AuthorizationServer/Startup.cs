@@ -9,6 +9,7 @@ using CorrelationId.DependencyInjection;
 using HealthChecks.UI.Client;
 using IdentityServer4.AccessTokenValidation;
 using IdentityServer4.Stores.Serialization;
+using idunno.Authentication.Basic;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.AspNetCore.HttpOverrides;
@@ -27,6 +28,7 @@ using Prometheus.SystemMetrics;
 using Prometheus.SystemMetrics.Collectors;
 using Raven.Client.Documents;
 using Raven.Client.Json.Serialization.NewtonsoftJson;
+using System.Security.Claims;
 using System.Security.Cryptography.X509Certificates;
 
 namespace AuthorizationServer
@@ -69,6 +71,11 @@ namespace AuthorizationServer
             });
             services.AddMemoryCache();
 
+            services.AddAuthorization(options =>
+            {
+                options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
+                options.AddPolicy("ViewMetrics", new AuthorizationPolicyBuilder().RequireAuthenticatedUser().AddAuthenticationSchemes("BasicAuthentication").Build());
+            });
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
                 .AddIdentityServerAuthentication(x =>
                 {
@@ -80,6 +87,24 @@ namespace AuthorizationServer
                     x.EnableCaching = true;
                     x.CacheDuration = TimeSpan.FromMinutes(1);
                     x.NameClaimType = "sub";
+                })
+                .AddBasic("BasicAuthentication", options =>
+                {
+                    options.Realm = "Basic Authentication";
+                    options.Events = new BasicAuthenticationEvents
+                    {
+                        OnValidateCredentials = context =>
+                        {
+                            if (context.Username == Configuration["Metrics:Username"] && context.Password == Configuration["Metrics:Password"])
+                            {
+                                var claims = new[] { new Claim(ClaimTypes.NameIdentifier, context.Username, ClaimValueTypes.String, context.Options.ClaimsIssuer) };
+                                context.Principal = new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name));
+                                context.Success();
+                            }
+
+                            return Task.CompletedTask;
+                        }
+                    };
                 });
 
             X509Certificate2? ravenDBcert = null;
@@ -125,7 +150,6 @@ namespace AuthorizationServer
             services.AddHealthChecks()
                 .AddRavenDB(setup => { setup.Urls = Configuration.GetSection("Raven:Urls").Get<string[]>(); setup.Database = Configuration["Raven:Database"]; setup.Certificate = ravenDBcert; }, "ravendb");
 
-            services.AddAuthorization();
             services.AddHttpContextAccessor();
             services.AddTransient<IAuthorizationPolicyProvider, AuthorizationPolicyProvider>();
             services.AddTransient<IAuthorizationHandler, RemoteAuthorizationHandler>();
@@ -272,7 +296,7 @@ namespace AuthorizationServer
                 {
                     await context.Response.WriteAsync("Communication with gRPC endpoints must be made through a gRPC client. To learn how to create a client, visit: https://go.microsoft.com/fwlink/?linkid=2086909");
                 });
-                endpoints.MapMetrics();
+                endpoints.MapMetrics().RequireAuthorization("ViewMetrics");
             });
         }
     }

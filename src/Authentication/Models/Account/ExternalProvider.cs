@@ -7,8 +7,11 @@ namespace Authentication.Models.Account
     public class ExternalProvider
     {
         public string DisplayName { get; set; }
+        
         public string AuthenticationScheme { get; set; }
 
-        public string Icon { get; set; }
+        public string? Icon { get; set; }
+
+        public string? Color { get; set; }
     }
 }

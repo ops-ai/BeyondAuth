@@ -22,6 +22,7 @@ using IdentityServer4.AccessTokenValidation;
 using IdentityServer4.Contrib.RavenDB.Options;
 using IdentityServer4.Models;
 using IdentityServer4.Stores.Serialization;
+using idunno.Authentication.Basic;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.DataProtection;
@@ -109,7 +110,25 @@ namespace IdentityManager
             var dataProtection = services.AddDataProtection().SetApplicationName(Configuration["DataProtection:AppName"]);
 
             services.AddAuthentication(IdentityServerAuthenticationDefaults.AuthenticationScheme)
-                .AddJwtBearer();
+                .AddJwtBearer()
+                .AddBasic("BasicAuthentication", options =>
+                {
+                    options.Realm = "Basic Authentication";
+                    options.Events = new BasicAuthenticationEvents
+                    {
+                        OnValidateCredentials = context =>
+                        {
+                            if (context.Username == Configuration["Metrics:Username"] && context.Password == Configuration["Metrics:Password"])
+                            {
+                                var claims = new[] { new Claim(ClaimTypes.NameIdentifier, context.Username, ClaimValueTypes.String, context.Options.ClaimsIssuer) };
+                                context.Principal = new ClaimsPrincipal(new ClaimsIdentity(claims, context.Scheme.Name));
+                                context.Success();
+                            }
+
+                            return Task.CompletedTask;
+                        }
+                    };
+                });
 
             services.AddMultiTenant<TenantSetting>().WithBasePathStrategy().WithStore(new ServiceLifetime(), (sp) => new RavenDBMultitenantStore(sp.GetRequiredService<IDocumentStore>(), sp.GetService<IMemoryCache>()))
                 .WithPerTenantOptions<IdentityStoreOptions>((options, tenantInfo) =>
@@ -243,6 +262,7 @@ namespace IdentityManager
                         .RequireClaim("scope", Configuration["Authentication:ApiName"])
                         .AddRequirements(new TenantAuthorizationRequirement((ulong)TenantPermissions.ManagePermissions));
                 });
+                options.AddPolicy("ViewMetrics", new AuthorizationPolicyBuilder().RequireAuthenticatedUser().AddAuthenticationSchemes("BasicAuthentication").Build());
                 options.DefaultPolicy = new AuthorizationPolicyBuilder().RequireAuthenticatedUser().Build();
             });
 
@@ -475,7 +495,7 @@ namespace IdentityManager
             app.UseEndpoints(endpoints =>
             {
                 endpoints.MapControllers().RequireAuthorization("ApiScope");
-                endpoints.MapMetrics();
+                endpoints.MapMetrics().RequireAuthorization("ViewMetrics");
             });
         }
     }
