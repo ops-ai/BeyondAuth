@@ -14,6 +14,7 @@ using System.Reflection;
 namespace Authentication.Controllers
 {
     [SecurityHeaders]
+    [Route("")]
     public class HomeController : BaseController
     {
         private readonly IIdentityServerInteractionService _interaction;

@@ -21,8 +21,8 @@
 
   <ItemGroup>
     <PackageReference Include="JsonSubTypes" Version="1.9.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="6.0.7" />
-    <PackageReference Include="NJsonSchema" Version="10.7.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="6.0.9" />
+    <PackageReference Include="NJsonSchema" Version="10.8.0" />
     <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0" />
   </ItemGroup>
 
