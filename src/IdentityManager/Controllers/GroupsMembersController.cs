@@ -78,7 +78,9 @@ namespace IdentityManager.Controllers
         /// <summary>
         /// Add users to group
         /// </summary>
+        /// <param name="name">Name of the group</param>
         /// <param name="model">Ids of users to add</param>
+        /// <param name="ct"></param>
         /// <response code="204">User(s) added</response>
         /// <response code="400">Validation failed</response>
         /// <response code="404">Group not found</response>
@@ -99,7 +101,7 @@ namespace IdentityManager.Controllers
 
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    _logger.LogDebug($"Adding members to group {name}");
+                    _logger.LogDebug("Adding members to group {name}", name);
 
                     var group = await session.LoadAsync<Group>($"Groups/{name}", ct);
                     if (group == null)
@@ -138,18 +140,18 @@ namespace IdentityManager.Controllers
         }
 
         /// <summary>
-        /// Remove users from a group
+        /// Remove user from a group
         /// </summary>
         /// <param name="name"></param>
-        /// <param name="model">Ids of users to remove</param>
-        /// <response code="201">Users removed</response>
+        /// <param name="userId">Id of user to remove</param>
+        /// <response code="201">User removed</response>
         /// <response code="404">Group not found</response>
-        /// <response code="500">Server error removing users from group</response>
+        /// <response code="500">Server error removing user from group</response>
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NoContent)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.NotFound)]
         [ProducesResponseType(typeof(void), (int)HttpStatusCode.InternalServerError)]
-        [HttpDelete]
-        public async Task<IActionResult> Delete([FromRoute] string name, [FromBody] GroupMemberAddModel model, CancellationToken ct = default)
+        [HttpDelete("{userId}")]
+        public async Task<IActionResult> Delete([FromRoute] string name, [FromRoute] string userId, CancellationToken ct = default)
         {
             try
             {
@@ -159,7 +161,7 @@ namespace IdentityManager.Controllers
                     if (group == null)
                         return NotFound();
 
-                    var users = await session.LoadAsync<ApplicationUser>(model.Ids.Select(t => $"ApplicationUsers/{t}").Intersect(group.Members.Keys), ct);
+                    var users = await session.LoadAsync<ApplicationUser>(new[] { $"ApplicationUsers/{userId}" }.Intersect(group.Members.Keys), ct);
                     var usersToRemove = users.Where(t => t.Value != null);
                     if (!usersToRemove.Any())
                         return NoContent();

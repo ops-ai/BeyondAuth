@@ -131,7 +131,10 @@ namespace IdentityManager.Controllers
                     EmailConfirmed = t.EmailConfirmed,
                     Locale = t.Locale,
                     TwoFactorEnabled = t.TwoFactorEnabled,
-                    UpdatedAt = t.UpdatedAt
+                    UpdatedAt = t.UpdatedAt,
+                    PhoneNumber = t.PhoneNumber,
+                    PhoneNumberConfirmed = t.PhoneNumberConfirmed,
+                    SecurityStamp = Cryptography.Hashing.GetStringSha256Hash(t.SecurityStamp)
                 }).ToListAsync(ct);
 
                 Response.Headers.Add("X-Total-Count", stats.TotalResults.ToString());

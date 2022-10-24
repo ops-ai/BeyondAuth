@@ -103,19 +103,19 @@ namespace Authentication.Controllers
                 if (user == null)
                 {
                     ViewData["ReturnUrl"] = model.ReturnUrl;
-                    _logger.LogWarning(10, $"User {model.Email} tried to reset their password, but the user was not found.");
+                    _logger.LogWarning(10, "User {model.Email} tried to reset their password, but the user was not found.", model.Email);
 
                     return View("ForgotPasswordNotAllowed");
                 }
 
                 if (!user.PasswordResetAllowed)
                 {
-                    _logger.LogWarning(11, $"User {model.Email} tried to reset their password, but password reset is not allowed for this user");
+                    _logger.LogWarning(11, "User {model.Email} tried to reset their password, but password reset is not allowed for this user", model.Email);
                     ViewData["ReturnUrl"] = model.ReturnUrl;
                     return View("ForgotPasswordNotAllowed");
                 }
 
-                _logger.LogInformation(12, $"User {model.Email} requested a password reset email.");
+                _logger.LogInformation(12, "User {model.Email} requested a password reset email.", model.Email);
 
                 // For more information on how to enable account confirmation and password reset please visit http://go.microsoft.com/fwlink/?LinkID=532713
                 // Send an email with this link
@@ -124,17 +124,17 @@ namespace Authentication.Controllers
                 // Url.Action auto encodes params you pass to it, but ReturnUrl is already encoded. Don't double encode
                 var callbackUrl = Url.Action("ResetPassword", "PasswordReset", new { code, returnUrl = WebUtility.UrlDecode(model.ReturnUrl) }, HttpContext.Request.Scheme);
 
-                var emailMessage = new ResetPasswordEmailMessage { To = model.Email, FirstName = user.FirstName, CallbackUrl = callbackUrl };
-
                 var interaction = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
-                var supportEmail = "support@beyondauth.io";
+                string supportEmail;
                 if (interaction != null)
                 {
                     var clientSetting = interaction.Client as ClientEntity;
                     supportEmail = clientSetting?.SupportEmail ?? _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
                 }
+                else
+                    supportEmail = _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
 
-                await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "callbackUrl", Value = callbackUrl, Sensitive = true }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = true } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Reset Password");
+                await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "callbackUrl", Value = callbackUrl, Sensitive = true }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = false } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Reset Password");
                 await AuditScope.LogAsync($"User:Password Reset Requested", new { SubjectId = user.Id });
 
                 // If we got this far, something failed, redisplay form
@@ -221,7 +221,7 @@ namespace Authentication.Controllers
                     supportEmail = clientSetting?.SupportEmail ?? _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
                 }
 
-                await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset-confirmation", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = true } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Password Reset Confirmation");
+                await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset-confirmation", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = false } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Password Reset Confirmation");
                 await AuditScope.LogAsync($"User:Passowrd Reset Successfully", new { SubjectId = user.Id });
 
                 return RedirectToAction(nameof(ResetPasswordConfirmation), "PasswordReset", new { returnUrl = model.ReturnUrl });

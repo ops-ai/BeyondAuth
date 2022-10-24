@@ -1,4 +1,5 @@
 using Audit.Core;
+using Authentication.Domain;
 using Authentication.Extensions;
 using Authentication.Filters;
 using Authentication.Infrastructure;
@@ -512,9 +513,19 @@ namespace Authentication.Controllers
                 var result = await _userManager.ChangePasswordAsync(user, model.OldPassword, model.NewPassword);
                 if (result.Succeeded)
                 {
+                    var interaction = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
+                    string supportEmail;
+                    if (interaction != null)
+                    {
+                        var clientSetting = interaction.Client as ClientEntity;
+                        supportEmail = clientSetting?.SupportEmail ?? _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
+                    }
+                    else
+                        supportEmail = _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
+
                     _logger.LogInformation(6, "User changed their password successfully.");
 
-                    await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-change-confirmation", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Password Changed Confirmation");
+                    await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-change-confirmation", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = false } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Password Changed Confirmation");
                     await AuditScope.LogAsync($"User:Passowrd Changed", new { SubjectId = user.Id });
 
                     return View("ChangePasswordConfirmation");
