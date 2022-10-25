@@ -187,9 +187,9 @@ namespace IdentityManager
                         document.Info.Title = "BeyondAuth Identity Manager";
                         document.Info.Description = File.ReadAllText("readme.md");
                         document.Info.ExtensionData = new Dictionary<string, object>
-                    {
-                        { "x-logo", new { url = "/logo.png", altText = "BeyondAuth" } }
-                    };
+                        {
+                            { "x-logo", new { url = "/logo.png", altText = "BeyondAuth" } }
+                        };
                         document.ExtensionData.Add("x-tagGroups", new { name = "OAuth2 / OpenID Connect", tags = new[] { "ApiResources", "ApiResourceSecrets", "Clients", "ClientSecrets" } });
                         //document.ExtensionData.Add("x-tagGroups", new { name = "Users", tags = new [] { "Users" } });
 
@@ -478,6 +478,7 @@ namespace IdentityManager
                     UsePkceWithAuthorizationCodeGrant = true,
                 };
             });
+            app.UseReDoc(opt => opt.Path = "/redoc");
 
             app.UseHealthChecks(Configuration["HealthChecks:FullEndpoint"], new HealthCheckOptions()
             {
