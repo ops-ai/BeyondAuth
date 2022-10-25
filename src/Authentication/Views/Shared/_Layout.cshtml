@@ -45,7 +45,7 @@
     <nav class="navbar">
         <div class="container-fluid align-items-center flex-nowrap">
             <a class="navbar-brand mx-md-0 @(!string.IsNullOrWhiteSpace(name) ? "" : "mx-auto")" href="~/">
-                <img src="@(tenantInfo?.BrandingOptions?.Logo ?? "/logo.svg")" class="icon-banner" alt="logo">
+                <img src="@(ViewBag.Logo ?? tenantInfo?.BrandingOptions?.Logo ?? "/logo.svg")" class="icon-banner" alt="logo">
             </a>
             @if (!string.IsNullOrWhiteSpace(name))
             {

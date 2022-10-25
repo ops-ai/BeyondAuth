@@ -382,6 +382,7 @@ namespace Authentication.Controllers
                 if (client != null)
                 {
                     allowLocal = client.EnableLocalLogin;
+                    ViewBag.Logo = client.LogoUri;
 
                     if (client.IdentityProviderRestrictions != null && client.IdentityProviderRestrictions.Any())
                         providers = providers.Where(provider => client.IdentityProviderRestrictions.Contains(provider.AuthenticationScheme)).ToList();
