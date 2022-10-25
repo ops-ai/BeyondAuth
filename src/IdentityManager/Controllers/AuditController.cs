@@ -26,6 +26,12 @@ namespace IdentityManager.Controllers
             _identityStoreOptions = identityStoreOptions;
         }
 
+        /// <summary>
+        /// Get user audit trail
+        /// </summary>
+        /// <param name="id">User Id</param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("users/{id}")]
         public async Task<IActionResult> UserAudits([FromRoute] string id, CancellationToken ct = default)
@@ -44,6 +50,12 @@ namespace IdentityManager.Controllers
             }
         }
 
+        /// <summary>
+        /// Get API Resource audit trail
+        /// </summary>
+        /// <param name="name">API Resource name</param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("api-resources/{name}")]
         public async Task<IActionResult> ApiResourceAudits([FromRoute] string name, CancellationToken ct = default)
@@ -62,6 +74,12 @@ namespace IdentityManager.Controllers
             }
         }
 
+        /// <summary>
+        /// Get OpenID Connect Client audit trails
+        /// </summary>
+        /// <param name="id">Client ID</param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("clients/{id}")]
         public async Task<IActionResult> ClientAudits([FromRoute] string id, CancellationToken ct = default)
@@ -80,6 +98,12 @@ namespace IdentityManager.Controllers
             }
         }
 
+        /// <summary>
+        /// Get API Scope audit trail
+        /// </summary>
+        /// <param name="name">API Scope Name</param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("scopes/{id}")]
         public async Task<IActionResult> ScopeAudits([FromRoute] string name, CancellationToken ct = default)
@@ -98,6 +122,12 @@ namespace IdentityManager.Controllers
             }
         }
 
+        /// <summary>
+        /// Get group audit trail
+        /// </summary>
+        /// <param name="id">Group id</param>
+        /// <param name="ct"></param>
+        /// <returns></returns>
         [HttpGet]
         [Route("groups/{id}")]
         public async Task<IActionResult> GroupAudits([FromRoute] string id, CancellationToken ct = default)

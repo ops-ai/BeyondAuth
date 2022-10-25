@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
+using NSwag.Annotations;
 
 namespace IdentityManager.Controllers
 {
+    [OpenApiIgnore]
     [ApiController]
     public class ErrorController : ControllerBase
     {
