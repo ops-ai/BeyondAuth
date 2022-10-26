@@ -137,7 +137,7 @@ namespace IdentityManager.Controllers
 
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    _logger.LogDebug($"Creating client {clientId}");
+                    _logger.LogDebug("Creating client {clientId}", clientId);
 
                     var client = await session.LoadAsync<ClientEntity>($"Clients/{clientId}", ct);
                     if (client == null)

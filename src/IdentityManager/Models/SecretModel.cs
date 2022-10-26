@@ -11,7 +11,7 @@ namespace IdentityManager.Models
         /// <summary>
         /// Hash of the hash of the secret
         /// </summary>
-        public string Id { get; set; }
+        public string? Id { get; set; }
 
         /// <summary>
         /// Type of secret. SecretTypes.SharedSecret or SecretTypes.X509CertificateBase64
