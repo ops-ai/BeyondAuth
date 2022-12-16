@@ -13,11 +13,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Finbuckle.MultiTenant" Version="6.8.1" />
+    <PackageReference Include="Finbuckle.MultiTenant" Version="6.9.1" />
     <PackageReference Include="IdentityModel" Version="5.2.0" />
     <!--<PackageReference Include="RavenDB.Identity" Version="8.0.7" />-->
 	<PackageReference Include="System.Reactive.Core" Version="5.0.0" />
-    <PackageReference Include="System.Text.Json" Version="6.0.6" />
+    <PackageReference Include="System.Text.Json" Version="7.0.1" />
   </ItemGroup>
 
   <ItemGroup>
