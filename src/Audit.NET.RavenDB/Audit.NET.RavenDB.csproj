@@ -6,7 +6,7 @@
 		<Copyright>Copyright 2022</Copyright>
 		<AssemblyTitle>Audit.RavenDB</AssemblyTitle>
 		<Authors>opsAI;Federico Colombo</Authors>
-		<TargetFrameworks>net5.0;net6.0</TargetFrameworks>
+		<TargetFrameworks>net5.0;net6.0;net7.0</TargetFrameworks>
 		<DefineConstants>$(DefineConstants);STRONG_NAME</DefineConstants>
 		<NoWarn>$(NoWarn);1573;1591;3001;3003</NoWarn>
 		<GenerateDocumentationFile>true</GenerateDocumentationFile>
