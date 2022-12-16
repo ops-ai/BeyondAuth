@@ -56,14 +56,6 @@ stages:
         workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
     - task: CmdLine@2
       inputs:
-        script: 'sed -e ''s/latest/$(tag)/g'' ba-docs-stg.yaml > $(Build.ArtifactStagingDirectory)/ba-docs-stg.yml'
-        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
-    - task: CmdLine@2
-      inputs:
-        script: 'sed -e ''s/latest/$(tag)/g'' ba-docs-prod.yaml > $(Build.ArtifactStagingDirectory)/ba-docs-prod.yml'
-        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
-    - task: CmdLine@2
-      inputs:
         script: 'sed -e ''s/latest/$(tag)/g'' ba-idp-stg.yaml > $(Build.ArtifactStagingDirectory)/ba-idp-stg.yml'
         workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
     - task: CmdLine@2
@@ -134,7 +126,7 @@ stages:
         containerRegistry: 'opsairegistry'
         repository: '$(imageNameAuth)'
         command: 'push'
-
+        
     - task: Docker@2
       displayName: Build IdP image
       inputs:
