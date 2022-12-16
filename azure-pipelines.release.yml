@@ -136,23 +136,6 @@ stages:
         command: 'push'
 
     - task: Docker@2
-      displayName: Build Docs image
-      inputs:
-        containerRegistry: '$(dockerRegistryServiceConnection)'
-        repository: '$(imageNameDocs)'
-        command: 'build'
-        Dockerfile: 'src/Documentation/Dockerfile'
-        buildContext: 'src'
-        tags: '$(tag)'
-        arguments: '--build-arg VERSION=$(tag)'
-    - task: Docker@2
-      displayName: Push Docs image to container registry
-      inputs:
-        containerRegistry: 'opsairegistry'
-        repository: '$(imageNameDocs)'
-        command: 'push'
-
-    - task: Docker@2
       displayName: Build IdP image
       inputs:
         containerRegistry: '$(dockerRegistryServiceConnection)'
