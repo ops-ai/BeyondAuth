@@ -204,7 +204,7 @@ namespace Authentication
                 .AddPasswordValidator<EmailAsPasswordValidator<ApplicationUser>>()
                 .AddPasswordValidator<InvalidPhrasePasswordValidator<ApplicationUser>>()
                 .AddPwnedPasswordsValidator<ApplicationUser>(options => options.ApiKey = Configuration["HaveIBeenPwned:ApiKey"])
-                .AddTop1000PasswordValidator<ApplicationUser>()
+                .AddTop100000PasswordValidator<ApplicationUser>()
                 .AddPasswordValidator<PasswordTopologyValidator<ApplicationUser>>();
 
             var builder = services.AddIdentityServer(options =>
