@@ -17,6 +17,7 @@ variables:
   imageNameIdp: 'beyondauth-idp'
   imageNamePolicy: 'beyondauth-policy'
   tag: '$(Build.BuildId)'
+  solution: '**/*.sln'
 
   # Agent VM image name
   vmImageName: 'ubuntu-latest'
