@@ -30,6 +30,22 @@ stages:
     pool:
       vmImage: $(vmImageName)
     steps:
+    
+    - task: gitversion/setup@0
+      inputs:
+        versionSpec: '5.x'
+    
+    - task: gitversion/execute@0
+      inputs:
+        updateAssemblyInfo: true
+        updateAssemblyInfoFilename: '$(Build.SourcesDirectory)\Toggly.FeatureManagement.NET\AssemblyInfo.cs'
+        additionalArguments: '/output buildserver'
+        
+    - task: UseDotNet@2
+      inputs:
+        packageType: 'sdk'
+        version: '7.0.100'
+
     - task: CmdLine@2
       inputs:
         script: 'sed -e ''s/latest/$(tag)/g'' ba-account-stg.yaml > $(Build.ArtifactStagingDirectory)/ba-account-stg.yml'

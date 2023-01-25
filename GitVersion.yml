@@ -1,4 +1,4 @@
-next-version: 1.0
+next-version: 1.0.4-alpha
 assembly-versioning-scheme: MajorMinorPatch
 assembly-informational-format: '{MajorMinorPatch}-{Sha}'
 mode: ContinuousDelivery
