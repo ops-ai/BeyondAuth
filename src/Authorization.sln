@@ -59,8 +59,6 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AuditServer.Tests", "Tests\
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "RadiusServer.Tests", "Tests\RadiusServer.Tests\RadiusServer.Tests.csproj", "{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E}"
 EndProject
-Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{8CE5014B-92D4-4DDE-A130-9A5856047B3E}"
-EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.Acl", "Authorization Handlers\BeyondAuth.Acl\BeyondAuth.Acl.csproj", "{2CD9342E-4D1D-4CBF-83A5-AA3EECE285CC}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Bridges", "Bridges", "{01BEDBC1-C476-492D-861E-6A3273F8D045}"
@@ -177,9 +175,6 @@ Global
 		{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D2A951C2-5E33-4575-ABC9-7DF4EE4C616E}.Release|Any CPU.Build.0 = Release|Any CPU
-		{8CE5014B-92D4-4DDE-A130-9A5856047B3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{8CE5014B-92D4-4DDE-A130-9A5856047B3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{8CE5014B-92D4-4DDE-A130-9A5856047B3E}.Release|Any CPU.ActiveCfg = Debug|Any CPU
 		{2CD9342E-4D1D-4CBF-83A5-AA3EECE285CC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{2CD9342E-4D1D-4CBF-83A5-AA3EECE285CC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2CD9342E-4D1D-4CBF-83A5-AA3EECE285CC}.Release|Any CPU.ActiveCfg = Release|Any CPU
@@ -276,7 +271,7 @@ Global
 		{C0E4F481-065E-44F7-9804-4166B40F1282} = {574904F3-F9C4-4D89-AC33-9C9A2B590BD8}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
 		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
+		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
 	EndGlobalSection
 EndGlobal
