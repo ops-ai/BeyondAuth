@@ -38,7 +38,7 @@ stages:
     - task: gitversion/execute@0
       inputs:
         updateAssemblyInfo: true
-        updateAssemblyInfoFilename: '$(Build.SourcesDirectory)/src/AssemblyInfo.cs'
+        updateAssemblyInfoFilename: '$(Build.SourcesDirectory)\src\AssemblyInfo.cs'
         additionalArguments: '/output buildserver'
         
     - task: UseDotNet@2
