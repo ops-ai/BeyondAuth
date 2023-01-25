@@ -2,22 +2,46 @@
 
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
-	<PackageProjectUrl>https://beyondauth.io</PackageProjectUrl>
-	
-	<RepositoryUrl>https://github.com/ops-ai/BeyondAuth</RepositoryUrl>
-	<RepositoryType>git</RepositoryType>
-	<PackageTags>beyondauth;identity;authentication</PackageTags>
-	<PackageLicenseExpression>MIT</PackageLicenseExpression>
-	<PackageId>BeyondAuth.$(AssemblyName)</PackageId>
-	<Nullable>enable</Nullable>
+    <PackageProjectUrl>https://beyondauth.io</PackageProjectUrl>
+
+    <RepositoryUrl>https://github.com/ops-ai/BeyondAuth</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>beyondauth;identity;authentication</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageId>BeyondAuth.$(AssemblyName)</PackageId>
+    <Nullable>enable</Nullable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageIcon>favicon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Finbuckle.MultiTenant" Version="6.9.1" />
     <PackageReference Include="IdentityModel" Version="5.2.0" />
     <!--<PackageReference Include="RavenDB.Identity" Version="8.0.7" />-->
-	<PackageReference Include="System.Reactive.Core" Version="5.0.0" />
+    <PackageReference Include="System.Reactive.Core" Version="5.0.0" />
     <PackageReference Include="System.Text.Json" Version="7.0.1" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Include="..\AssemblyInfo.cs" Link="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Include="..\favicon.png" Link="favicon.png" Pack="true" PackagePath="" />
+    <None Include="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>
@@ -29,5 +53,5 @@
     <ProjectReference Include="..\Authorization Handlers\BeyondAuth.Acl\BeyondAuth.Acl.csproj" />
     <ProjectReference Include="..\RavenDB.Identity\RavenDB.Identity.csproj" />
   </ItemGroup>
-  
+
 </Project>
