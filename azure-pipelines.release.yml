@@ -87,6 +87,13 @@ stages:
       inputs:
         script: 'sed -e ''s/latest/$(tag)/g'' ba-policy-prod.yaml > $(Build.ArtifactStagingDirectory)/ba-policy-prod.yml'
         workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+        
+    - task: DotNetCoreCLI@2
+      displayName: 'dotnet build'
+      inputs:
+        command: 'build'
+        projects: '$(solution)'
+        configuration: $(buildConfiguration)
 
     - task: DotNetCoreCLI@2
       inputs:

@@ -1,4 +1,5 @@
 ﻿using BeyondAuth.PolicyServer.Core.Models;
+using System.Collections.Generic;
 
 namespace BeyondAuth.PolicyProvider.Storage.RavenDB
 {
