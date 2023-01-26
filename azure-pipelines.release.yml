@@ -108,6 +108,7 @@ stages:
       inputs:
         command: 'build'
         projects: '$(solution)'
+        arguments: '-IncludeReferencedProjects'
         configuration: $(buildConfiguration)
 
     - task: DotNetCoreCLI@2
