@@ -54,7 +54,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\PolicyServer.Core\BeyondAuth.PolicyServer.Core.csproj">
       <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
-      <IncludeAssets>BeyondAuth.PolicyServer.Core.dll</IncludeAssets>
     </ProjectReference>
   </ItemGroup>
 

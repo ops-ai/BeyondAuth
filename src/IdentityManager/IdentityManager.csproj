@@ -93,6 +93,7 @@
 	<ItemGroup>
 		<ProjectReference Include="..\Audit.NET.RavenDB\Audit.NET.RavenDB.csproj" />
 		<ProjectReference Include="..\Authorization Handlers\BeyondAuth.Acl\BeyondAuth.Acl.csproj" />
+		<ProjectReference Include="..\Cryptography\Cryptography.csproj" />
 		<ProjectReference Include="..\Identity.Core\Identity.Core.csproj" />
 		<ProjectReference Include="..\Password Validators\BeyondAuth.PasswordValidators.Common\BeyondAuth.PasswordValidators.Common.csproj" />
 		<ProjectReference Include="..\Password Validators\BeyondAuth.PasswordValidators.Topology\BeyondAuth.PasswordValidators.Topology.csproj" />
