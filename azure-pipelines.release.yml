@@ -46,47 +46,62 @@ stages:
       inputs:
         packageType: 'sdk'
         version: '7.0.100'
+        
+    - task: CmdLine@2
+      inputs:
+        script: 'mkdir charts'
+        workingDirectory: '$(Build.ArtifactStagingDirectory)'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-account-stg.yaml > $(Build.ArtifactStagingDirectory)/charts/ba-account-stg.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-account-prod.yaml > $(Build.ArtifactStagingDirectory)/charts/ba-account-prod.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-audit-stg.yaml > $(Build.ArtifactStagingDirectory)/charts/ba-audit-stg.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-audit-prod.yaml > $(Build.ArtifactStagingDirectory)/charts/ba-audit-prod.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-auth-stg.yaml > $(Build.ArtifactStagingDirectory)/charts/ba-auth-stg.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-auth-prod.yaml > $(Build.ArtifactStagingDirectory)/charts/ba-auth-prod.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-idp-stg.yaml > $(Build.ArtifactStagingDirectory)/charts/ba-idp-stg.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-idp-prod.yaml > $(Build.ArtifactStagingDirectory)/charts/ba-idp-prod.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-policy-stg.yaml > $(Build.ArtifactStagingDirectory)/charts/ba-policy-stg.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+    - task: CmdLine@2
+      inputs:
+        script: 'sed -e ''s/latest/$(tag)/g'' ba-policy-prod.yaml > $(Build.ArtifactStagingDirectory)/charts/ba-policy-prod.yml'
+        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
 
+    - task: PublishBuildArtifacts@1
+      inputs:
+        PathtoPublish: '$(Build.ArtifactStagingDirectory)/charts'
+        ArtifactName: 'charts'
+        publishLocation: 'Container'
+        
     - task: CmdLine@2
       inputs:
-        script: 'sed -e ''s/latest/$(tag)/g'' ba-account-stg.yaml > $(Build.ArtifactStagingDirectory)/ba-account-stg.yml'
-        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
-    - task: CmdLine@2
-      inputs:
-        script: 'sed -e ''s/latest/$(tag)/g'' ba-account-prod.yaml > $(Build.ArtifactStagingDirectory)/ba-account-prod.yml'
-        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
-    - task: CmdLine@2
-      inputs:
-        script: 'sed -e ''s/latest/$(tag)/g'' ba-audit-stg.yaml > $(Build.ArtifactStagingDirectory)/ba-audit-stg.yml'
-        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
-    - task: CmdLine@2
-      inputs:
-        script: 'sed -e ''s/latest/$(tag)/g'' ba-audit-prod.yaml > $(Build.ArtifactStagingDirectory)/ba-audit-prod.yml'
-        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
-    - task: CmdLine@2
-      inputs:
-        script: 'sed -e ''s/latest/$(tag)/g'' ba-auth-stg.yaml > $(Build.ArtifactStagingDirectory)/ba-auth-stg.yml'
-        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
-    - task: CmdLine@2
-      inputs:
-        script: 'sed -e ''s/latest/$(tag)/g'' ba-auth-prod.yaml > $(Build.ArtifactStagingDirectory)/ba-auth-prod.yml'
-        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
-    - task: CmdLine@2
-      inputs:
-        script: 'sed -e ''s/latest/$(tag)/g'' ba-idp-stg.yaml > $(Build.ArtifactStagingDirectory)/ba-idp-stg.yml'
-        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
-    - task: CmdLine@2
-      inputs:
-        script: 'sed -e ''s/latest/$(tag)/g'' ba-idp-prod.yaml > $(Build.ArtifactStagingDirectory)/ba-idp-prod.yml'
-        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
-    - task: CmdLine@2
-      inputs:
-        script: 'sed -e ''s/latest/$(tag)/g'' ba-policy-stg.yaml > $(Build.ArtifactStagingDirectory)/ba-policy-stg.yml'
-        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
-    - task: CmdLine@2
-      inputs:
-        script: 'sed -e ''s/latest/$(tag)/g'' ba-policy-prod.yaml > $(Build.ArtifactStagingDirectory)/ba-policy-prod.yml'
-        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
+        script: 'rm -rf charts'
+        workingDirectory: '$(Build.ArtifactStagingDirectory)'
         
     - task: DotNetCoreCLI@2
       displayName: 'dotnet build'
@@ -104,7 +119,7 @@ stages:
     - task: PublishBuildArtifacts@1
       inputs:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
-        ArtifactName: 'charts'
+        ArtifactName: 'packages'
         publishLocation: 'Container'
 
     - task: Docker@2
