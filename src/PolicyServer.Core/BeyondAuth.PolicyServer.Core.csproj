@@ -13,6 +13,7 @@
 	<PackageTags>beyondauth;beyondauth policy;</PackageTags>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
     <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>

@@ -9,6 +9,7 @@
     <PackageTags>have i been pwned account dump</PackageTags>
     <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
     <IsPublishable>False</IsPublishable>
+    <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
