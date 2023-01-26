@@ -8,7 +8,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>beyondauth;identity;authentication</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageId>BeyondAuth.$(AssemblyName)</PackageId>
+    <PackageId>$(AssemblyName)</PackageId>
     <Nullable>enable</Nullable>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -38,13 +38,13 @@
 
   <ItemGroup>
     <PackageReference Include="Google.Protobuf" Version="3.21.12" />
-    <PackageReference Include="Grpc.Core" Version="2.46.5" />
-    <PackageReference Include="Grpc.Net.Client" Version="2.50.0" />
+    <PackageReference Include="Grpc.Core" Version="2.46.6" />
+    <PackageReference Include="Grpc.Net.Client" Version="2.51.0" />
     <PackageReference Include="Grpc.Tools" Version="2.51.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-	<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="7.0.1" />
+	<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="7.0.2" />
 	<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
@@ -52,7 +52,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\PolicyServer.Core\BeyondAuth.PolicyServer.Core.csproj" />
+    <ProjectReference Include="..\..\PolicyServer.Core\BeyondAuth.PolicyServer.Core.csproj">
+      <ReferenceOutputAssembly>true</ReferenceOutputAssembly>
+      <IncludeAssets>BeyondAuth.PolicyServer.Core.dll</IncludeAssets>
+    </ProjectReference>
   </ItemGroup>
 
   <ItemGroup>

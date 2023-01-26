@@ -12,7 +12,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="DiskQueue" Version="1.6.3" />
+    <PackageReference Include="DiskQueue" Version="1.6.5" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.2" />
   </ItemGroup>
 

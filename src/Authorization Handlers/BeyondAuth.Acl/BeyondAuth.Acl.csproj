@@ -9,7 +9,7 @@
     <RepositoryType>git</RepositoryType>
     <PackageTags>beyondauth;identity;authentication</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
-    <PackageId>BeyondAuth.$(AssemblyName)</PackageId>
+    <PackageId>$(AssemblyName)</PackageId>
     <Nullable>enable</Nullable>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
     <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
@@ -38,7 +38,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="7.0.1" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="7.0.2" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
