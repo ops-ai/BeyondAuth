@@ -22,7 +22,8 @@
 		<RepositoryUrl>https://github.com/thepirat000/Audit.NET</RepositoryUrl>
 		<RepositoryType>git</RepositoryType>
 		<GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-	</PropertyGroup>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+  </PropertyGroup>
 
 	<ItemGroup>
 		<PackageReference Include="Audit.NET" Version="20.1.2" />

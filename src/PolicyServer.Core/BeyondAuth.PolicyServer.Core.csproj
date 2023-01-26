@@ -12,6 +12,7 @@
 	<RepositoryType>git</RepositoryType>
 	<PackageTags>beyondauth;beyondauth policy;</PackageTags>
 	<PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
   </PropertyGroup>
 
   <ItemGroup>
