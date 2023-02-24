@@ -70,14 +70,22 @@
         <div class="text-center">
           @foreach (var provider in Model.ExternalProviders)
           {
-            <a class="btn btn-primary" asp-controller="External" asp-action="Challenge" asp-route-provider="@provider.AuthenticationScheme" asp-route-returnUrl="@Model.ReturnUrl" style="@(provider.Color != null ? $"background-color:{provider.Color};border-color:{provider.Color}" : "")">
-              
-              @if (!string.IsNullOrEmpty(provider.Icon))
-              {
-                  <i class="fa-brands fa-@provider.Icon"></i>
-              }
-              @provider.DisplayName
-            </a>
+            @if (provider.DisplayName == "Google") {
+              <a class="btn-google-signin" asp-controller="External" asp-action="Challenge" asp-route-provider="@provider.AuthenticationScheme" asp-route-returnUrl="@Model.ReturnUrl">
+                <img src="/img/btn-google-signin.png" alt="Sign in with Google">
+              </a>
+            }
+            else
+            {
+              <a class="btn btn-primary" asp-controller="External" asp-action="Challenge" asp-route-provider="@provider.AuthenticationScheme" asp-route-returnUrl="@Model.ReturnUrl" style="@(provider.Color != null ? $"background-color:{provider.Color};border-color:{provider.Color}" : "")">
+                
+                @if (!string.IsNullOrEmpty(provider.Icon))
+                {
+                    <i class="fa-brands fa-@provider.Icon"></i>
+                }
+                @provider.DisplayName
+              </a>
+            }
           }
         </div>
       }

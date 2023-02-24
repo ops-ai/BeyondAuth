@@ -32,6 +32,15 @@ a:hover {
   opacity: 0.9;
 }
 
+.btn-google-signin {
+  display: inline-block;
+  height: 46px;
+}
+.btn-google-signin > img {
+  height: 100%;
+  object-fit: contain;
+}
+
 /* /Buttons & Links */
 
 /* Dropdowns */
