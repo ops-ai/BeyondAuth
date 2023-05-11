@@ -21,7 +21,6 @@ namespace IdentityManager.Models
         /// <summary>
         /// Description
         /// </summary>
-        [Required]
         public string? Description { get; set; }
 
         /// <summary>
