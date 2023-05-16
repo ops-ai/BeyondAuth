@@ -36,7 +36,6 @@ namespace Authentication
                 .ConfigureLogging((context, builder) =>
                 {
                     builder.AddNLog("nlog.config").AddNLogWeb();
-                    builder.AddConsole();
 
                     var useLogging = context.Configuration.GetValue<bool>("UseLogging");
                     if (useLogging)
