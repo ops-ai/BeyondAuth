@@ -3,16 +3,39 @@
   <PropertyGroup>
     <TargetFramework>netstandard2.1</TargetFramework>
     <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
-    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
-    <IsPackable>false</IsPackable>
+    <PackageProjectUrl>https://beyondauth.io</PackageProjectUrl>
+    <IsPackable>true</IsPackable>
+
+    <RepositoryUrl>https://github.com/ops-ai/BeyondAuth</RepositoryUrl>
+    <RepositoryType>git</RepositoryType>
+    <PackageTags>beyondauth;cryptography</PackageTags>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <PackageId>BeyondAuth.$(AssemblyName)</PackageId>
+    <Nullable>enable</Nullable>
+    <GenerateAssemblyInfo>false</GenerateAssemblyInfo>
+    <GeneratePackageOnBuild>True</GeneratePackageOnBuild>
+    <PackageIcon>favicon.png</PackageIcon>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <GenerateDocumentationFile>True</GenerateDocumentationFile>
+  </PropertyGroup>
+
+  <PropertyGroup>
+    <IncludeSymbols>true</IncludeSymbols>
+    <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+  </PropertyGroup>
+
+  <PropertyGroup Condition="'$(TF_BUILD)' == 'true'">
+    <ContinuousIntegrationBuild>true</ContinuousIntegrationBuild>
+    <EmbedUntrackedSources>true</EmbedUntrackedSources>
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Include="..\AssemblyInfo.cs" Link="Properties\AssemblyInfo.cs" />
+    <None Include="..\favicon.png" Link="favicon.png" Pack="true" PackagePath="" />
+    <None Include="README.md" Pack="true" PackagePath="" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="Properties\" />
+    <Compile Include="..\AssemblyInfo.cs" Link="Properties\AssemblyInfo.cs" />
   </ItemGroup>
 
   <ItemGroup>

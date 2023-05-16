@@ -75,14 +75,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "charts", "charts", "{96BC0F
 	ProjectSection(SolutionItems) = preProject
 		charts\ba-account-prod.yaml = charts\ba-account-prod.yaml
 		charts\ba-account-stg.yaml = charts\ba-account-stg.yaml
-		charts\ba-audit-prod.yaml = charts\ba-audit-prod.yaml
-		charts\ba-audit-stg.yaml = charts\ba-audit-stg.yaml
 		charts\ba-auth-prod.yaml = charts\ba-auth-prod.yaml
 		charts\ba-auth-stg.yaml = charts\ba-auth-stg.yaml
 		charts\ba-idp-prod.yaml = charts\ba-idp-prod.yaml
 		charts\ba-idp-stg.yaml = charts\ba-idp-stg.yaml
-		charts\ba-policy-prod.yaml = charts\ba-policy-prod.yaml
-		charts\ba-policy-stg.yaml = charts\ba-policy-stg.yaml
 	EndProjectSection
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.UserManagement", "Policy Connectors\BeyondAuth.UserManagement\BeyondAuth.UserManagement.csproj", "{C0E4F481-065E-44F7-9804-4166B40F1282}"
@@ -185,14 +181,14 @@ Global
 		{F0C8F1ED-4D17-4785-B2D0-EE6FB533961B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F0C8F1ED-4D17-4785-B2D0-EE6FB533961B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F0C8F1ED-4D17-4785-B2D0-EE6FB533961B}.Release|Any CPU.Build.0 = Release|Any CPU
-		{9857F54A-32C4-4AD4-9275-6E8FA97C7B0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{9857F54A-32C4-4AD4-9275-6E8FA97C7B0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{9857F54A-32C4-4AD4-9275-6E8FA97C7B0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{9857F54A-32C4-4AD4-9275-6E8FA97C7B0B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{DE35808B-1780-4926-9223-EE0746CA3EA3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{DE35808B-1780-4926-9223-EE0746CA3EA3}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{DE35808B-1780-4926-9223-EE0746CA3EA3}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{DE35808B-1780-4926-9223-EE0746CA3EA3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9857F54A-32C4-4AD4-9275-6E8FA97C7B0B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9857F54A-32C4-4AD4-9275-6E8FA97C7B0B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9857F54A-32C4-4AD4-9275-6E8FA97C7B0B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9857F54A-32C4-4AD4-9275-6E8FA97C7B0B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -216,7 +212,7 @@ Global
 		{F0C8F1ED-4D17-4785-B2D0-EE6FB533961B} = {A69B0B3B-999B-4F44-B77A-D30D77A51759}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
-		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
 		LessCompiler = f136cc10-4cd8-4424-9277-4d7863748d9d
+		SolutionGuid = {0588527F-05C5-4D26-8370-6B6619E7A78A}
 	EndGlobalSection
 EndGlobal

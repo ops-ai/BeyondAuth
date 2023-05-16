@@ -10,12 +10,9 @@ resources:
 
 variables:
   dockerRegistryServiceConnection: '2090ed42-3209-4e98-bd10-118042d5815e'
-  imageNameAudit: 'beyondauth-audit'
   imageNameAccount: 'beyondauth-account'
   imageNameAuth: 'beyondauth-auth'
-  imageNameDocs: 'beyondauth-docs'
   imageNameIdp: 'beyondauth-idp'
-  imageNamePolicy: 'beyondauth-policy'
   tag: '$(Build.BuildId)'
   solution: '**/*.sln'
 
@@ -61,14 +58,6 @@ stages:
         workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
     - task: CmdLine@2
       inputs:
-        script: 'sed -e ''s/latest/$(tag)/g'' ba-audit-stg.yaml > $(Build.ArtifactStagingDirectory)/charts/ba-audit-stg.yml'
-        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
-    - task: CmdLine@2
-      inputs:
-        script: 'sed -e ''s/latest/$(tag)/g'' ba-audit-prod.yaml > $(Build.ArtifactStagingDirectory)/charts/ba-audit-prod.yml'
-        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
-    - task: CmdLine@2
-      inputs:
         script: 'sed -e ''s/latest/$(tag)/g'' ba-auth-stg.yaml > $(Build.ArtifactStagingDirectory)/charts/ba-auth-stg.yml'
         workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
     - task: CmdLine@2
@@ -82,14 +71,6 @@ stages:
     - task: CmdLine@2
       inputs:
         script: 'sed -e ''s/latest/$(tag)/g'' ba-idp-prod.yaml > $(Build.ArtifactStagingDirectory)/charts/ba-idp-prod.yml'
-        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
-    - task: CmdLine@2
-      inputs:
-        script: 'sed -e ''s/latest/$(tag)/g'' ba-policy-stg.yaml > $(Build.ArtifactStagingDirectory)/charts/ba-policy-stg.yml'
-        workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
-    - task: CmdLine@2
-      inputs:
-        script: 'sed -e ''s/latest/$(tag)/g'' ba-policy-prod.yaml > $(Build.ArtifactStagingDirectory)/charts/ba-policy-prod.yml'
         workingDirectory: '$(Build.SourcesDirectory)/src/charts/'
 
     - task: PublishBuildArtifacts@1
@@ -121,24 +102,7 @@ stages:
         PathtoPublish: '$(Build.ArtifactStagingDirectory)'
         ArtifactName: 'packages'
         publishLocation: 'Container'
-
-    - task: Docker@2
-      displayName: Build Audit image
-      inputs:
-        containerRegistry: '$(dockerRegistryServiceConnection)'
-        repository: '$(imageNameAudit)'
-        command: 'build'
-        Dockerfile: 'src/AuditServer/Dockerfile'
-        buildContext: 'src'
-        tags: '$(tag)'
-        arguments: '--build-arg VERSION=$(tag)'
-    - task: Docker@2
-      displayName: Push Audit image to container registry
-      inputs:
-        containerRegistry: 'opsairegistry'
-        repository: '$(imageNameAudit)'
-        command: 'push'
-
+        
     - task: Docker@2
       displayName: Build Account image
       inputs:
@@ -188,21 +152,4 @@ stages:
       inputs:
         containerRegistry: 'opsairegistry'
         repository: '$(imageNameIdp)'
-        command: 'push'
-
-    - task: Docker@2
-      displayName: Build Policy image
-      inputs:
-        containerRegistry: '$(dockerRegistryServiceConnection)'
-        repository: '$(imageNamePolicy)'
-        command: 'build'
-        Dockerfile: 'src/PolicyServer/Dockerfile'
-        buildContext: 'src'
-        tags: '$(tag)'
-        arguments: '--build-arg VERSION=$(tag)'
-    - task: Docker@2
-      displayName: Push Policy image to container registry
-      inputs:
-        containerRegistry: 'opsairegistry'
-        repository: '$(imageNamePolicy)'
         command: 'push'
