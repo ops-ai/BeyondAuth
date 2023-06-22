@@ -91,6 +91,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Data Loss Prevention", "Dat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Cryptography", "Cryptography\Cryptography.csproj", "{DE35808B-1780-4926-9223-EE0746CA3EA3}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BeyondAuth.Access.Core", "BeyondAuth.Access.Core\BeyondAuth.Access.Core.csproj", "{9857F54A-32C4-4AD4-9275-6E8FA97C7B0B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU

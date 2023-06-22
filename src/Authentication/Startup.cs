@@ -631,7 +631,7 @@ namespace Authentication
             });
 
             services.ConfigureOptions<RavenOptionsSetup>();
-            services.AddScoped(sp => sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<RavenSettings>>()?.Value?.DatabaseName));
+            services.AddScoped(sp => string.IsNullOrEmpty(sp.GetService<IOptions<RavenSettings>>()?.Value?.DatabaseName) ? sp.GetRequiredService<IDocumentStore>().OpenAsyncSession() : sp.GetRequiredService<IDocumentStore>().OpenAsyncSession(sp.GetService<IOptions<RavenSettings>>()?.Value?.DatabaseName));
 
             identityBuilder.Services.AddScoped<IUserStore<ApplicationUser>, UserStore<ApplicationUser, Raven.Identity.IdentityRole>>();
             identityBuilder.Services.AddScoped<IRoleStore<Raven.Identity.IdentityRole>, RoleStore<Raven.Identity.IdentityRole>>();

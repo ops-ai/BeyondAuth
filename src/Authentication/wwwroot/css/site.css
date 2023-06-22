@@ -422,3 +422,10 @@ body.theme-modern .card .card-decor-b::after {
 
 /* XX-Large devices (larger desktops, 1400px and up) */
 @media (min-width: 1400px) {}
+.field-icon {
+    float: right;
+    margin-right: 5px;
+    margin-top: -25px;
+    position: relative;
+    z-index: 2;
+}
