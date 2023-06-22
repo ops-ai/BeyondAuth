@@ -709,22 +709,22 @@ namespace Authentication
             Activity.DefaultIdFormat = ActivityIdFormat.W3C;
             Activity.ForceDefaultIdFormat = true;
 
-            services.AddOpenTelemetryTracing(
-                (builder) => builder
-                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("beyondauth-authentication"))
-                    .AddSource(nameof(IdentityServerEventSink))
-                    //.AddProcessor(new OpenTelemetryFilteredProcessor(new BatchActivityExportProcessor(new OpenTelemetryRavenDbExporter()), (act) => true)) //TODO: add filter
-                    .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    //.AddOtlpExporter(opt => opt.Endpoint = new Uri("grafana-agent:55680"))
-                    .AddConsoleExporter()
-                    );
+            //services.AddOpenTelemetryTracing(
+            //    (builder) => builder
+            //        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("beyondauth-authentication"))
+            //        .AddSource(nameof(IdentityServerEventSink))
+            //        //.AddProcessor(new OpenTelemetryFilteredProcessor(new BatchActivityExportProcessor(new OpenTelemetryRavenDbExporter()), (act) => true)) //TODO: add filter
+            //        .AddAspNetCoreInstrumentation()
+            //        .AddHttpClientInstrumentation()
+            //        //.AddOtlpExporter(opt => opt.Endpoint = new Uri("grafana-agent:55680"))
+            //        .AddConsoleExporter()
+            //        );
 
-            services.AddOpenTelemetryMetrics(builder =>
-            {
-                builder.AddAspNetCoreInstrumentation();
-                builder.AddHttpClientInstrumentation();
-            });
+            //services.AddOpenTelemetryMetrics(builder =>
+            //{
+            //    builder.AddAspNetCoreInstrumentation();
+            //    builder.AddHttpClientInstrumentation();
+            //});
 
             services.AddSystemMetrics(registerDefaultCollectors: false);
             services.AddSystemMetricCollector<WindowsMemoryCollector>();

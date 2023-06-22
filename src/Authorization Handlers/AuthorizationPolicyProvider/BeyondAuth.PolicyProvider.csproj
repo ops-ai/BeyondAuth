@@ -37,18 +37,18 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google.Protobuf" Version="3.21.12" />
+    <PackageReference Include="Google.Protobuf" Version="3.23.3" />
     <PackageReference Include="Grpc.Core" Version="2.46.6" />
-    <PackageReference Include="Grpc.Net.Client" Version="2.51.0" />
-    <PackageReference Include="Grpc.Tools" Version="2.51.0">
+    <PackageReference Include="Grpc.Net.Client" Version="2.54.0" />
+    <PackageReference Include="Grpc.Tools" Version="2.54.0">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-	<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="7.0.2" />
+	<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="7.0.7" />
 	<PackageReference Include="Microsoft.AspNetCore.Http.Abstractions" Version="2.2.0" />
     <PackageReference Include="Microsoft.AspNetCore.Http.Features" Version="5.0.17" />
     <PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
-	<PackageReference Include="System.Net.Http.Json" Version="7.0.0" />
+	<PackageReference Include="System.Net.Http.Json" Version="7.0.1" />
   </ItemGroup>
 
   <ItemGroup>

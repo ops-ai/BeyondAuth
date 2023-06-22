@@ -203,20 +203,21 @@ namespace AuthorizationServer
             services.AddGrpc();
             services.AddControllers();
 
-            services.AddOpenTelemetryTracing(
-                (builder) => builder
-                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("beyondauth-authentication"))
-                    .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    //.AddOtlpExporter(opt => opt.Endpoint = new Uri("grafana-agent:55680"))
-                    .AddConsoleExporter()
-                    );
+            services.AddOpenTelemetry();
+            //services.AddOpenTelemetryTracing(
+            //    (builder) => builder
+            //        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("beyondauth-authentication"))
+            //        .AddAspNetCoreInstrumentation()
+            //        .AddHttpClientInstrumentation()
+            //        //.AddOtlpExporter(opt => opt.Endpoint = new Uri("grafana-agent:55680"))
+            //        .AddConsoleExporter()
+            //        );
 
-            services.AddOpenTelemetryMetrics(builder =>
-            {
-                builder.AddAspNetCoreInstrumentation();
-                builder.AddHttpClientInstrumentation();
-            });
+            //services.AddOpenTelemetryMetrics(builder =>
+            //{
+            //    builder.AddAspNetCoreInstrumentation();
+            //    builder.AddHttpClientInstrumentation();
+            //});
 
             services.AddSystemMetrics(registerDefaultCollectors: false);
             services.AddSystemMetricCollector<WindowsMemoryCollector>();

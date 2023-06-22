@@ -339,20 +339,20 @@ namespace IdentityManager
             services.AddControllers().AddNewtonsoftJson();
             services.AddApplicationInsightsTelemetry(Configuration["APPINSIGHTS_CONNECTIONSTRING"]);
 
-            services.AddOpenTelemetryTracing(
-                (builder) => builder
-                    .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("beyondauth-idp"))
-                    .AddAspNetCoreInstrumentation()
-                    .AddHttpClientInstrumentation()
-                    //.AddOtlpExporter(opt => opt.Endpoint = new Uri("grafana-agent:55680"))
-                    .AddConsoleExporter()
-                    );
+            //services.AddOpenTelemetryTracing(
+            //    (builder) => builder
+            //        .SetResourceBuilder(ResourceBuilder.CreateDefault().AddService("beyondauth-idp"))
+            //        .AddAspNetCoreInstrumentation()
+            //        .AddHttpClientInstrumentation()
+            //        //.AddOtlpExporter(opt => opt.Endpoint = new Uri("grafana-agent:55680"))
+            //        .AddConsoleExporter()
+            //        );
 
-            services.AddOpenTelemetryMetrics(builder =>
-            {
-                builder.AddAspNetCoreInstrumentation();
-                builder.AddHttpClientInstrumentation();
-            });
+            //services.AddOpenTelemetryMetrics(builder =>
+            //{
+            //    builder.AddAspNetCoreInstrumentation();
+            //    builder.AddHttpClientInstrumentation();
+            //});
 
             services.AddSystemMetrics(registerDefaultCollectors: false);
             services.AddSystemMetricCollector<WindowsMemoryCollector>();
