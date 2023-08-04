@@ -41,6 +41,7 @@
 		<PackageReference Include="Azure.Identity" Version="1.9.0" />
 		<PackageReference Include="Azure.Security.KeyVault.Certificates" Version="4.5.1" />
 		<PackageReference Include="CorrelationId" Version="3.0.1" />
+		<PackageReference Include="Dangl.IdentityServer4.Storage" Version="4.2.1" />
 		<PackageReference Include="idunno.Authentication.Basic" Version="2.3.1" />
 		<PackageReference Include="Grpc.AspNetCore" Version="2.54.0" />
 		<PackageReference Include="Grpc.AspNetCore.HealthChecks" Version="2.54.0" />
@@ -49,7 +50,6 @@
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
 		<PackageReference Include="IdentityServer4.AccessTokenValidation" Version="3.0.1" />
-		<PackageReference Include="IdentityServer4.Storage" Version="4.1.2" />
 		<PackageReference Include="IPAddressRange" Version="6.0.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
 		<PackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="17.6.40">

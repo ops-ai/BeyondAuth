@@ -43,6 +43,8 @@
 		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="6.0.5" />
 		<PackageReference Include="Audit.Mvc.Core" Version="20.1.4" />
 		<PackageReference Include="Audit.NET" Version="20.1.4" />
+		<PackageReference Include="Dangl.IdentityServer4" Version="4.2.1" />
+		<PackageReference Include="Dangl.IdentityServer4.Storage" Version="4.2.1" />
 		<PackageReference Include="idunno.Authentication.Basic" Version="2.3.1" />
 		<PackageReference Include="Autofac" Version="7.0.1" />
 		<PackageReference Include="Autofac.Configuration" Version="6.0.0" />
@@ -58,7 +60,6 @@
 		<PackageReference Include="Finbuckle.MultiTenant.AspNetCore" Version="6.9.1" />
 		<PackageReference Include="Handlebars.Net" Version="2.1.4" />
 		<PackageReference Include="IdentityServer.LdapExtension" Version="3.1.0" />
-		<PackageReference Include="IdentityServer4" Version="4.1.2" />
 		<PackageReference Include="IdentityServer4.AspNetIdentity" Version="4.1.2" />
 		<PackageReference Include="IdentityServer4.Contrib.RavenDB" Version="1.0.0" />
 		<PackageReference Include="IPAddressRange" Version="6.0.0" />
