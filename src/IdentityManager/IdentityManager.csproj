@@ -26,15 +26,15 @@
 	</ItemGroup>
 
 	<ItemGroup>
-		<PackageReference Include="Audit.Mvc.Core" Version="20.1.4" />
-		<PackageReference Include="Audit.NET" Version="20.1.4" />
+		<PackageReference Include="Audit.Mvc.Core" Version="21.0.3" />
+		<PackageReference Include="Audit.NET" Version="21.0.3" />
 		<PackageReference Include="Azure.Extensions.AspNetCore.DataProtection.Blobs" Version="1.3.2" />
 		<PackageReference Include="Dangl.IdentityServer4" Version="4.2.1" />
 		<PackageReference Include="Dangl.IdentityServer4.Storage" Version="4.2.1" />
-		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="7.0.7" />
-		<PackageReference Include="AspNetCore.HealthChecks.RavenDB" Version="6.0.2" />
-		<PackageReference Include="AspNetCore.HealthChecks.UI" Version="6.0.5" />
-		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="6.0.5" />
+		<PackageReference Include="Microsoft.AspNetCore.Authorization" Version="7.0.9" />
+		<PackageReference Include="AspNetCore.HealthChecks.RavenDB" Version="7.0.0" />
+		<PackageReference Include="AspNetCore.HealthChecks.UI" Version="7.0.1" />
+		<PackageReference Include="AspNetCore.HealthChecks.UI.Client" Version="7.0.0" />
 		<PackageReference Include="Autofac" Version="7.0.1" />
 		<PackageReference Include="Autofac.Configuration" Version="6.0.0" />
 		<PackageReference Include="Autofac.Extensions.DependencyInjection" Version="8.0.0" />
@@ -52,8 +52,8 @@
 		<PackageReference Include="IPAddressRange" Version="6.0.0" />
 		<PackageReference Include="JsonSubTypes" Version="2.0.1" />
 		<PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.21.0" />
-		<PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="7.0.7" />
-		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.7" />
+		<PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="7.0.9" />
+		<PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="7.0.9" />
 		<PackageReference Include="Microsoft.Extensions.Logging" Version="7.0.0" />
 		<PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="7.0.0" />
 		<PackageReference Include="Microsoft.VisualStudio.Azure.Containers.Tools.Targets" Version="1.18.1" />
@@ -61,30 +61,30 @@
 			<PrivateAssets>all</PrivateAssets>
 			<IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
 		</PackageReference>
-		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.7" />
-		<PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="0.19.0" />
+		<PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="7.0.8" />
+		<PackageReference Include="NetEscapades.AspNetCore.SecurityHeaders" Version="0.20.0" />
 		<PackageReference Include="NJsonSchema" Version="10.9.0" />
 		<PackageReference Include="NLog.Extensions.AzureBlobStorage" Version="4.2.0" />
 		<PackageReference Include="NLog.Targets.Loki" Version="1.4.6" />
-		<PackageReference Include="NLog.Web.AspNetCore" Version="5.3.0" />
+		<PackageReference Include="NLog.Web.AspNetCore" Version="5.3.2" />
 		<PackageReference Include="NSwag.AspNetCore" Version="13.19.0" />
 		<PackageReference Include="NSwag.Core" Version="13.19.0" />
 		<PackageReference Include="NWebsec.AspNetCore.Middleware" Version="3.0.0" />
-		<PackageReference Include="OpenTelemetry" Version="1.5.0" />
-		<PackageReference Include="OpenTelemetry.Api" Version="1.5.0" />
+		<PackageReference Include="OpenTelemetry" Version="1.5.1" />
+		<PackageReference Include="OpenTelemetry.Api" Version="1.5.1" />
 		<PackageReference Include="OpenTelemetry.Contrib.Instrumentation.Azure" Version="0.6.0-beta" />
-		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.5.0" />
-		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.5.0" />
+		<PackageReference Include="OpenTelemetry.Exporter.Console" Version="1.5.1" />
+		<PackageReference Include="OpenTelemetry.Exporter.OpenTelemetryProtocol" Version="1.5.1" />
 		<PackageReference Include="OpenTelemetry.Exporter.Prometheus" Version="1.2.0-rc3" />
-		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.5.0" />
+		<PackageReference Include="OpenTelemetry.Extensions.Hosting" Version="1.5.1" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.AspNetCore" Version="1.0.0-rc9" />
 		<PackageReference Include="OpenTelemetry.Instrumentation.Http" Version="1.0.0-rc9" />
-		<PackageReference Include="prometheus-net" Version="8.0.0" />
-		<PackageReference Include="prometheus-net.AspNetCore" Version="8.0.0" />
-		<PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="8.0.0" />
+		<PackageReference Include="prometheus-net" Version="8.0.1" />
+		<PackageReference Include="prometheus-net.AspNetCore" Version="8.0.1" />
+		<PackageReference Include="prometheus-net.AspNetCore.HealthChecks" Version="8.0.1" />
 		<PackageReference Include="prometheus-net.Contrib" Version="1.0.0" />
 		<PackageReference Include="prometheus-net.SystemMetrics" Version="2.0.0" />
-		<PackageReference Include="RavenDB.Client" Version="5.4.105" />
+		<PackageReference Include="RavenDB.Client" Version="5.4.109" />
 		<PackageReference Include="scientist" Version="2.0.0" />
 		<PackageReference Include="Toggly.FeatureManagement" Version="2.7.3" />
 		<PackageReference Include="Toggly.FeatureManagement.Storage.RavenDB" Version="2.7.3" />
