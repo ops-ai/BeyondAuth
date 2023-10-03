@@ -162,7 +162,11 @@ namespace Authentication
                 options.AddPolicy("ViewMetrics", new AuthorizationPolicyBuilder().RequireAuthenticatedUser().AddAuthenticationSchemes("BasicAuthentication").Build());
             });
 
-            services.AddDistributedMemoryCache();
+            services.AddStackExchangeRedisCache(options =>
+            {
+                options.Configuration = Configuration["Redis:Host"] + ",abortConnect=false";
+                options.InstanceName = $"BA:session:{_env.EnvironmentName}:";
+            });
             services.AddOidcStateDataFormatterCache();
 
             //JwtSecurityTokenHandler.DefaultInboundClaimTypeMap.Clear();

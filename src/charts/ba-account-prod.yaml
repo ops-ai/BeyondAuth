@@ -45,6 +45,8 @@ spec:
            secretKeyRef:
              name: "ba-account-secrets"
              key: "ClientSecret"
+        - name: Redis__Host
+          value: "redis"
         ports:
         - containerPort: 443
           name: account-https

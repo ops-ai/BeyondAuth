@@ -100,6 +100,8 @@ namespace Authentication.Controllers
                 // Don't reveal that the user does not exist or is not confirmed
                 Thread.Sleep(new Random(1).Next(500, 2000));
 
+                ViewData["Email"] = model.Email;
+
                 if (user == null)
                 {
                     ViewData["ReturnUrl"] = model.ReturnUrl;
@@ -135,7 +137,7 @@ namespace Authentication.Controllers
                     supportEmail = _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
 
                 await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "callbackUrl", Value = callbackUrl, Sensitive = true }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = false } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Reset Password");
-                await AuditScope.LogAsync($"User:Password Reset Requested", new { SubjectId = user.Id });
+                await AuditScope.LogAsync("User:Password Reset Requested", new { SubjectId = user.Id });
 
                 // If we got this far, something failed, redisplay form
                 return View("ForgotPasswordConfirmation");
