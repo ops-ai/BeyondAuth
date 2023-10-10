@@ -123,10 +123,4 @@
 		<ProjectReference Include="..\Password Validators\BlackstarSolar.AspNetCore.Identity.PwnedPasswords\BlackstarSolar.AspNetCore.Identity.PwnedPasswords.csproj" />
 	</ItemGroup>
 
-	<ItemGroup>
-		<Compile Update="Program.cs">
-			<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
-		</Compile>
-	</ItemGroup>
-
 </Project>

@@ -1,0 +1,95 @@
+﻿@using IdentityServer4.Extensions
+@using Finbuckle.MultiTenant
+@{
+    string name = null;
+    if (!true.Equals(ViewData["signed-out"]))
+    {
+        name = Context.User?.GetDisplayName();
+    }
+    var tenantInfo = Context.GetMultiTenantContext<Identity.Core.TenantSetting>()?.TenantInfo;
+}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes" />
+    <meta name="description" content="BeyondAuth">
+    <meta name="theme-color" content="#177cab">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <title>@(tenantInfo?.BrandingOptions?.PageTitle ?? "BeyondAUTH")</title>
+    <link rel="icon" type="image/x-icon" href="@(tenantInfo?.BrandingOptions?.Favicon ?? "/favicon.ico")" />
+    <link rel="shortcut icon" type="image/x-icon" href="@(tenantInfo?.BrandingOptions?.Favicon ?? "/favicon.ico")" />
+
+    <link rel="apple-touch-icon" href="icons/icon-96x96.png">
+    <link rel="apple-touch-icon" sizes="180x180" href="icons/apple-icon-180.png">
+
+    <link rel="manifest" href="~/manifest.json" />
+
+    <link rel="stylesheet" href="~/css/variables.t.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/fontawesome.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/brands.min.css" asp-append-version="true" />
+    <link rel="stylesheet" href="~/css/solid.min.css" asp-append-version="true" />
+
+    <environment names="Development">
+        <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    </environment>
+    <environment names="Staging,Production">
+        <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
+    </environment>
+</head>
+
+<body class="d-flex flex-column min-vh-100 theme-modern theme-modern-center">
+    <nav class="navbar">
+        <div class="container-fluid align-items-center flex-nowrap">
+            
+            @if (!string.IsNullOrWhiteSpace(name))
+            {
+                <div class="dropdown link-dark text-decoration-none">
+                    <button class="btn dropdown-toggle" type="button" id="headermenu" data-bs-toggle="dropdown"
+                    aria-expanded="false">
+                        @name
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="headermenu">
+                        <li><a asp-action="Index" asp-controller="Profile" class="dropdown-item">Profile</a></li>
+                        <li><a asp-action="ChangePassword" asp-controller="Account" class="dropdown-item">Change Password</a>
+                        </li>
+                        <li>
+                            <hr class="dropdown-divider">
+                        </li>
+                        <li><a asp-action="Logout" asp-controller="Account" class="dropdown-item">Logout</a></li>
+                    </ul>
+                </div>
+            }
+
+            <a class="navbar-brand m-auto" href="~/">
+                <img src="@(ViewBag.Logo ?? tenantInfo?.BrandingOptions?.Logo ?? "/logo.svg")" class="icon-banner" alt="logo">
+            </a>
+        </div>
+    </nav>
+
+    <div class="app-offline d-none text-center bg-danger text-white">You are currently offline</div>
+
+    @RenderBody()
+
+    <environment names="Development">
+        <script src="~/lib/jquery/jquery.js" asp-append-version="true"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.min.js" asp-append-version="true"></script>
+        <script src="~/js/jsnlog.min.js" asp-append-version="true"></script>
+    </environment>
+    <environment names="Staging,Production">
+        <script src="~/lib/jquery/jquery.min.js" asp-append-version="true"></script>
+        <script src="~/lib/bootstrap/dist/js/bootstrap.min.js" asp-append-version="true"></script>
+        <script src="~/js/jsnlog.min.js" asp-append-version="true"></script>
+    </environment>
+    @RenderSection("scripts", required: false)
+
+    <script src="~/pwa.js" type="text/javascript" asp-append-version="true"></script>
+    <script src="~/js/site.js" async type="module" asp-append-version="true"></script>
+
+</body>
+
+</html>

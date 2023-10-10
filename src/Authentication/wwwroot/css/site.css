@@ -429,3 +429,11 @@ body.theme-modern .card .card-decor-b::after {
     position: relative;
     z-index: 2;
 }
+
+/* /Theme: ModernCenter */
+
+body.theme-modern.theme-modern-center .navbar .icon-banner {
+    max-width: 100%;
+    max-height: 300px;
+    text-align: center;
+}
