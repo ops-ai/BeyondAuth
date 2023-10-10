@@ -644,15 +644,15 @@ namespace Authentication
                 .AddRavenDB(setup => { setup.Urls = Configuration.GetSection("Raven:Urls").Get<string[]>(); setup.Database = Configuration["Raven:Database"]; setup.Certificate = ravenDBcert; }, "ravendb", timeout: new TimeSpan(0, 0, 2))
                 /*.AddIdentityServer(new Uri(Configuration["BaseUrl"]), "openid-connect", HealthStatus.Degraded)*/;
 
-            if (Environment.GetEnvironmentVariable("VaultUri") != null)
-            {
-                TokenCredential? clientCredential = Environment.GetEnvironmentVariable("ClientId") != null ? new ClientSecretCredential(Environment.GetEnvironmentVariable("TenantId"), Environment.GetEnvironmentVariable("ClientId"), Environment.GetEnvironmentVariable("ClientSecret")) : null;
+            //if (Environment.GetEnvironmentVariable("VaultUri") != null)
+            //{
+            //    TokenCredential? clientCredential = Environment.GetEnvironmentVariable("ClientId") != null ? new ClientSecretCredential(Environment.GetEnvironmentVariable("TenantId"), Environment.GetEnvironmentVariable("ClientId"), Environment.GetEnvironmentVariable("ClientSecret")) : null;
 
-                healthChecks.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")), clientCredential ?? new DefaultAzureCredential(), options =>
-                {
+            //    healthChecks.AddAzureKeyVault(new Uri(Environment.GetEnvironmentVariable("VaultUri")), clientCredential ?? new DefaultAzureCredential(), options =>
+            //    {
 
-                }, "vault", HealthStatus.Degraded, timeout: new TimeSpan(0, 0, 2));
-            }
+            //    }, "vault", HealthStatus.Degraded, timeout: new TimeSpan(0, 0, 2));
+            //}
 
             services.AddHttpClient("mailgun", config =>
             {

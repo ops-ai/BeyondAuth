@@ -19,12 +19,12 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Divergic.Logging.Xunit" Version="4.2.0" />
-    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="7.0.12" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.7.2" />
     <PackageReference Include="Microsoft.TestPlatform.TestHost" Version="17.7.2" />
     <PackageReference Include="Moq" Version="4.20.69" />
     <PackageReference Include="NLog.Web.AspNetCore" Version="5.3.4" />
-    <PackageReference Include="RavenDB.TestDriver" Version="5.4.109" />
+    <PackageReference Include="RavenDB.TestDriver" Version="6.0.0" />
     <PackageReference Include="tsh.xunit.logging" Version="0.1.0.12" />
     <PackageReference Include="xunit" Version="2.5.1" />
     <PackageReference Include="xunit.runner.console" Version="2.5.1">

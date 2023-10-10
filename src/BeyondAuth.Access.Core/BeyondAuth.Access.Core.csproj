@@ -6,7 +6,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="7.0.11" />
+    <PackageReference Include="Microsoft.AspNetCore.Authorization" Version="7.0.12" />
     <PackageReference Include="System.Collections.NonGeneric" Version="4.3.0" />
     <PackageReference Include="Universal.Common.Collections" Version="4.1.0" />
   </ItemGroup>
