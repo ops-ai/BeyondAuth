@@ -411,8 +411,10 @@ namespace IdentityManager
                         scope.SetCustomField("UserId", httpContextAccessor?.HttpContext?.User?.FindFirstValue("sub"));
                     if (httpContextAccessor?.HttpContext != null)
                         scope.SetCustomField("UserAgent", httpContextAccessor.HttpContext.Request.Headers.UserAgent.ToString());
-                    if (httpContextAccessor?.HttpContext?.User?.FindFirstValue("sub") != null)
+                    if (httpContextAccessor?.HttpContext?.User?.FindFirstValue("browser_id") != null)
                         scope.SetCustomField("BrowserId", httpContextAccessor?.HttpContext?.User?.FindFirstValue("browser_id"));
+                    if (httpContextAccessor?.HttpContext?.User?.FindFirstValue("client_id") != null)
+                        scope.SetCustomField("ClientId", httpContextAccessor?.HttpContext?.User?.FindFirstValue("client_id"));
 
                     var auditEvent = scope.Event;
                     if (auditEvent.Target != null)
