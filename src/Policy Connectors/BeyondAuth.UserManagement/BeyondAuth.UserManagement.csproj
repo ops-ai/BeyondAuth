@@ -39,11 +39,11 @@
   </PropertyGroup>
 
 	<ItemGroup>
-		<PackageReference Include="IdentityModel" Version="5.2.0" />
-		<PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="7.0.12" />
+		<PackageReference Include="IdentityModel" Version="6.2.0" />
+		<PackageReference Include="Microsoft.AspNetCore.JsonPatch" Version="7.0.13" />
 		<PackageReference Include="Microsoft.Extensions.Http" Version="7.0.0" />
 		<PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
-		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="7.0.12" />
+		<PackageReference Include="Microsoft.Extensions.Identity.Core" Version="7.0.13" />
 		<PackageReference Include="System.Net.Http.Json" Version="7.0.1" />
 	</ItemGroup>
 
