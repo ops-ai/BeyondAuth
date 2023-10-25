@@ -132,11 +132,12 @@ namespace Authentication.Controllers
                 {
                     var clientSetting = interaction.Client as ClientEntity;
                     supportEmail = clientSetting?.SupportEmail ?? _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
+                    ViewBag.Logo = clientSetting.LogoUri;
                 }
                 else
                     supportEmail = _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
 
-                await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "callbackUrl", Value = callbackUrl, Sensitive = true }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = false } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Reset Password");
+                await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "callbackUrl", Value = callbackUrl, Sensitive = true }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = false } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Reset Password", clientEntity: interaction?.Client as ClientEntity);
                 await AuditScope.LogAsync("User:Password Reset Requested", new { SubjectId = user.Id });
 
                 // If we got this far, something failed, redisplay form
@@ -155,8 +156,15 @@ namespace Authentication.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("password-reset-sent")]
-        public IActionResult ForgotPasswordConfirmation()
+        public async Task<IActionResult> ForgotPasswordConfirmation()
         {
+            var interaction = await _interaction.GetAuthorizationContextAsync(null);
+            if (interaction != null)
+            {
+                var clientSetting = interaction.Client as ClientEntity;
+                ViewBag.Logo = clientSetting.LogoUri;
+            }
+
             return View();
         }
 
@@ -169,10 +177,17 @@ namespace Authentication.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("reset-password")]
-        public IActionResult ResetPassword(string code = null, string returnUrl = null)
+        public async Task<IActionResult> ResetPassword(string code = null, string returnUrl = null)
         {
             if (code == null)
                 return RedirectToAction("Error", "Home");
+
+            var interaction = await _interaction.GetAuthorizationContextAsync(null);
+            if (interaction != null)
+            {
+                var clientSetting = interaction.Client as ClientEntity;
+                ViewBag.Logo = clientSetting.LogoUri;
+            }
 
             return View(new ResetPasswordModel { ReturnUrl = returnUrl });
         }
@@ -221,9 +236,10 @@ namespace Authentication.Controllers
                 {
                     var clientSetting = interaction.Client as ClientEntity;
                     supportEmail = clientSetting?.SupportEmail ?? _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
+                    ViewBag.Logo = clientSetting?.LogoUri;
                 }
 
-                await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset-confirmation", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = false } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Password Reset Confirmation");
+                await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset-confirmation", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = false } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Password Reset Confirmation", clientEntity: interaction?.Client as ClientEntity);
                 await AuditScope.LogAsync($"User:Passowrd Reset Successfully", new { SubjectId = user.Id });
 
                 return RedirectToAction(nameof(ResetPasswordConfirmation), "PasswordReset", new { returnUrl = model.ReturnUrl });
@@ -255,9 +271,17 @@ namespace Authentication.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("reset-password-successful")]
-        public IActionResult ResetPasswordConfirmation(string returnUrl)
+        public async Task<IActionResult> ResetPasswordConfirmation(string returnUrl)
         {
             ViewData["ReturnUrl"] = returnUrl;
+
+            var interaction = await _interaction.GetAuthorizationContextAsync(returnUrl);
+            if (interaction != null)
+            {
+                var clientSetting = interaction.Client as ClientEntity;
+                ViewBag.Logo = clientSetting?.LogoUri;
+            }
+
             return View();
         }
     }

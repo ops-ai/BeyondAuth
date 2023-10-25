@@ -487,6 +487,14 @@ namespace Authentication.Controllers
         [HttpGet("change-password")]
         public async Task<IActionResult> ChangePassword(string returnUrl)
         {
+            var interaction = await _interaction.GetAuthorizationContextAsync(returnUrl);
+            
+            if (interaction != null)
+            {
+                var clientSetting = interaction.Client as ClientEntity;
+                ViewBag.Logo = clientSetting.LogoUri;
+            }
+
             await Task.FromResult(0);
             return View(new ChangePasswordViewModel { ReturnUrl = returnUrl });
         }
@@ -520,13 +528,14 @@ namespace Authentication.Controllers
                     {
                         var clientSetting = interaction.Client as ClientEntity;
                         supportEmail = clientSetting?.SupportEmail ?? _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
+                        ViewBag.Logo = clientSetting.LogoUri;
                     }
                     else
                         supportEmail = _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
 
                     _logger.LogInformation(6, "User changed their password successfully.");
 
-                    await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-change-confirmation", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = false } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Password Changed Confirmation");
+                    await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-change-confirmation", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = false } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Password Changed Confirmation", clientEntity: interaction?.Client as ClientEntity);
                     await AuditScope.LogAsync($"User:Passowrd Changed", new { SubjectId = user.Id });
 
                     return View("ChangePasswordConfirmation");

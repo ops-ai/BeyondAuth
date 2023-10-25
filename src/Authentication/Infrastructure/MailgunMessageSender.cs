@@ -1,4 +1,5 @@
-﻿using Authentication.Models;
+﻿using Authentication.Domain;
+using Authentication.Models;
 using Finbuckle.MultiTenant;
 using Identity.Core;
 using Identity.Core.Settings;
@@ -28,14 +29,14 @@ namespace Authentication.Infrastructure
         }
 
         public async Task SendEmailAsync(string toEmail, string toName, string templateId, IEnumerable<TemplateVariable> templateData, string fromName, string fromEmail,
-            string subject, string? replyTo = null, List<string>? cc = null, List<string>? bcc = null)
+            string subject, string? replyTo = null, List<string>? cc = null, List<string>? bcc = null, ClientEntity? clientEntity = null)
         {
             try
             {
                 using var httpClient = _httpClientFactory.CreateClient("mailgun");
                 var tenantInfo = _httpContextAccessor.HttpContext.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
                 var vars = templateData.ToList();
-                vars.Add(new TemplateVariable { Name = "logo", Value = tenantInfo.BrandingOptions?.Logo ?? "https://account.beyondauth.io/logo.png" });
+                vars.Add(new TemplateVariable { Name = "logo", Value = clientEntity?.LogoUri ?? tenantInfo.BrandingOptions?.Logo ?? "https://account.beyondauth.io/logo.png" });
                 vars.Add(new TemplateVariable { Name = "primaryColor", Value = tenantInfo.BrandingOptions?.PrimaryColor ?? "#177CAB" });
                 vars.Add(new TemplateVariable { Name = "secondaryColor", Value = tenantInfo.BrandingOptions?.SecondaryColor ?? "#177CAB" });
                 vars.Add(new TemplateVariable { Name = "tenantId", Value = tenantInfo.Identifier });

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Options;
 using NSwag.Annotations;
 using Raven.Client.Documents;
 using System.Net;
+using System.Security.Claims;
 
 namespace IdentityManager.Controllers
 {
@@ -49,7 +50,7 @@ namespace IdentityManager.Controllers
 
                 using (var session = _documentStore.OpenAsyncSession(_identityStoreOptions.Value.DatabaseName))
                 {
-                    _logger.LogDebug($"Creating password reset request for user {userId}");
+                    _logger.LogDebug("Creating password reset request for user {userId}", userId);
 
                     var user = await _userManager.FindByIdAsync($"ApplicationUsers/{userId}");
                     if (user == null)
@@ -61,7 +62,8 @@ namespace IdentityManager.Controllers
                     {
                         var request = new PasswordResetRequest
                         {
-                            UserId = userId
+                            UserId = userId,
+                            ClientId = User.FindFirstValue("client_id")
                         };
                         await session.StoreAsync(request, ct);
 

@@ -11,5 +11,7 @@ namespace Identity.Core
         public DateTime CreatedOnUtc { get; set; } = DateTime.UtcNow;
 
         public bool Handled { get; set; } = false;
+
+        public string? ClientId { get; set; }
     }
 }
