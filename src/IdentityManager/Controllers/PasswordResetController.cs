@@ -63,7 +63,7 @@ namespace IdentityManager.Controllers
                         var request = new PasswordResetRequest
                         {
                             UserId = userId,
-                            ClientId = User.FindFirstValue("client_id")
+                            ClientId = $"Clients/{User.FindFirstValue("client_id")}"
                         };
                         await session.StoreAsync(request, ct);
 

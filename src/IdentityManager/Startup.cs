@@ -414,7 +414,7 @@ namespace IdentityManager
                     if (httpContextAccessor?.HttpContext?.User?.FindFirstValue("browser_id") != null)
                         scope.SetCustomField("BrowserId", httpContextAccessor?.HttpContext?.User?.FindFirstValue("browser_id"));
                     if (httpContextAccessor?.HttpContext?.User?.FindFirstValue("client_id") != null)
-                        scope.SetCustomField("ClientId", httpContextAccessor?.HttpContext?.User?.FindFirstValue("client_id"));
+                        scope.SetCustomField("ClientId", "Clients/" + httpContextAccessor?.HttpContext?.User?.FindFirstValue("client_id"));
 
                     var auditEvent = scope.Event;
                     if (auditEvent.Target != null)
