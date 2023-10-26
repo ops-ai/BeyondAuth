@@ -68,11 +68,16 @@ namespace Authentication.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("forgot-password")]
-        public IActionResult ForgotPassword(string returnUrl, string email)
+        public async Task<IActionResult> ForgotPassword(string returnUrl, string email)
         {
             try
             {
+                var interaction = await _interaction.GetAuthorizationContextAsync(returnUrl);
+                if (interaction != null)
+                    ViewBag.Logo = interaction.Client.LogoUri;
+
                 returnUrl = WebUtility.UrlEncode(returnUrl);
+
                 return View(new ForgotPasswordModel { ReturnUrl = returnUrl, Email = email });
             }
             catch (Exception ex)
@@ -156,9 +161,9 @@ namespace Authentication.Controllers
         /// <returns></returns>
         [HttpGet]
         [Route("password-reset-sent")]
-        public async Task<IActionResult> ForgotPasswordConfirmation()
+        public async Task<IActionResult> ForgotPasswordConfirmation(string? returnUrl)
         {
-            var interaction = await _interaction.GetAuthorizationContextAsync(null);
+            var interaction = await _interaction.GetAuthorizationContextAsync(returnUrl);
             if (interaction != null)
             {
                 var clientSetting = interaction.Client as ClientEntity;
@@ -227,8 +232,6 @@ namespace Authentication.Controllers
                 }
 
                 _logger.LogInformation(13, $"User {model.Email} reset their password. Sending password change confirmation email");
-
-                var emailMessage = new ResetPasswordConfirmationEmailMessage { To = user.Email, FirstName = user.FirstName };
 
                 var interaction = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
                 var supportEmail = "support@beyondauth.io";

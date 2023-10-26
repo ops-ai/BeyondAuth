@@ -1,102 +1,103 @@
 @model Authentication.Models.Account.LoginViewModel
 
 <div class="container account-container py-5 my-auto">
-  <div class="card">
-    <div class="card-decor d-none d-sm-block">
-      <div class="card-decor-t"></div>
-      <div class="card-decor-b"></div>
-    </div>
-    <div class="card-body">
-      <h4 class="card-title text-center py-3">Welcome</h4>
-      
-      @if (Model.EnableLocalLogin)
-      {
-        <form asp-route="Login" class="needs-validation" novalidate>
-          <input type="hidden" asp-for="ReturnUrl" />
+    <div class="card">
+        <div class="card-decor d-none d-sm-block">
+            <div class="card-decor-t"></div>
+            <div class="card-decor-b"></div>
+        </div>
+        <div class="card-body">
+            <h4 class="card-title text-center py-3">Welcome</h4>
 
-          <div class="mb-3 has-validation">
-            <label asp-for="Email" class="form-label">Email Address</label>
-            <input type="text" class="form-control" placeholder="Your Email Address *" asp-for="Email" autofocus required />@*pattern=".+@@.+\..+"*@
-          </div>
-          
-          <div>
-            <label asp-for="Password" class="form-label d-flex">
-              Password
-              @if (Model.AllowPasswordReset)
-              {
-                <a asp-action="ForgotPassword" asp-controller="PasswordReset" class="link-dark ms-auto">Forgot Password?</a>
-              }
-            </label>
-            <input type="password" class="form-control" placeholder="Your Password *" asp-for="Password" autocomplete="off" required />
-          </div>
-          
-          @Html.ValidationMessage("ErrorMessage")
-          @Html.ValidationMessageFor(m => m.Email)
-          @Html.ValidationMessageFor(m => m.Password)
-          
-          <div class="d-flex justify-content-between my-3">
-            @if (Model.AllowRememberLogin)
+            @if (Model.EnableLocalLogin)
             {
-              <div class="form-check">
-                <input class="form-check-input" type="checkbox" asp-for="RememberLogin">
-                <label class="form-check-label" asp-for="RememberLogin">
-                  Remember Me
-                </label>
-              </div>
+                <form asp-route="Login" class="needs-validation" novalidate>
+                    <input type="hidden" asp-for="ReturnUrl" />
+
+                    <div class="mb-3 has-validation">
+                        <label asp-for="Email" class="form-label">Email Address</label>
+                        <input type="text" class="form-control" placeholder="Your Email Address *" asp-for="Email" autofocus required />@*pattern=".+@@.+\..+"*@
+                    </div>
+
+                    <div>
+                        <label asp-for="Password" class="form-label d-flex">
+                            Password
+                            @if (Model.AllowPasswordReset)
+                            {
+                                <a asp-action="ForgotPassword" asp-controller="PasswordReset" class="link-dark ms-auto" asp-route-returnUrl="@Model.ReturnUrl">Forgot Password?</a>
+                            }
+                        </label>
+                        <input type="password" class="form-control" placeholder="Your Password *" asp-for="Password" autocomplete="off" required />
+                    </div>
+
+                    @Html.ValidationMessage("ErrorMessage")
+                    @Html.ValidationMessageFor(m => m.Email)
+                    @Html.ValidationMessageFor(m => m.Password)
+
+                    <div class="d-flex justify-content-between my-3">
+                        @if (Model.AllowRememberLogin)
+                        {
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" asp-for="RememberLogin">
+                                <label class="form-check-label" asp-for="RememberLogin">
+                                    Remember Me
+                                </label>
+                            </div>
+                        }
+                    </div>
+
+                    <button class="btn btn-primary w-100" name="button" type="submit" value="login">Sign In</button>
+
+                    @if (Model.SignupUrl != null)
+                    {
+                        <div class="text-center mt-3">
+                            @Model.SignupMessage <a href="@Model.SignupUrl" class="link-dark">@Model.SignupText</a>
+                        </div>
+                    }
+                    <input type="hidden" asp-for="BrowserId" />
+                </form>
             }
-          </div>
 
-          <button class="btn btn-primary w-100" name="button" type="submit" value="login">Sign In</button>
-
-          @if (Model.SignupUrl != null)
-          {
-            <div class="text-center mt-3">
-              @Model.SignupMessage <a href="@Model.SignupUrl" class="link-dark">@Model.SignupText</a>
-            </div>
-          }
-          <input type="hidden" asp-for="BrowserId" />
-        </form>
-      }
-
-      @if (Model.ExternalProviders.Any())
-      {
-        @if (Model.EnableLocalLogin)
-        {
-          <div class="divider my-3">
-            <small class="divider-text">or</small>
-          </div>
-        }
-
-        <div class="text-center">
-          @foreach (var provider in Model.ExternalProviders)
-          {
-            @if (provider.DisplayName == "Google") {
-              <a class="btn-google-signin" asp-controller="External" asp-action="Challenge" asp-route-provider="@provider.AuthenticationScheme" asp-route-returnUrl="@Model.ReturnUrl">
-                <img src="/img/btn-google-signin.png" alt="Sign in with Google">
-              </a>
-            }
-            else
+            @if (Model.ExternalProviders.Any())
             {
-              <a class="btn btn-primary" asp-controller="External" asp-action="Challenge" asp-route-provider="@provider.AuthenticationScheme" asp-route-returnUrl="@Model.ReturnUrl" style="@(provider.Color != null ? $"background-color:{provider.Color};border-color:{provider.Color}" : "")">
-                
-                @if (!string.IsNullOrEmpty(provider.Icon))
+                @if (Model.EnableLocalLogin)
                 {
-                    <i class="fa-brands fa-@provider.Icon"></i>
+                    <div class="divider my-3">
+                        <small class="divider-text">or</small>
+                    </div>
                 }
-                @provider.DisplayName
-              </a>
-            }
-          }
-        </div>
-      }
 
-      @if (!Model.EnableLocalLogin && !Model.ExternalProviders.Any())
-      {
-        <div class="alert alert-warning">
-          <strong>Invalid login request</strong>
-          There are no login schemes configured for this client.
+                <div class="text-center">
+                    @foreach (var provider in Model.ExternalProviders)
+                    {
+                        @if (provider.DisplayName == "Google")
+                        {
+                            <a class="btn-google-signin" asp-controller="External" asp-action="Challenge" asp-route-provider="@provider.AuthenticationScheme" asp-route-returnUrl="@Model.ReturnUrl">
+                                <img src="/img/btn-google-signin.png" alt="Sign in with Google">
+                            </a>
+                        }
+                        else
+                        {
+                            <a class="btn btn-primary" asp-controller="External" asp-action="Challenge" asp-route-provider="@provider.AuthenticationScheme" asp-route-returnUrl="@Model.ReturnUrl" style="@(provider.Color != null ? $"background-color:{provider.Color};border-color:{provider.Color}" : "")">
+
+                                @if (!string.IsNullOrEmpty(provider.Icon))
+                                {
+                                    <i class="fa-brands fa-@provider.Icon"></i>
+                                }
+                                @provider.DisplayName
+                            </a>
+                        }
+                    }
+                </div>
+            }
+
+            @if (!Model.EnableLocalLogin && !Model.ExternalProviders.Any())
+            {
+                <div class="alert alert-warning">
+                    <strong>Invalid login request</strong>
+                    There are no login schemes configured for this client.
+                </div>
+            }
         </div>
-      }
     </div>
-  </div>
 </div>
