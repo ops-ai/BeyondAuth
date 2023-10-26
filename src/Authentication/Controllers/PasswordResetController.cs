@@ -240,7 +240,7 @@ namespace Authentication.Controllers
                     ViewBag.Logo = interaction.Client?.LogoUri;
                 }
 
-                await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset-confirmation", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = false } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Password Reset Confirmation", clientEntity: interaction?.Client as ClientEntity);
+                await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset-confirmation", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = false } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Password Reset Confirmation", clientEntity: interaction?.Client);
                 await AuditScope.LogAsync($"User:Passowrd Reset Successfully", new { SubjectId = user.Id });
 
                 return RedirectToAction(nameof(ResetPasswordConfirmation), "PasswordReset", new { returnUrl = model.ReturnUrl });
