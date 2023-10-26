@@ -143,7 +143,7 @@ namespace IdentityManager.Controllers
                     if (resource == null)
                         throw new KeyNotFoundException($"Api Resource {name} was not found");
 
-                    var newSecret = shortid.ShortId.Generate(new shortid.Configuration.GenerationOptions { Length = 32, UseNumbers = true, UseSpecialCharacters = true });
+                    var newSecret = shortid.ShortId.Generate(new shortid.Configuration.GenerationOptions(true, true, 32));
                     using (var audit = await AuditScope.CreateAsync("ApiResource:AddSecret", () => resource, new { ResourceId = resource.Id }))
                     {
                         var secret = apiResourceSecret.FromModel();

@@ -4,6 +4,7 @@ using Authentication.Infrastructure;
 using Authentication.Models;
 using Authentication.Models.Messages;
 using Identity.Core;
+using IdentityServer4.Models;
 using Microsoft.AspNetCore.Identity;
 using Raven.Client.Documents;
 
@@ -45,12 +46,12 @@ namespace Authentication.Services
 
                     var emailMessage = new ResetPasswordEmailMessage { To = user.Email, FirstName = user.FirstName, CallbackUrl = callbackUrl };
                     var supportEmail = "support@beyondauth.io";
-                    ClientEntity? client = null;
+                    Client? client = null;
                     if (request.ClientId != null)
-                        client = await session.LoadAsync<ClientEntity>(request.ClientId);
+                        client = await session.LoadAsync<Client>(request.ClientId);
 
-                    if (client != null && client.SupportEmail != null)
-                        supportEmail = client.SupportEmail;
+                    if (client != null && client.Properties.ContainsKey("SupportEmail"))
+                        supportEmail = client.Properties["SupportEmail"];
 
                     await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "callbackUrl", Value = callbackUrl, Sensitive = true }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = true } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Reset Password", clientEntity: client);
                     await AuditScope.LogAsync($"User:Password Reset Requested", new { SubjectId = user.Id });

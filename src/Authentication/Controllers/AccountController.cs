@@ -490,10 +490,7 @@ namespace Authentication.Controllers
             var interaction = await _interaction.GetAuthorizationContextAsync(returnUrl);
             
             if (interaction != null)
-            {
-                var clientSetting = interaction.Client as ClientEntity;
-                ViewBag.Logo = clientSetting.LogoUri;
-            }
+                ViewBag.Logo = interaction.Client.LogoUri;
 
             await Task.FromResult(0);
             return View(new ChangePasswordViewModel { ReturnUrl = returnUrl });
@@ -526,8 +523,7 @@ namespace Authentication.Controllers
                     string supportEmail;
                     if (interaction != null)
                     {
-                        var clientSetting = interaction.Client as ClientEntity;
-                        supportEmail = clientSetting?.SupportEmail ?? _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
+                        supportEmail = interaction.Client.Properties.ContainsKey("SupportEmail") ? interaction.Client.Properties["SupportEmail"] : _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
                         ViewBag.Logo = interaction.Client.LogoUri;
                     }
                     else

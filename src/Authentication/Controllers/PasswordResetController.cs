@@ -76,8 +76,6 @@ namespace Authentication.Controllers
                 if (interaction != null)
                     ViewBag.Logo = interaction.Client.LogoUri;
 
-                returnUrl = WebUtility.UrlEncode(returnUrl);
-
                 return View(new ForgotPasswordModel { ReturnUrl = returnUrl, Email = email });
             }
             catch (Exception ex)
@@ -129,14 +127,13 @@ namespace Authentication.Controllers
                 var code = await _userManager.GeneratePasswordResetTokenAsync(user);
 
                 // Url.Action auto encodes params you pass to it, but ReturnUrl is already encoded. Don't double encode
-                var callbackUrl = Url.Action("ResetPassword", "PasswordReset", new { code, returnUrl = WebUtility.UrlDecode(model.ReturnUrl) }, HttpContext.Request.Scheme);
+                var callbackUrl = Url.Action("ResetPassword", "PasswordReset", new { code, returnUrl = model.ReturnUrl }, HttpContext.Request.Scheme);
 
                 var interaction = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
                 string supportEmail;
                 if (interaction != null)
                 {
-                    var clientSetting = interaction.Client as ClientEntity;
-                    supportEmail = clientSetting?.SupportEmail ?? _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
+                    supportEmail = interaction.Client.Properties.ContainsKey("SupportEmail") ? interaction.Client.Properties["SupportEmail"] : _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
                     ViewBag.Logo = interaction.Client.LogoUri;
                 }
                 else
@@ -229,14 +226,13 @@ namespace Authentication.Controllers
                     return View(model);
                 }
 
-                _logger.LogInformation(13, $"User {model.Email} reset their password. Sending password change confirmation email");
+                _logger.LogInformation(13, "User {model.Email} reset their password. Sending password change confirmation email", model.Email);
 
                 var interaction = await _interaction.GetAuthorizationContextAsync(model.ReturnUrl);
                 var supportEmail = "support@beyondauth.io";
                 if (interaction != null)
                 {
-                    var clientSetting = interaction.Client as ClientEntity;
-                    supportEmail = clientSetting?.SupportEmail ?? _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
+                    supportEmail = interaction.Client.Properties.ContainsKey("SupportEmail") ? interaction.Client.Properties["SupportEmail"] : _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
                     ViewBag.Logo = interaction.Client?.LogoUri;
                 }
 

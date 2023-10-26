@@ -54,10 +54,10 @@ namespace Authentication.Infrastructure
                     await AuditScope.LogAsync($"Client:{evt.Name}", new { ClientId = $"Clients/{clientAuthFailure.ClientId}", clientAuthFailure.RemoteIpAddress, clientAuthFailure.Message });
                     break;
                 case TokenIssuedSuccessEvent tokenIssuedSuccess:
-
+                    await AuditScope.LogAsync($"Client:{evt.Name}", new { ClientId = $"Clients/{tokenIssuedSuccess.ClientId}", tokenIssuedSuccess.RemoteIpAddress, tokenIssuedSuccess.Message, tokenIssuedSuccess.GrantType, tokenIssuedSuccess.RedirectUri });
                     break;
                 case TokenIssuedFailureEvent tokenIssuedFailure:
-                    
+                    await AuditScope.LogAsync($"Client:{evt.Name}", new { ClientId = $"Clients/{tokenIssuedFailure.ClientId}", tokenIssuedFailure.RemoteIpAddress, tokenIssuedFailure.Message, tokenIssuedFailure.GrantType, tokenIssuedFailure.RedirectUri, tokenIssuedFailure.Error, tokenIssuedFailure.ErrorDescription });
                     break;
                 case TokenIntrospectionSuccessEvent tokenIntrospectionSuccess:
                     await AuditScope.LogAsync($"ApiResource:{evt.Name}", new { ResourceId = $"ApiResources/{tokenIntrospectionSuccess.ApiName}", tokenIntrospectionSuccess.RemoteIpAddress, tokenIntrospectionSuccess.TokenScopes, tokenIntrospectionSuccess.Message });

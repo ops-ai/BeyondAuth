@@ -143,7 +143,7 @@ namespace IdentityManager.Controllers
                     if (client == null)
                         throw new KeyNotFoundException($"Client {clientId} was not found");
 
-                    var newSecret = shortid.ShortId.Generate(new shortid.Configuration.GenerationOptions { Length = 32, UseNumbers = true, UseSpecialCharacters = true });
+                    var newSecret = shortid.ShortId.Generate(new shortid.Configuration.GenerationOptions(true, true, 32));
                     using (var audit = await AuditScope.CreateAsync("Client:AddSecret", () => client, new { ClientId = client.Id }))
                     {
                         var secret = clientSecret.FromModel();
