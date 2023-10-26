@@ -186,7 +186,7 @@ namespace Authentication.Controllers
             if (code == null)
                 return RedirectToAction("Error", "Home");
 
-            var interaction = await _interaction.GetAuthorizationContextAsync(null);
+            var interaction = await _interaction.GetAuthorizationContextAsync(returnUrl);
             if (interaction != null)
             {
                 ViewBag.Logo = interaction.Client.LogoUri;
