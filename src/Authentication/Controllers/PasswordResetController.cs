@@ -137,12 +137,12 @@ namespace Authentication.Controllers
                 {
                     var clientSetting = interaction.Client as ClientEntity;
                     supportEmail = clientSetting?.SupportEmail ?? _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
-                    ViewBag.Logo = clientSetting.LogoUri;
+                    ViewBag.Logo = interaction.Client.LogoUri;
                 }
                 else
                     supportEmail = _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
 
-                await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "callbackUrl", Value = callbackUrl, Sensitive = true }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = false } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Reset Password", clientEntity: interaction?.Client as ClientEntity);
+                await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "callbackUrl", Value = callbackUrl, Sensitive = true }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = false } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Reset Password", clientEntity: interaction?.Client);
                 await AuditScope.LogAsync("User:Password Reset Requested", new { SubjectId = user.Id });
 
                 // If we got this far, something failed, redisplay form
@@ -166,8 +166,7 @@ namespace Authentication.Controllers
             var interaction = await _interaction.GetAuthorizationContextAsync(returnUrl);
             if (interaction != null)
             {
-                var clientSetting = interaction.Client as ClientEntity;
-                ViewBag.Logo = clientSetting.LogoUri;
+                ViewBag.Logo = interaction.Client.LogoUri;
             }
 
             return View();
@@ -190,8 +189,7 @@ namespace Authentication.Controllers
             var interaction = await _interaction.GetAuthorizationContextAsync(null);
             if (interaction != null)
             {
-                var clientSetting = interaction.Client as ClientEntity;
-                ViewBag.Logo = clientSetting.LogoUri;
+                ViewBag.Logo = interaction.Client.LogoUri;
             }
 
             return View(new ResetPasswordModel { ReturnUrl = returnUrl });
@@ -239,7 +237,7 @@ namespace Authentication.Controllers
                 {
                     var clientSetting = interaction.Client as ClientEntity;
                     supportEmail = clientSetting?.SupportEmail ?? _accountOptions.Value.SupportEmail ?? "support@beyondauth.io";
-                    ViewBag.Logo = clientSetting?.LogoUri;
+                    ViewBag.Logo = interaction.Client?.LogoUri;
                 }
 
                 await _emailSender.SendEmailAsync(user.Email, user.FirstName, "password-reset-confirmation", new[] { new TemplateVariable { Name = "firstName", Value = user.FirstName }, new TemplateVariable { Name = "supportEmail", Value = supportEmail, Sensitive = false } }, "BeyondAuth", "noreply@noreply.beyondauth.io", "Password Reset Confirmation", clientEntity: interaction?.Client as ClientEntity);
@@ -281,8 +279,7 @@ namespace Authentication.Controllers
             var interaction = await _interaction.GetAuthorizationContextAsync(returnUrl);
             if (interaction != null)
             {
-                var clientSetting = interaction.Client as ClientEntity;
-                ViewBag.Logo = clientSetting?.LogoUri;
+                ViewBag.Logo = interaction.Client?.LogoUri;
             }
 
             return View();

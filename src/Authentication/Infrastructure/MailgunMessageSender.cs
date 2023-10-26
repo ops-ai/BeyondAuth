@@ -4,6 +4,7 @@ using Finbuckle.MultiTenant;
 using Identity.Core;
 using Identity.Core.Settings;
 using IdentityModel;
+using IdentityServer4.Models;
 using Microsoft.Extensions.Options;
 using Raven.Client.Documents;
 using System.Security.Claims;
@@ -29,7 +30,7 @@ namespace Authentication.Infrastructure
         }
 
         public async Task SendEmailAsync(string toEmail, string toName, string templateId, IEnumerable<TemplateVariable> templateData, string fromName, string fromEmail,
-            string subject, string? replyTo = null, List<string>? cc = null, List<string>? bcc = null, ClientEntity? clientEntity = null)
+            string subject, string? replyTo = null, List<string>? cc = null, List<string>? bcc = null, Client? clientEntity = null)
         {
             try
             {
