@@ -36,7 +36,6 @@ namespace Authentication.Services
 
             await base.AddClientIdAsync(clientId);
 
-            await AuthenticateAsync();
             var sessionId = Properties?.GetSessionId();
 
             var userSession = await _session.LoadAsync<UserSession>($"UserSessions/{sessionId}");
