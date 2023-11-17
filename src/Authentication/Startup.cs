@@ -869,9 +869,9 @@ namespace Authentication
 
             app.UseRouting();
             app.UseMultiTenant();
-            app.UseAuthentication();
-            app.UseAuthorization();
+            //app.UseAuthentication();
             app.UseIdentityServer();
+            app.UseAuthorization();
 
             app.UseRequestLocalization();
 

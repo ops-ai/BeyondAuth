@@ -217,7 +217,7 @@ namespace Authentication.Controllers
                         {
                             IsPersistent = _accountOptions.Value.AllowRememberLogin && model.RememberLogin,
                             ExpiresUtc = _accountOptions.Value.AllowRememberLogin && model.RememberLogin ? DateTimeOffset.UtcNow.Add(_accountOptions.Value.RememberMeLoginDuration) : null,
-                            RedirectUri = !string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl) ? model.ReturnUrl : "~/"
+                            //RedirectUri = !string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl) ? model.ReturnUrl : "~/"
                         };
                         props.Items.Add("browser_id", model.BrowserId);
                         var tenantSettings = _httpContextAccessor.HttpContext.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
@@ -230,7 +230,7 @@ namespace Authentication.Controllers
                         //TODO: check for MFA add to Authentication Methods https://datatracker.ietf.org/doc/html/rfc8176
 
                         await HttpContext.SignInAsync(isuser, props);
-                        await _metricService.AddMetricAsync("Login", 1);
+                        await _metricService.MeasureAsync("Login", 1);
 
                         if (user.ChangePasswordOnNextLogin)
                             return RedirectToAction("ChangePassword");
