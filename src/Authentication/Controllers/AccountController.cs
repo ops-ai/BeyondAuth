@@ -179,6 +179,7 @@ namespace Authentication.Controllers
 
             if (ModelState.IsValid)
             {
+                model.Email = model.Email.Trim();
                 if (!model.Email.Contains('@') && !string.IsNullOrEmpty(_accountOptions.Value.DefaultDomain))
                     model.Email += $"@{_accountOptions.Value.DefaultDomain}";
 

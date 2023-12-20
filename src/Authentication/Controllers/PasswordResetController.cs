@@ -98,6 +98,7 @@ namespace Authentication.Controllers
             try
             {
                 if (!ModelState.IsValid) return View(model);
+                model.Email = model.Email.Trim();
                 var user = await _userManager.FindByNameAsync(model.Email);
 
                 // Don't reveal that the user does not exist or is not confirmed
@@ -207,6 +208,7 @@ namespace Authentication.Controllers
                 if (!ModelState.IsValid)
                     return View(model);
 
+                model.Email = model.Email.Trim();
                 var user = await _userManager.FindByNameAsync(model.Email);
 
                 Thread.Sleep(new Random(1).Next(500, 2000));
