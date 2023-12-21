@@ -409,15 +409,15 @@ namespace IdentityManager.Controllers
                                 ModelState.AddModelError("Password", error.Description);
                         }
 
-                        var setUsernameResult = await _userManager.SetUserNameAsync(user, userInfo.Email);
-                        if (setUsernameResult.Succeeded)
-                            audit.Comment("Username updated");
-                        else
-                        {
-                            audit.Comment("Username update failed");
-                            foreach (var error in setUsernameResult.Errors)
-                                ModelState.AddModelError("Password", error.Description);
-                        }
+                        //var setUsernameResult = await _userManager.SetUserNameAsync(user, userInfo.Email);
+                        //if (setUsernameResult.Succeeded)
+                        //    audit.Comment("Username updated");
+                        //else
+                        //{
+                        //    audit.Comment("Username update failed");
+                        //    foreach (var error in setUsernameResult.Errors)
+                        //        ModelState.AddModelError("Password", error.Description);
+                        //}
 
                         if (!userInfo.EmailConfirmed.HasValue)
                             user.EmailConfirmed = false;
