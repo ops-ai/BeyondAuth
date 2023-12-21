@@ -406,18 +406,18 @@ namespace IdentityManager.Controllers
                         {
                             audit.Comment("Email update failed");
                             foreach (var error in setEmailResult.Errors)
-                                ModelState.AddModelError("Password", error.Description);
+                                ModelState.AddModelError("Email", error.Description);
                         }
 
-                        var setUsernameResult = await _userManager.SetUserNameAsync(user, userInfo.Email);
-                        if (setUsernameResult.Succeeded)
-                            audit.Comment("Username updated");
-                        else
-                        {
-                            audit.Comment("Username update failed");
-                            foreach (var error in setUsernameResult.Errors)
-                                ModelState.AddModelError("Password", error.Description);
-                        }
+                        //var setUsernameResult = await _userManager.SetUserNameAsync(user, userInfo.Email);
+                        //if (setUsernameResult.Succeeded)
+                        //    audit.Comment("Username updated");
+                        //else
+                        //{
+                        //    audit.Comment("Username update failed");
+                        //    foreach (var error in setUsernameResult.Errors)
+                        //        ModelState.AddModelError("Email", error.Description);
+                        //}
 
                         if (!userInfo.EmailConfirmed.HasValue)
                             user.EmailConfirmed = false;
