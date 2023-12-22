@@ -401,7 +401,19 @@ namespace IdentityManager.Controllers
                     {
                         var setEmailResult = await _userManager.SetEmailAsync(user, userInfo.Email);
                         if (setEmailResult.Succeeded)
-                            audit.Comment("Email updated");
+                        {
+                            try
+                            {
+                                await _session.SaveChangesAsync();
+                                audit.Comment("Email updated");
+                            }
+                            catch (Exception)
+                            {
+                                audit.Discard();
+                                audit.Comment("Email update failed");
+                                throw;
+                            }
+                        }
                         else
                         {
                             audit.Comment("Email update failed");
@@ -409,15 +421,27 @@ namespace IdentityManager.Controllers
                                 ModelState.AddModelError("Email", error.Description);
                         }
 
-                        //var setUsernameResult = await _userManager.SetUserNameAsync(user, userInfo.Email);
-                        //if (setUsernameResult.Succeeded)
-                        //    audit.Comment("Username updated");
-                        //else
-                        //{
-                        //    audit.Comment("Username update failed");
-                        //    foreach (var error in setUsernameResult.Errors)
-                        //        ModelState.AddModelError("Email", error.Description);
-                        //}
+                        var setUsernameResult = await _userManager.SetUserNameAsync(user, userInfo.Email);
+                        if (setUsernameResult.Succeeded)
+                        {
+                            try
+                            {
+                                await _session.SaveChangesAsync();
+                                audit.Comment("Username updated");
+                            }
+                            catch (Exception)
+                            {
+                                audit.Discard();
+                                audit.Comment("Username update failed");
+                                throw;
+                            }
+                        }
+                        else
+                        {
+                            audit.Comment("Username update failed");
+                            foreach (var error in setUsernameResult.Errors)
+                                ModelState.AddModelError("Email", error.Description);
+                        }
 
                         if (!userInfo.EmailConfirmed.HasValue)
                             user.EmailConfirmed = false;
@@ -464,7 +488,7 @@ namespace IdentityManager.Controllers
                     await _userManager.UpdateAsync(user);
                     try
                     {
-                        await _session.SaveChangesAsync(ct);
+                        await _session.SaveChangesAsync();
                     }
                     catch (Exception)
                     {
