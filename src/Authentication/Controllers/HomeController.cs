@@ -44,10 +44,10 @@ namespace Authentication.Controllers
                 return Redirect(user.DefaultApp);
 
             var tenantSettings = _httpContextAccessor.HttpContext.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
-            if (tenantSettings.AccountOptions.DashboardUrl != null)
-                return Redirect(tenantSettings.AccountOptions.DashboardUrl);
+            //if (tenantSettings.AccountOptions.DashboardUrl != null)
+            //    return Redirect(tenantSettings.AccountOptions.DashboardUrl);
 
-            return View();
+            return View(new { tenantSettings?.AccountOptions?.DashboardUrl });
         }
 
         /// <summary>
