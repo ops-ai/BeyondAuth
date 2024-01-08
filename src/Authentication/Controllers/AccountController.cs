@@ -103,7 +103,7 @@ namespace Authentication.Controllers
                     {
                         IsPersistent = false,
                         ExpiresUtc = null,
-                        RedirectUri = !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl) ? returnUrl : "~/"
+                        //RedirectUri = !string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl) ? returnUrl : "~/"
                     };
 
                     var tenantSettings = _httpContextAccessor.HttpContext.GetMultiTenantContext<TenantSetting>()?.TenantInfo;
@@ -249,7 +249,7 @@ namespace Authentication.Controllers
                             return Redirect(model.ReturnUrl);
                         }
 
-                        return Redirect(props.RedirectUri);
+                        return Redirect(!string.IsNullOrEmpty(model.ReturnUrl) && Url.IsLocalUrl(model.ReturnUrl) ? model.ReturnUrl : "~/");
                     }
                     else if (signinResult.IsLockedOut && _accountOptions.Value.EnableLockedOutMessage) //Handle locked out message propagation if allowed by tenant settings
                     {
